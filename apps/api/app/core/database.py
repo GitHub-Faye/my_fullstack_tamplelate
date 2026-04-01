@@ -2,6 +2,8 @@ from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import NullPool
 
+from typing import AsyncGenerator
+
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -24,7 +26,7 @@ AsyncSessionLocal = async_sessionmaker(
 )
 
 
-async def get_db() -> AsyncSession:
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """获取数据库会话的依赖函数"""
     async with AsyncSessionLocal() as session:
         try:

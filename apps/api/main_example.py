@@ -2,11 +2,12 @@ from fastapi import Depends, FastAPI,Path, Query ,Body, Cookie, Header, Form, Fi
 
 from pydantic import BaseModel, Field
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, AsyncIterable
 from enum import Enum
 
 app = FastAPI()
-
+from fastapi.responses import StreamingResponse
+from fastapi.sse import ServerSentEvent
 
 
 
@@ -136,6 +137,36 @@ async def create_upload_file(
 
 
 
+
+# 模拟一个数据源（比如 AI 正在生成回复或从数据库读取数据）
+async def mock_data_generator():
+    for i in range(5):
+        await asyncio.sleep(1)  # 模拟耗时操作
+        yield {"id": i, "message": f"Hello item {i}"}
+
+
+# --- 1. JSON Lines (普通流式传输) ---
+# 这种方式每一行都是一个独立的 JSON，客户端需要自己处理换行符
+@app.get("/stream-jsonl")
+async def stream_jsonl() -> AsyncIterable[dict]:
+    """
+    最简单的流式传输：直接 yield 字典。
+    FastAPI 0.134+ 会自动将其识别为 application/jsonl 格式。
+    """
+    async for item in mock_data_generator():
+        yield item
+
+
+# --- 2. SSE (Server-Sent Events) ---
+# 这种方式遵循 SSE 协议格式（data: ...\n\n），浏览器原生支持自动重连
+@app.get("/stream-sse")
+async def stream_sse() -> AsyncIterable[ServerSentEvent]:
+    """
+    最简单的 SSE：yield ServerSentEvent 对象。
+    FastAPI 0.135+ 会自动处理 header 和心跳。
+    """
+    async for item in mock_data_generator():
+        yield ServerSentEvent(data=item, event="message")
 
 
 class Item(BaseModel):
