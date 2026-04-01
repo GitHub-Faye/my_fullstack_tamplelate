@@ -1,0 +1,12 @@
+{
+  "name": "@my-fullstack-template/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "fastapi dev",
+    "start": "fastapi start",
+    "test": "pytest",
+    "lint": "echo 'No lint configured for Python'",
+    "check-types": "echo 'No type check configured for Python'"
+  }
+}
