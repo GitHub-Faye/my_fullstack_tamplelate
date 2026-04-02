@@ -1,47 +1,79 @@
-from typing import Optional
+import uuid
+from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
-
-
-class UserBase(BaseModel):
-    """用户基础信息"""
-    username: str
-    email: Optional[EmailStr] = None
-    full_name: Optional[str] = None
+from pydantic import EmailStr
+from sqlmodel import Field, SQLModel
 
 
+# ------------------------------- 用户模型 -------------------------------------------------
+# 共享属性
+class UserBase(SQLModel):
+    email: EmailStr = Field(unique=True, index=True, max_length=255)  # 用户唯一邮箱
+    is_active: bool = True  # 是否激活
+    is_superuser: bool = False  # 是否超管
+    full_name: str | None = Field(default=None, max_length=255)  # 真实姓名
+
+
+# --------------------------- API 请求模型（Request DTO） -----------------------------------
+# 创建用户时需要的属性
 class UserCreate(UserBase):
-    """创建用户请求"""
-    password: str
+    password: str = Field(min_length=8, max_length=128)  # 明文密码，最少8位
 
 
-class UserUpdate(BaseModel):
-    """更新用户请求"""
-    email: Optional[EmailStr] = None
-    full_name: Optional[str] = None
-    disabled: Optional[bool] = None
+# 注册接口的 DTO（与 UserCreate 区分开更清晰）
+class UserRegister(SQLModel):
+    email: EmailStr = Field(max_length=255)
+    password: str = Field(min_length=8, max_length=128)
+    full_name: str | None = Field(default=None, max_length=255)
 
 
-class User(UserBase):
-    """用户响应模型"""
-    id: int
-    disabled: bool = False
-    
-    class Config:
-        from_attributes = True
+# 更新用户时可选属性
+class UserUpdate(UserBase):
+    email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
+    password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
-class UserInDB(User):
-    """数据库中的用户（包含密码）"""
-    hashed_password: str
+# 当前用户自更新
+class UserUpdateMe(SQLModel):
+    full_name: str | None = Field(default=None, max_length=255)
+    email: EmailStr | None = Field(default=None, max_length=255)
 
 
-class Token(BaseModel):
-    """Token 响应"""
+# 修改密码参数
+class UpdatePassword(SQLModel):
+    current_password: str = Field(min_length=8, max_length=128)
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+# ---------------------------- API 响应模型（Response DTO） --------------------------------
+# 返回给客户端的 User 信息
+class UserPublic(UserBase):
+    id: uuid.UUID
+    created_at: datetime | None = None
+
+
+class UsersPublic(SQLModel):
+    data: list[UserPublic]
+    count: int
+
+# ---------------------------- 通用 DTO --------------------------------------------------
+# 通用消息
+class Message(SQLModel):
+    message: str
+
+
+# token 响应
+class Token(SQLModel):
     access_token: str
-    token_type: str
+    token_type: str = "bearer"
 
 
-class TokenData(BaseModel):
-    """Token 数据"""
-    username: Optional[str] = None
+# JWT 载荷
+class TokenPayload(SQLModel):
+    sub: str | None = None
+
+
+# 重置密码时的 payload
+class NewPassword(SQLModel):
+    token: str
+    new_password: str = Field(min_length=8, max_length=128)
