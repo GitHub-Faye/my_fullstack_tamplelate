@@ -17,26 +17,20 @@ from typing import AsyncGenerator
 
 import jwt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core import security
 from app.core.config import get_settings
 from app.core.database import get_db 
 from app.core.models import User
+from app.core.security import reusable_oauth2
 
 from app.domains.user.schemas import TokenPayload
 
 
 settings = get_settings()
-# ======================== OAuth2 配置 ========================
-# 定义 OAuth2 密码流。tokenUrl 指向获取令牌的 API 端点
-# FastAPI 自动使用此配置生成 OpenAPI 文档中的"Authorize"按钮
-reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
-)
 
 
 # ======================== 类型别名定义 ========================
@@ -89,7 +83,7 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
     try:
         # 解码 JWT 令牌，使用 settings.SECRET_KEY 验证签名
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         # 将载荷转换为 TokenPayload 数据类（包含 sub 字段）
         token_data = TokenPayload(**payload)

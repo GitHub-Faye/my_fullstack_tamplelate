@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: postgres123
       POSTGRES_DB: appdb
     ports:
-      - "5432:5432"          # 本地端口固定为 5432
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -23,7 +23,7 @@ services:
     restart: unless-stopped
     command: redis-server --requirepass redis123 --appendonly yes
     ports:
-      - "6379:6379"          # 本地端口固定为 6379
+      - "6379:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -31,6 +31,24 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
+
+  # ==================== 新增 Adminer 可视化工具 ====================
+  adminer:
+    image: adminer:latest
+    container_name: app-adminer
+    restart: unless-stopped
+    ports:
+      - "8088:8080"          # 浏览器访问地址：http://localhost:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # 可选：让 Adminer 默认使用 PostgreSQL
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DEFAULT_DB: appdb
+    # networks:  # 如果你后面加了自定义网络，可以在这里加入
 
 volumes:
   postgres_data:

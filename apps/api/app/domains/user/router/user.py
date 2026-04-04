@@ -483,3 +483,8 @@ async def delete_user(
     await session.delete(user)
     await session.commit()
     return Message(message="User deleted successfully")
+
+
+@router.get("/health-check/")
+async def health_check() -> bool:
+    return True

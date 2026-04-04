@@ -7,7 +7,7 @@ from pwdlib.hashers.argon2 import Argon2Hasher
 from pwdlib.hashers.bcrypt import BcryptHasher
 
 from app.core.config import get_settings
-
+from fastapi.security import OAuth2PasswordBearer
 password_hash = PasswordHash(
     (
         Argon2Hasher(),
@@ -20,6 +20,12 @@ settings = get_settings()
 
 
 
+# ======================== OAuth2 配置 ========================
+# 定义 OAuth2 密码流。tokenUrl 指向获取令牌的 API 端点
+# FastAPI 自动使用此配置生成 OpenAPI 文档中的"Authorize"按钮
+reusable_oauth2 = OAuth2PasswordBearer(
+    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+)
 
 
 

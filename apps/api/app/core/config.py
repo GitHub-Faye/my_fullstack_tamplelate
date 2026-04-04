@@ -14,7 +14,10 @@ from pydantic import (
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
+from pathlib import Path
 
+# 获取当前文件所在目录（app/core/）
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # ======================== 工具函数 ========================
 def parse_cors(v: Any) -> list[str] | str:
@@ -46,7 +49,7 @@ class Settings(BaseSettings):
     # Pydantic v2 配置字典
     model_config = SettingsConfigDict(
         # 从 apps/api/.env 文件加载
-        env_file=".env",
+        env_file=BASE_DIR / ".env",
         # 忽略空值环境变量
         env_ignore_empty=True,
         # 忽略额外字段（不在模型中定义的环境变量）
