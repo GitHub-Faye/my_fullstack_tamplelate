@@ -74,6 +74,10 @@ apps/api/
 │   │           ├── login.py      # 登录/认证路由
 │   │           └── user.py       # 用户管理路由
 │   └── tasks/                    # 异步任务队列 (Celery)
+│       ├── __init__.py
+│       ├── celery_app.py         # Celery 应用配置
+│       ├── email_tasks.py        # 邮件发送任务
+│       ├── user_tasks.py         # 用户相关任务
 │       └── tasks.md              # 任务队列说明文档
 └── tests/                        # 测试目录
     └── tests.md                  # 测试说明文档
@@ -134,7 +138,39 @@ main.py → app/api/api.py → app/api/v1/api.py → domains/*/router/*.py
 
 ### 4. Tasks 层 (`app/tasks/`)
 
-**职责**: 异步任务队列（预留 Celery 扩展）
+**职责**: 异步任务队列（基于 Celery + Redis）
+
+| 文件 | 说明 |
+|------|------|
+| `celery_app.py` | Celery 应用实例配置，使用 Redis 作为 Broker 和 Backend |
+| `email_tasks.py` | 邮件发送异步任务，支持重试机制 |
+| `user_tasks.py` | 用户相关异步任务：注册后续处理、清理不活跃用户等 |
+
+**Celery 配置**:
+- **Broker**: Redis (`CELERY_BROKER_URL` 或 `REDIS_URL`)
+- **Backend**: Redis (`CELERY_RESULT_BACKEND` 或 `REDIS_URL`)
+- **序列化**: JSON
+- **时区**: UTC
+- **任务超时**: 30 分钟
+- **预取乘数**: 1（公平调度）
+
+**启动 Celery Worker**:
+```bash
+cd apps/api
+
+celery -A app.tasks.celery_app worker --loglevel=info
+
+# 或指定队列
+celery -A app.tasks.celery_app worker -Q email,default --loglevel=info
+```
+
+**常用任务**:
+
+| 任务 | 位置 | 说明 |
+|------|------|------|
+| `send_email_task` | `email_tasks.py` | 异步发送邮件，失败自动重试（最多3次，间隔5分钟） |
+| `process_user_signup_task` | `user_tasks.py` | 用户注册后续处理（发送欢迎邮件等） |
+| `cleanup_inactive_users_task` | `user_tasks.py` | 定期清理不活跃用户（可配置定时任务） |
 
 ---
 
@@ -208,6 +244,8 @@ main.py → app/api/api.py → app/api/v1/api.py → domains/*/router/*.py
 | `SECRET_KEY` | JWT 签名密钥 |
 | `DATABASE_URL` | PostgreSQL 连接字符串 |
 | `REDIS_URL` | Redis 连接字符串 |
+| `CELERY_BROKER_URL` | Celery Broker URL（可选，默认使用 REDIS_URL） |
+| `CELERY_RESULT_BACKEND` | Celery 结果后端 URL（可选，默认使用 REDIS_URL） |
 | `SMTP_*` | 邮件服务配置 |
 | `FIRST_SUPERUSER` | 初始超管邮箱 |
 | `FIRST_SUPERUSER_PASSWORD` | 初始超管密码 |
@@ -232,6 +270,15 @@ alembic upgrade head
 
 # Docker 启动依赖服务
 docker-compose up -d
+
+# 启动 Celery Worker
+celery -A app.tasks.celery_app worker --loglevel=info
+
+# 启动 Celery Beat（定时任务调度器）
+celery -A app.tasks.celery_app beat --loglevel=info
+
+# 监控 Celery（Flower）
+celery -A app.tasks.celery_app flower --port=5555
 ```
 
 ---
@@ -249,8 +296,10 @@ docker-compose up -d
 
 ## 扩展建议
 
-- **任务队列**: 在 `app/tasks/` 集成 Celery
+- ✅ **任务队列**: Celery 已集成，位于 `app/tasks/`
 - **缓存层**: 使用 Redis 缓存热点数据
+- **定时任务**: 配置 Celery Beat 执行周期性任务
 - **文件存储**: 添加对象存储服务 (MinIO/S3)
 - **监控**: 集成 Sentry 错误追踪
 - **日志**: 结构化日志输出到 ELK/Loki
+- **任务监控**: 使用 Flower 监控 Celery 任务状态
