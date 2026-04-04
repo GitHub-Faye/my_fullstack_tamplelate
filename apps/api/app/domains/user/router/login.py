@@ -21,9 +21,6 @@ from app.domains.user.schemas import (
     UserUpdate,
 )
 from app.domains.user.utils import (
-    generate_password_reset_token,
-    generate_reset_password_email,
-    send_email,
     verify_password_reset_token,
 )
 
@@ -61,29 +58,6 @@ async def test_token(current_user: CurrentUser) -> Any:
     return current_user
 
 
-@router.post("/password-recovery/{email}")
-async def recover_password(email: str, session: SessionDep) -> Message:
-    """
-    Password Recovery
-    """
-    user = await repository.get_user_by_email(session=session, email=email)
-
-    # Always return the same response to prevent email enumeration attacks
-    # Only send email if user actually exists
-    if user:
-        password_reset_token = generate_password_reset_token(email=email)
-        email_data = generate_reset_password_email(
-            email_to=user.email, email=email, token=password_reset_token
-        )
-        send_email(
-            email_to=user.email,
-            subject=email_data.subject,
-            html_content=email_data.html_content,
-        )
-    return Message(
-        message="If that email is registered, we sent a password recovery link"
-    )
-
 
 @router.post("/reset-password/")
 async def reset_password(session: SessionDep, body: NewPassword) -> Message:
@@ -107,28 +81,3 @@ async def reset_password(session: SessionDep, body: NewPassword) -> Message:
     )
     return Message(message="Password updated successfully")
 
-
-@router.post(
-    "/password-recovery-html-content/{email}",
-    dependencies=[Depends(get_current_active_superuser)],
-    response_class=HTMLResponse,
-)
-async def recover_password_html_content(email: str, session: SessionDep) -> Any:
-    """
-    HTML Content for Password Recovery
-    """
-    user = await repository.get_user_by_email(session=session, email=email)
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="The user with this username does not exist in the system.",
-        )
-    password_reset_token = generate_password_reset_token(email=email)
-    email_data = generate_reset_password_email(
-        email_to=user.email, email=email, token=password_reset_token
-    )
-
-    return HTMLResponse(
-        content=email_data.html_content, headers={"subject:": email_data.subject}
-    )

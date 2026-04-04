@@ -34,9 +34,9 @@ from app.domains.user.schemas import (
 )
 
 from app.core.models import Item, User
- 
+  
 
-from app.domains.user.utils import generate_new_account_email, send_email
+from app.tasks.user_tasks import process_user_signup_task
 
 settings = get_settings()
 # ======================== APIRouter 创建 ========================
@@ -122,17 +122,7 @@ async def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
 
     # 创建用户（密码自动哈希）
     user = await repository.create_user(session=session, user_create=user_in)
-    
-    # 若启用邮件服务，发送新账户邮件
-    if settings.emails_enabled and user_in.email:
-        email_data = generate_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
-        )
-        send_email(
-            email_to=user_in.email,
-            subject=email_data.subject,
-            html_content=email_data.html_content,
-        )
+
     return user
 
 
@@ -320,6 +310,14 @@ async def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     # 将 UserRegister 转换为 UserCreate（Pydantic v2 用法）
     user_create = UserCreate.model_validate(user_in)
     user = await repository.create_user(session=session, user_create=user_create)
+    
+    # 异步处理用户注册后续任务
+    process_user_signup_task.delay(
+        user_id=str(user.id),
+        email=user.email,
+        full_name=user.full_name
+    )
+    
     return user
 
 

@@ -21,7 +21,7 @@ services:
     image: redis:7-alpine
     container_name: app-redis
     restart: unless-stopped
-    command: redis-server --requirepass redis123 --appendonly yes
+    command: redis-server --requirepass redis123 --appendonly yes --appendfsync everysec
     ports:
       - "6379:6379"
     volumes:
@@ -31,7 +31,46 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
+# ==================== Celery Worker（必须添加） ====================
+  celery-worker:
+    build: .
+    container_name: app-celery-worker
+    restart: unless-stopped
+    command: celery -A app.tasks.celery_app worker --loglevel=info --pool=solo
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      REDIS_URL: redis://:redis123@redis:6379/0
+      CELERY_BROKER_URL: redis://:redis123@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
 
+  # ==================== Flower（强烈推荐添加，用于监控 Celery 任务） ====================
+  flower:
+    build: .
+    container_name: app-flower
+    restart: unless-stopped
+    command: celery -A app.tasks.celery_app flower --port=5555 --broker=redis://:redis123@redis:6379/0
+    ports:
+      - "5555:5555"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+      celery-worker:
+        condition: service_started
+    environment:
+      REDIS_URL: redis://:redis123@redis:6379/0
+      CELERY_BROKER_URL: redis://:redis123@redis:6379/0
+      CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
+      PYTHONPATH: /app
   # ==================== 新增 Adminer 可视化工具 ====================
   adminer:
     image: adminer:latest
