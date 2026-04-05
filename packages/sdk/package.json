@@ -1,0 +1,29 @@
+{
+  "name": "@repo/sdk",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "generate": "openapi-ts -c @hey-api/client-fetch -i http://localhost:8000/openapi.json -o ./src",
+    "generate:local": "openapi-ts -f openapi-ts.config.local.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@hey-api/client-fetch": "^0.10.0"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "^0.66.0",
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "5.9.2"
+  }
+}
