@@ -6,7 +6,14 @@
         "name": "next"
       }
     ],
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/components/*": ["./components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/features/*": ["./features/*"]
+    }
   },
   "include": [
     "**/*.ts",

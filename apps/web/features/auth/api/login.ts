@@ -12,25 +12,27 @@ export interface LoginResponse {
 }
 
 export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
-  const formData: BodyLoginAccessTokenV1LoginAccessTokenPost = {
-    username: credentials.email,
-    password: credentials.password,
-    grant_type: 'password',
-    scope: '',
-    client_id: null,
-    client_secret: null,
-  };
+  const formData = new URLSearchParams();
+  formData.append('username', credentials.email);
+  formData.append('password', credentials.password);
+  formData.append('grant_type', 'password');
+  formData.append('scope', '');
 
   const response = await client.post({
     url: '/v1/login/access-token',
-    body: formData,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
+    body: formData.toString(),
   });
 
   if (response.error) {
-    throw new Error('Login failed');
+    // Try to get more detailed error information
+    const errorDetails = (response.error as any)?.data?.detail ||
+                       (response.error as any)?.data ||
+                       response.error;
+    console.error('Login error details:', errorDetails);
+    throw new Error('Login failed: ' + JSON.stringify(errorDetails));
   }
 
   return response.data as LoginResponse;
