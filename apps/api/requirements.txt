@@ -79,3 +79,9 @@ watchfiles==1.1.1
 wcwidth==0.6.0
 websockets==15.0.1
 wheel==0.46.3
+structlog==25.5.0
+
+# Testing dependencies
+aiosqlite==0.21.0
+pytest==8.3.5
+pytest-asyncio==0.26.0
