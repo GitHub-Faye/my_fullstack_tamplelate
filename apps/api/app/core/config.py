@@ -185,6 +185,8 @@ class Settings(BaseSettings):
     
     # ======================== JWT 配置 ========================
     ALGORITHM: str = "HS256"  # JWT 签名算法
+    BIND: str | None = None  # Gunicorn 绑定地址（可通过环境变量覆盖）
+    WORKERS: int | None = None  # Gunicorn worker 数量（可通过
 
     # ======================== 安全检查方法 ========================
     def _check_default_secret(self, var_name: str, value: str | None) -> None:

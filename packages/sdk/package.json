@@ -6,7 +6,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": "./dist/index.js"
     }
   },
   "main": "./dist/index.js",
@@ -14,15 +14,15 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "generate": "openapi-ts -c @hey-api/client-fetch -i http://localhost:8000/openapi.json -o ./src",
+    "generate": "openapi-ts -f openapi-ts.config.local.ts",
     "generate:local": "openapi-ts -f openapi-ts.config.local.ts",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist src/api"
   },
   "dependencies": {
     "@hey-api/client-fetch": "^0.10.0"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "^0.66.0",
+    "@hey-api/openapi-ts": "^0.95.0",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
     "typescript": "5.9.2"

@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -31,30 +33,57 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
-# ==================== Celery Worker（必须添加） ====================
+
+  # ==================== 新增：RabbitMQ（作为 Celery Broker） ====================
+  rabbitmq:
+    image: rabbitmq:4-management   # 带 Web 管理界面（推荐）
+    container_name: app-rabbitmq
+    restart: unless-stopped
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"    # AMQP 端口（Celery 连接用）
+      - "15672:15672"  # 管理界面端口（浏览器访问）
+    environment:
+      RABBITMQ_DEFAULT_USER: celery_user      # 自定义用户（不要用 guest 生产）
+      RABBITMQ_DEFAULT_PASS: celery123        # 生产请改成强密码
+      RABBITMQ_DEFAULT_VHOST: celery_vhost    # 独立虚拟主机（推荐）
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ==================== Celery Worker ====================
   celery-worker:
     build: .
     container_name: app-celery-worker
     restart: unless-stopped
-    command: celery -A app.tasks.celery_app worker --loglevel=info --pool=solo
+    # 修改为下面这行（去掉 --pool=gevent，推荐加上 --concurrency）
+    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4
     volumes:
       - .:/app
     env_file:
       - .env
     depends_on:
+      rabbitmq:
+        condition: service_healthy
       redis:
         condition: service_healthy
     environment:
       REDIS_URL: redis://:redis123@redis:6379/0
-      CELERY_BROKER_URL: redis://:redis123@redis:6379/0
+      CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
       CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
+      PYTHONPATH: /app
 
-  # ==================== Flower（强烈推荐添加，用于监控 Celery 任务） ====================
+  # ==================== Flower（监控 Celery） ====================
   flower:
     build: .
     container_name: app-flower
     restart: unless-stopped
-    command: celery -A app.tasks.celery_app flower --port=5555 --broker=redis://:redis123@redis:6379/0
+    command: celery -A app.tasks.celery_app flower --port=5555 --broker=amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
     ports:
       - "5555:5555"
     volumes:
@@ -62,33 +91,33 @@ services:
     env_file:
       - .env
     depends_on:
+      rabbitmq:
+        condition: service_healthy
       redis:
         condition: service_healthy
       celery-worker:
         condition: service_started
     environment:
       REDIS_URL: redis://:redis123@redis:6379/0
-      CELERY_BROKER_URL: redis://:redis123@redis:6379/0
+      CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
       CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
       PYTHONPATH: /app
-  # ==================== 新增 Adminer 可视化工具 ====================
+
+  # ==================== Adminer（数据库可视化） ====================
   adminer:
     image: adminer:latest
     container_name: app-adminer
     restart: unless-stopped
     ports:
-      - "8088:8080"          # 浏览器访问地址：http://localhost:8080
+      - "8088:8080"
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-    # 可选：让 Adminer 默认使用 PostgreSQL
     environment:
       ADMINER_DEFAULT_SERVER: postgres
       ADMINER_DEFAULT_DB: appdb
-    # networks:  # 如果你后面加了自定义网络，可以在这里加入
 
 volumes:
   postgres_data:
   redis_data:
+  rabbitmq_data:     # 新增 RabbitMQ 数据持久化卷
