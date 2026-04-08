@@ -24,13 +24,16 @@
 
 ```
 apps/api/
-├── .env                          # 环境变量配置文件
 ├── .gitignore                    # Git 忽略规则
 ├── docker-compose.yml            # Docker 服务编排配置
+├── Dockerfile                    # Docker 构建配置
+├── gunicorn.conf.py              # Gunicorn 生产服务器配置
 ├── main.py                       # 应用入口文件
 ├── main_example.py               # FastAPI 示例代码参考
 ├── package.json                  # npm 脚本配置（用于 monorepo）
-├── pytest.ini                    # pytest 测试配置
+├── PROJECT_STRUCTURE.md          # 项目结构说明文档
+├── pyproject.toml                # Python 项目配置（工具、依赖）
+├── requirements.txt              # Python 依赖列表
 ├── app/                          # 应用主代码目录
 │   ├── __init__.py
 │   ├── alembic.ini               # Alembic 迁移配置
@@ -48,7 +51,7 @@ apps/api/
 │   │       └── api.py            # v1 路由注册
 │   ├── core/                     # 核心基础设施层
 │   │   ├── __init__.py
-│   │   ├──  core.md              # 核心层说明文档
+│   │   ├── core.md               # 核心层说明文档
 │   │   ├── config.py             # 应用配置管理
 │   │   ├── database.py           # 数据库连接与会话管理
 │   │   ├── events.py             # 应用事件处理
@@ -77,10 +80,16 @@ apps/api/
 │       ├── __init__.py
 │       ├── celery_app.py         # Celery 应用配置
 │       ├── email_tasks.py        # 邮件发送任务
-│       ├── user_tasks.py         # 用户相关任务
-│       └── tasks.md              # 任务队列说明文档
+│       ├── tasks.md              # 任务队列说明文档
+│       └── user_tasks.py         # 用户相关任务
 └── tests/                        # 测试目录
-    └── tests.md                  # 测试说明文档
+    ├── __init__.py
+    ├── conftest.py               # pytest 全局配置和 fixtures
+    ├── test_items.py             # Item 模块测试
+    ├── test_login.py             # 登录认证测试
+    ├── test_users.py             # 用户模块测试
+    ├── tests.md                  # 测试说明文档
+    └── utils.py                  # 测试工具函数
 ```
 
 ---
@@ -112,6 +121,8 @@ main.py → app/api/api.py → app/api/v1/api.py → domains/*/router/*.py
 | `models.py` | SQLModel 核心模型：User、Item 及关系定义 |
 | `security.py` | JWT 令牌生成/验证、密码哈希 (Argon2/Bcrypt) |
 | `middleware.py` | 自定义中间件 (请求处理时间统计) |
+| `events.py` | 应用生命周期事件处理 |
+| `logging.py` | 结构化日志配置 |
 
 ### 3. Domains 层 (`app/domains/`)
 
@@ -125,6 +136,7 @@ main.py → app/api/api.py → app/api/v1/api.py → domains/*/router/*.py
 | `repository.py` | 数据访问层：create_user, update_user, authenticate 等 |
 | `dependencies.py` | FastAPI 依赖：SessionDep, CurrentUser, get_current_active_superuser |
 | `utils.py` | 邮件发送、密码重置令牌生成等工具函数 |
+| `exceptions.py` | 用户领域相关异常定义 |
 | `router/login.py` | 登录相关端点：/login/access-token, /reset-password |
 | `router/user.py` | 用户管理端点：CRUD、注册、密码修改等 |
 
@@ -171,6 +183,18 @@ celery -A app.tasks.celery_app worker -Q email,default --loglevel=info
 | `send_email_task` | `email_tasks.py` | 异步发送邮件，失败自动重试（最多3次，间隔5分钟） |
 | `process_user_signup_task` | `user_tasks.py` | 用户注册后续处理（发送欢迎邮件等） |
 | `cleanup_inactive_users_task` | `user_tasks.py` | 定期清理不活跃用户（可配置定时任务） |
+
+### 5. Tests 层 (`tests/`)
+
+**职责**: 单元测试和集成测试
+
+| 文件 | 说明 |
+|------|------|
+| `conftest.py` | pytest 全局配置、共享 fixtures、数据库初始化 |
+| `test_login.py` | 登录认证相关测试 |
+| `test_users.py` | 用户管理相关测试 |
+| `test_items.py` | Item 管理相关测试 |
+| `utils.py` | 测试辅助函数：用户创建、认证令牌获取等 |
 
 ---
 
@@ -264,6 +288,9 @@ fastapi start
 # 运行测试
 pytest
 
+# 运行测试并生成覆盖率报告
+pytest --cov=app --cov-report=html
+
 # 数据库迁移
 alembic revision --autogenerate -m "描述"
 alembic upgrade head
@@ -283,6 +310,28 @@ celery -A app.tasks.celery_app flower --port=5555
 
 ---
 
+## 部署配置
+
+### Docker 支持
+
+| 文件 | 说明 |
+|------|------|
+| `Dockerfile` | 生产环境容器构建配置 |
+| `docker-compose.yml` | 本地开发依赖服务编排（PostgreSQL + Redis） |
+| `gunicorn.conf.py` | Gunicorn WSGI 服务器配置 |
+
+### 生产部署
+
+```bash
+# 构建镜像
+docker build -t myapp-api .
+
+# 运行容器
+docker run -p 8000:8000 --env-file .env myapp-api
+```
+
+---
+
 ## 安全特性
 
 1. **密码安全**: Argon2 哈希，支持自动升级算法
@@ -297,6 +346,7 @@ celery -A app.tasks.celery_app flower --port=5555
 ## 扩展建议
 
 - ✅ **任务队列**: Celery 已集成，位于 `app/tasks/`
+- ✅ **测试框架**: pytest 已集成，位于 `tests/`
 - **缓存层**: 使用 Redis 缓存热点数据
 - **定时任务**: 配置 Celery Beat 执行周期性任务
 - **文件存储**: 添加对象存储服务 (MinIO/S3)

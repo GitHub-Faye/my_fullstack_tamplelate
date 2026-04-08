@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.11'
 
 services:
   postgres:
@@ -56,13 +56,14 @@ services:
       retries: 5
       start_period: 30s
 
-  # ==================== Celery Worker ====================
+# ==================== Celery Worker ====================
   celery-worker:
     build: .
     container_name: app-celery-worker
     restart: unless-stopped
-    # 修改为下面这行（去掉 --pool=gevent，推荐加上 --concurrency）
-    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4
+    command: >
+      sh -c "pip install --no-deps -r requirements.txt &&
+             celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4 --pool=prefork"
     volumes:
       - .:/app
     env_file:
@@ -72,18 +73,22 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
     environment:
       REDIS_URL: redis://:redis123@redis:6379/0
       CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
       CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
       PYTHONPATH: /app
 
-  # ==================== Flower（监控 Celery） ====================
+  # ==================== Flower（Celery 监控） ====================
   flower:
     build: .
     container_name: app-flower
     restart: unless-stopped
-    command: celery -A app.tasks.celery_app flower --port=5555 --broker=amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
+    command: >
+      sh -c "pip install --no-deps -r requirements.txt &&
+             celery -A app.tasks.celery_app flower --port=5555 --broker=amqp://celery_user:celery123@rabbitmq:5672/celery_vhost"
     ports:
       - "5555:5555"
     volumes:

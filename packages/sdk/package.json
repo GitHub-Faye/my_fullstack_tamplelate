@@ -19,7 +19,8 @@
     "clean": "rm -rf dist src/api"
   },
   "dependencies": {
-    "@hey-api/client-fetch": "^0.10.0"
+    "@hey-api/client-fetch": "^0.10.0",
+    "@tanstack/react-query": "^5.96.2"
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "^0.95.0",

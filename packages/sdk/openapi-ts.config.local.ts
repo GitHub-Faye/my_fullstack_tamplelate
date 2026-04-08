@@ -12,6 +12,7 @@ export default defineConfig({
   plugins: [
     '@hey-api/typescript',       // 类型
     '@hey-api/sdk',              // 生成 services / sdk
+    '@tanstack/react-query',
 
     // 推荐替换成 Next.js 专用 client（更适合 Next.js）
     {
