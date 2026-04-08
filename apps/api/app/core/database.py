@@ -1,13 +1,10 @@
 from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import NullPool
-from sqlalchemy import select
 
 from typing import AsyncGenerator
 
 from app.core.config import get_settings
-from app.core.security import get_password_hash
-from app.core.models import User
 
 settings = get_settings()
 
@@ -43,25 +40,3 @@ async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
     
-    # 创建超级用户
-    async with AsyncSessionLocal() as session:
-        # 检查是否已存在该邮箱的用户
-        result = await session.execute(
-            select(User).where(User.email == settings.FIRST_SUPERUSER)
-        )
-        user = result.scalar_one_or_none()
-        
-        if not user:
-            # 创建默认超级用户
-            user = User(
-                email=settings.FIRST_SUPERUSER,
-                hashed_password=get_password_hash(settings.FIRST_SUPERUSER_PASSWORD),
-                is_superuser=True,
-                is_active=True,
-                full_name="Admin",
-            )
-            session.add(user)
-            await session.commit()
-            print(f"✅ 默认超级用户已创建: {settings.FIRST_SUPERUSER}")
-        else:
-            print(f"ℹ️ 超级用户已存在: {settings.FIRST_SUPERUSER}")

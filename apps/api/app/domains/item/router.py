@@ -14,7 +14,7 @@ from app.domains.item.schemas import (
     Message,
 )
 
-router = APIRouter(prefix="/items", tags=["items"])
+router = APIRouter()
 
 
 @router.get("/", response_model=ItemsPublic)

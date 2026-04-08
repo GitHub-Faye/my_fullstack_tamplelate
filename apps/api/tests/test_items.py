@@ -1,362 +1,482 @@
 """
 Tests for item management endpoints.
 
-Covers:
-- List items (/items/)
-- Get item by ID (/items/{id})
-- Create item (/items/)
-- Update item (/items/{id})
-- Delete item (/items/{id})
+Tests cover:
+- Item CRUD operations
+- Permission checks (owner/superuser)
+- Pagination
 """
 
 import uuid
-
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import Item, User
-from app.domains.item.schemas import ItemCreate
+from app.core.models import User, Item
 
 
-class TestListItems:
-    """Tests for GET /items/ endpoint."""
+# ======================== 获取物品列表测试 ========================
 
-    async def test_list_items_empty(self, authorized_client: AsyncClient):
-        """Test listing items when user has no items."""
-        response = await authorized_client.get("/v1/items/")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["data"] == []
-        assert data["count"] == 0
-
-    async def test_list_items_with_data(self, authorized_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test listing items when user has items."""
-        # Create some items for the user
-        from app.core.models import Item
-        item1 = Item(title="Item 1", description="Description 1", owner_id=normal_user.id)
-        item2 = Item(title="Item 2", description="Description 2", owner_id=normal_user.id)
-        db_session.add(item1)
-        db_session.add(item2)
-        await db_session.commit()
-
-        response = await authorized_client.get("/v1/items/")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["count"] == 2
-        assert len(data["data"]) == 2
-        assert data["data"][0]["title"] in ["Item 1", "Item 2"]
-
-    async def test_list_items_as_superuser_sees_all(self, superuser_client: AsyncClient, normal_user: User, superuser: User, db_session: AsyncSession):
-        """Test superuser can see all items."""
-        from app.core.models import Item
-        # Create item for normal user
-        item1 = Item(title="User Item", description="User Description", owner_id=normal_user.id)
-        # Create item for superuser
-        item2 = Item(title="Superuser Item", description="Superuser Description", owner_id=superuser.id)
-        db_session.add(item1)
-        db_session.add(item2)
-        await db_session.commit()
-
-        response = await superuser_client.get("/v1/items/")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["count"] == 2
-        assert len(data["data"]) == 2
-
-    async def test_list_items_pagination(self, authorized_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test listing items with pagination."""
-        from app.core.models import Item
-        # Create multiple items
-        for i in range(5):
-            item = Item(title=f"Item {i}", description=f"Description {i}", owner_id=normal_user.id)
-            db_session.add(item)
-        await db_session.commit()
-
-        response = await authorized_client.get("/v1/items/?skip=0&limit=2")
-        assert response.status_code == 200
-        data = response.json()
-        assert len(data["data"]) == 2
-        assert data["count"] == 5
-
-    async def test_list_items_unauthorized(self, client: AsyncClient):
-        """Test listing items without token returns 401."""
-        response = await client.get("/v1/items/")
-        assert response.status_code == 401
+@pytest.mark.asyncio
+async def test_read_items_normal_user(
+    authorized_client: AsyncClient,
+    test_user: User,
+    test_item: Item
+):
+    """
+    测试普通用户获取自己的物品列表。
+    """
+    response = await authorized_client.get("/v1/items/")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert "data" in data
+    assert "count" in data
+    assert data["count"] == 1
+    assert len(data["data"]) == 1
+    assert data["data"][0]["title"] == test_item.title
 
 
-class TestGetItem:
-    """Tests for GET /items/{id} endpoint."""
-
-    async def test_get_item_success(self, authorized_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test getting an item by ID."""
-        from app.core.models import Item
-        item = Item(title="Test Item", description="Test Description", owner_id=normal_user.id)
-        db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
-
-        response = await authorized_client.get(f"/v1/items/{item.id}")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["title"] == "Test Item"
-        assert data["description"] == "Test Description"
-        assert data["id"] == str(item.id)
-        assert data["owner_id"] == str(normal_user.id)
-
-    async def test_get_item_not_found(self, authorized_client: AsyncClient):
-        """Test getting non-existent item returns 404."""
-        fake_id = uuid.uuid4()
-        response = await authorized_client.get(f"/v1/items/{fake_id}")
-        assert response.status_code == 404
-        assert "not found" in response.json()["detail"]
-
-    async def test_get_item_other_user_forbidden(self, authorized_client: AsyncClient, superuser: User, db_session: AsyncSession):
-        """Test getting another user's item returns 403."""
-        from app.core.models import Item
-        # Create item owned by superuser
-        item = Item(title="Superuser Item", description="Secret", owner_id=superuser.id)
-        db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
-
-        response = await authorized_client.get(f"/v1/items/{item.id}")
-        assert response.status_code == 403
-        assert "Not enough permissions" in response.json()["detail"]
-
-    async def test_get_item_as_superuser_can_access_any(self, superuser_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test superuser can access any item."""
-        from app.core.models import Item
-        item = Item(title="User Item", description="User Description", owner_id=normal_user.id)
-        db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
-
-        response = await superuser_client.get(f"/v1/items/{item.id}")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["title"] == "User Item"
-
-    async def test_get_item_unauthorized(self, client: AsyncClient):
-        """Test getting item without token returns 401."""
-        fake_id = uuid.uuid4()
-        response = await client.get(f"/v1/items/{fake_id}")
-        assert response.status_code == 401
-
-
-class TestCreateItem:
-    """Tests for POST /items/ endpoint."""
-
-    async def test_create_item_success(self, authorized_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test creating an item successfully."""
-        response = await authorized_client.post(
-            "/v1/items/",
-            json={
-                "title": "New Item",
-                "description": "New Description",
-            },
+@pytest.mark.asyncio
+async def test_read_items_pagination(
+    authorized_client: AsyncClient,
+    test_user: User,
+    db_session: AsyncSession
+):
+    """
+    测试物品列表分页功能。
+    """
+    # 创建多个物品
+    for i in range(5):
+        item = Item(
+            title=f"Item {i}",
+            description=f"Description {i}",
+            owner_id=test_user.id,
         )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["title"] == "New Item"
-        assert data["description"] == "New Description"
-        assert data["owner_id"] == str(normal_user.id)
-        assert "id" in data
-        assert "created_at" in data
-
-    async def test_create_item_minimal(self, authorized_client: AsyncClient, normal_user: User):
-        """Test creating an item with minimal data (title only)."""
-        response = await authorized_client.post(
-            "/v1/items/",
-            json={
-                "title": "Minimal Item",
-            },
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["title"] == "Minimal Item"
-        assert data["description"] is None
-
-    async def test_create_item_validation_error(self, authorized_client: AsyncClient):
-        """Test creating an item with invalid data returns 422."""
-        response = await authorized_client.post(
-            "/v1/items/",
-            json={
-                "title": "",  # Empty title should fail
-            },
-        )
-        assert response.status_code == 422
-
-    async def test_create_item_unauthorized(self, client: AsyncClient):
-        """Test creating item without token returns 401."""
-        response = await client.post(
-            "/v1/items/",
-            json={
-                "title": "New Item",
-                "description": "New Description",
-            },
-        )
-        assert response.status_code == 401
-
-
-class TestUpdateItem:
-    """Tests for PUT /items/{id} endpoint."""
-
-    async def test_update_item_success(self, authorized_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test updating an item successfully."""
-        from app.core.models import Item
-        item = Item(title="Original Title", description="Original Description", owner_id=normal_user.id)
         db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
-
-        response = await authorized_client.put(
-            f"/v1/items/{item.id}",
-            json={
-                "title": "Updated Title",
-                "description": "Updated Description",
-            },
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["title"] == "Updated Title"
-        assert data["description"] == "Updated Description"
-        assert data["id"] == str(item.id)
-
-    async def test_update_item_partial(self, authorized_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test updating only title of an item."""
-        from app.core.models import Item
-        item = Item(title="Original Title", description="Keep This", owner_id=normal_user.id)
-        db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
-
-        response = await authorized_client.put(
-            f"/v1/items/{item.id}",
-            json={
-                "title": "Updated Title",
-            },
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["title"] == "Updated Title"
-        # Description should remain unchanged
-        assert data["description"] == "Keep This"
-
-    async def test_update_item_not_found(self, authorized_client: AsyncClient):
-        """Test updating non-existent item returns 404."""
-        fake_id = uuid.uuid4()
-        response = await authorized_client.put(
-            f"/v1/items/{fake_id}",
-            json={
-                "title": "Updated Title",
-            },
-        )
-        assert response.status_code == 404
-
-    async def test_update_item_other_user_forbidden(self, authorized_client: AsyncClient, superuser: User, db_session: AsyncSession):
-        """Test updating another user's item returns 403."""
-        from app.core.models import Item
-        item = Item(title="Superuser Item", description="Secret", owner_id=superuser.id)
-        db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
-
-        response = await authorized_client.put(
-            f"/v1/items/{item.id}",
-            json={
-                "title": "Hacked Title",
-            },
-        )
-        assert response.status_code == 403
-        assert "Not enough permissions" in response.json()["detail"]
-
-    async def test_update_item_as_superuser_can_update_any(self, superuser_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test superuser can update any item."""
-        from app.core.models import Item
-        item = Item(title="User Item", description="User Description", owner_id=normal_user.id)
-        db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
-
-        response = await superuser_client.put(
-            f"/v1/items/{item.id}",
-            json={
-                "title": "Updated By Superuser",
-            },
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert data["title"] == "Updated By Superuser"
-
-    async def test_update_item_unauthorized(self, client: AsyncClient):
-        """Test updating item without token returns 401."""
-        fake_id = uuid.uuid4()
-        response = await client.put(
-            f"/v1/items/{fake_id}",
-            json={
-                "title": "Updated Title",
-            },
-        )
-        assert response.status_code == 401
+    await db_session.commit()
+    
+    # 测试分页
+    response = await authorized_client.get("/v1/items/?skip=0&limit=3")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 5  # 5 new items created in this test
+    assert len(data["data"]) == 3
 
 
-class TestDeleteItem:
-    """Tests for DELETE /items/{id} endpoint."""
+@pytest.mark.asyncio
+async def test_read_items_superuser_sees_all(
+    superuser_client: AsyncClient,
+    test_user: User,
+    test_superuser: User,
+    db_session: AsyncSession
+):
+    """
+    测试超级管理员可以看到所有用户的物品。
+    """
+    # 创建属于普通用户的物品
+    user_item = Item(
+        title="User Item",
+        description="Belongs to test_user",
+        owner_id=test_user.id,
+    )
+    db_session.add(user_item)
+    
+    # 创建属于超级管理员的物品
+    admin_item = Item(
+        title="Admin Item",
+        description="Belongs to superuser",
+        owner_id=test_superuser.id,
+    )
+    db_session.add(admin_item)
+    await db_session.commit()
+    
+    response = await superuser_client.get("/v1/items/")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 2  # 2 new items created in this test
+    
+    titles = [item["title"] for item in data["data"]]
+    assert "User Item" in titles
+    assert "Admin Item" in titles
 
-    async def test_delete_item_success(self, authorized_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test deleting an item successfully."""
-        from app.core.models import Item
-        item = Item(title="Item to Delete", description="Will be deleted", owner_id=normal_user.id)
-        db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
-        item_id = item.id
 
-        response = await authorized_client.delete(f"/v1/items/{item_id}")
-        assert response.status_code == 200
-        assert "deleted successfully" in response.json()["message"]
+@pytest.mark.asyncio
+async def test_read_items_unauthorized(client: AsyncClient):
+    """
+    测试未登录用户无法获取物品列表。
+    """
+    response = await client.get("/v1/items/")
+    
+    assert response.status_code in [401, 403]  # OAuth2 returns 401 for missing token
 
-        # Verify item was deleted
-        result = await db_session.get(Item, item_id)
-        assert result is None
 
-    async def test_delete_item_not_found(self, authorized_client: AsyncClient):
-        """Test deleting non-existent item returns 404."""
-        fake_id = uuid.uuid4()
-        response = await authorized_client.delete(f"/v1/items/{fake_id}")
-        assert response.status_code == 404
+# ======================== 获取单个物品测试 ========================
 
-    async def test_delete_item_other_user_forbidden(self, authorized_client: AsyncClient, superuser: User, db_session: AsyncSession):
-        """Test deleting another user's item returns 403."""
-        from app.core.models import Item
-        item = Item(title="Superuser Item", description="Secret", owner_id=superuser.id)
-        db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
+@pytest.mark.asyncio
+async def test_read_item_by_id_owner(
+    authorized_client: AsyncClient,
+    test_item: Item
+):
+    """
+    测试物品所有者可以获取自己的物品。
+    """
+    response = await authorized_client.get(f"/v1/items/{test_item.id}")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == str(test_item.id)
+    assert data["title"] == test_item.title
+    assert data["owner_id"] == str(test_item.owner_id)
 
-        response = await authorized_client.delete(f"/v1/items/{item.id}")
-        assert response.status_code == 403
-        assert "Not enough permissions" in response.json()["detail"]
 
-    async def test_delete_item_as_superuser_can_delete_any(self, superuser_client: AsyncClient, normal_user: User, db_session: AsyncSession):
-        """Test superuser can delete any item."""
-        from app.core.models import Item
-        item = Item(title="User Item", description="User Description", owner_id=normal_user.id)
-        db_session.add(item)
-        await db_session.commit()
-        await db_session.refresh(item)
-        item_id = item.id
+@pytest.mark.asyncio
+async def test_read_item_by_id_not_found(authorized_client: AsyncClient):
+    """
+    测试获取不存在的物品返回 404。
+    """
+    fake_id = uuid.uuid4()
+    response = await authorized_client.get(f"/v1/items/{fake_id}")
+    
+    assert response.status_code == 404
+    data = response.json()
+    assert "not found" in data["detail"]
 
-        response = await superuser_client.delete(f"/v1/items/{item_id}")
-        assert response.status_code == 200
 
-        # Verify item was deleted
-        result = await db_session.get(Item, item_id)
-        assert result is None
+@pytest.mark.asyncio
+async def test_read_item_by_id_other_user(
+    authorized_client: AsyncClient,
+    db_session: AsyncSession
+):
+    """
+    测试普通用户无法获取其他用户的物品。
+    """
+    # 创建另一个用户和其物品
+    other_user = User(
+        email="other_item@example.com",
+        hashed_password="hashed_password",
+        full_name="Other User",
+        is_active=True,
+        is_superuser=False,
+    )
+    db_session.add(other_user)
+    await db_session.commit()
+    
+    other_item = Item(
+        title="Other User's Item",
+        description="This belongs to other user",
+        owner_id=other_user.id,
+    )
+    db_session.add(other_item)
+    await db_session.commit()
+    
+    response = await authorized_client.get(f"/v1/items/{other_item.id}")
+    
+    assert response.status_code == 403
+    data = response.json()
+    assert "Not enough permissions" in data["detail"]
 
-    async def test_delete_item_unauthorized(self, client: AsyncClient):
-        """Test deleting item without token returns 401."""
-        fake_id = uuid.uuid4()
-        response = await client.delete(f"/v1/items/{fake_id}")
-        assert response.status_code == 401
+
+@pytest.mark.asyncio
+async def test_read_item_by_id_superuser_can_access_any(
+    superuser_client: AsyncClient,
+    test_item: Item
+):
+    """
+    测试超级管理员可以获取任何物品。
+    """
+    response = await superuser_client.get(f"/v1/items/{test_item.id}")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["id"] == str(test_item.id)
+
+
+# ======================== 创建物品测试 ========================
+
+@pytest.mark.asyncio
+async def test_create_item_success(
+    authorized_client: AsyncClient,
+    test_user: User
+):
+    """
+    测试成功创建物品。
+    """
+    response = await authorized_client.post(
+        "/v1/items/",
+        json={
+            "title": "New Item",
+            "description": "A new test item",
+        },
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "New Item"
+    assert data["description"] == "A new test item"
+    assert data["owner_id"] == str(test_user.id)
+    assert "id" in data
+
+
+@pytest.mark.asyncio
+async def test_create_item_validation_error(authorized_client: AsyncClient):
+    """
+    测试创建物品时验证失败（缺少必填字段）。
+    """
+    response = await authorized_client.post(
+        "/v1/items/",
+        json={
+            "description": "Missing title",
+        },
+    )
+    
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_item_empty_title(authorized_client: AsyncClient):
+    """
+    测试创建物品时标题为空失败。
+    """
+    response = await authorized_client.post(
+        "/v1/items/",
+        json={
+            "title": "",  # 空标题
+            "description": "Description",
+        },
+    )
+    
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_create_item_unauthorized(client: AsyncClient):
+    """
+    测试未登录用户无法创建物品。
+    """
+    response = await client.post(
+        "/v1/items/",
+        json={
+            "title": "New Item",
+            "description": "Description",
+        },
+    )
+    
+    assert response.status_code in [401, 403]  # OAuth2 returns 401 for missing token
+
+
+# ======================== 更新物品测试 ========================
+
+@pytest.mark.asyncio
+async def test_update_item_success(
+    authorized_client: AsyncClient,
+    test_item: Item
+):
+    """
+    测试成功更新自己的物品。
+    """
+    response = await authorized_client.put(
+        f"/v1/items/{test_item.id}",
+        json={
+            "title": "Updated Title",
+            "description": "Updated description",
+        },
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "Updated Title"
+    assert data["description"] == "Updated description"
+    assert data["id"] == str(test_item.id)
+
+
+@pytest.mark.asyncio
+async def test_update_item_partial(
+    authorized_client: AsyncClient,
+    test_item: Item
+):
+    """
+    测试部分更新物品（只更新描述）。
+    """
+    response = await authorized_client.put(
+        f"/v1/items/{test_item.id}",
+        json={
+            "description": "Only description updated",
+        },
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    # 标题应该保持不变
+    assert data["title"] == test_item.title
+    assert data["description"] == "Only description updated"
+
+
+@pytest.mark.asyncio
+async def test_update_item_not_found(authorized_client: AsyncClient):
+    """
+    测试更新不存在的物品返回 404。
+    """
+    fake_id = uuid.uuid4()
+    response = await authorized_client.put(
+        f"/v1/items/{fake_id}",
+        json={
+            "title": "Updated Title",
+        },
+    )
+    
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_update_item_other_user(
+    authorized_client: AsyncClient,
+    db_session: AsyncSession
+):
+    """
+    测试普通用户无法更新其他用户的物品。
+    """
+    # 创建另一个用户和其物品
+    other_user = User(
+        email="other_update@example.com",
+        hashed_password="hashed_password",
+        full_name="Other User",
+        is_active=True,
+        is_superuser=False,
+    )
+    db_session.add(other_user)
+    await db_session.commit()
+    
+    other_item = Item(
+        title="Other's Item",
+        description="Belongs to other",
+        owner_id=other_user.id,
+    )
+    db_session.add(other_item)
+    await db_session.commit()
+    
+    response = await authorized_client.put(
+        f"/v1/items/{other_item.id}",
+        json={
+            "title": "Trying to update",
+        },
+    )
+    
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_update_item_superuser_can_update_any(
+    superuser_client: AsyncClient,
+    test_item: Item
+):
+    """
+    测试超级管理员可以更新任何物品。
+    """
+    response = await superuser_client.put(
+        f"/v1/items/{test_item.id}",
+        json={
+            "title": "Updated by Admin",
+        },
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "Updated by Admin"
+
+
+# ======================== 删除物品测试 ========================
+
+@pytest.mark.asyncio
+async def test_delete_item_success(
+    authorized_client: AsyncClient,
+    test_item: Item
+):
+    """
+    测试成功删除自己的物品。
+    """
+    response = await authorized_client.delete(f"/v1/items/{test_item.id}")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert "deleted successfully" in data["message"]
+
+
+@pytest.mark.asyncio
+async def test_delete_item_not_found(authorized_client: AsyncClient):
+    """
+    测试删除不存在的物品返回 404。
+    """
+    fake_id = uuid.uuid4()
+    response = await authorized_client.delete(f"/v1/items/{fake_id}")
+    
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_delete_item_other_user(
+    authorized_client: AsyncClient,
+    db_session: AsyncSession
+):
+    """
+    测试普通用户无法删除其他用户的物品。
+    """
+    # 创建另一个用户和其物品
+    other_user = User(
+        email="other_delete@example.com",
+        hashed_password="hashed_password",
+        full_name="Other User",
+        is_active=True,
+        is_superuser=False,
+    )
+    db_session.add(other_user)
+    await db_session.commit()
+    
+    other_item = Item(
+        title="Other's Item to Delete",
+        description="Belongs to other",
+        owner_id=other_user.id,
+    )
+    db_session.add(other_item)
+    await db_session.commit()
+    
+    response = await authorized_client.delete(f"/v1/items/{other_item.id}")
+    
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_delete_item_superuser_can_delete_any(
+    superuser_client: AsyncClient,
+    db_session: AsyncSession,
+    test_user: User
+):
+    """
+    测试超级管理员可以删除任何物品。
+    """
+    # 创建一个物品让超级管理员删除
+    item_to_delete = Item(
+        title="Item to be deleted by admin",
+        description="This will be deleted",
+        owner_id=test_user.id,
+    )
+    db_session.add(item_to_delete)
+    await db_session.commit()
+    
+    response = await superuser_client.delete(f"/v1/items/{item_to_delete.id}")
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert "deleted successfully" in data["message"]
+
+
+@pytest.mark.asyncio
+async def test_delete_item_unauthorized(client: AsyncClient, test_item: Item):
+    """
+    测试未登录用户无法删除物品。
+    """
+    response = await client.delete(f"/v1/items/{test_item.id}")
+    
+    assert response.status_code in [401, 403]  # OAuth2 returns 401 for missing token

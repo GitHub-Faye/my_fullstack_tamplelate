@@ -12,6 +12,7 @@
 - Annotated：Python 3.9+ 特性，用于组合类型提示和元数据
 """
 
+import uuid
 from typing import Annotated
 from typing import AsyncGenerator
 
@@ -95,8 +96,9 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
         )
     
     # 从数据库查询用户
-    # token_data.sub 包含用户 ID（UUID 字符串）
-    user = await session.get(User, token_data.sub)
+    # token_data.sub 包含用户 ID（UUID 字符串），需要转换为 UUID 对象
+    user_id = uuid.UUID(token_data.sub) if isinstance(token_data.sub, str) else token_data.sub
+    user = await session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     

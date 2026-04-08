@@ -1,81 +1,38 @@
 """
-Pytest configuration and fixtures for API tests.
+Pytest configuration and shared fixtures for FastAPI testing.
 
 This module provides:
-- Test database setup with SQLite (in-memory) for fast tests
-- Async HTTP client (httpx) for API testing
-- User fixtures (normal user, superuser)
-- Authentication helpers
+- Async test support with pytest-asyncio
+- In-memory SQLite database for testing (no external DB needed)
+- FastAPI dependency overrides for database and authentication
+- Test client fixtures using httpx.AsyncClient
 """
 
 import asyncio
 import uuid
-from typing import AsyncGenerator
+from datetime import datetime, timezone, timedelta
+from typing import AsyncGenerator, Generator
 
 import pytest
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.pool import NullPool
+from fastapi import FastAPI
+from httpx import AsyncClient, ASGITransport
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlmodel import SQLModel
 
-from app.core.config import Settings
+# Import app and dependencies to override
+from main import app as fastapi_app
+from app.core.config import get_settings, Settings
 from app.core.database import get_db
-from app.core.models import User
-from app.core.security import get_password_hash
-from app.domains.user.repository import create_user
-from app.domains.user.schemas import UserCreate
-from main import app
+from app.core.models import User, Item
+from app.core.security import get_password_hash, create_access_token
+from app.domains.user.dependencies import get_current_user, get_current_active_superuser
 
 
-# ======================== Test Database Configuration ========================
+# ======================== pytest-asyncio 配置 ========================
 
-# Use SQLite file-based database for tests (more reliable than in-memory with async)
-TEST_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
-
-
-def get_test_settings() -> Settings:
-    """Return test settings with test database."""
-    return Settings(
-        DATABASE_URL=TEST_DATABASE_URL,
-        SECRET_KEY="test-secret-key-for-testing-only-do-not-use-in-production",
-        FIRST_SUPERUSER="admin@example.com",
-        FIRST_SUPERUSER_PASSWORD="admin12345",
-        ENVIRONMENT="local",
-        DEBUG=True,
-    )
-
-
-# Create test engine
-test_engine = create_async_engine(
-    TEST_DATABASE_URL,
-    echo=False,
-    poolclass=NullPool,
-    future=True,
-)
-
-
-async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
-    """Override database dependency for testing."""
-    from sqlalchemy.ext.asyncio import async_sessionmaker
-
-    async_session = async_sessionmaker(
-        test_engine,
-        class_=AsyncSession,
-        expire_on_commit=False,
-        autoflush=False,
-        autocommit=False,
-    )
-    async with async_session() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
-
-
-# ======================== Pytest Configuration ========================
-
-@pytest_asyncio.fixture(scope="session")
+# 配置 pytest-asyncio 使用 function scope
+@pytest.fixture(scope="session")
 def event_loop():
     """Create an instance of the default event loop for the test session."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
@@ -83,152 +40,214 @@ def event_loop():
     loop.close()
 
 
-@pytest_asyncio.fixture(scope="session", autouse=True)
-async def setup_test_database() -> AsyncGenerator[None, None]:
-    """Set up test database - create all tables before tests and drop after."""
-    # Create all tables
-    async with test_engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.create_all)
+# ======================== 内存数据库配置 ========================
 
-    yield
-
-    # Drop all tables after tests
-    async with test_engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.drop_all)
-
-    await test_engine.dispose()
-
-    # Clean up test database file
-    import os
-    if os.path.exists("./test.db"):
-        os.remove("./test.db")
+# 使用 aiosqlite 作为内存数据库，无需外部 PostgreSQL
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 
-@pytest_asyncio.fixture(autouse=True)
-async def clean_tables() -> AsyncGenerator[None, None]:
-    """Clean tables before each test to ensure test isolation."""
-    yield
-    # Clean up after each test
-    async with test_engine.begin() as conn:
-        # Delete all data from tables (keep table structure)
-        await conn.exec_driver_sql("DELETE FROM item")
-        await conn.exec_driver_sql("DELETE FROM user")
+@pytest_asyncio.fixture(scope="function")
+async def engine():
+    """
+    创建测试用的异步数据库引擎（function 级别，每个测试函数独立）。
+    
+    使用内存中的 SQLite 数据库，无需外部数据库服务器。
+    """
+    engine = create_async_engine(
+        TEST_DATABASE_URL,
+        echo=False,  # 测试时关闭 SQL 打印
+        future=True,
+    )
+    yield engine
+    await engine.dispose()
 
 
-@pytest_asyncio.fixture
-async def db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Provide a database session for tests."""
-    from sqlalchemy.ext.asyncio import async_sessionmaker
-
+@pytest_asyncio.fixture(scope="function")
+async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
+    """
+    为每个测试函数创建独立的数据库会话。
+    
+    每个测试函数都会：
+    1. 创建新的数据库表
+    2. 运行测试
+    3. 回滚事务并删除表
+    
+    确保测试之间完全隔离。
+    """
+    # 创建会话工厂
     async_session = async_sessionmaker(
-        test_engine,
+        engine,
         class_=AsyncSession,
         expire_on_commit=False,
         autoflush=False,
         autocommit=False,
     )
+    
+    # 创建所有表
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
+    
+    # 创建会话
     async with async_session() as session:
         yield session
+        # 测试结束后回滚
+        await session.rollback()
+    
+    # 清理表
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.drop_all)
 
 
-# ======================== HTTP Client Fixtures ========================
+# ======================== FastAPI App Fixture ========================
 
-@pytest_asyncio.fixture
-async def client() -> AsyncGenerator[AsyncClient, None]:
-    """Provide an async HTTP client for testing."""
-    # Override the database dependency
-    app.dependency_overrides[get_db] = override_get_db
+@pytest_asyncio.fixture(scope="function")
+async def app(db_session: AsyncSession) -> FastAPI:
+    """
+    创建配置好的 FastAPI 应用实例，用于测试。
+    
+    覆盖的依赖：
+    - get_db: 返回内存数据库会话
+    """
+    # 覆盖数据库依赖
+    async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
+        yield db_session
+    
+    # 覆盖依赖
+    fastapi_app.dependency_overrides[get_db] = override_get_db
+    
+    yield fastapi_app
+    
+    # 清理依赖覆盖
+    fastapi_app.dependency_overrides.clear()
 
+
+@pytest_asyncio.fixture(scope="function")
+async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
+    """
+    创建 httpx.AsyncClient 测试客户端。
+    
+    使用 ASGITransport 直接调用 FastAPI 应用，无需启动服务器。
+    """
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
-    # Clean up dependency override
-    app.dependency_overrides.clear()
 
+# ======================== 测试数据 Fixtures ========================
 
-# ======================== User Fixtures ========================
-
-@pytest_asyncio.fixture
-async def normal_user(db_session: AsyncSession) -> User:
-    """Create a normal (non-superuser) user for testing."""
-    user_in = UserCreate(
-        email="user@example.com",
-        password="userpassword123",
+@pytest_asyncio.fixture(scope="function")
+async def test_user(db_session: AsyncSession) -> User:
+    """
+    创建一个普通测试用户。
+    """
+    user = User(
+        email="test@example.com",
+        hashed_password=get_password_hash("testpassword123"),
         full_name="Test User",
         is_active=True,
         is_superuser=False,
     )
-    user = await create_user(session=db_session, user_create=user_in)
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
     return user
 
 
-@pytest_asyncio.fixture
-async def superuser(db_session: AsyncSession) -> User:
-    """Create a superuser for testing."""
-    user_in = UserCreate(
-        email="superuser@example.com",
-        password="superpassword123",
-        full_name="Test Superuser",
+@pytest_asyncio.fixture(scope="function")
+async def test_superuser(db_session: AsyncSession) -> User:
+    """
+    创建一个超级管理员测试用户。
+    """
+    user = User(
+        email="admin@example.com",
+        hashed_password=get_password_hash("adminpassword123"),
+        full_name="Admin User",
         is_active=True,
         is_superuser=True,
     )
-    user = await create_user(session=db_session, user_create=user_in)
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
     return user
 
 
-@pytest_asyncio.fixture
-async def inactive_user(db_session: AsyncSession) -> User:
-    """Create an inactive user for testing."""
-    user_in = UserCreate(
-        email="inactive@example.com",
-        password="inactivepassword123",
-        full_name="Inactive User",
-        is_active=False,
-        is_superuser=False,
+@pytest_asyncio.fixture(scope="function")
+async def test_item(db_session: AsyncSession, test_user: User) -> Item:
+    """
+    创建一个测试物品，属于 test_user。
+    """
+    item = Item(
+        title="Test Item",
+        description="This is a test item",
+        owner_id=test_user.id,
     )
-    user = await create_user(session=db_session, user_create=user_in)
-    return user
+    db_session.add(item)
+    await db_session.commit()
+    await db_session.refresh(item)
+    return item
 
 
-# ======================== Authentication Helpers ========================
-
-async def get_user_token(client: AsyncClient, email: str, password: str) -> str:
-    """Get access token for a user."""
-    response = await client.post(
-        "/v1/login/access-token",
-        data={
-            "username": email,
-            "password": password,
-        },
+@pytest_asyncio.fixture(scope="function")
+async def user_token(test_user: User) -> str:
+    """
+    为普通测试用户生成 JWT 访问令牌。
+    """
+    from datetime import timedelta
+    token = create_access_token(
+        subject=str(test_user.id),
+        expires_delta=timedelta(minutes=30),
     )
-    assert response.status_code == 200, f"Failed to get token: {response.text}"
-    return response.json()["access_token"]
+    return token
 
 
-@pytest_asyncio.fixture
-async def normal_user_token(client: AsyncClient, normal_user: User) -> str:
-    """Get access token for the normal user."""
-    return await get_user_token(client, normal_user.email, "userpassword123")
+@pytest_asyncio.fixture(scope="function")
+async def superuser_token(test_superuser: User) -> str:
+    """
+    为超级管理员测试用户生成 JWT 访问令牌。
+    """
+    from datetime import timedelta
+    token = create_access_token(
+        subject=str(test_superuser.id),
+        expires_delta=timedelta(minutes=30),
+    )
+    return token
 
 
-@pytest_asyncio.fixture
-async def superuser_token(client: AsyncClient, superuser: User) -> str:
-    """Get access token for the superuser."""
-    return await get_user_token(client, superuser.email, "superpassword123")
+@pytest_asyncio.fixture(scope="function")
+async def authorized_client(app: FastAPI, user_token: str) -> AsyncGenerator[AsyncClient, None]:
+    """
+    已授权的客户端（普通用户）。
+    
+    自动在请求头中添加 Authorization。
+    """
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        ac.headers["Authorization"] = f"Bearer {user_token}"
+        yield ac
 
 
-# ======================== Authenticated Client Fixtures ========================
+@pytest_asyncio.fixture(scope="function")
+async def superuser_client(app: FastAPI, superuser_token: str) -> AsyncGenerator[AsyncClient, None]:
+    """
+    已授权的客户端（超级管理员）。
+    
+    自动在请求头中添加 Authorization。
+    """
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        ac.headers["Authorization"] = f"Bearer {superuser_token}"
+        yield ac
 
-@pytest_asyncio.fixture
-async def authorized_client(client: AsyncClient, normal_user_token: str) -> AsyncClient:
-    """Provide an HTTP client authorized as a normal user."""
-    client.headers["Authorization"] = f"Bearer {normal_user_token}"
-    return client
 
+# ======================== 同步客户端 Fixture ========================
 
-@pytest_asyncio.fixture
-async def superuser_client(client: AsyncClient, superuser_token: str) -> AsyncClient:
-    """Provide an HTTP client authorized as a superuser."""
-    client.headers["Authorization"] = f"Bearer {superuser_token}"
-    return client
+@pytest_asyncio.fixture(scope="function")
+async def sync_client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
+    """
+    同步测试客户端（使用 httpx.AsyncClient）。
+    
+    用于需要同步接口的测试场景。
+    """
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        yield ac

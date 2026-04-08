@@ -40,10 +40,7 @@ from app.tasks.user_tasks import process_user_signup_task
 
 settings = get_settings()
 # ======================== APIRouter 创建 ========================
-# 为所有用户路由创建独立的 router
-# prefix="/users"：所有路由前缀为 /users
-# tags=["users"]：OpenAPI 文档分组标签
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter()
 
 
 # ======================== 超管-only 路由：获取所有用户 ========================
