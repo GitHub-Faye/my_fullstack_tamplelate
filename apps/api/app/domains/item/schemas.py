@@ -3,6 +3,7 @@ from datetime import datetime
 
 from sqlmodel import Field, SQLModel
 
+from app.core.schemas import Message, PaginatedResponse
 
 
 # --------------------------------- 物品模型 ---------------------------------------------
@@ -30,13 +31,11 @@ class ItemPublic(ItemBase):
     created_at: datetime | None = None
 
 
-class ItemsPublic(SQLModel):
-    data: list[ItemPublic]
-    count: int
+# 使用统一分页协议
+class ItemsPublic(PaginatedResponse[ItemPublic]):
+    pass
 
 
 # ---------------------------- 通用 DTO --------------------------------------------------
-# 通用消息
-class Message(SQLModel):
-    message: str
+# Message 从 app.core.schemas 导入
 

@@ -7,7 +7,9 @@ from pwdlib.hashers.argon2 import Argon2Hasher
 from pwdlib.hashers.bcrypt import BcryptHasher
 
 from app.core.config import get_settings
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from app.core.scopes import ItemScope
+
 password_hash = PasswordHash(
     (
         Argon2Hasher(),
@@ -23,8 +25,16 @@ settings = get_settings()
 # ======================== OAuth2 配置 ========================
 # 定义 OAuth2 密码流。tokenUrl 指向获取令牌的 API 端点
 # FastAPI 自动使用此配置生成 OpenAPI 文档中的"Authorize"按钮
+# scopes 参数定义了可用的权限范围，会在 Swagger UI 的授权弹窗中显示
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+    tokenUrl=f"{settings.API_V1_STR}/login/access-token",
+    scopes={
+        ItemScope.READ: "读取 item 列表和详情",
+        ItemScope.CREATE: "创建新的 item",
+        ItemScope.UPDATE: "更新 item",
+        ItemScope.DELETE: "删除 item",
+        ItemScope.ADMIN: "管理所有 item（包括他人的）",
+    },
 )
 
 

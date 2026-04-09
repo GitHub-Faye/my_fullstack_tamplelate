@@ -503,6 +503,9 @@ export const readItemsV1ItemsGetQueryKey = (options?: Options<ReadItemsV1ItemsGe
  * Read Items
  *
  * Retrieve items.
+ *
+ * - 普通用户只能查看自己的 items
+ * - 拥有 item:admin 权限的用户可以查看所有 items
  */
 export const readItemsV1ItemsGetOptions = (options?: Options<ReadItemsV1ItemsGetData>) => queryOptions<ReadItemsV1ItemsGetResponse, ReadItemsV1ItemsGetError, ReadItemsV1ItemsGetResponse, ReturnType<typeof readItemsV1ItemsGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -521,6 +524,8 @@ export const readItemsV1ItemsGetOptions = (options?: Options<ReadItemsV1ItemsGet
  * Create Item
  *
  * Create new item.
+ *
+ * 需要 item:create 权限。
  */
 export const createItemV1ItemsPostMutation = (options?: Partial<Options<CreateItemV1ItemsPostData>>): UseMutationOptions<CreateItemV1ItemsPostResponse, CreateItemV1ItemsPostError, Options<CreateItemV1ItemsPostData>> => {
     const mutationOptions: UseMutationOptions<CreateItemV1ItemsPostResponse, CreateItemV1ItemsPostError, Options<CreateItemV1ItemsPostData>> = {
@@ -540,6 +545,9 @@ export const createItemV1ItemsPostMutation = (options?: Partial<Options<CreateIt
  * Delete Item
  *
  * Delete an item.
+ *
+ * - 普通用户只能删除自己的 item（需要 item:delete 权限）
+ * - 拥有 item:admin 权限的用户可以删除任何 item
  */
 export const deleteItemV1ItemsIdDeleteMutation = (options?: Partial<Options<DeleteItemV1ItemsIdDeleteData>>): UseMutationOptions<DeleteItemV1ItemsIdDeleteResponse, DeleteItemV1ItemsIdDeleteError, Options<DeleteItemV1ItemsIdDeleteData>> => {
     const mutationOptions: UseMutationOptions<DeleteItemV1ItemsIdDeleteResponse, DeleteItemV1ItemsIdDeleteError, Options<DeleteItemV1ItemsIdDeleteData>> = {
@@ -561,6 +569,9 @@ export const readItemV1ItemsIdGetQueryKey = (options: Options<ReadItemV1ItemsIdG
  * Read Item
  *
  * Get item by ID.
+ *
+ * - 普通用户只能查看自己的 item
+ * - 拥有 item:admin 权限的用户可以查看任何 item
  */
 export const readItemV1ItemsIdGetOptions = (options: Options<ReadItemV1ItemsIdGetData>) => queryOptions<ReadItemV1ItemsIdGetResponse, ReadItemV1ItemsIdGetError, ReadItemV1ItemsIdGetResponse, ReturnType<typeof readItemV1ItemsIdGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -579,6 +590,9 @@ export const readItemV1ItemsIdGetOptions = (options: Options<ReadItemV1ItemsIdGe
  * Update Item
  *
  * Update an item.
+ *
+ * - 普通用户只能更新自己的 item（需要 item:update 权限）
+ * - 拥有 item:admin 权限的用户可以更新任何 item
  */
 export const updateItemV1ItemsIdPutMutation = (options?: Partial<Options<UpdateItemV1ItemsIdPutData>>): UseMutationOptions<UpdateItemV1ItemsIdPutResponse, UpdateItemV1ItemsIdPutError, Options<UpdateItemV1ItemsIdPutData>> => {
     const mutationOptions: UseMutationOptions<UpdateItemV1ItemsIdPutResponse, UpdateItemV1ItemsIdPutError, Options<UpdateItemV1ItemsIdPutData>> = {

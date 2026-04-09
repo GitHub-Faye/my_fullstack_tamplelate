@@ -17,16 +17,25 @@ from typing import Annotated
 from typing import AsyncGenerator
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, status
 
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.core.config import get_settings
-from app.core.database import get_db 
-from app.core.models import User
+from app.core.database import get_db
+from app.core.models import User, Role, RoleScope, UserRole
 from app.core.security import reusable_oauth2
+from app.core.scopes import ItemScope
+from app.core.errors import (
+    BusinessException,
+    ErrorCode,
+    raise_user_not_found,
+    raise_permission_denied,
+    raise_scope_missing,
+)
 
 from app.domains.user.schemas import TokenPayload
 
@@ -90,8 +99,8 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):
         # 令牌无效、过期或签名错误
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+        raise BusinessException(
+            code=ErrorCode.AUTH_INVALID_TOKEN,
             detail="Could not validate credentials",
         )
     
@@ -100,11 +109,14 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
     user_id = uuid.UUID(token_data.sub) if isinstance(token_data.sub, str) else token_data.sub
     user = await session.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise_user_not_found()
     
     # 检查用户是否被激活
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise BusinessException(
+            code=ErrorCode.AUTH_INACTIVE_USER,
+            detail="Inactive user"
+        )
     
     return user
 
@@ -147,7 +159,156 @@ async def get_current_active_superuser(current_user: CurrentUser) -> User:
     两种方式等效，第一种更清晰（直接拒绝权限不足的请求）。
     """
     if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=403, detail="The user doesn't have enough privileges"
-        )
+        raise_permission_denied("The user doesn't have enough privileges")
     return current_user
+
+
+# ======================== Scope 权限检查 ========================
+
+async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
+    """
+    获取用户的所有 scope 权限。
+    
+    参数：
+    - session：数据库会话
+    - user：用户对象
+    
+    返回值：
+    - set[str]：用户拥有的所有 scope 集合
+    """
+    # 超管拥有所有权限
+    if user.is_superuser:
+        return {scope.value for scope in ItemScope}
+    
+    # 加载用户的 roles 和 scopes
+    scopes = set()
+    
+    # 查询用户的所有角色及其 scopes
+    stmt = (
+        select(RoleScope.scope)
+        .join(Role, RoleScope.role_id == Role.id)
+        .join(UserRole, Role.id == UserRole.role_id)
+        .where(UserRole.user_id == user.id)
+        .distinct()
+    )
+    result = await session.execute(stmt)
+    scopes = {row[0] for row in result.all()}
+    
+    return scopes
+
+
+def require_scope(required_scope: ItemScope):
+    """
+    创建依赖项，检查用户是否拥有指定的 scope 权限。
+    
+    参数：
+    - required_scope：需要的权限范围
+    
+    返回值：
+    - 依赖函数，可在路由的 dependencies 中使用
+    
+    使用示例：
+    @router.post("/", dependencies=[Depends(require_scope(ItemScope.CREATE))])
+    async def create_item(...):
+        ...
+    """
+    async def scope_checker(
+        session: SessionDep,
+        current_user: CurrentUser,
+    ) -> None:
+        user_scopes = await get_user_scopes(session, current_user)
+        
+        if required_scope.value not in user_scopes:
+            raise_scope_missing(required_scope.value)
+    
+    return scope_checker
+
+
+def require_any_scope(*required_scopes: ItemScope):
+    """
+    创建依赖项，检查用户是否拥有任意一个指定的 scope 权限。
+    
+    参数：
+    - required_scopes：需要的权限范围列表（满足其一即可）
+    
+    返回值：
+    - 依赖函数，可在路由的 dependencies 中使用
+    
+    使用示例：
+    @router.get("/", dependencies=[Depends(require_any_scope(ItemScope.READ, ItemScope.ADMIN))])
+    async def read_items(...):
+        ...
+    """
+    async def scope_checker(
+        session: SessionDep,
+        current_user: CurrentUser,
+    ) -> None:
+        user_scopes = await get_user_scopes(session, current_user)
+        required_scope_values = {scope.value for scope in required_scopes}
+        
+        if not user_scopes.intersection(required_scope_values):
+            raise_permission_denied(
+                f"Permission denied: one of {[s.value for s in required_scopes]} required"
+            )
+    
+    return scope_checker
+
+
+def require_all_scopes(*required_scopes: ItemScope):
+    """
+    创建依赖项，检查用户是否拥有所有指定的 scope 权限。
+    
+    参数：
+    - required_scopes：需要的权限范围列表（必须全部满足）
+    
+    返回值：
+    - 依赖函数，可在路由的 dependencies 中使用
+    
+    使用示例：
+    @router.post("/admin", dependencies=[Depends(require_all_scopes(ItemScope.ADMIN, ItemScope.CREATE))])
+    async def admin_create(...):
+        ...
+    """
+    async def scope_checker(
+        session: SessionDep,
+        current_user: CurrentUser,
+    ) -> None:
+        user_scopes = await get_user_scopes(session, current_user)
+        required_scope_values = {scope.value for scope in required_scopes}
+        
+        if not required_scope_values.issubset(user_scopes):
+            missing = required_scope_values - user_scopes
+            raise_permission_denied(f"Permission denied: missing scopes {list(missing)}")
+    
+    return scope_checker
+
+
+async def check_item_owner_or_admin(
+    session: SessionDep,
+    current_user: CurrentUser,
+    item_owner_id: uuid.UUID,
+) -> bool:
+    """
+    检查用户是否是 item 的所有者或拥有 admin 权限。
+    
+    参数：
+    - session：数据库会话
+    - current_user：当前用户
+    - item_owner_id：item 的所有者 ID
+    
+    返回值：
+    - bool：是否有权限
+    
+    异常：
+    - 403 Forbidden：无权限
+    """
+    # 是自己的 item
+    if item_owner_id == current_user.id:
+        return True
+    
+    # 检查是否有 item:admin 权限
+    user_scopes = await get_user_scopes(session, current_user)
+    if ItemScope.ADMIN.value in user_scopes:
+        return True
+    
+    raise_permission_denied("Not enough permissions")

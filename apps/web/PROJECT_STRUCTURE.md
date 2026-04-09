@@ -19,6 +19,7 @@ This is a Next.js 16 frontend application built with React 19, TypeScript, Tailw
 | Notifications | Sonner |
 | API Client | @hey-api/client-fetch |
 | Icons | Lucide React |
+| Testing | Vitest + @testing-library/react + MSW |
 
 ## Project Structure
 
@@ -29,33 +30,29 @@ apps/web/
 │   │   ├── layout.tsx            # Auth layout (centered, minimal)
 │   │   ├── login/
 │   │   │   └── page.tsx          # Login page
-│   │   ├── signup/
-│   │   │   └── page.tsx          # Registration page
-│   │   ├── recover-password/
-│   │   │   └── page.tsx          # Password recovery request
-│   │   └── reset-password/
-│   │       ├── page.tsx          # Reset password wrapper
-│   │       └── ResetPasswordForm.tsx  # Reset password form
+│   │   └── signup/
+│   │       └── page.tsx          # Registration page
 │   ├── (dashboard)/              # Dashboard route group
 │   │   ├── layout.tsx            # Dashboard layout with sidebar
-│   │   ├── page.tsx              # Dashboard home/overview
-│   │   ├── admin/
-│   │   │   ├── page.tsx          # User management (admin only)
-│   │   │   └── users/
-│   │   │       ├── new/
-│   │   │       │   └── page.tsx  # Create new user
-│   │   │       └── [id]/
-│   │   │           └── edit/
-│   │   │               └── page.tsx  # Edit user
-│   │   ├── items/
-│   │   │   ├── page.tsx          # Items list
-│   │   │   ├── new/
-│   │   │   │   └── page.tsx      # Create new item
-│   │   │   └── [id]/
-│   │   │       └── edit/
-│   │   │           └── page.tsx  # Edit item
-│   │   └── settings/
-│   │       └── page.tsx          # User settings (profile, password)
+│   │   ├── dashboard/
+│   │   │   ├── page.tsx          # Dashboard home/overview
+│   │   │   ├── admin/
+│   │   │   │   ├── page.tsx      # User management (admin only)
+│   │   │   │   └── users/
+│   │   │   │       ├── new/
+│   │   │   │       │   └── page.tsx  # Create new user
+│   │   │   │       └── [id]/
+│   │   │   │           └── edit/
+│   │   │   │               └── page.tsx  # Edit user
+│   │   │   ├── items/
+│   │   │   │   ├── page.tsx      # Items list
+│   │   │   │   ├── new/
+│   │   │   │   │   └── page.tsx  # Create new item
+│   │   │   │   └── [id]/
+│   │   │   │       └── edit/
+│   │   │   │           └── page.tsx  # Edit item
+│   │   │   └── settings/
+│   │   │       └── page.tsx      # User settings (profile, password)
 │   ├── layout.tsx                # Root layout with providers
 │   ├── globals.css               # Global styles
 │   └── page.tsx                  # Landing page (redirects to dashboard)
@@ -66,8 +63,8 @@ apps/web/
 │       ├── badge.tsx
 │       ├── button.tsx
 │       ├── card.tsx
-│       ├── checkbox.tsx          # Added for forms
-│       ├── dialog.tsx            # Added for confirmations
+│       ├── checkbox.tsx
+│       ├── dialog.tsx
 │       ├── dropdown-menu.tsx
 │       ├── form.tsx
 │       ├── input.tsx
@@ -78,15 +75,32 @@ apps/web/
 │       ├── sonner.tsx
 │       ├── table.tsx
 │       └── textarea.tsx
-├── features/
-│   └── auth/
+├── features/                     # Feature-based modules
+│   ├── item/                     # Item management feature
+│   │   ├── api/
+│   │   │   ├── queries.ts        # TanStack Query hooks
+│   │   │   └── queries.test.ts   # Query tests
+│   │   ├── components/
+│   │   │   ├── ItemForm.tsx      # Create/Edit item form
+│   │   │   ├── ItemForm.test.tsx # Form tests
+│   │   │   ├── ItemTable.tsx     # Items list table
+│   │   │   └── ItemTable.test.tsx # Table tests
+│   │   ├── schemas.ts            # Zod validation schemas
+│   │   ├── schemas.test.ts       # Schema tests
+│   │   └── index.ts              # Feature exports
+│   └── user/                     # User management feature
 │       ├── api/
-│       │   └── login.ts          # Login API functions
+│       │   ├── queries.ts        # TanStack Query hooks
+│       │   └── queries.test.ts   # Query tests
 │       ├── components/
-│       │   └── LoginForm.tsx     # Login form component
-│       ├── hooks/
-│       │   └── useLogin.ts       # Login mutation hook
-│       └── schemas.ts            # Auth form schemas
+│       │   ├── DashboardLayout.tsx   # Dashboard layout with sidebar
+│       │   ├── UserForm.tsx      # Create/Edit user form
+│       │   ├── UserForm.test.tsx # Form tests
+│       │   ├── UserTable.tsx     # Users list table
+│       │   └── UserTable.test.tsx # Table tests
+│       ├── schemas.ts            # Zod validation schemas
+│       ├── schemas.test.ts       # Schema tests
+│       └── index.ts              # Feature exports
 ├── src/
 │   ├── lib/
 │   │   ├── api-sdk.ts            # SDK client configuration
@@ -94,13 +108,21 @@ apps/web/
 │   ├── stores/
 │   │   └── auth.ts               # Auth store (Zustand)
 │   └── providers.tsx             # App providers (QueryClient)
+├── test/                         # Test infrastructure
+│   ├── mocks/
+│   │   ├── handlers.ts           # MSW API mock handlers
+│   │   └── server.ts             # MSW server setup
+│   ├── setup.ts                  # Test setup and configuration
+│   └── utils.tsx                 # Test utilities and helpers
 ├── public/                       # Static assets
 ├── components.json               # shadcn/ui config
+├── middleware.ts                 # Next.js middleware (auth protection)
 ├── next.config.js                # Next.js config
 ├── package.json
 ├── postcss.config.mjs
 ├── tailwind.config.ts
-└── tsconfig.json
+├── tsconfig.json
+└── vitest.config.ts              # Vitest configuration
 ```
 
 ## Route Structure
@@ -108,8 +130,6 @@ apps/web/
 ### Public Routes (No Auth Required)
 - `/login` - Login page
 - `/signup` - Registration page
-- `/recover-password` - Password recovery
-- `/reset-password` - Password reset (requires token)
 
 ### Protected Routes (Requires Auth)
 - `/dashboard` - Dashboard overview
@@ -126,26 +146,31 @@ apps/web/
 ### Authentication
 - JWT token-based authentication
 - Token stored in localStorage via Zustand persist
+- Cookie-based token for SSR/middleware compatibility
 - Automatic token attachment to API requests
-- Login, signup, password recovery flows
+- Login, signup flows
+- Middleware protection for dashboard routes
 
 ### Dashboard Layout
 - Responsive sidebar navigation
 - Collapsible on mobile (sheet component)
 - User menu with avatar and dropdown
 - Admin-only navigation items
+- Items management navigation
 
 ### Data Fetching
 - TanStack Query for server state
 - Automatic caching and refetching
 - Loading and error states
 - Optimistic updates
+- Query key factory pattern
 
 ### Forms
 - React Hook Form for form management
 - Zod for validation
 - shadcn/ui form components
 - Toast notifications for feedback
+- Reusable form components for create/edit
 
 ### UI Components
 All shadcn/ui components are in `components/ui/`:
@@ -153,7 +178,31 @@ All shadcn/ui components are in `components/ui/`:
 - Layout (Card, Sheet, Dialog)
 - Feedback (Toast via Sonner)
 - Navigation (Button, Dropdown Menu)
-- Data display (Table, Badge, Avatar)
+- Data display (Table, Badge, Avatar, Skeleton)
+
+## Feature-Based Architecture
+
+The project uses a feature-based folder structure:
+
+```
+features/
+├── item/                         # Item management feature
+│   ├── api/                      # API layer (TanStack Query hooks)
+│   ├── components/               # Feature-specific components
+│   ├── schemas.ts                # Validation schemas
+│   └── index.ts                  # Public exports
+└── user/                         # User management feature
+    ├── api/
+    ├── components/
+    ├── schemas.ts
+    └── index.ts
+```
+
+Each feature is self-contained with its own:
+- API hooks for data fetching
+- Components for UI
+- Schemas for validation
+- Tests for quality assurance
 
 ## API Integration
 
@@ -161,24 +210,14 @@ The app uses the `@repo/sdk` package generated from the backend OpenAPI spec:
 
 ```typescript
 // Example usage
-import { readItemsV1ItemsItemsGet, createItemV1ItemsItemsPost } from '@repo/sdk';
+import { useItems, useCreateItem } from '@/features/item/api/queries';
 
 // Get items
-const { data } = useQuery({
-  queryKey: ['items'],
-  queryFn: async () => {
-    const response = await readItemsV1ItemsItemsGet();
-    return response.data;
-  },
-});
+const { data, isLoading } = useItems(0, 10);
 
 // Create item
-const mutation = useMutation({
-  mutationFn: async (data: ItemCreate) => {
-    const response = await createItemV1ItemsItemsPost({ body: data });
-    return response.data;
-  },
-});
+const createMutation = useCreateItem();
+createMutation.mutate({ title: 'New Item', description: 'Description' });
 ```
 
 ## State Management
@@ -188,17 +227,50 @@ const mutation = useMutation({
 // src/stores/auth.ts
 - user: UserPublic | null
 - token: string | null
+- isAuthenticated: boolean
 - setUser(user)
 - setToken(token)
 - logout()
 ```
 
 ### Server State (TanStack Query)
-- Items list: `['items']`
-- Single item: `['item', id]`
-- Users list: `['users']`
-- Single user: `['user', id]`
-- Current user: `['currentUser']`
+Query keys follow a factory pattern:
+- Items list: `['items', 'list', { skip, limit }]`
+- Single item: `['items', 'detail', id]`
+- Users list: `['users', 'list', { skip, limit }]`
+- Single user: `['users', 'detail', id]`
+- Current user: `['users', 'me']`
+
+## Testing
+
+The project uses Vitest with @testing-library/react and MSW for testing:
+
+### Test Structure
+```
+test/
+├── mocks/
+│   ├── handlers.ts           # API mock handlers
+│   └── server.ts             # MSW server setup
+├── setup.ts                  # Test configuration
+└── utils.tsx                 # Test utilities
+```
+
+### Running Tests
+```bash
+# Run all tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests with coverage
+pnpm test:coverage
+```
+
+### Test Types
+- **Unit Tests**: Schema validation, utility functions
+- **Component Tests**: Form rendering, user interactions
+- **Integration Tests**: API hooks with mocked responses
 
 ## Development
 
@@ -225,6 +297,11 @@ pnpm check-types
 ### Lint
 ```bash
 pnpm lint
+```
+
+### Test
+```bash
+pnpm test
 ```
 
 ## Environment Variables
@@ -260,6 +337,12 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - postcss
 - autoprefixer
 - eslint
+- vitest
+- @testing-library/react
+- @testing-library/jest-dom
+- @testing-library/user-event
+- msw
+- jsdom
 
 ## Notes
 
@@ -269,3 +352,5 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - Toast notifications use Sonner for user feedback
 - The dashboard layout is responsive and works on mobile
 - Admin routes are protected by checking `user.is_superuser`
+- Tests use MSW to mock API responses at the network level
+- Query keys use a factory pattern for consistency

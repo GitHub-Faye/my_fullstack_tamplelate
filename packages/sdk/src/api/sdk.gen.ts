@@ -386,6 +386,9 @@ export const healthCheckV1UsersHealthCheckGet = <ThrowOnError extends boolean = 
  * Read Items
  *
  * Retrieve items.
+ *
+ * - 普通用户只能查看自己的 items
+ * - 拥有 item:admin 权限的用户可以查看所有 items
  */
 export const readItemsV1ItemsGet = <ThrowOnError extends boolean = false>(options?: Options<ReadItemsV1ItemsGetData, ThrowOnError>) => (options?.client ?? client).get<ReadItemsV1ItemsGetResponses, ReadItemsV1ItemsGetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -397,6 +400,8 @@ export const readItemsV1ItemsGet = <ThrowOnError extends boolean = false>(option
  * Create Item
  *
  * Create new item.
+ *
+ * 需要 item:create 权限。
  */
 export const createItemV1ItemsPost = <ThrowOnError extends boolean = false>(options: Options<CreateItemV1ItemsPostData, ThrowOnError>) => (options.client ?? client).post<CreateItemV1ItemsPostResponses, CreateItemV1ItemsPostErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -412,6 +417,9 @@ export const createItemV1ItemsPost = <ThrowOnError extends boolean = false>(opti
  * Delete Item
  *
  * Delete an item.
+ *
+ * - 普通用户只能删除自己的 item（需要 item:delete 权限）
+ * - 拥有 item:admin 权限的用户可以删除任何 item
  */
 export const deleteItemV1ItemsIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteItemV1ItemsIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteItemV1ItemsIdDeleteResponses, DeleteItemV1ItemsIdDeleteErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -423,6 +431,9 @@ export const deleteItemV1ItemsIdDelete = <ThrowOnError extends boolean = false>(
  * Read Item
  *
  * Get item by ID.
+ *
+ * - 普通用户只能查看自己的 item
+ * - 拥有 item:admin 权限的用户可以查看任何 item
  */
 export const readItemV1ItemsIdGet = <ThrowOnError extends boolean = false>(options: Options<ReadItemV1ItemsIdGetData, ThrowOnError>) => (options.client ?? client).get<ReadItemV1ItemsIdGetResponses, ReadItemV1ItemsIdGetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -434,6 +445,9 @@ export const readItemV1ItemsIdGet = <ThrowOnError extends boolean = false>(optio
  * Update Item
  *
  * Update an item.
+ *
+ * - 普通用户只能更新自己的 item（需要 item:update 权限）
+ * - 拥有 item:admin 权限的用户可以更新任何 item
  */
 export const updateItemV1ItemsIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateItemV1ItemsIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateItemV1ItemsIdPutResponses, UpdateItemV1ItemsIdPutErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

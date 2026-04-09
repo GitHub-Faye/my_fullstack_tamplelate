@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -13,8 +13,9 @@ from app.domains.user.dependencies import (
 )
 from app.core import security
 from app.core.config import get_settings
+from app.core.schemas import Message
+from app.core.errors import BusinessException, ErrorCode
 from app.domains.user.schemas import (
-    Message,
     NewPassword,
     Token,
     UserPublic,
@@ -39,9 +40,15 @@ async def login_access_token(
         session=session, email=form_data.username, password=form_data.password
     )
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        raise BusinessException(
+            code=ErrorCode.AUTH_INVALID_CREDENTIALS,
+            detail="Incorrect email or password"
+        )
     elif not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise BusinessException(
+            code=ErrorCode.AUTH_INACTIVE_USER,
+            detail="Inactive user"
+        )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(
@@ -66,13 +73,22 @@ async def reset_password(session: SessionDep, body: NewPassword) -> Message:
     """
     email = verify_password_reset_token(token=body.token)
     if not email:
-        raise HTTPException(status_code=400, detail="Invalid token")
+        raise BusinessException(
+            code=ErrorCode.AUTH_INVALID_TOKEN,
+            detail="Invalid token"
+        )
     user = await repository.get_user_by_email(session=session, email=email)
     if not user:
         # Don't reveal that the user doesn't exist - use same error as invalid token
-        raise HTTPException(status_code=400, detail="Invalid token")
+        raise BusinessException(
+            code=ErrorCode.AUTH_INVALID_TOKEN,
+            detail="Invalid token"
+        )
     elif not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise BusinessException(
+            code=ErrorCode.AUTH_INACTIVE_USER,
+            detail="Inactive user"
+        )
     user_in_update = UserUpdate(password=body.new_password)
     await repository.update_user(
         session=session,

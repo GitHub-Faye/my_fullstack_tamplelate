@@ -11,7 +11,7 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlmodel import col, delete, func, select
 
 from app.domains.user import repository
@@ -22,8 +22,15 @@ from app.domains.user.dependencies import (
 )
 from app.core.config import get_settings
 from app.core.security import get_password_hash, verify_password
+from app.core.schemas import Message
+from app.core.errors import (
+    BusinessException,
+    ErrorCode,
+    raise_user_already_exists,
+    raise_user_not_found,
+    raise_permission_denied,
+)
 from app.domains.user.schemas import (
-    Message,
     UpdatePassword,
     UserCreate,
     UserPublic,
@@ -112,10 +119,7 @@ async def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
     # 检查邮箱唯一性
     user = await repository.get_user_by_email(session=session, email=user_in.email)
     if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this email already exists in the system.",
-        )
+        raise_user_already_exists("The user with this email already exists in the system.")
 
     # 创建用户（密码自动哈希）
     user = await repository.create_user(session=session, user_create=user_in)
@@ -156,9 +160,7 @@ async def update_user_me(
     if user_in.email:
         existing_user = await repository.get_user_by_email(session=session, email=user_in.email)
         if existing_user and existing_user.id != current_user.id:
-            raise HTTPException(
-                status_code=409, detail="User with this email already exists"
-            )
+            raise_user_already_exists("User with this email already exists")
     
     # 仅序列化用户明确设置的字段（exclude_unset=True）
     user_data = user_in.model_dump(exclude_unset=True)
@@ -200,12 +202,16 @@ async def update_password_me(
     # 验证现有密码
     verified, _ = verify_password(body.current_password, current_user.hashed_password)
     if not verified:
-        raise HTTPException(status_code=400, detail="Incorrect password")
+        raise BusinessException(
+            code=ErrorCode.USER_INVALID_PASSWORD,
+            detail="Incorrect password"
+        )
     
     # 检查新密码是否与旧密码相同
     if body.current_password == body.new_password:
-        raise HTTPException(
-            status_code=400, detail="New password cannot be the same as the current one"
+        raise BusinessException(
+            code=ErrorCode.USER_PASSWORD_SAME_AS_OLD,
+            detail="New password cannot be the same as the current one"
         )
     
     # 哈希新密码并保存
@@ -260,8 +266,9 @@ async def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     # 防止超管意外删除自己
     if current_user.is_superuser:
-        raise HTTPException(
-            status_code=403, detail="Super users are not allowed to delete themselves"
+        raise BusinessException(
+            code=ErrorCode.USER_CANNOT_DELETE_SELF,
+            detail="Super users are not allowed to delete themselves"
         )
     await session.delete(current_user)
     await session.commit()
@@ -299,10 +306,7 @@ async def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     # 检查邮箱唯一性
     user = await repository.get_user_by_email(session=session, email=user_in.email)
     if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this email already exists in the system",
-        )
+        raise_user_already_exists("The user with this email already exists in the system")
     
     # 将 UserRegister 转换为 UserCreate（Pydantic v2 用法）
     user_create = UserCreate.model_validate(user_in)
@@ -357,14 +361,11 @@ async def read_user_by_id(
     
     # 非超管不允许查看他人信息
     if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=403,
-            detail="The user doesn't have enough privileges",
-        )
+        raise_permission_denied("The user doesn't have enough privileges")
     
     # 检查目标用户是否存在
     if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise_user_not_found()
     return user
 
 
@@ -407,18 +408,13 @@ async def update_user(
     # 查询目标用户
     db_user = await session.get(User, user_id)
     if not db_user:
-        raise HTTPException(
-            status_code=404,
-            detail="The user with this id does not exist in the system",
-        )
+        raise_user_not_found("The user with this id does not exist in the system")
     
     # 若修改邮箱，检查新邮箱唯一性
     if user_in.email:
         existing_user = await repository.get_user_by_email(session=session, email=user_in.email)
         if existing_user and existing_user.id != user_id:
-            raise HTTPException(
-                status_code=409, detail="User with this email already exists"
-            )
+            raise_user_already_exists("User with this email already exists")
 
     # 调用 CRUD 更新用户
     db_user = await repository.update_user(session=session, db_user=db_user, user_in=user_in)
@@ -462,12 +458,13 @@ async def delete_user(
     # 查询目标用户
     user = await session.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise_user_not_found()
     
     # 防止超管删除自己
     if user == current_user:
-        raise HTTPException(
-            status_code=403, detail="Super users are not allowed to delete themselves"
+        raise BusinessException(
+            code=ErrorCode.USER_CANNOT_DELETE_SELF,
+            detail="Super users are not allowed to delete themselves"
         )
     
     # 显式删除该用户的所有 Item（确保数据一致性）
