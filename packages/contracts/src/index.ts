@@ -13,13 +13,13 @@
  */
 
 // 错误码
-export * from './errors';
+export * from './errors.js';
 
 // 权限 Scope
-export * from './scopes';
+export * from './scopes.js';
 
 // 分页协议
-export * from './pagination';
+export * from './pagination.js';
 
 // 业务常量
-export * from './constants';
+export * from './constants.js';
