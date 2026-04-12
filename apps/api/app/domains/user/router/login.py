@@ -2,19 +2,21 @@ from datetime import timedelta
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
-from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.domains.user import repository
-from app.domains.user.dependencies import (
+
+
+from app.core.dependencies import (
     CurrentUser,
     SessionDep,
-    get_current_active_superuser,
 )
-from app.core import security
+from app.core.security import create_access_token
 from app.core.config import get_settings
 from app.core.schemas import Message
 from app.core.errors import BusinessException, ErrorCode
+
+
+from app.domains.user import repository
 from app.domains.user.schemas import (
     NewPassword,
     Token,
@@ -25,8 +27,13 @@ from app.domains.user.utils import (
     verify_password_reset_token,
 )
 
+
+
+
+
+
 settings = get_settings()
-router = APIRouter(tags=["login"])
+router = APIRouter()
 
 
 @router.post("/login/access-token")
@@ -51,7 +58,7 @@ async def login_access_token(
         )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
-        access_token=security.create_access_token(
+        access_token=create_access_token(
             user.id, expires_delta=access_token_expires
         )
     )

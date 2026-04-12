@@ -45,12 +45,17 @@ export const zItemUpdate = z.object({
  * ItemsPublic
  */
 export const zItemsPublic = z.object({
-    data: z.array(zItemPublic),
-    count: z.int()
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
 });
 
 /**
  * Message
+ *
+ * 通用消息响应
  */
 export const zMessage = z.object({
     message: z.string()
@@ -135,8 +140,11 @@ export const zUserUpdateMe = z.object({
  * UsersPublic
  */
 export const zUsersPublic = z.object({
-    data: z.array(zUserPublic),
-    count: z.int()
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
 });
 
 /**
@@ -175,8 +183,8 @@ export const zResetPasswordV1ResetPasswordPostBody = zNewPassword;
 export const zResetPasswordV1ResetPasswordPostResponse = zMessage;
 
 export const zReadUsersV1UsersGetQuery = z.object({
-    skip: z.int().optional().default(0),
-    limit: z.int().optional().default(100)
+    page: z.int().optional().default(1),
+    page_size: z.int().optional().default(20)
 });
 
 /**
@@ -259,8 +267,8 @@ export const zUpdateUserV1UsersUserIdPatchResponse = zUserPublic;
 export const zHealthCheckV1UsersHealthCheckGetResponse = z.boolean();
 
 export const zReadItemsV1ItemsGetQuery = z.object({
-    skip: z.int().optional().default(0),
-    limit: z.int().optional().default(100)
+    page: z.int().optional().default(1),
+    page_size: z.int().optional().default(20)
 });
 
 /**

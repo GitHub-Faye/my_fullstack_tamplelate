@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client/index.js';
-import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostErrors, CreateItemV1ItemsPostResponses, CreateUserV1UsersPostData, CreateUserV1UsersPostErrors, CreateUserV1UsersPostResponses, DeleteItemV1ItemsIdDeleteData, DeleteItemV1ItemsIdDeleteErrors, DeleteItemV1ItemsIdDeleteResponses, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponses, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteErrors, DeleteUserV1UsersUserIdDeleteResponses, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponses, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostErrors, LoginAccessTokenV1LoginAccessTokenPostResponses, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetErrors, ReadItemsV1ItemsGetResponses, ReadItemV1ItemsIdGetData, ReadItemV1ItemsIdGetErrors, ReadItemV1ItemsIdGetResponses, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetErrors, ReadUserByIdV1UsersUserIdGetResponses, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponses, ReadUsersV1UsersGetData, ReadUsersV1UsersGetErrors, ReadUsersV1UsersGetResponses, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostErrors, RegisterUserV1UsersSignupPostResponses, ResetPasswordV1ResetPasswordPostData, ResetPasswordV1ResetPasswordPostErrors, ResetPasswordV1ResetPasswordPostResponses, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponses, TriggerErrorSentryDebugGetData, TriggerErrorSentryDebugGetResponses, UpdateItemV1ItemsIdPutData, UpdateItemV1ItemsIdPutErrors, UpdateItemV1ItemsIdPutResponses, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchErrors, UpdatePasswordMeV1UsersMePasswordPatchResponses, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchErrors, UpdateUserMeV1UsersMePatchResponses, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchErrors, UpdateUserV1UsersUserIdPatchResponses } from './types.gen.js';
+import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostErrors, CreateItemV1ItemsPostResponses, CreateUserV1UsersPostData, CreateUserV1UsersPostErrors, CreateUserV1UsersPostResponses, DeleteItemV1ItemsIdDeleteData, DeleteItemV1ItemsIdDeleteErrors, DeleteItemV1ItemsIdDeleteResponses, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponses, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteErrors, DeleteUserV1UsersUserIdDeleteResponses, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponses, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostErrors, LoginAccessTokenV1LoginAccessTokenPostResponses, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetErrors, ReadItemsV1ItemsGetResponses, ReadItemV1ItemsIdGetData, ReadItemV1ItemsIdGetErrors, ReadItemV1ItemsIdGetResponses, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetErrors, ReadUserByIdV1UsersUserIdGetResponses, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponses, ReadUsersV1UsersGetData, ReadUsersV1UsersGetErrors, ReadUsersV1UsersGetResponses, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostErrors, RegisterUserV1UsersSignupPostResponses, ResetPasswordV1ResetPasswordPostData, ResetPasswordV1ResetPasswordPostErrors, ResetPasswordV1ResetPasswordPostResponses, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponses, UpdateItemV1ItemsIdPutData, UpdateItemV1ItemsIdPutErrors, UpdateItemV1ItemsIdPutResponses, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchErrors, UpdatePasswordMeV1UsersMePasswordPatchResponses, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchErrors, UpdateUserMeV1UsersMePatchResponses, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchErrors, UpdateUserV1UsersUserIdPatchResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -67,11 +67,10 @@ export const resetPasswordV1ResetPasswordPost = <ThrowOnError extends boolean = 
  *
  * 参数：
  * - session：数据库会话（依赖注入）
- * - skip：分页偏移量（默认 0）
- * - limit：每页数量（默认 100）
+ * - pagination：分页参数（page, page_size）
  *
  * 返回值：
- * - UsersPublic：包含 data（用户列表）和 count（总数）
+ * - UsersPublic：包含 data（用户列表）、count（总数）、page（当前页）、page_size（每页大小）、total_pages（总页数）
  *
  * 查询语句：
  * 1. 使用 func.count() 获取用户总数
@@ -458,8 +457,3 @@ export const updateItemV1ItemsIdPut = <ThrowOnError extends boolean = false>(opt
         ...options.headers
     }
 });
-
-/**
- * Trigger Error
- */
-export const triggerErrorSentryDebugGet = <ThrowOnError extends boolean = false>(options?: Options<TriggerErrorSentryDebugGetData, ThrowOnError>) => (options?.client ?? client).get<TriggerErrorSentryDebugGetResponses, unknown, ThrowOnError>({ url: '/sentry-debug', ...options });

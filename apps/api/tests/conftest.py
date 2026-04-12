@@ -26,7 +26,7 @@ from app.core.config import get_settings, Settings
 from app.core.database import get_db
 from app.core.models import User, Item
 from app.core.security import get_password_hash, create_access_token
-from app.domains.user.dependencies import get_current_user, get_current_active_superuser
+from apps.api.app.domains.item.dependencies import get_current_user, get_current_active_superuser
 
 
 # ======================== pytest-asyncio 配置 ========================

@@ -105,15 +105,29 @@ export type ItemsPublic = {
     /**
      * Data
      */
-    data: Array<ItemPublic>;
+    data: Array<unknown>;
     /**
      * Count
      */
     count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
 };
 
 /**
  * Message
+ *
+ * 通用消息响应
  */
 export type Message = {
     /**
@@ -285,11 +299,23 @@ export type UsersPublic = {
     /**
      * Data
      */
-    data: Array<UserPublic>;
+    data: Array<unknown>;
     /**
      * Count
      */
     count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
 };
 
 /**
@@ -381,13 +407,13 @@ export type ReadUsersV1UsersGetData = {
     path?: never;
     query?: {
         /**
-         * Skip
+         * Page
          */
-        skip?: number;
+        page?: number;
         /**
-         * Limit
+         * Page Size
          */
-        limit?: number;
+        page_size?: number;
     };
     url: '/v1/users/';
 };
@@ -655,13 +681,13 @@ export type ReadItemsV1ItemsGetData = {
     path?: never;
     query?: {
         /**
-         * Skip
+         * Page
          */
-        skip?: number;
+        page?: number;
         /**
-         * Limit
+         * Page Size
          */
-        limit?: number;
+        page_size?: number;
     };
     url: '/v1/items/';
 };
@@ -798,17 +824,3 @@ export type UpdateItemV1ItemsIdPutResponses = {
 };
 
 export type UpdateItemV1ItemsIdPutResponse = UpdateItemV1ItemsIdPutResponses[keyof UpdateItemV1ItemsIdPutResponses];
-
-export type TriggerErrorSentryDebugGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/sentry-debug';
-};
-
-export type TriggerErrorSentryDebugGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};

@@ -1,26 +1,28 @@
 import uuid
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 
-from app.domains.user.dependencies import (
+from app.core.dependencies import (
     CurrentUser,
     SessionDep,
     require_scope,
     require_any_scope,
-    check_item_owner_or_admin,
 )
 from app.core.models import Item
 from app.core.scopes import ItemScope
-from app.core.schemas import Message
+from app.core.schemas import Message, PaginationParams
 from app.core.errors import raise_item_not_found
+
+
 from app.domains.item.schemas import (
     ItemCreate,
     ItemPublic,
     ItemsPublic,
     ItemUpdate,
 )
+from app.domains.item.dependencies import check_item_owner_or_admin
 
 router = APIRouter()
 
@@ -31,7 +33,9 @@ router = APIRouter()
     dependencies=[Depends(require_any_scope(ItemScope.READ, ItemScope.ADMIN))],
 )
 async def read_items(
-    session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
+    session: SessionDep,
+    current_user: CurrentUser,
+    pagination: Annotated[PaginationParams, Query()],
 ) -> Any:
     """
     Retrieve items.
@@ -39,10 +43,8 @@ async def read_items(
     - 普通用户只能查看自己的 items
     - 拥有 item:admin 权限的用户可以查看所有 items
     """
-    # 检查是否有 admin 权限
-    user_scopes = await check_item_owner_or_admin.__wrapped__(session, current_user, current_user.id)
     # 重新获取用户 scopes 来判断是否是 admin
-    from app.domains.user.dependencies import get_user_scopes
+    from app.core.dependencies import get_user_scopes
     scopes = await get_user_scopes(session, current_user)
     is_admin = ItemScope.ADMIN.value in scopes or current_user.is_superuser
 
@@ -51,7 +53,10 @@ async def read_items(
         result = await session.execute(count_statement)
         count = result.scalar_one()
         statement = (
-            select(Item).order_by(Item.created_at.desc()).offset(skip).limit(limit)
+            select(Item)
+            .order_by(Item.created_at.desc())
+            .offset(pagination.offset)
+            .limit(pagination.limit)
         )
         result = await session.execute(statement)
         items = result.scalars().all()
@@ -67,13 +72,19 @@ async def read_items(
             select(Item)
             .where(Item.owner_id == current_user.id)
             .order_by(Item.created_at.desc())
-            .offset(skip)
-            .limit(limit)
+            .offset(pagination.offset)
+            .limit(pagination.limit)
         )
         result = await session.execute(statement)
         items = result.scalars().all()
 
-    return ItemsPublic(data=items, count=count)
+    return ItemsPublic(
+        data=items,
+        count=count,
+        page=pagination.page,
+        page_size=pagination.page_size,
+        total_pages=(count + pagination.page_size - 1) // pagination.page_size if count > 0 else 0,
+    )
 
 
 @router.get(

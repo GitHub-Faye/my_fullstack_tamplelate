@@ -9,20 +9,20 @@
 """
 
 import uuid
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import col, delete, func, select
 
-from app.domains.user import repository
-from app.domains.user.dependencies import (
+
+from app.core.dependencies import (
     CurrentUser,
     SessionDep,
     get_current_active_superuser,
 )
 from app.core.config import get_settings
 from app.core.security import get_password_hash, verify_password
-from app.core.schemas import Message
+from app.core.schemas import Message, PaginationParams
 from app.core.errors import (
     BusinessException,
     ErrorCode,
@@ -30,6 +30,9 @@ from app.core.errors import (
     raise_user_not_found,
     raise_permission_denied,
 )
+
+
+from app.domains.user import repository
 from app.domains.user.schemas import (
     UpdatePassword,
     UserCreate,
@@ -39,6 +42,7 @@ from app.domains.user.schemas import (
     UserUpdate,
     UserUpdateMe,
 )
+
 
 from app.core.models import Item, User
   
@@ -57,7 +61,10 @@ router = APIRouter()
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
-async def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+async def read_users(
+    session: SessionDep,
+    pagination: Annotated[PaginationParams, Query()],
+) -> Any:
     """
     获取所有用户列表（分页）。
     
@@ -65,11 +72,10 @@ async def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> An
     
     参数：
     - session：数据库会话（依赖注入）
-    - skip：分页偏移量（默认 0）
-    - limit：每页数量（默认 100）
+    - pagination：分页参数（page, page_size）
     
     返回值：
-    - UsersPublic：包含 data（用户列表）和 count（总数）
+    - UsersPublic：包含 data（用户列表）、count（总数）、page（当前页）、page_size（每页大小）、total_pages（总页数）
     
     查询语句：
     1. 使用 func.count() 获取用户总数
@@ -83,12 +89,21 @@ async def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> An
 
     # 获取分页的用户列表（按创建时间倒序）
     statement = (
-        select(User).order_by(User.created_at.desc()).offset(skip).limit(limit)
+        select(User)
+        .order_by(User.created_at.desc())
+        .offset(pagination.offset)
+        .limit(pagination.limit)
     )
     result = await session.execute(statement)
     users = result.scalars().all()
 
-    return UsersPublic(data=users, count=count)
+    return UsersPublic(
+        data=users,
+        count=count,
+        page=pagination.page,
+        page_size=pagination.page_size,
+        total_pages=(count + pagination.page_size - 1) // pagination.page_size if count > 0 else 0,
+    )
 
 
 @router.post(

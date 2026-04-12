@@ -19,12 +19,12 @@ settings = get_settings()
 logger = get_logger(__name__)
 
 # ================== Sentry 集成（可选） ==================
-sentry_sdk.init(
-    dsn="https://b3de48eedad92f89c06ef7f45c6bd58f@o4511178754686976.ingest.us.sentry.io/4511178758029312",
-    # Add data like request headers and IP for users,
-    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-    send_default_pii=True,
-)
+# sentry_sdk.init(
+#     dsn="https://b3de48eedad92f89c06ef7f45c6bd58f@o4511178754686976.ingest.us.sentry.io/4511178758029312",
+#     # Add data like request headers and IP for users,
+#     # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+#     send_default_pii=True,
+# )
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -62,9 +62,9 @@ app.add_middleware(
 
 app.include_router(api_router)
 
-@app.get("/sentry-debug")
-async def trigger_error():
-    division_by_zero = 1 / 0
+# @app.get("/sentry-debug")
+# async def trigger_error():
+#     division_by_zero = 1 / 0
 
     
 if __name__ == "__main__":

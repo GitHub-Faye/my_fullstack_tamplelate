@@ -10,18 +10,16 @@ export function middleware(request: NextRequest) {
   // Check if the path is public
   const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
 
-  // Get token from cookies or localStorage (we'll check cookie first)
+  // Get token from cookies
   const token = request.cookies.get('access_token')?.value;
-
-  // If no token and trying to access protected route, redirect to login
-  if (!token && !isPublicPath && pathname !== '/') {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
 
   // If has token and trying to access login/signup, redirect to dashboard
   if (token && isPublicPath) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
+
+  // Note: We don't redirect unauthenticated users here anymore
+  // Let the client-side handle it to avoid hydration issues
 
   return NextResponse.next();
 }
