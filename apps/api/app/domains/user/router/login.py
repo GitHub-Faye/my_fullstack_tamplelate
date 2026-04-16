@@ -12,22 +12,14 @@ from app.core.dependencies import (
 )
 from app.core.security import create_access_token
 from app.core.config import get_settings
-from app.core.schemas import Message
 from app.core.errors import BusinessException, ErrorCode
 
 
 from app.domains.user import repository
 from app.domains.user.schemas import (
-    NewPassword,
     Token,
     UserPublic,
-    UserUpdate,
 )
-from app.domains.user.utils import (
-    verify_password_reset_token,
-)
-
-
 
 
 
@@ -73,34 +65,4 @@ async def test_token(current_user: CurrentUser) -> Any:
 
 
 
-@router.post("/reset-password/")
-async def reset_password(session: SessionDep, body: NewPassword) -> Message:
-    """
-    Reset password
-    """
-    email = verify_password_reset_token(token=body.token)
-    if not email:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INVALID_TOKEN,
-            detail="Invalid token"
-        )
-    user = await repository.get_user_by_email(session=session, email=email)
-    if not user:
-        # Don't reveal that the user doesn't exist - use same error as invalid token
-        raise BusinessException(
-            code=ErrorCode.AUTH_INVALID_TOKEN,
-            detail="Invalid token"
-        )
-    elif not user.is_active:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INACTIVE_USER,
-            detail="Inactive user"
-        )
-    user_in_update = UserUpdate(password=body.new_password)
-    await repository.update_user(
-        session=session,
-        db_user=user,
-        user_in=user_in_update,
-    )
-    return Message(message="Password updated successfully")
 

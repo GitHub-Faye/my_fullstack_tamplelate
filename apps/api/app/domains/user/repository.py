@@ -1,13 +1,64 @@
-from typing import Any
+from typing import Any, Tuple
+import uuid
 
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.security import get_password_hash, verify_password
-from app.domains.user.schemas import  UserCreate, UserUpdate
-from app.core.models import User
+from app.domains.user.schemas import UserCreate, UserUpdate, UserUpdateMe, UpdatePassword
+from app.core.models import User, Item
 
 # ============================== 用户 CRUD 操作 ==============================
+async def get_user(*, session: AsyncSession, user_id: uuid.UUID) -> User | None:
+    """
+    通过用户ID查询用户。
+    - 使用 select + where 构建查询语句
+    - 返回首条匹配结果，若不存在则返回 None
+    """
+    user = await session.get(User, user_id)
+    return user
+
+async def get_users(
+    *, session: AsyncSession, skip: int, limit: int, sort_field: str = "created_at", sort_order: str = "desc"
+) -> Tuple[list[User], int]:
+    """
+    分页获取用户列表
+    
+    Args:
+        session: 数据库会话
+        skip: 跳过的记录数
+        limit: 返回的记录数
+        sort_field: 排序字段
+        sort_order: 排序方式 ("asc" 或 "desc")
+    
+    Returns:
+        tuple: (用户列表, 总记录数)
+    """
+    # 获取用户总数
+    count_statement = select(func.count()).select_from(User)
+    result = await session.execute(count_statement)
+    count = result.scalar_one()
+
+    # 获取分页的用户列表
+    statement = select(User)
+    
+    # 添加排序
+    if hasattr(User, sort_field):
+        if sort_order.lower() == "desc":
+            statement = statement.order_by(getattr(User, sort_field).desc())
+        else:
+            statement = statement.order_by(getattr(User, sort_field).asc())
+    else:
+        # 默认按创建时间倒序排列
+        statement = statement.order_by(User.created_at.desc())
+    
+    statement = statement.offset(skip).limit(limit)
+    result = await session.execute(statement)
+    users = result.scalars().all()
+
+    return users, count
+
 
 async def create_user(*, session: AsyncSession, user_create: UserCreate) -> User:
     """
@@ -43,6 +94,78 @@ async def update_user(*, session: AsyncSession, db_user: User, user_in: UserUpda
     await session.commit()
     await session.refresh(db_user)
     return db_user
+
+
+async def update_user_me(
+    *, session: AsyncSession, db_user: User, user_in: UserUpdateMe
+) -> User:
+    """
+    更新当前用户自己的信息。
+    
+    Args:
+        session: 数据库会话
+        db_user: 数据库用户对象
+        user_in: 用户更新数据
+    
+    Returns:
+        更新后的用户对象
+    """
+    # 仅序列化用户明确设置的字段
+    user_data = user_in.model_dump(exclude_unset=True)
+    # 使用 sqlmodel_update() 合并数据
+    db_user.sqlmodel_update(user_data)
+    session.add(db_user)
+    await session.commit()
+    await session.refresh(db_user)
+    return db_user
+
+
+async def update_password_me(
+    *, session: AsyncSession, db_user: User, new_password: str
+) -> User:
+    """
+    更新当前用户自己的密码。
+    
+    Args:
+        session: 数据库会话
+        db_user: 数据库用户对象
+        new_password: 新密码
+    
+    Returns:
+        更新后的用户对象
+    """
+    # 哈希新密码并保存
+    hashed_password = get_password_hash(new_password)
+    db_user.hashed_password = hashed_password
+    session.add(db_user)
+    await session.commit()
+    await session.refresh(db_user)
+    return db_user
+
+
+async def delete_user(*, session: AsyncSession, db_user: User) -> None:
+    """
+    删除指定用户。
+    
+    Args:
+        session: 数据库会话
+        db_user: 要删除的用户对象
+    """
+    await session.delete(db_user)
+    await session.commit()
+
+
+async def delete_user_items(*, session: AsyncSession, user_id: uuid.UUID) -> None:
+    """
+    删除指定用户的所有关联项目。
+    
+    Args:
+        session: 数据库会话
+        user_id: 用户ID
+    """
+    statement = delete(Item).where(Item.owner_id == user_id)
+    await session.execute(statement)
+    await session.commit()
 
 
 async def get_user_by_email(*, session: AsyncSession, email: str) -> User | None:
@@ -85,4 +208,3 @@ async def authenticate(*, session: AsyncSession, email: str, password: str) -> U
         await session.commit()
         await session.refresh(db_user)
     return db_user
-

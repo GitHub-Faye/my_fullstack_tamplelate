@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@/src/stores/auth";
+import { useCurrentUser } from "@/features/user";
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatUserRole, formatUserStatus, formatDate } from "@/src/lib/utils";
 
 export default function DashboardPage() {
-  const user = useUser();
+  const user = useCurrentUser();
 
   return (
     <div className="space-y-6">

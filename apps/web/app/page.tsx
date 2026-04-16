@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation"; // 路由跳转钩子
-import { useIsAuthenticated, useIsHydrated } from "@/src/stores/auth"; // 认证状态全局状态
+import { useIsAuthenticated, useIsHydrated } from "@/features/user"; // 认证状态全局状态
 import { Loader2 } from "lucide-react"; // 加载图标
 
 export default function Home() {

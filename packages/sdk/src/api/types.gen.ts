@@ -137,20 +137,6 @@ export type Message = {
 };
 
 /**
- * NewPassword
- */
-export type NewPassword = {
-    /**
-     * Token
-     */
-    token: string;
-    /**
-     * New Password
-     */
-    new_password: string;
-};
-
-/**
  * Token
  */
 export type Token = {
@@ -377,31 +363,6 @@ export type TestTokenV1LoginTestTokenPostResponses = {
 
 export type TestTokenV1LoginTestTokenPostResponse = TestTokenV1LoginTestTokenPostResponses[keyof TestTokenV1LoginTestTokenPostResponses];
 
-export type ResetPasswordV1ResetPasswordPostData = {
-    body: NewPassword;
-    path?: never;
-    query?: never;
-    url: '/v1/reset-password/';
-};
-
-export type ResetPasswordV1ResetPasswordPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ResetPasswordV1ResetPasswordPostError = ResetPasswordV1ResetPasswordPostErrors[keyof ResetPasswordV1ResetPasswordPostErrors];
-
-export type ResetPasswordV1ResetPasswordPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: Message;
-};
-
-export type ResetPasswordV1ResetPasswordPostResponse = ResetPasswordV1ResetPasswordPostResponses[keyof ResetPasswordV1ResetPasswordPostResponses];
-
 export type ReadUsersV1UsersGetData = {
     body?: never;
     path?: never;
@@ -460,113 +421,6 @@ export type CreateUserV1UsersPostResponses = {
 };
 
 export type CreateUserV1UsersPostResponse = CreateUserV1UsersPostResponses[keyof CreateUserV1UsersPostResponses];
-
-export type DeleteUserMeV1UsersMeDeleteData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/v1/users/me';
-};
-
-export type DeleteUserMeV1UsersMeDeleteResponses = {
-    /**
-     * Successful Response
-     */
-    200: Message;
-};
-
-export type DeleteUserMeV1UsersMeDeleteResponse = DeleteUserMeV1UsersMeDeleteResponses[keyof DeleteUserMeV1UsersMeDeleteResponses];
-
-export type ReadUserMeV1UsersMeGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/v1/users/me';
-};
-
-export type ReadUserMeV1UsersMeGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserPublic;
-};
-
-export type ReadUserMeV1UsersMeGetResponse = ReadUserMeV1UsersMeGetResponses[keyof ReadUserMeV1UsersMeGetResponses];
-
-export type UpdateUserMeV1UsersMePatchData = {
-    body: UserUpdateMe;
-    path?: never;
-    query?: never;
-    url: '/v1/users/me';
-};
-
-export type UpdateUserMeV1UsersMePatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateUserMeV1UsersMePatchError = UpdateUserMeV1UsersMePatchErrors[keyof UpdateUserMeV1UsersMePatchErrors];
-
-export type UpdateUserMeV1UsersMePatchResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserPublic;
-};
-
-export type UpdateUserMeV1UsersMePatchResponse = UpdateUserMeV1UsersMePatchResponses[keyof UpdateUserMeV1UsersMePatchResponses];
-
-export type UpdatePasswordMeV1UsersMePasswordPatchData = {
-    body: UpdatePassword;
-    path?: never;
-    query?: never;
-    url: '/v1/users/me/password';
-};
-
-export type UpdatePasswordMeV1UsersMePasswordPatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdatePasswordMeV1UsersMePasswordPatchError = UpdatePasswordMeV1UsersMePasswordPatchErrors[keyof UpdatePasswordMeV1UsersMePasswordPatchErrors];
-
-export type UpdatePasswordMeV1UsersMePasswordPatchResponses = {
-    /**
-     * Successful Response
-     */
-    200: Message;
-};
-
-export type UpdatePasswordMeV1UsersMePasswordPatchResponse = UpdatePasswordMeV1UsersMePasswordPatchResponses[keyof UpdatePasswordMeV1UsersMePasswordPatchResponses];
-
-export type RegisterUserV1UsersSignupPostData = {
-    body: UserRegister;
-    path?: never;
-    query?: never;
-    url: '/v1/users/signup';
-};
-
-export type RegisterUserV1UsersSignupPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RegisterUserV1UsersSignupPostError = RegisterUserV1UsersSignupPostErrors[keyof RegisterUserV1UsersSignupPostErrors];
-
-export type RegisterUserV1UsersSignupPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserPublic;
-};
-
-export type RegisterUserV1UsersSignupPostResponse = RegisterUserV1UsersSignupPostResponses[keyof RegisterUserV1UsersSignupPostResponses];
 
 export type DeleteUserV1UsersUserIdDeleteData = {
     body?: never;
@@ -676,6 +530,113 @@ export type HealthCheckV1UsersHealthCheckGetResponses = {
 
 export type HealthCheckV1UsersHealthCheckGetResponse = HealthCheckV1UsersHealthCheckGetResponses[keyof HealthCheckV1UsersHealthCheckGetResponses];
 
+export type DeleteUserMeV1UsersMeDeleteData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/users/me';
+};
+
+export type DeleteUserMeV1UsersMeDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeleteUserMeV1UsersMeDeleteResponse = DeleteUserMeV1UsersMeDeleteResponses[keyof DeleteUserMeV1UsersMeDeleteResponses];
+
+export type ReadUserMeV1UsersMeGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/users/me';
+};
+
+export type ReadUserMeV1UsersMeGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserPublic;
+};
+
+export type ReadUserMeV1UsersMeGetResponse = ReadUserMeV1UsersMeGetResponses[keyof ReadUserMeV1UsersMeGetResponses];
+
+export type UpdateUserMeV1UsersMePatchData = {
+    body: UserUpdateMe;
+    path?: never;
+    query?: never;
+    url: '/v1/users/me';
+};
+
+export type UpdateUserMeV1UsersMePatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateUserMeV1UsersMePatchError = UpdateUserMeV1UsersMePatchErrors[keyof UpdateUserMeV1UsersMePatchErrors];
+
+export type UpdateUserMeV1UsersMePatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserPublic;
+};
+
+export type UpdateUserMeV1UsersMePatchResponse = UpdateUserMeV1UsersMePatchResponses[keyof UpdateUserMeV1UsersMePatchResponses];
+
+export type UpdatePasswordMeV1UsersMePasswordPatchData = {
+    body: UpdatePassword;
+    path?: never;
+    query?: never;
+    url: '/v1/users/me/password';
+};
+
+export type UpdatePasswordMeV1UsersMePasswordPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdatePasswordMeV1UsersMePasswordPatchError = UpdatePasswordMeV1UsersMePasswordPatchErrors[keyof UpdatePasswordMeV1UsersMePasswordPatchErrors];
+
+export type UpdatePasswordMeV1UsersMePasswordPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type UpdatePasswordMeV1UsersMePasswordPatchResponse = UpdatePasswordMeV1UsersMePasswordPatchResponses[keyof UpdatePasswordMeV1UsersMePasswordPatchResponses];
+
+export type RegisterUserV1UsersSignupPostData = {
+    body: UserRegister;
+    path?: never;
+    query?: never;
+    url: '/v1/users/signup';
+};
+
+export type RegisterUserV1UsersSignupPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RegisterUserV1UsersSignupPostError = RegisterUserV1UsersSignupPostErrors[keyof RegisterUserV1UsersSignupPostErrors];
+
+export type RegisterUserV1UsersSignupPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserPublic;
+};
+
+export type RegisterUserV1UsersSignupPostResponse = RegisterUserV1UsersSignupPostResponses[keyof RegisterUserV1UsersSignupPostResponses];
+
 export type ReadItemsV1ItemsGetData = {
     body?: never;
     path?: never;
@@ -735,92 +696,92 @@ export type CreateItemV1ItemsPostResponses = {
 
 export type CreateItemV1ItemsPostResponse = CreateItemV1ItemsPostResponses[keyof CreateItemV1ItemsPostResponses];
 
-export type DeleteItemV1ItemsIdDeleteData = {
+export type DeleteItemV1ItemsItemIdDeleteData = {
     body?: never;
     path: {
         /**
-         * Id
+         * Item Id
          */
-        id: string;
+        item_id: string;
     };
     query?: never;
-    url: '/v1/items/{id}';
+    url: '/v1/items/{item_id}';
 };
 
-export type DeleteItemV1ItemsIdDeleteErrors = {
+export type DeleteItemV1ItemsItemIdDeleteErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteItemV1ItemsIdDeleteError = DeleteItemV1ItemsIdDeleteErrors[keyof DeleteItemV1ItemsIdDeleteErrors];
+export type DeleteItemV1ItemsItemIdDeleteError = DeleteItemV1ItemsItemIdDeleteErrors[keyof DeleteItemV1ItemsItemIdDeleteErrors];
 
-export type DeleteItemV1ItemsIdDeleteResponses = {
+export type DeleteItemV1ItemsItemIdDeleteResponses = {
     /**
      * Successful Response
      */
     200: Message;
 };
 
-export type DeleteItemV1ItemsIdDeleteResponse = DeleteItemV1ItemsIdDeleteResponses[keyof DeleteItemV1ItemsIdDeleteResponses];
+export type DeleteItemV1ItemsItemIdDeleteResponse = DeleteItemV1ItemsItemIdDeleteResponses[keyof DeleteItemV1ItemsItemIdDeleteResponses];
 
-export type ReadItemV1ItemsIdGetData = {
+export type ReadItemV1ItemsItemIdGetData = {
     body?: never;
     path: {
         /**
-         * Id
+         * Item Id
          */
-        id: string;
+        item_id: string;
     };
     query?: never;
-    url: '/v1/items/{id}';
+    url: '/v1/items/{item_id}';
 };
 
-export type ReadItemV1ItemsIdGetErrors = {
+export type ReadItemV1ItemsItemIdGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadItemV1ItemsIdGetError = ReadItemV1ItemsIdGetErrors[keyof ReadItemV1ItemsIdGetErrors];
+export type ReadItemV1ItemsItemIdGetError = ReadItemV1ItemsItemIdGetErrors[keyof ReadItemV1ItemsItemIdGetErrors];
 
-export type ReadItemV1ItemsIdGetResponses = {
+export type ReadItemV1ItemsItemIdGetResponses = {
     /**
      * Successful Response
      */
     200: ItemPublic;
 };
 
-export type ReadItemV1ItemsIdGetResponse = ReadItemV1ItemsIdGetResponses[keyof ReadItemV1ItemsIdGetResponses];
+export type ReadItemV1ItemsItemIdGetResponse = ReadItemV1ItemsItemIdGetResponses[keyof ReadItemV1ItemsItemIdGetResponses];
 
-export type UpdateItemV1ItemsIdPutData = {
+export type UpdateItemV1ItemsItemIdPutData = {
     body: ItemUpdate;
     path: {
         /**
-         * Id
+         * Item Id
          */
-        id: string;
+        item_id: string;
     };
     query?: never;
-    url: '/v1/items/{id}';
+    url: '/v1/items/{item_id}';
 };
 
-export type UpdateItemV1ItemsIdPutErrors = {
+export type UpdateItemV1ItemsItemIdPutErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateItemV1ItemsIdPutError = UpdateItemV1ItemsIdPutErrors[keyof UpdateItemV1ItemsIdPutErrors];
+export type UpdateItemV1ItemsItemIdPutError = UpdateItemV1ItemsItemIdPutErrors[keyof UpdateItemV1ItemsItemIdPutErrors];
 
-export type UpdateItemV1ItemsIdPutResponses = {
+export type UpdateItemV1ItemsItemIdPutResponses = {
     /**
      * Successful Response
      */
     200: ItemPublic;
 };
 
-export type UpdateItemV1ItemsIdPutResponse = UpdateItemV1ItemsIdPutResponses[keyof UpdateItemV1ItemsIdPutResponses];
+export type UpdateItemV1ItemsItemIdPutResponse = UpdateItemV1ItemsItemIdPutResponses[keyof UpdateItemV1ItemsItemIdPutResponses];

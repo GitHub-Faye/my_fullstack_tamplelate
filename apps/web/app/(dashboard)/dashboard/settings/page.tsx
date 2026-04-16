@@ -1,10 +1,10 @@
 "use client";
 
-import { useUser } from "@/src/stores/auth";
+import { useCurrentUser } from "@/features/user";
 import { UserProfileForm, PasswordChangeForm } from "@/features/user";
 
 export default function SettingsPage() {
-  const user = useUser();
+  const user = useCurrentUser();
 
   if (!user) {
     return null;

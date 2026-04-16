@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useUser, useIsSuperuser, useAuthStore } from "@/src/stores/auth";
+import { useCurrentUser, useIsSuperuser, useAuthStore } from "@/features/user";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -29,7 +29,7 @@ const adminNavigation = [
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const user = useUser();
+  const user = useCurrentUser();
   const isSuperuser = useIsSuperuser();
   const logout = useAuthStore((state) => state.logout);
 

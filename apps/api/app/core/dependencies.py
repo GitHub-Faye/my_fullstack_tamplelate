@@ -162,7 +162,7 @@ async def get_current_active_superuser(current_user: CurrentUser) -> User:
         raise_permission_denied("The user doesn't have enough privileges")
     return current_user
 
-
+CurrentActiveSuperuser = Annotated[User, Depends(get_current_active_superuser)]
 # ======================== Scope 权限检查 ========================
 
 async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:

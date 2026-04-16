@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client/index.js';
-import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostErrors, CreateItemV1ItemsPostResponses, CreateUserV1UsersPostData, CreateUserV1UsersPostErrors, CreateUserV1UsersPostResponses, DeleteItemV1ItemsIdDeleteData, DeleteItemV1ItemsIdDeleteErrors, DeleteItemV1ItemsIdDeleteResponses, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponses, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteErrors, DeleteUserV1UsersUserIdDeleteResponses, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponses, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostErrors, LoginAccessTokenV1LoginAccessTokenPostResponses, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetErrors, ReadItemsV1ItemsGetResponses, ReadItemV1ItemsIdGetData, ReadItemV1ItemsIdGetErrors, ReadItemV1ItemsIdGetResponses, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetErrors, ReadUserByIdV1UsersUserIdGetResponses, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponses, ReadUsersV1UsersGetData, ReadUsersV1UsersGetErrors, ReadUsersV1UsersGetResponses, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostErrors, RegisterUserV1UsersSignupPostResponses, ResetPasswordV1ResetPasswordPostData, ResetPasswordV1ResetPasswordPostErrors, ResetPasswordV1ResetPasswordPostResponses, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponses, UpdateItemV1ItemsIdPutData, UpdateItemV1ItemsIdPutErrors, UpdateItemV1ItemsIdPutResponses, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchErrors, UpdatePasswordMeV1UsersMePasswordPatchResponses, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchErrors, UpdateUserMeV1UsersMePatchResponses, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchErrors, UpdateUserV1UsersUserIdPatchResponses } from './types.gen.js';
+import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostErrors, CreateItemV1ItemsPostResponses, CreateUserV1UsersPostData, CreateUserV1UsersPostErrors, CreateUserV1UsersPostResponses, DeleteItemV1ItemsItemIdDeleteData, DeleteItemV1ItemsItemIdDeleteErrors, DeleteItemV1ItemsItemIdDeleteResponses, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponses, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteErrors, DeleteUserV1UsersUserIdDeleteResponses, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponses, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostErrors, LoginAccessTokenV1LoginAccessTokenPostResponses, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetErrors, ReadItemsV1ItemsGetResponses, ReadItemV1ItemsItemIdGetData, ReadItemV1ItemsItemIdGetErrors, ReadItemV1ItemsItemIdGetResponses, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetErrors, ReadUserByIdV1UsersUserIdGetResponses, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponses, ReadUsersV1UsersGetData, ReadUsersV1UsersGetErrors, ReadUsersV1UsersGetResponses, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostErrors, RegisterUserV1UsersSignupPostResponses, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponses, UpdateItemV1ItemsItemIdPutData, UpdateItemV1ItemsItemIdPutErrors, UpdateItemV1ItemsItemIdPutResponses, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchErrors, UpdatePasswordMeV1UsersMePasswordPatchResponses, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchErrors, UpdateUserMeV1UsersMePatchResponses, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchErrors, UpdateUserV1UsersUserIdPatchResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -42,20 +42,6 @@ export const testTokenV1LoginTestTokenPost = <ThrowOnError extends boolean = fal
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/login/test-token',
     ...options
-});
-
-/**
- * Reset Password
- *
- * Reset password
- */
-export const resetPasswordV1ResetPasswordPost = <ThrowOnError extends boolean = false>(options: Options<ResetPasswordV1ResetPasswordPostData, ThrowOnError>) => (options.client ?? client).post<ResetPasswordV1ResetPasswordPostResponses, ResetPasswordV1ResetPasswordPostErrors, ThrowOnError>({
-    url: '/v1/reset-password/',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
 });
 
 /**
@@ -100,11 +86,6 @@ export const readUsersV1UsersGet = <ThrowOnError extends boolean = false>(option
  * 业务流程：
  * 1. 检查邮箱是否已存在，存在则返回 400 错误
  * 2. 调用 repository create_user() 创建用户（密码自动哈希）
- * 3. 若启用邮件服务，生成新账户邮件并发送
- *
- * 邮件通知：
- * - 包含临时密码（用于提醒用户首次修改）
- * - 若邮件发送失败不影响用户创建成功
  */
 export const createUserV1UsersPost = <ThrowOnError extends boolean = false>(options: Options<CreateUserV1UsersPostData, ThrowOnError>) => (options.client ?? client).post<CreateUserV1UsersPostResponses, CreateUserV1UsersPostErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -115,6 +96,114 @@ export const createUserV1UsersPost = <ThrowOnError extends boolean = false>(opti
         ...options.headers
     }
 });
+
+/**
+ * Delete User
+ *
+ * 删除指定用户（超管操作）。
+ *
+ * 权限：超管-only
+ *
+ * 参数：
+ * - session：数据库会话
+ * - current_user：当前超管用户（用于权限检查）
+ * - user_id：目标用户 UUID
+ *
+ * 返回值：
+ * - Message：删除成功消息
+ *
+ * 业务流程：
+ * 1. 查询目标用户是否存在
+ * 2. 防止超管删除自己（防止系统无超管）
+ * 3. 使用仓库函数删除该用户的所有 Item（确保数据一致性）
+ * 4. 使用仓库函数删除用户记录
+ *
+ * 异常：
+ * - 404：用户不存在
+ * - 403：不允许删除自己
+ *
+ * 注意：
+ * - 虽然 User.items 有 cascade_delete=True，但此处显式删除 Item
+ * - 这是为了确保数据库一致性和日志记录，避免某些场景下级联失败
+ */
+export const deleteUserV1UsersUserIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteUserV1UsersUserIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteUserV1UsersUserIdDeleteResponses, DeleteUserV1UsersUserIdDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/users/{user_id}',
+    ...options
+});
+
+/**
+ * Read User By Id
+ *
+ * 获取指定用户信息。
+ *
+ * 权限：
+ * - 用户可查看自己的信息
+ * - 超管可查看任何用户信息
+ *
+ * 参数：
+ * - user_id：目标用户 UUID
+ * - session：数据库会话
+ * - current_user：当前登录用户
+ *
+ * 返回值：
+ * - UserPublic：用户信息
+ *
+ * 业务流程：
+ * 1. 查询指定用户
+ * 2. 若为自己，直接返回
+ * 3. 若不是自己且当前用户非超管，返回 403 禁止访问
+ * 4. 若用户不存在，返回 404
+ *
+ * 异常：
+ * - 403：权限不足
+ * - 404：用户不存在
+ */
+export const readUserByIdV1UsersUserIdGet = <ThrowOnError extends boolean = false>(options: Options<ReadUserByIdV1UsersUserIdGetData, ThrowOnError>) => (options.client ?? client).get<ReadUserByIdV1UsersUserIdGetResponses, ReadUserByIdV1UsersUserIdGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/users/{user_id}',
+    ...options
+});
+
+/**
+ * Update User
+ *
+ * 更新指定用户信息（超管操作）。
+ *
+ * 权限：超管-only
+ *
+ * 参数：
+ * - session：数据库会话
+ * - user_id：目标用户 UUID
+ * - user_in：用户更新 DTO（email、password、is_active、is_superuser 等可选）
+ *
+ * 返回值：
+ * - UserPublic：更新后的用户信息
+ *
+ * 业务流程：
+ * 1. 查询目标用户是否存在
+ * 2. 若修改邮箱，检查新邮箱唯一性（允许保持原邮箱）
+ * 3. 调用 repository.update_user() 更新用户
+ * 4. 返回更新后的用户
+ *
+ * 异常：
+ * - 404：用户不存在
+ * - 409：新邮箱被其他用户占用
+ */
+export const updateUserV1UsersUserIdPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateUserV1UsersUserIdPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateUserV1UsersUserIdPatchResponses, UpdateUserV1UsersUserIdPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/users/{user_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Health Check
+ */
+export const healthCheckV1UsersHealthCheckGet = <ThrowOnError extends boolean = false>(options?: Options<HealthCheckV1UsersHealthCheckGetData, ThrowOnError>) => (options?.client ?? client).get<HealthCheckV1UsersHealthCheckGetResponses, unknown, ThrowOnError>({ url: '/v1/users/health-check/', ...options });
 
 /**
  * Delete User Me
@@ -132,7 +221,7 @@ export const createUserV1UsersPost = <ThrowOnError extends boolean = false>(opti
  *
  * 业务逻辑：
  * 1. 检查当前用户是否为超管，超管不允许自删除（防止误操作导致系统无超管）
- * 2. 删除用户记录
+ * 2. 使用仓库函数删除用户记录
  * 3. 级联删除会由数据库约束自动处理（User.items 有 cascade_delete=True）
  *
  * 异常：
@@ -273,121 +362,12 @@ export const registerUserV1UsersSignupPost = <ThrowOnError extends boolean = fal
 });
 
 /**
- * Delete User
- *
- * 删除指定用户（超管操作）。
- *
- * 权限：超管-only
- *
- * 参数：
- * - session：数据库会话
- * - current_user：当前超管用户（用于权限检查）
- * - user_id：目标用户 UUID
- *
- * 返回值：
- * - Message：删除成功消息
- *
- * 业务流程：
- * 1. 查询目标用户是否存在
- * 2. 防止超管删除自己（防止系统无超管）
- * 3. 手动删除该用户的所有 Item（因为关联表可能有特殊处理）
- * 4. 删除用户记录（级联会自动删除 items）
- * 5. 提交事务
- *
- * 异常：
- * - 404：用户不存在
- * - 403：不允许删除自己
- *
- * 注意：
- * - 虽然 User.items 有 cascade_delete=True，但此处显式删除 Item
- * - 这是为了确保数据库一致性和日志记录，避免某些场景下级联失败
- */
-export const deleteUserV1UsersUserIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteUserV1UsersUserIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteUserV1UsersUserIdDeleteResponses, DeleteUserV1UsersUserIdDeleteErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/users/{user_id}',
-    ...options
-});
-
-/**
- * Read User By Id
- *
- * 获取指定用户信息。
- *
- * 权限：
- * - 用户可查看自己的信息
- * - 超管可查看任何用户信息
- *
- * 参数：
- * - user_id：目标用户 UUID
- * - session：数据库会话
- * - current_user：当前登录用户
- *
- * 返回值：
- * - UserPublic：用户信息
- *
- * 业务流程：
- * 1. 查询指定用户
- * 2. 若为自己，直接返回
- * 3. 若不是自己且当前用户非超管，返回 403 禁止访问
- * 4. 若用户不存在，返回 404
- *
- * 异常：
- * - 403：权限不足
- * - 404：用户不存在
- */
-export const readUserByIdV1UsersUserIdGet = <ThrowOnError extends boolean = false>(options: Options<ReadUserByIdV1UsersUserIdGetData, ThrowOnError>) => (options.client ?? client).get<ReadUserByIdV1UsersUserIdGetResponses, ReadUserByIdV1UsersUserIdGetErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/users/{user_id}',
-    ...options
-});
-
-/**
- * Update User
- *
- * 更新指定用户信息（超管操作）。
- *
- * 权限：超管-only
- *
- * 参数：
- * - session：数据库会话
- * - user_id：目标用户 UUID
- * - user_in：用户更新 DTO（email、password、is_active、is_superuser 等可选）
- *
- * 返回值：
- * - UserPublic：更新后的用户信息
- *
- * 业务流程：
- * 1. 查询目标用户是否存在
- * 2. 若修改邮箱，检查新邮箱唯一性（允许保持原邮箱）
- * 3. 调用 repository.update_user() 更新用户
- * 4. 返回更新后的用户
- *
- * 异常：
- * - 404：用户不存在
- * - 409：新邮箱被其他用户占用
- */
-export const updateUserV1UsersUserIdPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateUserV1UsersUserIdPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateUserV1UsersUserIdPatchResponses, UpdateUserV1UsersUserIdPatchErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/users/{user_id}',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Health Check
- */
-export const healthCheckV1UsersHealthCheckGet = <ThrowOnError extends boolean = false>(options?: Options<HealthCheckV1UsersHealthCheckGetData, ThrowOnError>) => (options?.client ?? client).get<HealthCheckV1UsersHealthCheckGetResponses, unknown, ThrowOnError>({ url: '/v1/users/health-check/', ...options });
-
-/**
  * Read Items
  *
  * Retrieve items.
  *
- * - 普通用户只能查看自己的 items
- * - 拥有 item:admin 权限的用户可以查看所有 items
+ * - Regular users can only view their own items
+ * - Users with item:admin permission can view all items
  */
 export const readItemsV1ItemsGet = <ThrowOnError extends boolean = false>(options?: Options<ReadItemsV1ItemsGetData, ThrowOnError>) => (options?.client ?? client).get<ReadItemsV1ItemsGetResponses, ReadItemsV1ItemsGetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -400,7 +380,7 @@ export const readItemsV1ItemsGet = <ThrowOnError extends boolean = false>(option
  *
  * Create new item.
  *
- * 需要 item:create 权限。
+ * Requires item:create permission.
  */
 export const createItemV1ItemsPost = <ThrowOnError extends boolean = false>(options: Options<CreateItemV1ItemsPostData, ThrowOnError>) => (options.client ?? client).post<CreateItemV1ItemsPostResponses, CreateItemV1ItemsPostErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -417,12 +397,12 @@ export const createItemV1ItemsPost = <ThrowOnError extends boolean = false>(opti
  *
  * Delete an item.
  *
- * - 普通用户只能删除自己的 item（需要 item:delete 权限）
- * - 拥有 item:admin 权限的用户可以删除任何 item
+ * - Regular users can only delete their own items (requires item:delete permission)
+ * - Users with item:admin permission can delete any item
  */
-export const deleteItemV1ItemsIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteItemV1ItemsIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteItemV1ItemsIdDeleteResponses, DeleteItemV1ItemsIdDeleteErrors, ThrowOnError>({
+export const deleteItemV1ItemsItemIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteItemV1ItemsItemIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteItemV1ItemsItemIdDeleteResponses, DeleteItemV1ItemsItemIdDeleteErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/items/{id}',
+    url: '/v1/items/{item_id}',
     ...options
 });
 
@@ -431,12 +411,12 @@ export const deleteItemV1ItemsIdDelete = <ThrowOnError extends boolean = false>(
  *
  * Get item by ID.
  *
- * - 普通用户只能查看自己的 item
- * - 拥有 item:admin 权限的用户可以查看任何 item
+ * - Regular users can only view their own items
+ * - Users with item:admin permission can view any item
  */
-export const readItemV1ItemsIdGet = <ThrowOnError extends boolean = false>(options: Options<ReadItemV1ItemsIdGetData, ThrowOnError>) => (options.client ?? client).get<ReadItemV1ItemsIdGetResponses, ReadItemV1ItemsIdGetErrors, ThrowOnError>({
+export const readItemV1ItemsItemIdGet = <ThrowOnError extends boolean = false>(options: Options<ReadItemV1ItemsItemIdGetData, ThrowOnError>) => (options.client ?? client).get<ReadItemV1ItemsItemIdGetResponses, ReadItemV1ItemsItemIdGetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/items/{id}',
+    url: '/v1/items/{item_id}',
     ...options
 });
 
@@ -445,12 +425,12 @@ export const readItemV1ItemsIdGet = <ThrowOnError extends boolean = false>(optio
  *
  * Update an item.
  *
- * - 普通用户只能更新自己的 item（需要 item:update 权限）
- * - 拥有 item:admin 权限的用户可以更新任何 item
+ * - Regular users can only update their own items (requires item:update permission)
+ * - Users with item:admin permission can update any item
  */
-export const updateItemV1ItemsIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateItemV1ItemsIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateItemV1ItemsIdPutResponses, UpdateItemV1ItemsIdPutErrors, ThrowOnError>({
+export const updateItemV1ItemsItemIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateItemV1ItemsItemIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateItemV1ItemsItemIdPutResponses, UpdateItemV1ItemsItemIdPutErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/items/{id}',
+    url: '/v1/items/{item_id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',

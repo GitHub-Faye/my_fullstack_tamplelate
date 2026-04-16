@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useIsAuthenticated, useIsHydrated } from "@/src/stores/auth";
+import { useIsAuthenticated, useIsHydrated } from "@/features/user";
 import { Loader2 } from "lucide-react";
 import { Navbar } from "@/components/navbar";
 

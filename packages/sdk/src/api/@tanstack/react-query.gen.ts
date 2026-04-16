@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { createItemV1ItemsPost, createUserV1UsersPost, deleteItemV1ItemsIdDelete, deleteUserMeV1UsersMeDelete, deleteUserV1UsersUserIdDelete, healthCheckV1UsersHealthCheckGet, loginAccessTokenV1LoginAccessTokenPost, type Options, readItemsV1ItemsGet, readItemV1ItemsIdGet, readUserByIdV1UsersUserIdGet, readUserMeV1UsersMeGet, readUsersV1UsersGet, registerUserV1UsersSignupPost, resetPasswordV1ResetPasswordPost, testTokenV1LoginTestTokenPost, updateItemV1ItemsIdPut, updatePasswordMeV1UsersMePasswordPatch, updateUserMeV1UsersMePatch, updateUserV1UsersUserIdPatch } from '../sdk.gen.js';
-import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostError, CreateItemV1ItemsPostResponse, CreateUserV1UsersPostData, CreateUserV1UsersPostError, CreateUserV1UsersPostResponse, DeleteItemV1ItemsIdDeleteData, DeleteItemV1ItemsIdDeleteError, DeleteItemV1ItemsIdDeleteResponse, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponse, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteError, DeleteUserV1UsersUserIdDeleteResponse, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponse, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostError, LoginAccessTokenV1LoginAccessTokenPostResponse, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetError, ReadItemsV1ItemsGetResponse, ReadItemV1ItemsIdGetData, ReadItemV1ItemsIdGetError, ReadItemV1ItemsIdGetResponse, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponse, ReadUsersV1UsersGetData, ReadUsersV1UsersGetError, ReadUsersV1UsersGetResponse, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostError, RegisterUserV1UsersSignupPostResponse, ResetPasswordV1ResetPasswordPostData, ResetPasswordV1ResetPasswordPostError, ResetPasswordV1ResetPasswordPostResponse, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponse, UpdateItemV1ItemsIdPutData, UpdateItemV1ItemsIdPutError, UpdateItemV1ItemsIdPutResponse, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchError, UpdatePasswordMeV1UsersMePasswordPatchResponse, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchError, UpdateUserMeV1UsersMePatchResponse, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchError, UpdateUserV1UsersUserIdPatchResponse } from '../types.gen.js';
+import { createItemV1ItemsPost, createUserV1UsersPost, deleteItemV1ItemsItemIdDelete, deleteUserMeV1UsersMeDelete, deleteUserV1UsersUserIdDelete, healthCheckV1UsersHealthCheckGet, loginAccessTokenV1LoginAccessTokenPost, type Options, readItemsV1ItemsGet, readItemV1ItemsItemIdGet, readUserByIdV1UsersUserIdGet, readUserMeV1UsersMeGet, readUsersV1UsersGet, registerUserV1UsersSignupPost, testTokenV1LoginTestTokenPost, updateItemV1ItemsItemIdPut, updatePasswordMeV1UsersMePasswordPatch, updateUserMeV1UsersMePatch, updateUserV1UsersUserIdPatch } from '../sdk.gen.js';
+import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostError, CreateItemV1ItemsPostResponse, CreateUserV1UsersPostData, CreateUserV1UsersPostError, CreateUserV1UsersPostResponse, DeleteItemV1ItemsItemIdDeleteData, DeleteItemV1ItemsItemIdDeleteError, DeleteItemV1ItemsItemIdDeleteResponse, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponse, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteError, DeleteUserV1UsersUserIdDeleteResponse, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponse, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostError, LoginAccessTokenV1LoginAccessTokenPostResponse, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetError, ReadItemsV1ItemsGetResponse, ReadItemV1ItemsItemIdGetData, ReadItemV1ItemsItemIdGetError, ReadItemV1ItemsItemIdGetResponse, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponse, ReadUsersV1UsersGetData, ReadUsersV1UsersGetError, ReadUsersV1UsersGetResponse, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostError, RegisterUserV1UsersSignupPostResponse, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponse, UpdateItemV1ItemsItemIdPutData, UpdateItemV1ItemsItemIdPutError, UpdateItemV1ItemsItemIdPutResponse, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchError, UpdatePasswordMeV1UsersMePasswordPatchResponse, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchError, UpdateUserMeV1UsersMePatchResponse, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchError, UpdateUserV1UsersUserIdPatchResponse } from '../types.gen.js';
 
 /**
  * Login Access Token
@@ -34,25 +34,6 @@ export const testTokenV1LoginTestTokenPostMutation = (options?: Partial<Options<
     const mutationOptions: UseMutationOptions<TestTokenV1LoginTestTokenPostResponse, DefaultError, Options<TestTokenV1LoginTestTokenPostData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await testTokenV1LoginTestTokenPost({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-/**
- * Reset Password
- *
- * Reset password
- */
-export const resetPasswordV1ResetPasswordPostMutation = (options?: Partial<Options<ResetPasswordV1ResetPasswordPostData>>): UseMutationOptions<ResetPasswordV1ResetPasswordPostResponse, ResetPasswordV1ResetPasswordPostError, Options<ResetPasswordV1ResetPasswordPostData>> => {
-    const mutationOptions: UseMutationOptions<ResetPasswordV1ResetPasswordPostResponse, ResetPasswordV1ResetPasswordPostError, Options<ResetPasswordV1ResetPasswordPostData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await resetPasswordV1ResetPasswordPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -219,11 +200,6 @@ export const readUsersV1UsersGetInfiniteOptions = (options?: Options<ReadUsersV1
  * 业务流程：
  * 1. 检查邮箱是否已存在，存在则返回 400 错误
  * 2. 调用 repository create_user() 创建用户（密码自动哈希）
- * 3. 若启用邮件服务，生成新账户邮件并发送
- *
- * 邮件通知：
- * - 包含临时密码（用于提醒用户首次修改）
- * - 若邮件发送失败不影响用户创建成功
  */
 export const createUserV1UsersPostMutation = (options?: Partial<Options<CreateUserV1UsersPostData>>): UseMutationOptions<CreateUserV1UsersPostResponse, CreateUserV1UsersPostError, Options<CreateUserV1UsersPostData>> => {
     const mutationOptions: UseMutationOptions<CreateUserV1UsersPostResponse, CreateUserV1UsersPostError, Options<CreateUserV1UsersPostData>> = {
@@ -238,6 +214,148 @@ export const createUserV1UsersPostMutation = (options?: Partial<Options<CreateUs
     };
     return mutationOptions;
 };
+
+/**
+ * Delete User
+ *
+ * 删除指定用户（超管操作）。
+ *
+ * 权限：超管-only
+ *
+ * 参数：
+ * - session：数据库会话
+ * - current_user：当前超管用户（用于权限检查）
+ * - user_id：目标用户 UUID
+ *
+ * 返回值：
+ * - Message：删除成功消息
+ *
+ * 业务流程：
+ * 1. 查询目标用户是否存在
+ * 2. 防止超管删除自己（防止系统无超管）
+ * 3. 使用仓库函数删除该用户的所有 Item（确保数据一致性）
+ * 4. 使用仓库函数删除用户记录
+ *
+ * 异常：
+ * - 404：用户不存在
+ * - 403：不允许删除自己
+ *
+ * 注意：
+ * - 虽然 User.items 有 cascade_delete=True，但此处显式删除 Item
+ * - 这是为了确保数据库一致性和日志记录，避免某些场景下级联失败
+ */
+export const deleteUserV1UsersUserIdDeleteMutation = (options?: Partial<Options<DeleteUserV1UsersUserIdDeleteData>>): UseMutationOptions<DeleteUserV1UsersUserIdDeleteResponse, DeleteUserV1UsersUserIdDeleteError, Options<DeleteUserV1UsersUserIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteUserV1UsersUserIdDeleteResponse, DeleteUserV1UsersUserIdDeleteError, Options<DeleteUserV1UsersUserIdDeleteData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteUserV1UsersUserIdDelete({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readUserByIdV1UsersUserIdGetQueryKey = (options: Options<ReadUserByIdV1UsersUserIdGetData>) => createQueryKey('readUserByIdV1UsersUserIdGet', options);
+
+/**
+ * Read User By Id
+ *
+ * 获取指定用户信息。
+ *
+ * 权限：
+ * - 用户可查看自己的信息
+ * - 超管可查看任何用户信息
+ *
+ * 参数：
+ * - user_id：目标用户 UUID
+ * - session：数据库会话
+ * - current_user：当前登录用户
+ *
+ * 返回值：
+ * - UserPublic：用户信息
+ *
+ * 业务流程：
+ * 1. 查询指定用户
+ * 2. 若为自己，直接返回
+ * 3. 若不是自己且当前用户非超管，返回 403 禁止访问
+ * 4. 若用户不存在，返回 404
+ *
+ * 异常：
+ * - 403：权限不足
+ * - 404：用户不存在
+ */
+export const readUserByIdV1UsersUserIdGetOptions = (options: Options<ReadUserByIdV1UsersUserIdGetData>) => queryOptions<ReadUserByIdV1UsersUserIdGetResponse, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReturnType<typeof readUserByIdV1UsersUserIdGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readUserByIdV1UsersUserIdGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readUserByIdV1UsersUserIdGetQueryKey(options)
+});
+
+/**
+ * Update User
+ *
+ * 更新指定用户信息（超管操作）。
+ *
+ * 权限：超管-only
+ *
+ * 参数：
+ * - session：数据库会话
+ * - user_id：目标用户 UUID
+ * - user_in：用户更新 DTO（email、password、is_active、is_superuser 等可选）
+ *
+ * 返回值：
+ * - UserPublic：更新后的用户信息
+ *
+ * 业务流程：
+ * 1. 查询目标用户是否存在
+ * 2. 若修改邮箱，检查新邮箱唯一性（允许保持原邮箱）
+ * 3. 调用 repository.update_user() 更新用户
+ * 4. 返回更新后的用户
+ *
+ * 异常：
+ * - 404：用户不存在
+ * - 409：新邮箱被其他用户占用
+ */
+export const updateUserV1UsersUserIdPatchMutation = (options?: Partial<Options<UpdateUserV1UsersUserIdPatchData>>): UseMutationOptions<UpdateUserV1UsersUserIdPatchResponse, UpdateUserV1UsersUserIdPatchError, Options<UpdateUserV1UsersUserIdPatchData>> => {
+    const mutationOptions: UseMutationOptions<UpdateUserV1UsersUserIdPatchResponse, UpdateUserV1UsersUserIdPatchError, Options<UpdateUserV1UsersUserIdPatchData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateUserV1UsersUserIdPatch({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const healthCheckV1UsersHealthCheckGetQueryKey = (options?: Options<HealthCheckV1UsersHealthCheckGetData>) => createQueryKey('healthCheckV1UsersHealthCheckGet', options);
+
+/**
+ * Health Check
+ */
+export const healthCheckV1UsersHealthCheckGetOptions = (options?: Options<HealthCheckV1UsersHealthCheckGetData>) => queryOptions<HealthCheckV1UsersHealthCheckGetResponse, DefaultError, HealthCheckV1UsersHealthCheckGetResponse, ReturnType<typeof healthCheckV1UsersHealthCheckGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await healthCheckV1UsersHealthCheckGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: healthCheckV1UsersHealthCheckGetQueryKey(options)
+});
 
 /**
  * Delete User Me
@@ -255,7 +373,7 @@ export const createUserV1UsersPostMutation = (options?: Partial<Options<CreateUs
  *
  * 业务逻辑：
  * 1. 检查当前用户是否为超管，超管不允许自删除（防止误操作导致系统无超管）
- * 2. 删除用户记录
+ * 2. 使用仓库函数删除用户记录
  * 3. 级联删除会由数据库约束自动处理（User.items 有 cascade_delete=True）
  *
  * 异常：
@@ -425,149 +543,6 @@ export const registerUserV1UsersSignupPostMutation = (options?: Partial<Options<
     return mutationOptions;
 };
 
-/**
- * Delete User
- *
- * 删除指定用户（超管操作）。
- *
- * 权限：超管-only
- *
- * 参数：
- * - session：数据库会话
- * - current_user：当前超管用户（用于权限检查）
- * - user_id：目标用户 UUID
- *
- * 返回值：
- * - Message：删除成功消息
- *
- * 业务流程：
- * 1. 查询目标用户是否存在
- * 2. 防止超管删除自己（防止系统无超管）
- * 3. 手动删除该用户的所有 Item（因为关联表可能有特殊处理）
- * 4. 删除用户记录（级联会自动删除 items）
- * 5. 提交事务
- *
- * 异常：
- * - 404：用户不存在
- * - 403：不允许删除自己
- *
- * 注意：
- * - 虽然 User.items 有 cascade_delete=True，但此处显式删除 Item
- * - 这是为了确保数据库一致性和日志记录，避免某些场景下级联失败
- */
-export const deleteUserV1UsersUserIdDeleteMutation = (options?: Partial<Options<DeleteUserV1UsersUserIdDeleteData>>): UseMutationOptions<DeleteUserV1UsersUserIdDeleteResponse, DeleteUserV1UsersUserIdDeleteError, Options<DeleteUserV1UsersUserIdDeleteData>> => {
-    const mutationOptions: UseMutationOptions<DeleteUserV1UsersUserIdDeleteResponse, DeleteUserV1UsersUserIdDeleteError, Options<DeleteUserV1UsersUserIdDeleteData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await deleteUserV1UsersUserIdDelete({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const readUserByIdV1UsersUserIdGetQueryKey = (options: Options<ReadUserByIdV1UsersUserIdGetData>) => createQueryKey('readUserByIdV1UsersUserIdGet', options);
-
-/**
- * Read User By Id
- *
- * 获取指定用户信息。
- *
- * 权限：
- * - 用户可查看自己的信息
- * - 超管可查看任何用户信息
- *
- * 参数：
- * - user_id：目标用户 UUID
- * - session：数据库会话
- * - current_user：当前登录用户
- *
- * 返回值：
- * - UserPublic：用户信息
- *
- * 业务流程：
- * 1. 查询指定用户
- * 2. 若为自己，直接返回
- * 3. 若不是自己且当前用户非超管，返回 403 禁止访问
- * 4. 若用户不存在，返回 404
- *
- * 异常：
- * - 403：权限不足
- * - 404：用户不存在
- */
-export const readUserByIdV1UsersUserIdGetOptions = (options: Options<ReadUserByIdV1UsersUserIdGetData>) => queryOptions<ReadUserByIdV1UsersUserIdGetResponse, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReturnType<typeof readUserByIdV1UsersUserIdGetQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readUserByIdV1UsersUserIdGet({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: readUserByIdV1UsersUserIdGetQueryKey(options)
-});
-
-/**
- * Update User
- *
- * 更新指定用户信息（超管操作）。
- *
- * 权限：超管-only
- *
- * 参数：
- * - session：数据库会话
- * - user_id：目标用户 UUID
- * - user_in：用户更新 DTO（email、password、is_active、is_superuser 等可选）
- *
- * 返回值：
- * - UserPublic：更新后的用户信息
- *
- * 业务流程：
- * 1. 查询目标用户是否存在
- * 2. 若修改邮箱，检查新邮箱唯一性（允许保持原邮箱）
- * 3. 调用 repository.update_user() 更新用户
- * 4. 返回更新后的用户
- *
- * 异常：
- * - 404：用户不存在
- * - 409：新邮箱被其他用户占用
- */
-export const updateUserV1UsersUserIdPatchMutation = (options?: Partial<Options<UpdateUserV1UsersUserIdPatchData>>): UseMutationOptions<UpdateUserV1UsersUserIdPatchResponse, UpdateUserV1UsersUserIdPatchError, Options<UpdateUserV1UsersUserIdPatchData>> => {
-    const mutationOptions: UseMutationOptions<UpdateUserV1UsersUserIdPatchResponse, UpdateUserV1UsersUserIdPatchError, Options<UpdateUserV1UsersUserIdPatchData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await updateUserV1UsersUserIdPatch({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const healthCheckV1UsersHealthCheckGetQueryKey = (options?: Options<HealthCheckV1UsersHealthCheckGetData>) => createQueryKey('healthCheckV1UsersHealthCheckGet', options);
-
-/**
- * Health Check
- */
-export const healthCheckV1UsersHealthCheckGetOptions = (options?: Options<HealthCheckV1UsersHealthCheckGetData>) => queryOptions<HealthCheckV1UsersHealthCheckGetResponse, DefaultError, HealthCheckV1UsersHealthCheckGetResponse, ReturnType<typeof healthCheckV1UsersHealthCheckGetQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await healthCheckV1UsersHealthCheckGet({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: healthCheckV1UsersHealthCheckGetQueryKey(options)
-});
-
 export const readItemsV1ItemsGetQueryKey = (options?: Options<ReadItemsV1ItemsGetData>) => createQueryKey('readItemsV1ItemsGet', options);
 
 /**
@@ -575,8 +550,8 @@ export const readItemsV1ItemsGetQueryKey = (options?: Options<ReadItemsV1ItemsGe
  *
  * Retrieve items.
  *
- * - 普通用户只能查看自己的 items
- * - 拥有 item:admin 权限的用户可以查看所有 items
+ * - Regular users can only view their own items
+ * - Users with item:admin permission can view all items
  */
 export const readItemsV1ItemsGetOptions = (options?: Options<ReadItemsV1ItemsGetData>) => queryOptions<ReadItemsV1ItemsGetResponse, ReadItemsV1ItemsGetError, ReadItemsV1ItemsGetResponse, ReturnType<typeof readItemsV1ItemsGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -598,8 +573,8 @@ export const readItemsV1ItemsGetInfiniteQueryKey = (options?: Options<ReadItemsV
  *
  * Retrieve items.
  *
- * - 普通用户只能查看自己的 items
- * - 拥有 item:admin 权限的用户可以查看所有 items
+ * - Regular users can only view their own items
+ * - Users with item:admin permission can view all items
  */
 export const readItemsV1ItemsGetInfiniteOptions = (options?: Options<ReadItemsV1ItemsGetData>) => infiniteQueryOptions<ReadItemsV1ItemsGetResponse, ReadItemsV1ItemsGetError, InfiniteData<ReadItemsV1ItemsGetResponse>, QueryKey<Options<ReadItemsV1ItemsGetData>>, number | Pick<QueryKey<Options<ReadItemsV1ItemsGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
@@ -628,7 +603,7 @@ export const readItemsV1ItemsGetInfiniteOptions = (options?: Options<ReadItemsV1
  *
  * Create new item.
  *
- * 需要 item:create 权限。
+ * Requires item:create permission.
  */
 export const createItemV1ItemsPostMutation = (options?: Partial<Options<CreateItemV1ItemsPostData>>): UseMutationOptions<CreateItemV1ItemsPostResponse, CreateItemV1ItemsPostError, Options<CreateItemV1ItemsPostData>> => {
     const mutationOptions: UseMutationOptions<CreateItemV1ItemsPostResponse, CreateItemV1ItemsPostError, Options<CreateItemV1ItemsPostData>> = {
@@ -649,13 +624,13 @@ export const createItemV1ItemsPostMutation = (options?: Partial<Options<CreateIt
  *
  * Delete an item.
  *
- * - 普通用户只能删除自己的 item（需要 item:delete 权限）
- * - 拥有 item:admin 权限的用户可以删除任何 item
+ * - Regular users can only delete their own items (requires item:delete permission)
+ * - Users with item:admin permission can delete any item
  */
-export const deleteItemV1ItemsIdDeleteMutation = (options?: Partial<Options<DeleteItemV1ItemsIdDeleteData>>): UseMutationOptions<DeleteItemV1ItemsIdDeleteResponse, DeleteItemV1ItemsIdDeleteError, Options<DeleteItemV1ItemsIdDeleteData>> => {
-    const mutationOptions: UseMutationOptions<DeleteItemV1ItemsIdDeleteResponse, DeleteItemV1ItemsIdDeleteError, Options<DeleteItemV1ItemsIdDeleteData>> = {
+export const deleteItemV1ItemsItemIdDeleteMutation = (options?: Partial<Options<DeleteItemV1ItemsItemIdDeleteData>>): UseMutationOptions<DeleteItemV1ItemsItemIdDeleteResponse, DeleteItemV1ItemsItemIdDeleteError, Options<DeleteItemV1ItemsItemIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteItemV1ItemsItemIdDeleteResponse, DeleteItemV1ItemsItemIdDeleteError, Options<DeleteItemV1ItemsItemIdDeleteData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await deleteItemV1ItemsIdDelete({
+            const { data } = await deleteItemV1ItemsItemIdDelete({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -666,19 +641,19 @@ export const deleteItemV1ItemsIdDeleteMutation = (options?: Partial<Options<Dele
     return mutationOptions;
 };
 
-export const readItemV1ItemsIdGetQueryKey = (options: Options<ReadItemV1ItemsIdGetData>) => createQueryKey('readItemV1ItemsIdGet', options);
+export const readItemV1ItemsItemIdGetQueryKey = (options: Options<ReadItemV1ItemsItemIdGetData>) => createQueryKey('readItemV1ItemsItemIdGet', options);
 
 /**
  * Read Item
  *
  * Get item by ID.
  *
- * - 普通用户只能查看自己的 item
- * - 拥有 item:admin 权限的用户可以查看任何 item
+ * - Regular users can only view their own items
+ * - Users with item:admin permission can view any item
  */
-export const readItemV1ItemsIdGetOptions = (options: Options<ReadItemV1ItemsIdGetData>) => queryOptions<ReadItemV1ItemsIdGetResponse, ReadItemV1ItemsIdGetError, ReadItemV1ItemsIdGetResponse, ReturnType<typeof readItemV1ItemsIdGetQueryKey>>({
+export const readItemV1ItemsItemIdGetOptions = (options: Options<ReadItemV1ItemsItemIdGetData>) => queryOptions<ReadItemV1ItemsItemIdGetResponse, ReadItemV1ItemsItemIdGetError, ReadItemV1ItemsItemIdGetResponse, ReturnType<typeof readItemV1ItemsItemIdGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readItemV1ItemsIdGet({
+        const { data } = await readItemV1ItemsItemIdGet({
             ...options,
             ...queryKey[0],
             signal,
@@ -686,7 +661,7 @@ export const readItemV1ItemsIdGetOptions = (options: Options<ReadItemV1ItemsIdGe
         });
         return data;
     },
-    queryKey: readItemV1ItemsIdGetQueryKey(options)
+    queryKey: readItemV1ItemsItemIdGetQueryKey(options)
 });
 
 /**
@@ -694,13 +669,13 @@ export const readItemV1ItemsIdGetOptions = (options: Options<ReadItemV1ItemsIdGe
  *
  * Update an item.
  *
- * - 普通用户只能更新自己的 item（需要 item:update 权限）
- * - 拥有 item:admin 权限的用户可以更新任何 item
+ * - Regular users can only update their own items (requires item:update permission)
+ * - Users with item:admin permission can update any item
  */
-export const updateItemV1ItemsIdPutMutation = (options?: Partial<Options<UpdateItemV1ItemsIdPutData>>): UseMutationOptions<UpdateItemV1ItemsIdPutResponse, UpdateItemV1ItemsIdPutError, Options<UpdateItemV1ItemsIdPutData>> => {
-    const mutationOptions: UseMutationOptions<UpdateItemV1ItemsIdPutResponse, UpdateItemV1ItemsIdPutError, Options<UpdateItemV1ItemsIdPutData>> = {
+export const updateItemV1ItemsItemIdPutMutation = (options?: Partial<Options<UpdateItemV1ItemsItemIdPutData>>): UseMutationOptions<UpdateItemV1ItemsItemIdPutResponse, UpdateItemV1ItemsItemIdPutError, Options<UpdateItemV1ItemsItemIdPutData>> => {
+    const mutationOptions: UseMutationOptions<UpdateItemV1ItemsItemIdPutResponse, UpdateItemV1ItemsItemIdPutError, Options<UpdateItemV1ItemsItemIdPutData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await updateItemV1ItemsIdPut({
+            const { data } = await updateItemV1ItemsItemIdPut({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

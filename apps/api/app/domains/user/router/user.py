@@ -12,8 +12,6 @@ import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
-from sqlmodel import col, delete, func, select
-
 
 from app.core.dependencies import (
     CurrentUser,
@@ -21,7 +19,7 @@ from app.core.dependencies import (
     get_current_active_superuser,
 )
 from app.core.config import get_settings
-from app.core.security import get_password_hash, verify_password
+from app.core.security import verify_password
 from app.core.schemas import Message, PaginationParams
 from app.core.errors import (
     BusinessException,
@@ -30,7 +28,6 @@ from app.core.errors import (
     raise_user_not_found,
     raise_permission_denied,
 )
-
 
 from app.domains.user import repository
 from app.domains.user.schemas import (
@@ -43,10 +40,6 @@ from app.domains.user.schemas import (
     UserUpdateMe,
 )
 
-
-from app.core.models import Item, User
-  
-
 from app.tasks.user_tasks import process_user_signup_task
 
 settings = get_settings()
@@ -55,6 +48,37 @@ router = APIRouter()
 
 
 # ======================== 超管-only 路由：获取所有用户 ========================
+
+@router.post(
+    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
+)
+async def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+    """
+    创建新用户（超管操作）。
+    
+    权限：超管-only
+    
+    参数：
+    - session：数据库会话
+    - user_in：用户创建 DTO（包含邮箱、密码等）
+    
+    返回值：
+    - UserPublic：创建成功的用户信息
+    
+    业务流程：
+    1. 检查邮箱是否已存在，存在则返回 400 错误
+    2. 调用 repository create_user() 创建用户（密码自动哈希）
+    """
+    # 检查邮箱唯一性
+    user = await repository.get_user_by_email(session=session, email=user_in.email)
+    if user:
+        raise_user_already_exists("The user with this email already exists in the system.")
+
+    # 创建用户（密码自动哈希）
+    user = await repository.create_user(session=session, user_create=user_in)
+
+    return user
+
 
 @router.get(
     "/",
@@ -82,20 +106,12 @@ async def read_users(
     2. 使用 order_by(col(User.created_at).desc()) 按创建时间降序排列
     3. 使用 offset/limit 分页
     """
-    # 获取用户总数
-    count_statement = select(func.count()).select_from(User)
-    result = await session.execute(count_statement)
-    count = result.scalar_one()
-
-    # 获取分页的用户列表（按创建时间倒序）
-    statement = (
-        select(User)
-        .order_by(User.created_at.desc())
-        .offset(pagination.offset)
-        .limit(pagination.limit)
+    # 使用仓库函数获取分页用户列表
+    users, count = await repository.get_users(
+        session=session,
+        skip=pagination.offset,
+        limit=pagination.limit
     )
-    result = await session.execute(statement)
-    users = result.scalars().all()
 
     return UsersPublic(
         data=users,
@@ -106,41 +122,115 @@ async def read_users(
     )
 
 
-@router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
+
+# ======================== 更新用户（超管操作） ========================
+
+@router.patch(
+    "/{user_id}",
+    dependencies=[Depends(get_current_active_superuser)],
+    response_model=UserPublic,
 )
-async def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+async def update_user(
+    *,
+    session: SessionDep,
+    user_id: uuid.UUID,
+    user_in: UserUpdate,
+) -> Any:
     """
-    创建新用户（超管操作）。
+    更新指定用户信息（超管操作）。
     
     权限：超管-only
     
     参数：
     - session：数据库会话
-    - user_in：用户创建 DTO（包含邮箱、密码等）
+    - user_id：目标用户 UUID
+    - user_in：用户更新 DTO（email、password、is_active、is_superuser 等可选）
     
     返回值：
-    - UserPublic：创建成功的用户信息
+    - UserPublic：更新后的用户信息
     
     业务流程：
-    1. 检查邮箱是否已存在，存在则返回 400 错误
-    2. 调用 repository create_user() 创建用户（密码自动哈希）
-    3. 若启用邮件服务，生成新账户邮件并发送
+    1. 查询目标用户是否存在
+    2. 若修改邮箱，检查新邮箱唯一性（允许保持原邮箱）
+    3. 调用 repository.update_user() 更新用户
+    4. 返回更新后的用户
     
-    邮件通知：
-    - 包含临时密码（用于提醒用户首次修改）
-    - 若邮件发送失败不影响用户创建成功
+    异常：
+    - 404：用户不存在
+    - 409：新邮箱被其他用户占用
     """
-    # 检查邮箱唯一性
-    user = await repository.get_user_by_email(session=session, email=user_in.email)
-    if user:
-        raise_user_already_exists("The user with this email already exists in the system.")
+    # 查询目标用户
+    user = await repository.get_user(session=session, user_id=user_id)
+    if not user:
+        raise_user_not_found("The user with this id does not exist in the system")
+    
+    # 若修改邮箱，检查新邮箱唯一性
+    if user_in.email:
+        existing_user = await repository.get_user_by_email(session=session, email=user_in.email)
+        if existing_user and existing_user.id != user_id:
+            raise_user_already_exists("User with this email already exists")
 
-    # 创建用户（密码自动哈希）
-    user = await repository.create_user(session=session, user_create=user_in)
-
+    # 调用 CRUD 更新用户
+    user = await repository.update_user(session=session, db_user=user, user_in=user_in)
     return user
 
+
+# ======================== 删除用户（超管操作） ========================
+
+@router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
+async def delete_user(
+    session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
+) -> Message:
+    """
+    删除指定用户（超管操作）。
+    
+    权限：超管-only
+    
+    参数：
+    - session：数据库会话
+    - current_user：当前超管用户（用于权限检查）
+    - user_id：目标用户 UUID
+    
+    返回值：
+    - Message：删除成功消息
+    
+    业务流程：
+    1. 查询目标用户是否存在
+    2. 防止超管删除自己（防止系统无超管）
+    3. 使用仓库函数删除该用户的所有 Item（确保数据一致性）
+    4. 使用仓库函数删除用户记录
+    
+    异常：
+    - 404：用户不存在
+    - 403：不允许删除自己
+    
+    注意：
+    - 虽然 User.items 有 cascade_delete=True，但此处显式删除 Item
+    - 这是为了确保数据库一致性和日志记录，避免某些场景下级联失败
+    """
+    # 查询目标用户
+    user = await repository.get_user(session=session, user_id=user_id)
+    if not user:
+        raise_user_not_found()
+    
+    # 防止超管删除自己
+    if user == current_user:
+        raise BusinessException(
+            code=ErrorCode.USER_CANNOT_DELETE_SELF,
+            detail="Super users are not allowed to delete themselves"
+        )
+    
+    # 使用仓库函数删除该用户的所有 Item（确保数据一致性）
+    await repository.delete_user_items(session=session, user_id=user_id)
+    
+    # 使用仓库函数删除用户
+    await repository.delete_user(session=session, db_user=user)
+    return Message(message="User deleted successfully")
+
+
+@router.get("/health-check/")
+async def health_check() -> bool:
+    return True
 
 # ======================== 当前用户自助操作 ========================
 
@@ -177,13 +267,10 @@ async def update_user_me(
         if existing_user and existing_user.id != current_user.id:
             raise_user_already_exists("User with this email already exists")
     
-    # 仅序列化用户明确设置的字段（exclude_unset=True）
-    user_data = user_in.model_dump(exclude_unset=True)
-    # 使用 sqlmodel_update() 合并数据
-    current_user.sqlmodel_update(user_data)
-    session.add(current_user)
-    await session.commit()
-    await session.refresh(current_user)
+    # 使用仓库函数更新用户信息
+    current_user = await repository.update_user_me(
+        session=session, db_user=current_user, user_in=user_in
+    )
     return current_user
 
 
@@ -229,11 +316,10 @@ async def update_password_me(
             detail="New password cannot be the same as the current one"
         )
     
-    # 哈希新密码并保存
-    hashed_password = get_password_hash(body.new_password)
-    current_user.hashed_password = hashed_password
-    session.add(current_user)
-    await session.commit()
+    # 使用仓库函数更新密码
+    await repository.update_password_me(
+        session=session, db_user=current_user, new_password=body.new_password
+    )
     return Message(message="Password updated successfully")
 
 
@@ -273,7 +359,7 @@ async def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     
     业务逻辑：
     1. 检查当前用户是否为超管，超管不允许自删除（防止误操作导致系统无超管）
-    2. 删除用户记录
+    2. 使用仓库函数删除用户记录
     3. 级联删除会由数据库约束自动处理（User.items 有 cascade_delete=True）
     
     异常：
@@ -285,8 +371,8 @@ async def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
             code=ErrorCode.USER_CANNOT_DELETE_SELF,
             detail="Super users are not allowed to delete themselves"
         )
-    await session.delete(current_user)
-    await session.commit()
+    # 使用仓库函数删除用户
+    await repository.delete_user(session=session, db_user=current_user)
     return Message(message="User deleted successfully")
 
 
@@ -368,7 +454,7 @@ async def read_user_by_id(
     - 403：权限不足
     - 404：用户不存在
     """
-    user = await session.get(User, user_id)
+    user = await repository.get_user(session=session, user_id=user_id)
     
     # 允许查看自己的信息
     if user == current_user:
@@ -384,114 +470,3 @@ async def read_user_by_id(
     return user
 
 
-# ======================== 更新用户（超管操作） ========================
-
-@router.patch(
-    "/{user_id}",
-    dependencies=[Depends(get_current_active_superuser)],
-    response_model=UserPublic,
-)
-async def update_user(
-    *,
-    session: SessionDep,
-    user_id: uuid.UUID,
-    user_in: UserUpdate,
-) -> Any:
-    """
-    更新指定用户信息（超管操作）。
-    
-    权限：超管-only
-    
-    参数：
-    - session：数据库会话
-    - user_id：目标用户 UUID
-    - user_in：用户更新 DTO（email、password、is_active、is_superuser 等可选）
-    
-    返回值：
-    - UserPublic：更新后的用户信息
-    
-    业务流程：
-    1. 查询目标用户是否存在
-    2. 若修改邮箱，检查新邮箱唯一性（允许保持原邮箱）
-    3. 调用 repository.update_user() 更新用户
-    4. 返回更新后的用户
-    
-    异常：
-    - 404：用户不存在
-    - 409：新邮箱被其他用户占用
-    """
-    # 查询目标用户
-    db_user = await session.get(User, user_id)
-    if not db_user:
-        raise_user_not_found("The user with this id does not exist in the system")
-    
-    # 若修改邮箱，检查新邮箱唯一性
-    if user_in.email:
-        existing_user = await repository.get_user_by_email(session=session, email=user_in.email)
-        if existing_user and existing_user.id != user_id:
-            raise_user_already_exists("User with this email already exists")
-
-    # 调用 CRUD 更新用户
-    db_user = await repository.update_user(session=session, db_user=db_user, user_in=user_in)
-    return db_user
-
-
-# ======================== 删除用户（超管操作） ========================
-
-@router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
-async def delete_user(
-    session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
-) -> Message:
-    """
-    删除指定用户（超管操作）。
-    
-    权限：超管-only
-    
-    参数：
-    - session：数据库会话
-    - current_user：当前超管用户（用于权限检查）
-    - user_id：目标用户 UUID
-    
-    返回值：
-    - Message：删除成功消息
-    
-    业务流程：
-    1. 查询目标用户是否存在
-    2. 防止超管删除自己（防止系统无超管）
-    3. 手动删除该用户的所有 Item（因为关联表可能有特殊处理）
-    4. 删除用户记录（级联会自动删除 items）
-    5. 提交事务
-    
-    异常：
-    - 404：用户不存在
-    - 403：不允许删除自己
-    
-    注意：
-    - 虽然 User.items 有 cascade_delete=True，但此处显式删除 Item
-    - 这是为了确保数据库一致性和日志记录，避免某些场景下级联失败
-    """
-    # 查询目标用户
-    user = await session.get(User, user_id)
-    if not user:
-        raise_user_not_found()
-    
-    # 防止超管删除自己
-    if user == current_user:
-        raise BusinessException(
-            code=ErrorCode.USER_CANNOT_DELETE_SELF,
-            detail="Super users are not allowed to delete themselves"
-        )
-    
-    # 显式删除该用户的所有 Item（确保数据一致性）
-    statement = delete(Item).where(Item.owner_id == user_id)
-    await session.execute(statement)
-    
-    # 删除用户
-    await session.delete(user)
-    await session.commit()
-    return Message(message="User deleted successfully")
-
-
-@router.get("/health-check/")
-async def health_check() -> bool:
-    return True

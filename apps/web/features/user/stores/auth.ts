@@ -21,7 +21,7 @@ interface AuthState {
 // Helper to set cookie for middleware
 function setCookie(name: string, value: string | null, days: number = 7) {
   if (typeof document === "undefined") return;
-  
+
   if (value === null) {
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
   } else {

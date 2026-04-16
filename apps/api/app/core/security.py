@@ -7,8 +7,10 @@ from pwdlib.hashers.argon2 import Argon2Hasher
 from pwdlib.hashers.bcrypt import BcryptHasher
 
 from app.core.config import get_settings
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.core.scopes import ItemScope
+
+
+from fastapi.security import OAuth2PasswordBearer
 
 password_hash = PasswordHash(
     (

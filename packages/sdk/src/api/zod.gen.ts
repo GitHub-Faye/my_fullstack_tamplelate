@@ -62,14 +62,6 @@ export const zMessage = z.object({
 });
 
 /**
- * NewPassword
- */
-export const zNewPassword = z.object({
-    token: z.string(),
-    new_password: z.string().min(8).max(128)
-});
-
-/**
  * Token
  */
 export const zToken = z.object({
@@ -175,13 +167,6 @@ export const zLoginAccessTokenV1LoginAccessTokenPostResponse = zToken;
  */
 export const zTestTokenV1LoginTestTokenPostResponse = zUserPublic;
 
-export const zResetPasswordV1ResetPasswordPostBody = zNewPassword;
-
-/**
- * Successful Response
- */
-export const zResetPasswordV1ResetPasswordPostResponse = zMessage;
-
 export const zReadUsersV1UsersGetQuery = z.object({
     page: z.int().optional().default(1),
     page_size: z.int().optional().default(20)
@@ -198,37 +183,6 @@ export const zCreateUserV1UsersPostBody = zUserCreate;
  * Successful Response
  */
 export const zCreateUserV1UsersPostResponse = zUserPublic;
-
-/**
- * Successful Response
- */
-export const zDeleteUserMeV1UsersMeDeleteResponse = zMessage;
-
-/**
- * Successful Response
- */
-export const zReadUserMeV1UsersMeGetResponse = zUserPublic;
-
-export const zUpdateUserMeV1UsersMePatchBody = zUserUpdateMe;
-
-/**
- * Successful Response
- */
-export const zUpdateUserMeV1UsersMePatchResponse = zUserPublic;
-
-export const zUpdatePasswordMeV1UsersMePasswordPatchBody = zUpdatePassword;
-
-/**
- * Successful Response
- */
-export const zUpdatePasswordMeV1UsersMePasswordPatchResponse = zMessage;
-
-export const zRegisterUserV1UsersSignupPostBody = zUserRegister;
-
-/**
- * Successful Response
- */
-export const zRegisterUserV1UsersSignupPostResponse = zUserPublic;
 
 export const zDeleteUserV1UsersUserIdDeletePath = z.object({
     user_id: z.uuid()
@@ -266,6 +220,37 @@ export const zUpdateUserV1UsersUserIdPatchResponse = zUserPublic;
  */
 export const zHealthCheckV1UsersHealthCheckGetResponse = z.boolean();
 
+/**
+ * Successful Response
+ */
+export const zDeleteUserMeV1UsersMeDeleteResponse = zMessage;
+
+/**
+ * Successful Response
+ */
+export const zReadUserMeV1UsersMeGetResponse = zUserPublic;
+
+export const zUpdateUserMeV1UsersMePatchBody = zUserUpdateMe;
+
+/**
+ * Successful Response
+ */
+export const zUpdateUserMeV1UsersMePatchResponse = zUserPublic;
+
+export const zUpdatePasswordMeV1UsersMePasswordPatchBody = zUpdatePassword;
+
+/**
+ * Successful Response
+ */
+export const zUpdatePasswordMeV1UsersMePasswordPatchResponse = zMessage;
+
+export const zRegisterUserV1UsersSignupPostBody = zUserRegister;
+
+/**
+ * Successful Response
+ */
+export const zRegisterUserV1UsersSignupPostResponse = zUserPublic;
+
 export const zReadItemsV1ItemsGetQuery = z.object({
     page: z.int().optional().default(1),
     page_size: z.int().optional().default(20)
@@ -283,31 +268,31 @@ export const zCreateItemV1ItemsPostBody = zItemCreate;
  */
 export const zCreateItemV1ItemsPostResponse = zItemPublic;
 
-export const zDeleteItemV1ItemsIdDeletePath = z.object({
-    id: z.uuid()
+export const zDeleteItemV1ItemsItemIdDeletePath = z.object({
+    item_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zDeleteItemV1ItemsIdDeleteResponse = zMessage;
+export const zDeleteItemV1ItemsItemIdDeleteResponse = zMessage;
 
-export const zReadItemV1ItemsIdGetPath = z.object({
-    id: z.uuid()
+export const zReadItemV1ItemsItemIdGetPath = z.object({
+    item_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zReadItemV1ItemsIdGetResponse = zItemPublic;
+export const zReadItemV1ItemsItemIdGetResponse = zItemPublic;
 
-export const zUpdateItemV1ItemsIdPutBody = zItemUpdate;
+export const zUpdateItemV1ItemsItemIdPutBody = zItemUpdate;
 
-export const zUpdateItemV1ItemsIdPutPath = z.object({
-    id: z.uuid()
+export const zUpdateItemV1ItemsItemIdPutPath = z.object({
+    item_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zUpdateItemV1ItemsIdPutResponse = zItemPublic;
+export const zUpdateItemV1ItemsItemIdPutResponse = zItemPublic;

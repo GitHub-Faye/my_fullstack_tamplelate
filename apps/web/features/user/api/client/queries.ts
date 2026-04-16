@@ -21,7 +21,6 @@ import {
   updateUserV1UsersUserIdPatch,
   deleteUserMeV1UsersMeDelete,
   deleteUserV1UsersUserIdDelete,
-  resetPasswordV1ResetPasswordPost,
   // Types
   type ReadUsersV1UsersGetData,
   type ReadUsersV1UsersGetResponse,
@@ -45,17 +44,14 @@ import {
   type DeleteUserMeV1UsersMeDeleteResponse,
   type DeleteUserV1UsersUserIdDeleteResponse,
   type DeleteUserV1UsersUserIdDeleteError,
-  type ResetPasswordV1ResetPasswordPostResponse,
-  type ResetPasswordV1ResetPasswordPostError,
   type BodyLoginAccessTokenV1LoginAccessTokenPost,
   type UserRegister,
   type UserCreate,
   type UserUpdateMe,
   type UpdatePassword,
   type UserUpdate,
-  type NewPassword,
 } from "@repo/sdk";
-import { useAuthStore } from "@/src/stores/auth";
+import { useAuthStore } from "../../stores/auth";
 
 // Query Keys
 export const userKeys = {
@@ -360,27 +356,6 @@ export function useDeleteUser() {
     },
     onError: (error: Error) => {
       toast.error(error.message || "删除用户失败");
-    },
-  });
-}
-
-/**
- * Reset password mutation
- */
-export function useResetPassword() {
-  return useMutation({
-    mutationFn: async (data: NewPassword) => {
-      const response = await resetPasswordV1ResetPasswordPost({
-        body: data,
-        throwOnError: true,
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      toast.success("密码重置成功，请使用新密码登录");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "密码重置失败");
     },
   });
 }
