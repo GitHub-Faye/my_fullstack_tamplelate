@@ -2,10 +2,10 @@
 
 import {
   readItemsV1ItemsGet,
-  readItemV1ItemsIdGet,
+  readItemV1ItemsItemIdGet,
   type ReadItemsV1ItemsGetData,
   type ReadItemsV1ItemsGetResponse,
-  type ReadItemV1ItemsIdGetResponse,
+  type ReadItemV1ItemsItemIdGetResponse,
 } from "@repo/sdk";
 
 // ==================== Server-Side Data Fetching ====================
@@ -30,10 +30,10 @@ export async function getItems(
  */
 export async function getItemById(
   itemId: string
-): Promise<ReadItemV1ItemsIdGetResponse | null> {
+): Promise<ReadItemV1ItemsItemIdGetResponse | null> {
   try {
-    const response = await readItemV1ItemsIdGet({
-      path: { id: itemId },
+    const response = await readItemV1ItemsItemIdGet({
+      path: { item_id: itemId },
       throwOnError: true,
     });
     return response.data;

@@ -11,23 +11,18 @@ import { toast } from "sonner";
 import {
   // SDK functions
   readItemsV1ItemsGet,
-  readItemV1ItemsIdGet,
+  readItemV1ItemsItemIdGet,
   createItemV1ItemsPost,
-  updateItemV1ItemsIdPut,
-  deleteItemV1ItemsIdDelete,
+  updateItemV1ItemsItemIdPut,
+  deleteItemV1ItemsItemIdDelete,
   // Types
   type ReadItemsV1ItemsGetData,
   type ReadItemsV1ItemsGetResponse,
   type ReadItemsV1ItemsGetError,
-  type ReadItemV1ItemsIdGetData,
-  type ReadItemV1ItemsIdGetResponse,
-  type ReadItemV1ItemsIdGetError,
+  type ReadItemV1ItemsItemIdGetResponse,
+  type ReadItemV1ItemsItemIdGetError,
   type CreateItemV1ItemsPostResponse,
   type CreateItemV1ItemsPostError,
-  type UpdateItemV1ItemsIdPutResponse,
-  type UpdateItemV1ItemsIdPutError,
-  type DeleteItemV1ItemsIdDeleteResponse,
-  type DeleteItemV1ItemsIdDeleteError,
   type ItemCreate,
   type ItemUpdate,
 } from "@repo/sdk";
@@ -78,9 +73,9 @@ export function useItem(
   itemId: string,
   options?: Omit<
     UseQueryOptions<
-      ReadItemV1ItemsIdGetResponse,
-      ReadItemV1ItemsIdGetError,
-      ReadItemV1ItemsIdGetResponse
+      ReadItemV1ItemsItemIdGetResponse,
+      ReadItemV1ItemsItemIdGetError,
+      ReadItemV1ItemsItemIdGetResponse
     >,
     "queryKey" | "queryFn"
   >
@@ -88,8 +83,8 @@ export function useItem(
   return useQuery({
     queryKey: itemKeys.detail(itemId),
     queryFn: async () => {
-      const response = await readItemV1ItemsIdGet({
-        path: { id: itemId },
+      const response = await readItemV1ItemsItemIdGet({
+        path: { item_id: itemId },
         throwOnError: true,
       });
       return response.data;
@@ -139,8 +134,8 @@ export function useUpdateItem() {
       itemId: string;
       data: ItemUpdate;
     }) => {
-      const response = await updateItemV1ItemsIdPut({
-        path: { id: itemId },
+      const response = await updateItemV1ItemsItemIdPut({
+        path: { item_id: itemId },
         body: data,
         throwOnError: true,
       });
@@ -167,8 +162,8 @@ export function useDeleteItem() {
 
   return useMutation({
     mutationFn: async (itemId: string) => {
-      const response = await deleteItemV1ItemsIdDelete({
-        path: { id: itemId },
+      const response = await deleteItemV1ItemsItemIdDelete({
+        path: { item_id: itemId },
         throwOnError: true,
       });
       return response.data;
