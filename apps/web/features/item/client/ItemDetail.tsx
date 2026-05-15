@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/src/lib/utils";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Package, Loader2 } from "lucide-react";
 import { useItem } from "../api/client/queries";

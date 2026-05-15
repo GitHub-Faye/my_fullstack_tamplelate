@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel
 
-from app.core.schemas import Message, PaginatedResponse
+from app.core.schemas import  PaginatedResponse
 
 
 # ------------------------------- 用户模型 -------------------------------------------------

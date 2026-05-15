@@ -50,9 +50,14 @@ router = APIRouter()
 # ======================== 超管-only 路由：获取所有用户 ========================
 
 @router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
+    "/", response_model=UserPublic
 )
-async def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+async def create_user(
+    *,
+    session: SessionDep,
+    user_in: UserCreate,
+    _: Annotated[None, Depends(get_current_active_superuser)],
+) -> Any:
     """
     创建新用户（超管操作）。
     
@@ -82,12 +87,12 @@ async def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
 
 @router.get(
     "/",
-    dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
 async def read_users(
     session: SessionDep,
     pagination: Annotated[PaginationParams, Query()],
+    _: Annotated[None, Depends(get_current_active_superuser)],
 ) -> Any:
     """
     获取所有用户列表（分页）。
@@ -127,7 +132,6 @@ async def read_users(
 
 @router.patch(
     "/{user_id}",
-    dependencies=[Depends(get_current_active_superuser)],
     response_model=UserPublic,
 )
 async def update_user(
@@ -135,6 +139,7 @@ async def update_user(
     session: SessionDep,
     user_id: uuid.UUID,
     user_in: UserUpdate,
+    _: Annotated[None, Depends(get_current_active_superuser)],
 ) -> Any:
     """
     更新指定用户信息（超管操作）。
@@ -177,9 +182,12 @@ async def update_user(
 
 # ======================== 删除用户（超管操作） ========================
 
-@router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
+@router.delete("/{user_id}")
 async def delete_user(
-    session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
+    session: SessionDep,
+    current_user: CurrentUser,
+    user_id: uuid.UUID,
+    _: Annotated[None, Depends(get_current_active_superuser)],
 ) -> Message:
     """
     删除指定用户（超管操作）。

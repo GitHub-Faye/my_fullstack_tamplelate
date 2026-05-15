@@ -29,12 +29,12 @@ router = APIRouter()
 @router.get(
     "/",
     response_model=ItemsPublic,
-    dependencies=[Depends(require_any_scope(ItemScope.READ, ItemScope.ADMIN))],
 )
 async def read_items(
     session: SessionDep,
     current_user: CurrentUser,
     pagination: Annotated[PaginationParams, Query()],
+    _: Annotated[None, Depends(require_any_scope(ItemScope.READ, ItemScope.ADMIN))],
 ) -> Any:
     """
     Retrieve items.
@@ -70,12 +70,12 @@ async def read_items(
 @router.get(
     "/{item_id}",
     response_model=ItemPublic,
-    dependencies=[Depends(require_any_scope(ItemScope.READ, ItemScope.ADMIN))],
 )
 async def read_item(
     session: SessionDep,
     current_user: CurrentUser,
     item_id: uuid.UUID,
+    _: Annotated[None, Depends(require_any_scope(ItemScope.READ, ItemScope.ADMIN))],
 ) -> Any:
     """
     Get item by ID.
@@ -96,13 +96,13 @@ async def read_item(
 @router.post(
     "/",
     response_model=ItemPublic,
-    dependencies=[Depends(require_scope(ItemScope.CREATE))],
 )
 async def create_item(
     *,
     session: SessionDep,
     current_user: CurrentUser,
     item_in: ItemCreate,
+    _: Annotated[None, Depends(require_scope(ItemScope.CREATE))],
 ) -> Any:
     """
     Create new item.
@@ -120,7 +120,6 @@ async def create_item(
 @router.put(
     "/{item_id}",
     response_model=ItemPublic,
-    dependencies=[Depends(require_any_scope(ItemScope.UPDATE, ItemScope.ADMIN))],
 )
 async def update_item(
     *,
@@ -128,6 +127,7 @@ async def update_item(
     current_user: CurrentUser,
     item_id: uuid.UUID,
     item_in: ItemUpdate,
+    _: Annotated[None, Depends(require_any_scope(ItemScope.UPDATE, ItemScope.ADMIN))],
 ) -> Any:
     """
     Update an item.
@@ -155,6 +155,7 @@ async def delete_item(
     session: SessionDep,
     current_user: CurrentActiveSuperuser,
     item_id: uuid.UUID,
+    _: Annotated[None, Depends(require_any_scope(ItemScope.DELETE, ItemScope.ADMIN))],
 ) -> Message:
     """
     Delete an item.

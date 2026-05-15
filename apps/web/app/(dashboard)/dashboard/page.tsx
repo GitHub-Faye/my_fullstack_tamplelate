@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatUserRole, formatUserStatus, formatDate } from "@/src/lib/utils";
+import { formatUserRole, formatUserStatus, formatDate } from "@/lib/utils";
 
 export default function DashboardPage() {
   const user = useCurrentUser();

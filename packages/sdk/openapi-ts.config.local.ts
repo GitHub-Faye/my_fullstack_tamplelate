@@ -10,10 +10,10 @@ export default defineConfig({
   },
   
   plugins: [
-      '@hey-api/typescript',
-      '@hey-api/sdk',
-      'zod',
       '@hey-api/client-fetch',
+      '@hey-api/typescript',
+      'zod',
+      '@hey-api/sdk',
       '@tanstack/react-query',          // ← can often be just the string
     ],
 });

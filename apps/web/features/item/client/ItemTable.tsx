@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { useItems, useDeleteItem, itemKeys } from "../api/client/queries";
-import { formatDate } from "@/src/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface ItemTableProps {

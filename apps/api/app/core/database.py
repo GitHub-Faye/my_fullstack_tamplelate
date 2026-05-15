@@ -1,3 +1,9 @@
+# 数据库管理分成了三个清晰的层次：
+
+# Engine（连接池/底层驱动）
+# Session Factory（会话工厂）
+# Dependency / Context Provider（依赖注入或请求作用域的会话获取器）
+
 from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import NullPool

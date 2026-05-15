@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import { useUsers, useDeleteUser, userKeys } from "../api/client/queries";
-import { formatDate, formatUserRole, formatUserStatus } from "@/src/lib/utils";
+import { formatDate, formatUserRole, formatUserStatus } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface UserTableProps {
