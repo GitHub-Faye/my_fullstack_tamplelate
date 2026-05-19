@@ -173,6 +173,10 @@ export type UserCreate = {
      */
     email: string;
     /**
+     * Username
+     */
+    username: string;
+    /**
      * Is Active
      */
     is_active?: boolean;
@@ -198,6 +202,10 @@ export type UserPublic = {
      * Email
      */
     email: string;
+    /**
+     * Username
+     */
+    username: string;
     /**
      * Is Active
      */
@@ -229,6 +237,10 @@ export type UserRegister = {
      */
     email: string;
     /**
+     * Username
+     */
+    username: string;
+    /**
      * Password
      */
     password: string;
@@ -246,6 +258,10 @@ export type UserUpdate = {
      * Email
      */
     email?: string | null;
+    /**
+     * Username
+     */
+    username?: string | null;
     /**
      * Is Active
      */

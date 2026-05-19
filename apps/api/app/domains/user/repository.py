@@ -180,6 +180,18 @@ async def get_user_by_email(*, session: AsyncSession, email: str) -> User | None
     return session_user
 
 
+async def get_user_by_username(*, session: AsyncSession, username: str) -> User | None:
+    """
+    通过用户名查询用户。
+    - 使用 select + where 构建查询语句
+    - 返回首条匹配结果，若不存在则返回 None
+    """
+    statement = select(User).where(User.username == username)
+    result = await session.execute(statement)
+    session_user = result.scalar_one_or_none()
+    return session_user
+
+
 # 虚拟哈希值：用于防止时序攻击
 # Argon2 哈希，用户不存在时也会执行相同耗时的密码验证逻辑，保证响应时间一致
 DUMMY_HASH = "$argon2id$v=19$m=65536,t=3,p=4$MjQyZWE1MzBjYjJlZTI0Yw$YTU4NGM5ZTZmYjE2NzZlZjY0ZWY3ZGRkY2U2OWFjNjk"

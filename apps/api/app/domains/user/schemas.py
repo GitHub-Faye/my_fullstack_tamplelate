@@ -11,6 +11,13 @@ from app.core.schemas import  PaginatedResponse
 # 共享属性
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)  # 用户唯一邮箱
+    username: str = Field(
+        unique=True,
+        index=True,
+        min_length=3,
+        max_length=50,
+        regex=r"^[a-zA-Z0-9_]+$",
+    )  # 用户名，只允许字母、数字、下划线
     is_active: bool = True  # 是否激活
     is_superuser: bool = False  # 是否超管
     full_name: str | None = Field(default=None, max_length=255)  # 真实姓名
@@ -25,6 +32,7 @@ class UserCreate(UserBase):
 # 注册接口的 DTO（与 UserCreate 区分开更清晰）
 class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
+    username: str = Field(min_length=3, max_length=50, regex=r"^[a-zA-Z0-9_]+$")
     password: str = Field(min_length=8, max_length=128)
     full_name: str | None = Field(default=None, max_length=255)
 
@@ -32,10 +40,12 @@ class UserRegister(SQLModel):
 # 更新用户时可选属性
 class UserUpdate(UserBase):
     email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
+    # username 不允许修改
+    username: str | None = Field(default=None, min_length=3, max_length=50, regex=r"^[a-zA-Z0-9_]+$")  # type: ignore
     password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
-# 当前用户自更新
+# 当前用户自更新（username 不允许修改）
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)

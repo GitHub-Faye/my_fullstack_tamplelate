@@ -10,6 +10,11 @@ export const userBaseSchema = z.object({
     .min(1, "请输入邮箱")
     .email("请输入有效的邮箱地址")
     .max(255, "邮箱不能超过255个字符"),
+  username: z
+    .string()
+    .min(3, "用户名至少需要3个字符")
+    .max(50, "用户名不能超过50个字符")
+    .regex(/^[a-zA-Z0-9_]+$/, "用户名只能包含字母、数字和下划线"),
   isActive: z.boolean().default(true),
   isSuperuser: z.boolean().default(false),
   fullName: z
@@ -29,6 +34,11 @@ export const userCreateSchema = z.object({
     .min(1, "请输入邮箱")
     .email("请输入有效的邮箱地址")
     .max(255, "邮箱不能超过255个字符"),
+  username: z
+    .string()
+    .min(3, "用户名至少需要3个字符")
+    .max(50, "用户名不能超过50个字符")
+    .regex(/^[a-zA-Z0-9_]+$/, "用户名只能包含字母、数字和下划线"),
   password: z
     .string()
     .min(1, "请输入密码")
@@ -48,6 +58,7 @@ export type UserCreateFormData = z.infer<typeof userCreateSchema>;
 /**
  * User update form schema (admin)
  * Matches backend UserUpdate
+ * Note: username is not allowed to be changed after creation
  */
 export const userUpdateSchema = z.object({
   email: z
@@ -76,6 +87,7 @@ export type UserUpdateFormData = z.infer<typeof userUpdateSchema>;
 /**
  * User update me form schema (self-service)
  * Matches backend UserUpdateMe
+ * Note: username is not allowed to be changed after creation
  */
 export const userUpdateMeSchema = z.object({
   email: z

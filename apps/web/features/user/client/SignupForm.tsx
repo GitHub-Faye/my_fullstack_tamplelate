@@ -38,6 +38,7 @@ export function SignupForm() {
     resolver: zodResolver(signupSchema),
     defaultValues: {
       email: "",
+      username: "",
       password: "",
       confirmPassword: "",
       fullName: "",
@@ -49,6 +50,7 @@ export function SignupForm() {
     try {
       await signupMutation.mutateAsync({
         email: data.email,
+        username: data.username,
         password: data.password,
         full_name: data.fullName || undefined,
       });
@@ -78,6 +80,24 @@ export function SignupForm() {
                   <FormControl>
                     <Input
                       placeholder="请输入您的姓名"
+                      {...field}
+                      disabled={signupMutation.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>用户名</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="3-50个字符，字母数字下划线"
                       {...field}
                       disabled={signupMutation.isPending}
                     />

@@ -27,6 +27,11 @@ export const signupSchema = z.object({
     .string()
     .min(1, "请输入邮箱")
     .email("请输入有效的邮箱地址"),
+  username: z
+    .string()
+    .min(3, "用户名至少需要3个字符")
+    .max(50, "用户名不能超过50个字符")
+    .regex(/^[a-zA-Z0-9_]+$/, "用户名只能包含字母、数字和下划线"),
   password: z
     .string()
     .min(1, "请输入密码")

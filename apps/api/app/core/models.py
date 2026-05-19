@@ -79,6 +79,13 @@ class RoleScope(RoleScopeBase, table=True):
 # ==================================== User ====================================
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
+    username: str = Field(
+        unique=True,
+        index=True,
+        min_length=3,
+        max_length=50,
+        regex=r"^[a-zA-Z0-9_]+$",
+    )
     is_active: bool = True
     is_superuser: bool = False
     full_name: Optional[str] = Field(default=None, max_length=255)

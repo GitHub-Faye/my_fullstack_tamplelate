@@ -47,12 +47,10 @@ export function UserForm({ user, mode }: UserFormProps) {
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
 
+  // Use any to avoid complex type issues with conditional schemas
   const schema = isEdit ? userUpdateSchema : userCreateSchema;
-  type FormData = typeof schema extends typeof userCreateSchema
-    ? UserCreateFormData
-    : UserUpdateFormData;
 
-  const form = useForm<FormData>({
+  const form = useForm({
     resolver: zodResolver(schema),
     defaultValues: isEdit
       ? {
@@ -64,6 +62,7 @@ export function UserForm({ user, mode }: UserFormProps) {
         }
       : {
           email: "",
+          username: "",
           password: "",
           fullName: "",
           isActive: true,
@@ -71,29 +70,32 @@ export function UserForm({ user, mode }: UserFormProps) {
         },
   });
 
-  async function onSubmit(data: FormData) {
+  async function onSubmit(data: unknown) {
     try {
       if (isEdit && user) {
+        const formData = data as UserUpdateFormData;
         // Filter out empty values for update
         const updateData: UserUpdateFormData = {};
-        if (data.email) updateData.email = data.email;
-        if (data.fullName !== undefined) updateData.fullName = data.fullName || null;
-        if (data.isActive !== undefined) updateData.isActive = data.isActive;
-        if (data.isSuperuser !== undefined) updateData.isSuperuser = data.isSuperuser;
-        if (data.password) updateData.password = data.password;
+        if (formData.email) updateData.email = formData.email;
+        if (formData.fullName !== undefined) updateData.fullName = formData.fullName || null;
+        if (formData.isActive !== undefined) updateData.isActive = formData.isActive;
+        if (formData.isSuperuser !== undefined) updateData.isSuperuser = formData.isSuperuser;
+        if (formData.password) updateData.password = formData.password;
 
         await updateMutation.mutateAsync({
           userId: user.id,
-          data: updateData as UserUpdateFormData,
+          data: updateData,
         });
         router.push("/dashboard/admin");
       } else {
+        const formData = data as UserCreateFormData;
         await createMutation.mutateAsync({
-          email: data.email,
-          password: (data as UserCreateFormData).password,
-          full_name: data.fullName || undefined,
-          is_active: data.isActive,
-          is_superuser: data.isSuperuser,
+          email: formData.email,
+          username: formData.username,
+          password: formData.password,
+          full_name: formData.fullName || undefined,
+          is_active: formData.isActive,
+          is_superuser: formData.isSuperuser,
         });
         router.push("/dashboard/admin");
       }
@@ -135,6 +137,26 @@ export function UserForm({ user, mode }: UserFormProps) {
                 </FormItem>
               )}
             />
+
+            {!isEdit && (
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>用户名</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="3-50个字符，字母数字下划线"
+                        {...field}
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
