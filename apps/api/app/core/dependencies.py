@@ -13,7 +13,8 @@
 """
 
 import uuid
-from typing import Annotated
+from enum import Enum
+from typing import Annotated, Union
 from typing import AsyncGenerator
 
 import jwt
@@ -28,7 +29,7 @@ from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.models import User, Role, RoleScope, UserRole
 from app.core.security import reusable_oauth2
-from app.core.scopes import ItemScope
+from app.core.scopes import BlogScope, ItemScope
 from app.core.errors import (
     BusinessException,
     ErrorCode,
@@ -178,7 +179,7 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
     """
     # 超管拥有所有权限
     if user.is_superuser:
-        return {scope.value for scope in ItemScope}
+        return {scope.value for scope in ItemScope} | {scope.value for scope in BlogScope}
     
     # 加载用户的 roles 和 scopes
     scopes = set()
@@ -197,16 +198,19 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
     return scopes
 
 
-def require_scope(required_scope: ItemScope):
+ScopeEnum = Union[ItemScope, BlogScope]
+
+
+def require_scope(required_scope: ScopeEnum):
     """
     创建依赖项，检查用户是否拥有指定的 scope 权限。
-    
+
     参数：
-    - required_scope：需要的权限范围
-    
+    - required_scope：需要的权限范围 (支持 ItemScope / BlogScope)
+
     返回值：
     - 依赖函数，可在路由的 dependencies 中使用
-    
+
     使用示例：
     @router.post("/", dependencies=[Depends(require_scope(ItemScope.CREATE))])
     async def create_item(...):
@@ -217,23 +221,23 @@ def require_scope(required_scope: ItemScope):
         current_user: CurrentUser,
     ) -> None:
         user_scopes = await get_user_scopes(session, current_user)
-        
+
         if required_scope.value not in user_scopes:
             raise_scope_missing(required_scope.value)
-    
+
     return scope_checker
 
 
-def require_any_scope(*required_scopes: ItemScope):
+def require_any_scope(*required_scopes: ScopeEnum):
     """
     创建依赖项，检查用户是否拥有任意一个指定的 scope 权限。
-    
+
     参数：
-    - required_scopes：需要的权限范围列表（满足其一即可）
-    
+    - required_scopes：需要的权限范围列表（满足其一即可，支持 ItemScope / BlogScope）
+
     返回值：
     - 依赖函数，可在路由的 dependencies 中使用
-    
+
     使用示例：
     @router.get("/", dependencies=[Depends(require_any_scope(ItemScope.READ, ItemScope.ADMIN))])
     async def read_items(...):
@@ -245,25 +249,25 @@ def require_any_scope(*required_scopes: ItemScope):
     ) -> None:
         user_scopes = await get_user_scopes(session, current_user)
         required_scope_values = {scope.value for scope in required_scopes}
-        
+
         if not user_scopes.intersection(required_scope_values):
             raise_permission_denied(
                 f"Permission denied: one of {[s.value for s in required_scopes]} required"
             )
-    
+
     return scope_checker
 
 
-def require_all_scopes(*required_scopes: ItemScope):
+def require_all_scopes(*required_scopes: ScopeEnum):
     """
     创建依赖项，检查用户是否拥有所有指定的 scope 权限。
-    
+
     参数：
-    - required_scopes：需要的权限范围列表（必须全部满足）
-    
+    - required_scopes：需要的权限范围列表（必须全部满足，支持 ItemScope / BlogScope）
+
     返回值：
     - 依赖函数，可在路由的 dependencies 中使用
-    
+
     使用示例：
     @router.post("/admin", dependencies=[Depends(require_all_scopes(ItemScope.ADMIN, ItemScope.CREATE))])
     async def admin_create(...):
@@ -275,9 +279,9 @@ def require_all_scopes(*required_scopes: ItemScope):
     ) -> None:
         user_scopes = await get_user_scopes(session, current_user)
         required_scope_values = {scope.value for scope in required_scopes}
-        
+
         if not required_scope_values.issubset(user_scopes):
             missing = required_scope_values - user_scopes
             raise_permission_denied(f"Permission denied: missing scopes {list(missing)}")
-    
+
     return scope_checker

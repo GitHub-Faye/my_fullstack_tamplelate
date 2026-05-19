@@ -47,3 +47,41 @@ DEFAULT_ROLE_SCOPES = {
         ItemScope.ADMIN,
     ],
 }
+
+# ==================================== BlogScope ====================================
+
+class BlogScope(str, Enum):
+    """Blog 资源的权限范围"""
+
+    READ   = "blog:read"
+    CREATE = "blog:create"
+    UPDATE = "blog:update"
+    DELETE = "blog:delete"
+    ADMIN  = "blog:admin"
+
+
+ALL_BLOG_SCOPES = [
+    BlogScope.READ,
+    BlogScope.CREATE,
+    BlogScope.UPDATE,
+    BlogScope.DELETE,
+    BlogScope.ADMIN,
+]
+
+# 将 Blog 权限合并到预定义角色
+DEFAULT_ROLE_SCOPES["viewer"].extend([
+    BlogScope.READ,
+])
+DEFAULT_ROLE_SCOPES["editor"].extend([
+    BlogScope.READ,
+    BlogScope.CREATE,
+    BlogScope.UPDATE,
+    BlogScope.DELETE,
+])
+DEFAULT_ROLE_SCOPES["admin"].extend([
+    BlogScope.READ,
+    BlogScope.CREATE,
+    BlogScope.UPDATE,
+    BlogScope.DELETE,
+    BlogScope.ADMIN,
+])

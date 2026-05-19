@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import List, Optional   # 保留 typing.List
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -109,6 +109,11 @@ class User(UserBase, table=True):
         back_populates="users",
         link_model=UserRole,
     )
+    # 与 BlogPost 的一对多关系
+    blog_posts: List["BlogPost"] = Relationship(
+        back_populates="author",
+        cascade_delete=True,
+    )
 
 
 # ==================================== Item ====================================
@@ -129,3 +134,75 @@ class Item(ItemBase, table=True):
 
     # 关键修改在这里
     owner: Optional["User"] = Relationship(back_populates="items")
+
+
+# ==================================== BlogCategory ====================================
+
+class BlogCategory(SQLModel, table=True):
+    """博客分类表"""
+    __tablename__ = "blogcategory"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    name: str = Field(unique=True, index=True, max_length=50)
+    slug: str = Field(unique=True, index=True, max_length=50)
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+
+    posts: List["BlogPost"] = Relationship(back_populates="category")
+
+
+# ==================================== BlogPost ====================================
+
+class BlogPost(SQLModel, table=True):
+    """博客文章表"""
+    __tablename__ = "blogpost"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    slug: str = Field(unique=True, index=True, max_length=255)
+    title: str = Field(max_length=255)
+    excerpt: Optional[str] = Field(default=None, max_length=500)
+    body: str = Field()
+    category_id: Optional[uuid.UUID] = Field(
+        foreign_key="blogcategory.id", ondelete="SET NULL"
+    )
+    author_id: uuid.UUID = Field(foreign_key="user.id", ondelete="CASCADE")
+    is_published: bool = Field(default=False, index=True)
+    published_at: Optional[datetime] = Field(default=None, index=True, sa_type=DateTime(timezone=True))
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+    updated_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+
+    category: Optional["BlogCategory"] = Relationship(back_populates="posts")
+    author: Optional["User"] = Relationship(back_populates="blog_posts")
+    comments: List["BlogComment"] = Relationship(back_populates="post", cascade_delete=True)
+
+
+# ==================================== BlogComment ====================================
+
+class BlogComment(SQLModel, table=True):
+    """博客评论表"""
+    __tablename__ = "blogcomment"
+
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    post_id: uuid.UUID = Field(
+        foreign_key="blogpost.id", ondelete="CASCADE", index=True
+    )
+    author_id: Optional[uuid.UUID] = Field(
+        foreign_key="user.id", ondelete="SET NULL"
+    )
+    author_name: str = Field(max_length=80)
+    content: str = Field()
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+        index=True,
+    )
+
+    post: Optional["BlogPost"] = Relationship(back_populates="comments")

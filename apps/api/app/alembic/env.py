@@ -26,7 +26,7 @@ sys.path.insert(0, str(BASE_DIR))
 
 # 导入所有模型以确保它们在 SQLModel.metadata 中注册
 # 这行必须在导入 config 之前，确保模型已加载
-from app.core.models import User, Item, Role, RoleScope, UserRole  # noqa: F401
+from app.core.models import User, Item, Role, RoleScope, UserRole, BlogCategory, BlogPost, BlogComment  # noqa: F401
 
 # 现在可以安全地导入配置
 from app.core.config import get_settings

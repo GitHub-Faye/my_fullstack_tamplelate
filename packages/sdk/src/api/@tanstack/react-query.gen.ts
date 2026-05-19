@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { createItemV1ItemsPost, createUserV1UsersPost, deleteItemV1ItemsItemIdDelete, deleteUserMeV1UsersMeDelete, deleteUserV1UsersUserIdDelete, healthCheckV1UsersHealthCheckGet, loginAccessTokenV1LoginAccessTokenPost, type Options, readItemsV1ItemsGet, readItemV1ItemsItemIdGet, readUserByIdV1UsersUserIdGet, readUserMeV1UsersMeGet, readUsersV1UsersGet, registerUserV1UsersSignupPost, testTokenV1LoginTestTokenPost, updateItemV1ItemsItemIdPut, updatePasswordMeV1UsersMePasswordPatch, updateUserMeV1UsersMePatch, updateUserV1UsersUserIdPatch } from '../sdk.gen.js';
-import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostError, CreateItemV1ItemsPostResponse, CreateUserV1UsersPostData, CreateUserV1UsersPostError, CreateUserV1UsersPostResponse, DeleteItemV1ItemsItemIdDeleteData, DeleteItemV1ItemsItemIdDeleteError, DeleteItemV1ItemsItemIdDeleteResponse, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponse, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteError, DeleteUserV1UsersUserIdDeleteResponse, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponse, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostError, LoginAccessTokenV1LoginAccessTokenPostResponse, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetError, ReadItemsV1ItemsGetResponse, ReadItemV1ItemsItemIdGetData, ReadItemV1ItemsItemIdGetError, ReadItemV1ItemsItemIdGetResponse, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponse, ReadUsersV1UsersGetData, ReadUsersV1UsersGetError, ReadUsersV1UsersGetResponse, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostError, RegisterUserV1UsersSignupPostResponse, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponse, UpdateItemV1ItemsItemIdPutData, UpdateItemV1ItemsItemIdPutError, UpdateItemV1ItemsItemIdPutResponse, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchError, UpdatePasswordMeV1UsersMePasswordPatchResponse, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchError, UpdateUserMeV1UsersMePatchResponse, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchError, UpdateUserV1UsersUserIdPatchResponse } from '../types.gen.js';
+import { adminListPostsV1BlogPostsAdminListGet, createCategoryV1BlogCategoriesPost, createCommentV1BlogPostsSlugCommentsPost, createItemV1ItemsPost, createPostV1BlogPostsPost, createUserV1UsersPost, deleteCategoryV1BlogCategoriesCategoryIdDelete, deleteCommentV1BlogCommentsCommentIdDelete, deleteItemV1ItemsItemIdDelete, deletePostV1BlogPostsPostIdDelete, deleteUserMeV1UsersMeDelete, deleteUserV1UsersUserIdDelete, getArchivesV1BlogPostsArchivesGet, getPostDetailV1BlogPostsSlugGet, getRecentCommentsV1BlogCommentsRecentGet, healthCheckV1UsersHealthCheckGet, listCategoriesV1BlogCategoriesGet, listCategoryPostsV1BlogCategoriesSlugPostsGet, listCommentsV1BlogPostsSlugCommentsGet, listPostsV1BlogPostsGet, loginAccessTokenV1LoginAccessTokenPost, type Options, readItemsV1ItemsGet, readItemV1ItemsItemIdGet, readUserByIdV1UsersUserIdGet, readUserMeV1UsersMeGet, readUsersV1UsersGet, registerUserV1UsersSignupPost, testTokenV1LoginTestTokenPost, updateCategoryV1BlogCategoriesCategoryIdPatch, updateItemV1ItemsItemIdPut, updatePasswordMeV1UsersMePasswordPatch, updatePostV1BlogPostsPostIdPatch, updateUserMeV1UsersMePatch, updateUserV1UsersUserIdPatch } from '../sdk.gen.js';
+import type { AdminListPostsV1BlogPostsAdminListGetData, AdminListPostsV1BlogPostsAdminListGetError, AdminListPostsV1BlogPostsAdminListGetResponse, CreateCategoryV1BlogCategoriesPostData, CreateCategoryV1BlogCategoriesPostError, CreateCategoryV1BlogCategoriesPostResponse, CreateCommentV1BlogPostsSlugCommentsPostData, CreateCommentV1BlogPostsSlugCommentsPostError, CreateCommentV1BlogPostsSlugCommentsPostResponse, CreateItemV1ItemsPostData, CreateItemV1ItemsPostError, CreateItemV1ItemsPostResponse, CreatePostV1BlogPostsPostData, CreatePostV1BlogPostsPostError, CreatePostV1BlogPostsPostResponse, CreateUserV1UsersPostData, CreateUserV1UsersPostError, CreateUserV1UsersPostResponse, DeleteCategoryV1BlogCategoriesCategoryIdDeleteData, DeleteCategoryV1BlogCategoriesCategoryIdDeleteError, DeleteCategoryV1BlogCategoriesCategoryIdDeleteResponse, DeleteCommentV1BlogCommentsCommentIdDeleteData, DeleteCommentV1BlogCommentsCommentIdDeleteError, DeleteCommentV1BlogCommentsCommentIdDeleteResponse, DeleteItemV1ItemsItemIdDeleteData, DeleteItemV1ItemsItemIdDeleteError, DeleteItemV1ItemsItemIdDeleteResponse, DeletePostV1BlogPostsPostIdDeleteData, DeletePostV1BlogPostsPostIdDeleteError, DeletePostV1BlogPostsPostIdDeleteResponse, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponse, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteError, DeleteUserV1UsersUserIdDeleteResponse, GetArchivesV1BlogPostsArchivesGetData, GetArchivesV1BlogPostsArchivesGetResponse, GetPostDetailV1BlogPostsSlugGetData, GetPostDetailV1BlogPostsSlugGetError, GetPostDetailV1BlogPostsSlugGetResponse, GetRecentCommentsV1BlogCommentsRecentGetData, GetRecentCommentsV1BlogCommentsRecentGetError, GetRecentCommentsV1BlogCommentsRecentGetResponse, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponse, ListCategoriesV1BlogCategoriesGetData, ListCategoriesV1BlogCategoriesGetError, ListCategoriesV1BlogCategoriesGetResponse, ListCategoryPostsV1BlogCategoriesSlugPostsGetData, ListCategoryPostsV1BlogCategoriesSlugPostsGetError, ListCategoryPostsV1BlogCategoriesSlugPostsGetResponse, ListCommentsV1BlogPostsSlugCommentsGetData, ListCommentsV1BlogPostsSlugCommentsGetError, ListCommentsV1BlogPostsSlugCommentsGetResponse, ListPostsV1BlogPostsGetData, ListPostsV1BlogPostsGetError, ListPostsV1BlogPostsGetResponse, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostError, LoginAccessTokenV1LoginAccessTokenPostResponse, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetError, ReadItemsV1ItemsGetResponse, ReadItemV1ItemsItemIdGetData, ReadItemV1ItemsItemIdGetError, ReadItemV1ItemsItemIdGetResponse, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponse, ReadUsersV1UsersGetData, ReadUsersV1UsersGetError, ReadUsersV1UsersGetResponse, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostError, RegisterUserV1UsersSignupPostResponse, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponse, UpdateCategoryV1BlogCategoriesCategoryIdPatchData, UpdateCategoryV1BlogCategoriesCategoryIdPatchError, UpdateCategoryV1BlogCategoriesCategoryIdPatchResponse, UpdateItemV1ItemsItemIdPutData, UpdateItemV1ItemsItemIdPutError, UpdateItemV1ItemsItemIdPutResponse, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchError, UpdatePasswordMeV1UsersMePasswordPatchResponse, UpdatePostV1BlogPostsPostIdPatchData, UpdatePostV1BlogPostsPostIdPatchError, UpdatePostV1BlogPostsPostIdPatchResponse, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchError, UpdateUserMeV1UsersMePatchResponse, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchError, UpdateUserV1UsersUserIdPatchResponse } from '../types.gen.js';
 
 /**
  * Login Access Token
@@ -676,6 +676,507 @@ export const updateItemV1ItemsItemIdPutMutation = (options?: Partial<Options<Upd
     const mutationOptions: UseMutationOptions<UpdateItemV1ItemsItemIdPutResponse, UpdateItemV1ItemsItemIdPutError, Options<UpdateItemV1ItemsItemIdPutData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await updateItemV1ItemsItemIdPut({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listPostsV1BlogPostsGetQueryKey = (options: Options<ListPostsV1BlogPostsGetData>) => createQueryKey('listPostsV1BlogPostsGet', options);
+
+/**
+ * List Posts
+ *
+ * 公开文章列表（仅已发布）。
+ *
+ * 权限：公开
+ * 支持搜索（q）和分类筛选（category）
+ */
+export const listPostsV1BlogPostsGetOptions = (options: Options<ListPostsV1BlogPostsGetData>) => queryOptions<ListPostsV1BlogPostsGetResponse, ListPostsV1BlogPostsGetError, ListPostsV1BlogPostsGetResponse, ReturnType<typeof listPostsV1BlogPostsGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listPostsV1BlogPostsGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listPostsV1BlogPostsGetQueryKey(options)
+});
+
+export const listPostsV1BlogPostsGetInfiniteQueryKey = (options: Options<ListPostsV1BlogPostsGetData>): QueryKey<Options<ListPostsV1BlogPostsGetData>> => createQueryKey('listPostsV1BlogPostsGet', options, true);
+
+/**
+ * List Posts
+ *
+ * 公开文章列表（仅已发布）。
+ *
+ * 权限：公开
+ * 支持搜索（q）和分类筛选（category）
+ */
+export const listPostsV1BlogPostsGetInfiniteOptions = (options: Options<ListPostsV1BlogPostsGetData>) => infiniteQueryOptions<ListPostsV1BlogPostsGetResponse, ListPostsV1BlogPostsGetError, InfiniteData<ListPostsV1BlogPostsGetResponse>, QueryKey<Options<ListPostsV1BlogPostsGetData>>, number | Pick<QueryKey<Options<ListPostsV1BlogPostsGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListPostsV1BlogPostsGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                'pagination.page': pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listPostsV1BlogPostsGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listPostsV1BlogPostsGetInfiniteQueryKey(options)
+});
+
+/**
+ * Create Post
+ *
+ * 创建新文章。
+ *
+ * 权限：BlogScope.CREATE
+ */
+export const createPostV1BlogPostsPostMutation = (options?: Partial<Options<CreatePostV1BlogPostsPostData>>): UseMutationOptions<CreatePostV1BlogPostsPostResponse, CreatePostV1BlogPostsPostError, Options<CreatePostV1BlogPostsPostData>> => {
+    const mutationOptions: UseMutationOptions<CreatePostV1BlogPostsPostResponse, CreatePostV1BlogPostsPostError, Options<CreatePostV1BlogPostsPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createPostV1BlogPostsPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getArchivesV1BlogPostsArchivesGetQueryKey = (options?: Options<GetArchivesV1BlogPostsArchivesGetData>) => createQueryKey('getArchivesV1BlogPostsArchivesGet', options);
+
+/**
+ * Get Archives
+ *
+ * 归档视图：按年/月聚合所有已发布文章。
+ *
+ * 权限：公开
+ */
+export const getArchivesV1BlogPostsArchivesGetOptions = (options?: Options<GetArchivesV1BlogPostsArchivesGetData>) => queryOptions<GetArchivesV1BlogPostsArchivesGetResponse, DefaultError, GetArchivesV1BlogPostsArchivesGetResponse, ReturnType<typeof getArchivesV1BlogPostsArchivesGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getArchivesV1BlogPostsArchivesGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getArchivesV1BlogPostsArchivesGetQueryKey(options)
+});
+
+export const getPostDetailV1BlogPostsSlugGetQueryKey = (options: Options<GetPostDetailV1BlogPostsSlugGetData>) => createQueryKey('getPostDetailV1BlogPostsSlugGet', options);
+
+/**
+ * Get Post Detail
+ *
+ * 文章详情（含正文 body）。
+ *
+ * 权限：公开（仅已发布），后台可查看未发布
+ */
+export const getPostDetailV1BlogPostsSlugGetOptions = (options: Options<GetPostDetailV1BlogPostsSlugGetData>) => queryOptions<GetPostDetailV1BlogPostsSlugGetResponse, GetPostDetailV1BlogPostsSlugGetError, GetPostDetailV1BlogPostsSlugGetResponse, ReturnType<typeof getPostDetailV1BlogPostsSlugGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getPostDetailV1BlogPostsSlugGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getPostDetailV1BlogPostsSlugGetQueryKey(options)
+});
+
+export const adminListPostsV1BlogPostsAdminListGetQueryKey = (options: Options<AdminListPostsV1BlogPostsAdminListGetData>) => createQueryKey('adminListPostsV1BlogPostsAdminListGet', options);
+
+/**
+ * Admin List Posts
+ *
+ * 后台文章列表（含未发布）。
+ *
+ * 权限：BlogScope.UPDATE
+ */
+export const adminListPostsV1BlogPostsAdminListGetOptions = (options: Options<AdminListPostsV1BlogPostsAdminListGetData>) => queryOptions<AdminListPostsV1BlogPostsAdminListGetResponse, AdminListPostsV1BlogPostsAdminListGetError, AdminListPostsV1BlogPostsAdminListGetResponse, ReturnType<typeof adminListPostsV1BlogPostsAdminListGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await adminListPostsV1BlogPostsAdminListGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: adminListPostsV1BlogPostsAdminListGetQueryKey(options)
+});
+
+export const adminListPostsV1BlogPostsAdminListGetInfiniteQueryKey = (options: Options<AdminListPostsV1BlogPostsAdminListGetData>): QueryKey<Options<AdminListPostsV1BlogPostsAdminListGetData>> => createQueryKey('adminListPostsV1BlogPostsAdminListGet', options, true);
+
+/**
+ * Admin List Posts
+ *
+ * 后台文章列表（含未发布）。
+ *
+ * 权限：BlogScope.UPDATE
+ */
+export const adminListPostsV1BlogPostsAdminListGetInfiniteOptions = (options: Options<AdminListPostsV1BlogPostsAdminListGetData>) => infiniteQueryOptions<AdminListPostsV1BlogPostsAdminListGetResponse, AdminListPostsV1BlogPostsAdminListGetError, InfiniteData<AdminListPostsV1BlogPostsAdminListGetResponse>, QueryKey<Options<AdminListPostsV1BlogPostsAdminListGetData>>, number | Pick<QueryKey<Options<AdminListPostsV1BlogPostsAdminListGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<AdminListPostsV1BlogPostsAdminListGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                'pagination.page': pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await adminListPostsV1BlogPostsAdminListGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: adminListPostsV1BlogPostsAdminListGetInfiniteQueryKey(options)
+});
+
+/**
+ * Delete Post
+ *
+ * 删除文章。
+ *
+ * 权限：作者本人或 BlogScope.ADMIN
+ */
+export const deletePostV1BlogPostsPostIdDeleteMutation = (options?: Partial<Options<DeletePostV1BlogPostsPostIdDeleteData>>): UseMutationOptions<DeletePostV1BlogPostsPostIdDeleteResponse, DeletePostV1BlogPostsPostIdDeleteError, Options<DeletePostV1BlogPostsPostIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeletePostV1BlogPostsPostIdDeleteResponse, DeletePostV1BlogPostsPostIdDeleteError, Options<DeletePostV1BlogPostsPostIdDeleteData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deletePostV1BlogPostsPostIdDelete({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Update Post
+ *
+ * 更新文章。
+ *
+ * 权限：作者本人或 BlogScope.ADMIN
+ */
+export const updatePostV1BlogPostsPostIdPatchMutation = (options?: Partial<Options<UpdatePostV1BlogPostsPostIdPatchData>>): UseMutationOptions<UpdatePostV1BlogPostsPostIdPatchResponse, UpdatePostV1BlogPostsPostIdPatchError, Options<UpdatePostV1BlogPostsPostIdPatchData>> => {
+    const mutationOptions: UseMutationOptions<UpdatePostV1BlogPostsPostIdPatchResponse, UpdatePostV1BlogPostsPostIdPatchError, Options<UpdatePostV1BlogPostsPostIdPatchData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updatePostV1BlogPostsPostIdPatch({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listCategoriesV1BlogCategoriesGetQueryKey = (options?: Options<ListCategoriesV1BlogCategoriesGetData>) => createQueryKey('listCategoriesV1BlogCategoriesGet', options);
+
+/**
+ * List Categories
+ *
+ * 获取全量分类列表（含各分类文章计数）。
+ *
+ * 权限：公开
+ */
+export const listCategoriesV1BlogCategoriesGetOptions = (options?: Options<ListCategoriesV1BlogCategoriesGetData>) => queryOptions<ListCategoriesV1BlogCategoriesGetResponse, ListCategoriesV1BlogCategoriesGetError, ListCategoriesV1BlogCategoriesGetResponse, ReturnType<typeof listCategoriesV1BlogCategoriesGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listCategoriesV1BlogCategoriesGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listCategoriesV1BlogCategoriesGetQueryKey(options)
+});
+
+export const listCategoriesV1BlogCategoriesGetInfiniteQueryKey = (options?: Options<ListCategoriesV1BlogCategoriesGetData>): QueryKey<Options<ListCategoriesV1BlogCategoriesGetData>> => createQueryKey('listCategoriesV1BlogCategoriesGet', options, true);
+
+/**
+ * List Categories
+ *
+ * 获取全量分类列表（含各分类文章计数）。
+ *
+ * 权限：公开
+ */
+export const listCategoriesV1BlogCategoriesGetInfiniteOptions = (options?: Options<ListCategoriesV1BlogCategoriesGetData>) => infiniteQueryOptions<ListCategoriesV1BlogCategoriesGetResponse, ListCategoriesV1BlogCategoriesGetError, InfiniteData<ListCategoriesV1BlogCategoriesGetResponse>, QueryKey<Options<ListCategoriesV1BlogCategoriesGetData>>, number | Pick<QueryKey<Options<ListCategoriesV1BlogCategoriesGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListCategoriesV1BlogCategoriesGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listCategoriesV1BlogCategoriesGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listCategoriesV1BlogCategoriesGetInfiniteQueryKey(options)
+});
+
+/**
+ * Create Category
+ *
+ * 创建新分类。
+ *
+ * 权限：BlogScope.ADMIN
+ */
+export const createCategoryV1BlogCategoriesPostMutation = (options?: Partial<Options<CreateCategoryV1BlogCategoriesPostData>>): UseMutationOptions<CreateCategoryV1BlogCategoriesPostResponse, CreateCategoryV1BlogCategoriesPostError, Options<CreateCategoryV1BlogCategoriesPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateCategoryV1BlogCategoriesPostResponse, CreateCategoryV1BlogCategoriesPostError, Options<CreateCategoryV1BlogCategoriesPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createCategoryV1BlogCategoriesPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listCategoryPostsV1BlogCategoriesSlugPostsGetQueryKey = (options: Options<ListCategoryPostsV1BlogCategoriesSlugPostsGetData>) => createQueryKey('listCategoryPostsV1BlogCategoriesSlugPostsGet', options);
+
+/**
+ * List Category Posts
+ *
+ * 获取指定分类下的已发布文章列表（分页）。
+ *
+ * 权限：公开
+ */
+export const listCategoryPostsV1BlogCategoriesSlugPostsGetOptions = (options: Options<ListCategoryPostsV1BlogCategoriesSlugPostsGetData>) => queryOptions<ListCategoryPostsV1BlogCategoriesSlugPostsGetResponse, ListCategoryPostsV1BlogCategoriesSlugPostsGetError, ListCategoryPostsV1BlogCategoriesSlugPostsGetResponse, ReturnType<typeof listCategoryPostsV1BlogCategoriesSlugPostsGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listCategoryPostsV1BlogCategoriesSlugPostsGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listCategoryPostsV1BlogCategoriesSlugPostsGetQueryKey(options)
+});
+
+export const listCategoryPostsV1BlogCategoriesSlugPostsGetInfiniteQueryKey = (options: Options<ListCategoryPostsV1BlogCategoriesSlugPostsGetData>): QueryKey<Options<ListCategoryPostsV1BlogCategoriesSlugPostsGetData>> => createQueryKey('listCategoryPostsV1BlogCategoriesSlugPostsGet', options, true);
+
+/**
+ * List Category Posts
+ *
+ * 获取指定分类下的已发布文章列表（分页）。
+ *
+ * 权限：公开
+ */
+export const listCategoryPostsV1BlogCategoriesSlugPostsGetInfiniteOptions = (options: Options<ListCategoryPostsV1BlogCategoriesSlugPostsGetData>) => infiniteQueryOptions<ListCategoryPostsV1BlogCategoriesSlugPostsGetResponse, ListCategoryPostsV1BlogCategoriesSlugPostsGetError, InfiniteData<ListCategoryPostsV1BlogCategoriesSlugPostsGetResponse>, QueryKey<Options<ListCategoryPostsV1BlogCategoriesSlugPostsGetData>>, number | Pick<QueryKey<Options<ListCategoryPostsV1BlogCategoriesSlugPostsGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListCategoryPostsV1BlogCategoriesSlugPostsGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listCategoryPostsV1BlogCategoriesSlugPostsGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listCategoryPostsV1BlogCategoriesSlugPostsGetInfiniteQueryKey(options)
+});
+
+/**
+ * Delete Category
+ *
+ * 删除分类。
+ *
+ * 权限：BlogScope.ADMIN
+ */
+export const deleteCategoryV1BlogCategoriesCategoryIdDeleteMutation = (options?: Partial<Options<DeleteCategoryV1BlogCategoriesCategoryIdDeleteData>>): UseMutationOptions<DeleteCategoryV1BlogCategoriesCategoryIdDeleteResponse, DeleteCategoryV1BlogCategoriesCategoryIdDeleteError, Options<DeleteCategoryV1BlogCategoriesCategoryIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteCategoryV1BlogCategoriesCategoryIdDeleteResponse, DeleteCategoryV1BlogCategoriesCategoryIdDeleteError, Options<DeleteCategoryV1BlogCategoriesCategoryIdDeleteData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteCategoryV1BlogCategoriesCategoryIdDelete({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Update Category
+ *
+ * 更新分类。
+ *
+ * 权限：BlogScope.ADMIN
+ */
+export const updateCategoryV1BlogCategoriesCategoryIdPatchMutation = (options?: Partial<Options<UpdateCategoryV1BlogCategoriesCategoryIdPatchData>>): UseMutationOptions<UpdateCategoryV1BlogCategoriesCategoryIdPatchResponse, UpdateCategoryV1BlogCategoriesCategoryIdPatchError, Options<UpdateCategoryV1BlogCategoriesCategoryIdPatchData>> => {
+    const mutationOptions: UseMutationOptions<UpdateCategoryV1BlogCategoriesCategoryIdPatchResponse, UpdateCategoryV1BlogCategoriesCategoryIdPatchError, Options<UpdateCategoryV1BlogCategoriesCategoryIdPatchData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateCategoryV1BlogCategoriesCategoryIdPatch({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const listCommentsV1BlogPostsSlugCommentsGetQueryKey = (options: Options<ListCommentsV1BlogPostsSlugCommentsGetData>) => createQueryKey('listCommentsV1BlogPostsSlugCommentsGet', options);
+
+/**
+ * List Comments
+ *
+ * 获取指定文章的评论列表（分页）。
+ *
+ * 权限：公开
+ */
+export const listCommentsV1BlogPostsSlugCommentsGetOptions = (options: Options<ListCommentsV1BlogPostsSlugCommentsGetData>) => queryOptions<ListCommentsV1BlogPostsSlugCommentsGetResponse, ListCommentsV1BlogPostsSlugCommentsGetError, ListCommentsV1BlogPostsSlugCommentsGetResponse, ReturnType<typeof listCommentsV1BlogPostsSlugCommentsGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await listCommentsV1BlogPostsSlugCommentsGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listCommentsV1BlogPostsSlugCommentsGetQueryKey(options)
+});
+
+export const listCommentsV1BlogPostsSlugCommentsGetInfiniteQueryKey = (options: Options<ListCommentsV1BlogPostsSlugCommentsGetData>): QueryKey<Options<ListCommentsV1BlogPostsSlugCommentsGetData>> => createQueryKey('listCommentsV1BlogPostsSlugCommentsGet', options, true);
+
+/**
+ * List Comments
+ *
+ * 获取指定文章的评论列表（分页）。
+ *
+ * 权限：公开
+ */
+export const listCommentsV1BlogPostsSlugCommentsGetInfiniteOptions = (options: Options<ListCommentsV1BlogPostsSlugCommentsGetData>) => infiniteQueryOptions<ListCommentsV1BlogPostsSlugCommentsGetResponse, ListCommentsV1BlogPostsSlugCommentsGetError, InfiniteData<ListCommentsV1BlogPostsSlugCommentsGetResponse>, QueryKey<Options<ListCommentsV1BlogPostsSlugCommentsGetData>>, number | Pick<QueryKey<Options<ListCommentsV1BlogPostsSlugCommentsGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ListCommentsV1BlogPostsSlugCommentsGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await listCommentsV1BlogPostsSlugCommentsGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: listCommentsV1BlogPostsSlugCommentsGetInfiniteQueryKey(options)
+});
+
+/**
+ * Create Comment
+ *
+ * 提交新评论。
+ *
+ * 权限：登录用户（不允许匿名）
+ */
+export const createCommentV1BlogPostsSlugCommentsPostMutation = (options?: Partial<Options<CreateCommentV1BlogPostsSlugCommentsPostData>>): UseMutationOptions<CreateCommentV1BlogPostsSlugCommentsPostResponse, CreateCommentV1BlogPostsSlugCommentsPostError, Options<CreateCommentV1BlogPostsSlugCommentsPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateCommentV1BlogPostsSlugCommentsPostResponse, CreateCommentV1BlogPostsSlugCommentsPostError, Options<CreateCommentV1BlogPostsSlugCommentsPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createCommentV1BlogPostsSlugCommentsPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getRecentCommentsV1BlogCommentsRecentGetQueryKey = (options?: Options<GetRecentCommentsV1BlogCommentsRecentGetData>) => createQueryKey('getRecentCommentsV1BlogCommentsRecentGet', options);
+
+/**
+ * Get Recent Comments
+ *
+ * 最近评论（用于侧栏展示）。
+ *
+ * 权限：公开
+ */
+export const getRecentCommentsV1BlogCommentsRecentGetOptions = (options?: Options<GetRecentCommentsV1BlogCommentsRecentGetData>) => queryOptions<GetRecentCommentsV1BlogCommentsRecentGetResponse, GetRecentCommentsV1BlogCommentsRecentGetError, GetRecentCommentsV1BlogCommentsRecentGetResponse, ReturnType<typeof getRecentCommentsV1BlogCommentsRecentGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getRecentCommentsV1BlogCommentsRecentGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getRecentCommentsV1BlogCommentsRecentGetQueryKey(options)
+});
+
+/**
+ * Delete Comment
+ *
+ * 删除评论。
+ *
+ * 权限：评论作者或 BlogScope.ADMIN
+ */
+export const deleteCommentV1BlogCommentsCommentIdDeleteMutation = (options?: Partial<Options<DeleteCommentV1BlogCommentsCommentIdDeleteData>>): UseMutationOptions<DeleteCommentV1BlogCommentsCommentIdDeleteResponse, DeleteCommentV1BlogCommentsCommentIdDeleteError, Options<DeleteCommentV1BlogCommentsCommentIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteCommentV1BlogCommentsCommentIdDeleteResponse, DeleteCommentV1BlogCommentsCommentIdDeleteError, Options<DeleteCommentV1BlogCommentsCommentIdDeleteData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteCommentV1BlogCommentsCommentIdDelete({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

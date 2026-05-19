@@ -5,6 +5,58 @@ export type ClientOptions = {
 };
 
 /**
+ * ArchiveEntry
+ *
+ * 单条归档记录（某年某月）
+ */
+export type ArchiveEntry = {
+    /**
+     * Year
+     */
+    year: number;
+    /**
+     * Month
+     */
+    month: number;
+    /**
+     * Posts
+     */
+    posts: Array<ArchivePostBrief>;
+};
+
+/**
+ * ArchivePostBrief
+ *
+ * 归档文章简要信息
+ */
+export type ArchivePostBrief = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Published At
+     */
+    published_at?: string | null;
+};
+
+/**
+ * ArchiveResponse
+ *
+ * 归档响应
+ */
+export type ArchiveResponse = {
+    /**
+     * Archives
+     */
+    archives: Array<ArchiveEntry>;
+};
+
+/**
  * Body_login_access_token_v1_login_access_token_post
  */
 export type BodyLoginAccessTokenV1LoginAccessTokenPost = {
@@ -32,6 +84,170 @@ export type BodyLoginAccessTokenV1LoginAccessTokenPost = {
      * Client Secret
      */
     client_secret?: string | null;
+};
+
+/**
+ * CategoriesPublic
+ *
+ * 分类分页响应
+ */
+export type CategoriesPublic = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
+};
+
+/**
+ * CategoryCreate
+ *
+ * 创建分类请求
+ */
+export type CategoryCreate = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Slug
+     */
+    slug: string;
+};
+
+/**
+ * CategoryPublic
+ *
+ * 公开分类响应（含文章计数）
+ */
+export type CategoryPublic = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Post Count
+     */
+    post_count?: number;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * CategoryUpdate
+ *
+ * 更新分类请求（所有字段可选）
+ */
+export type CategoryUpdate = {
+    /**
+     * Name
+     */
+    name?: string | null;
+    /**
+     * Slug
+     */
+    slug?: string | null;
+};
+
+/**
+ * CommentCreate
+ *
+ * 创建评论请求
+ */
+export type CommentCreate = {
+    /**
+     * Author Name
+     */
+    author_name: string;
+    /**
+     * Content
+     */
+    content: string;
+};
+
+/**
+ * CommentPublic
+ *
+ * 公开评论响应
+ */
+export type CommentPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Post Id
+     */
+    post_id: string;
+    /**
+     * Author Id
+     */
+    author_id?: string | null;
+    /**
+     * Author Name
+     */
+    author_name: string;
+    /**
+     * Content
+     */
+    content: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * CommentsPublic
+ *
+ * 评论分页响应
+ */
+export type CommentsPublic = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
 };
 
 /**
@@ -134,6 +350,276 @@ export type Message = {
      * Message
      */
     message: string;
+};
+
+/**
+ * PaginationParams
+ *
+ * 分页查询参数
+ *
+ * 用于统一分页请求参数:
+ * - page: 页码，从 1 开始
+ * - page_size: 每页数量，默认 20，最大 100
+ */
+export type PaginationParams = {
+    /**
+     * Page
+     */
+    page?: number;
+    /**
+     * Page Size
+     */
+    page_size?: number;
+};
+
+/**
+ * PostCreate
+ *
+ * 创建文章请求
+ */
+export type PostCreate = {
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Excerpt
+     */
+    excerpt?: string | null;
+    /**
+     * Body
+     */
+    body: string;
+    /**
+     * Is Published
+     */
+    is_published?: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    /**
+     * Published At
+     */
+    published_at?: string | null;
+};
+
+/**
+ * PostDetailPublic
+ *
+ * 文章详情响应（包含 body）
+ */
+export type PostDetailPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Excerpt
+     */
+    excerpt?: string | null;
+    /**
+     * Is Published
+     */
+    is_published: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    category?: CategoryPublic | null;
+    /**
+     * Author Id
+     */
+    author_id: string;
+    /**
+     * Author Name
+     */
+    author_name?: string | null;
+    /**
+     * Comments Count
+     */
+    comments_count?: number;
+    /**
+     * Published At
+     */
+    published_at?: string | null;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Body
+     */
+    body: string;
+};
+
+/**
+ * PostPublic
+ *
+ * 公开文章响应（列表视图，不含 body）
+ */
+export type PostPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Excerpt
+     */
+    excerpt?: string | null;
+    /**
+     * Is Published
+     */
+    is_published: boolean;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    category?: CategoryPublic | null;
+    /**
+     * Author Id
+     */
+    author_id: string;
+    /**
+     * Author Name
+     */
+    author_name?: string | null;
+    /**
+     * Comments Count
+     */
+    comments_count?: number;
+    /**
+     * Published At
+     */
+    published_at?: string | null;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+};
+
+/**
+ * PostUpdate
+ *
+ * 更新文章请求（所有字段可选）
+ */
+export type PostUpdate = {
+    /**
+     * Slug
+     */
+    slug?: string | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Excerpt
+     */
+    excerpt?: string | null;
+    /**
+     * Body
+     */
+    body?: string | null;
+    /**
+     * Category Id
+     */
+    category_id?: string | null;
+    /**
+     * Is Published
+     */
+    is_published?: boolean | null;
+    /**
+     * Published At
+     */
+    published_at?: string | null;
+};
+
+/**
+ * PostsPublic
+ *
+ * 文章分页响应
+ */
+export type PostsPublic = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
+};
+
+/**
+ * RecentCommentPublic
+ *
+ * 最近评论响应（用于侧栏）
+ */
+export type RecentCommentPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Author Name
+     */
+    author_name: string;
+    /**
+     * Post Slug
+     */
+    post_slug: string;
+    /**
+     * Post Title
+     */
+    post_title: string;
+    /**
+     * Content
+     */
+    content: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
 };
 
 /**
@@ -801,3 +1287,497 @@ export type UpdateItemV1ItemsItemIdPutResponses = {
 };
 
 export type UpdateItemV1ItemsItemIdPutResponse = UpdateItemV1ItemsItemIdPutResponses[keyof UpdateItemV1ItemsItemIdPutResponses];
+
+export type ListPostsV1BlogPostsGetData = {
+    body?: never;
+    path?: never;
+    query: {
+        pagination: PaginationParams;
+        /**
+         * Q
+         *
+         * 搜索关键词
+         */
+        q?: string | null;
+        /**
+         * Category
+         *
+         * 分类 slug
+         */
+        category?: string | null;
+    };
+    url: '/v1/blog/posts/';
+};
+
+export type ListPostsV1BlogPostsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListPostsV1BlogPostsGetError = ListPostsV1BlogPostsGetErrors[keyof ListPostsV1BlogPostsGetErrors];
+
+export type ListPostsV1BlogPostsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PostsPublic;
+};
+
+export type ListPostsV1BlogPostsGetResponse = ListPostsV1BlogPostsGetResponses[keyof ListPostsV1BlogPostsGetResponses];
+
+export type CreatePostV1BlogPostsPostData = {
+    body: PostCreate;
+    path?: never;
+    query?: never;
+    url: '/v1/blog/posts/';
+};
+
+export type CreatePostV1BlogPostsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreatePostV1BlogPostsPostError = CreatePostV1BlogPostsPostErrors[keyof CreatePostV1BlogPostsPostErrors];
+
+export type CreatePostV1BlogPostsPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: PostPublic;
+};
+
+export type CreatePostV1BlogPostsPostResponse = CreatePostV1BlogPostsPostResponses[keyof CreatePostV1BlogPostsPostResponses];
+
+export type GetArchivesV1BlogPostsArchivesGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/blog/posts/archives';
+};
+
+export type GetArchivesV1BlogPostsArchivesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ArchiveResponse;
+};
+
+export type GetArchivesV1BlogPostsArchivesGetResponse = GetArchivesV1BlogPostsArchivesGetResponses[keyof GetArchivesV1BlogPostsArchivesGetResponses];
+
+export type GetPostDetailV1BlogPostsSlugGetData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/v1/blog/posts/{slug}';
+};
+
+export type GetPostDetailV1BlogPostsSlugGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetPostDetailV1BlogPostsSlugGetError = GetPostDetailV1BlogPostsSlugGetErrors[keyof GetPostDetailV1BlogPostsSlugGetErrors];
+
+export type GetPostDetailV1BlogPostsSlugGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PostDetailPublic;
+};
+
+export type GetPostDetailV1BlogPostsSlugGetResponse = GetPostDetailV1BlogPostsSlugGetResponses[keyof GetPostDetailV1BlogPostsSlugGetResponses];
+
+export type AdminListPostsV1BlogPostsAdminListGetData = {
+    body?: never;
+    path?: never;
+    query: {
+        pagination: PaginationParams;
+        /**
+         * Q
+         */
+        q?: string | null;
+    };
+    url: '/v1/blog/posts/admin/list';
+};
+
+export type AdminListPostsV1BlogPostsAdminListGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminListPostsV1BlogPostsAdminListGetError = AdminListPostsV1BlogPostsAdminListGetErrors[keyof AdminListPostsV1BlogPostsAdminListGetErrors];
+
+export type AdminListPostsV1BlogPostsAdminListGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PostsPublic;
+};
+
+export type AdminListPostsV1BlogPostsAdminListGetResponse = AdminListPostsV1BlogPostsAdminListGetResponses[keyof AdminListPostsV1BlogPostsAdminListGetResponses];
+
+export type DeletePostV1BlogPostsPostIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Post Id
+         */
+        post_id: string;
+    };
+    query?: never;
+    url: '/v1/blog/posts/{post_id}';
+};
+
+export type DeletePostV1BlogPostsPostIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeletePostV1BlogPostsPostIdDeleteError = DeletePostV1BlogPostsPostIdDeleteErrors[keyof DeletePostV1BlogPostsPostIdDeleteErrors];
+
+export type DeletePostV1BlogPostsPostIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeletePostV1BlogPostsPostIdDeleteResponse = DeletePostV1BlogPostsPostIdDeleteResponses[keyof DeletePostV1BlogPostsPostIdDeleteResponses];
+
+export type UpdatePostV1BlogPostsPostIdPatchData = {
+    body: PostUpdate;
+    path: {
+        /**
+         * Post Id
+         */
+        post_id: string;
+    };
+    query?: never;
+    url: '/v1/blog/posts/{post_id}';
+};
+
+export type UpdatePostV1BlogPostsPostIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdatePostV1BlogPostsPostIdPatchError = UpdatePostV1BlogPostsPostIdPatchErrors[keyof UpdatePostV1BlogPostsPostIdPatchErrors];
+
+export type UpdatePostV1BlogPostsPostIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: PostPublic;
+};
+
+export type UpdatePostV1BlogPostsPostIdPatchResponse = UpdatePostV1BlogPostsPostIdPatchResponses[keyof UpdatePostV1BlogPostsPostIdPatchResponses];
+
+export type ListCategoriesV1BlogCategoriesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/v1/blog/categories/';
+};
+
+export type ListCategoriesV1BlogCategoriesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListCategoriesV1BlogCategoriesGetError = ListCategoriesV1BlogCategoriesGetErrors[keyof ListCategoriesV1BlogCategoriesGetErrors];
+
+export type ListCategoriesV1BlogCategoriesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CategoriesPublic;
+};
+
+export type ListCategoriesV1BlogCategoriesGetResponse = ListCategoriesV1BlogCategoriesGetResponses[keyof ListCategoriesV1BlogCategoriesGetResponses];
+
+export type CreateCategoryV1BlogCategoriesPostData = {
+    body: CategoryCreate;
+    path?: never;
+    query?: never;
+    url: '/v1/blog/categories/';
+};
+
+export type CreateCategoryV1BlogCategoriesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateCategoryV1BlogCategoriesPostError = CreateCategoryV1BlogCategoriesPostErrors[keyof CreateCategoryV1BlogCategoriesPostErrors];
+
+export type CreateCategoryV1BlogCategoriesPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CategoryPublic;
+};
+
+export type CreateCategoryV1BlogCategoriesPostResponse = CreateCategoryV1BlogCategoriesPostResponses[keyof CreateCategoryV1BlogCategoriesPostResponses];
+
+export type ListCategoryPostsV1BlogCategoriesSlugPostsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/v1/blog/categories/{slug}/posts';
+};
+
+export type ListCategoryPostsV1BlogCategoriesSlugPostsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListCategoryPostsV1BlogCategoriesSlugPostsGetError = ListCategoryPostsV1BlogCategoriesSlugPostsGetErrors[keyof ListCategoryPostsV1BlogCategoriesSlugPostsGetErrors];
+
+export type ListCategoryPostsV1BlogCategoriesSlugPostsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: PostsPublic;
+};
+
+export type ListCategoryPostsV1BlogCategoriesSlugPostsGetResponse = ListCategoryPostsV1BlogCategoriesSlugPostsGetResponses[keyof ListCategoryPostsV1BlogCategoriesSlugPostsGetResponses];
+
+export type DeleteCategoryV1BlogCategoriesCategoryIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Category Id
+         */
+        category_id: string;
+    };
+    query?: never;
+    url: '/v1/blog/categories/{category_id}';
+};
+
+export type DeleteCategoryV1BlogCategoriesCategoryIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteCategoryV1BlogCategoriesCategoryIdDeleteError = DeleteCategoryV1BlogCategoriesCategoryIdDeleteErrors[keyof DeleteCategoryV1BlogCategoriesCategoryIdDeleteErrors];
+
+export type DeleteCategoryV1BlogCategoriesCategoryIdDeleteResponses = {
+    /**
+     * Response Delete Category V1 Blog Categories  Category Id  Delete
+     *
+     * Successful Response
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type DeleteCategoryV1BlogCategoriesCategoryIdDeleteResponse = DeleteCategoryV1BlogCategoriesCategoryIdDeleteResponses[keyof DeleteCategoryV1BlogCategoriesCategoryIdDeleteResponses];
+
+export type UpdateCategoryV1BlogCategoriesCategoryIdPatchData = {
+    body: CategoryUpdate;
+    path: {
+        /**
+         * Category Id
+         */
+        category_id: string;
+    };
+    query?: never;
+    url: '/v1/blog/categories/{category_id}';
+};
+
+export type UpdateCategoryV1BlogCategoriesCategoryIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateCategoryV1BlogCategoriesCategoryIdPatchError = UpdateCategoryV1BlogCategoriesCategoryIdPatchErrors[keyof UpdateCategoryV1BlogCategoriesCategoryIdPatchErrors];
+
+export type UpdateCategoryV1BlogCategoriesCategoryIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: CategoryPublic;
+};
+
+export type UpdateCategoryV1BlogCategoriesCategoryIdPatchResponse = UpdateCategoryV1BlogCategoriesCategoryIdPatchResponses[keyof UpdateCategoryV1BlogCategoriesCategoryIdPatchResponses];
+
+export type ListCommentsV1BlogPostsSlugCommentsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: {
+        /**
+         * Page
+         */
+        page?: number;
+        /**
+         * Page Size
+         */
+        page_size?: number;
+    };
+    url: '/v1/blog/posts/{slug}/comments';
+};
+
+export type ListCommentsV1BlogPostsSlugCommentsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListCommentsV1BlogPostsSlugCommentsGetError = ListCommentsV1BlogPostsSlugCommentsGetErrors[keyof ListCommentsV1BlogPostsSlugCommentsGetErrors];
+
+export type ListCommentsV1BlogPostsSlugCommentsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: CommentsPublic;
+};
+
+export type ListCommentsV1BlogPostsSlugCommentsGetResponse = ListCommentsV1BlogPostsSlugCommentsGetResponses[keyof ListCommentsV1BlogPostsSlugCommentsGetResponses];
+
+export type CreateCommentV1BlogPostsSlugCommentsPostData = {
+    body: CommentCreate;
+    path: {
+        /**
+         * Slug
+         */
+        slug: string;
+    };
+    query?: never;
+    url: '/v1/blog/posts/{slug}/comments';
+};
+
+export type CreateCommentV1BlogPostsSlugCommentsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateCommentV1BlogPostsSlugCommentsPostError = CreateCommentV1BlogPostsSlugCommentsPostErrors[keyof CreateCommentV1BlogPostsSlugCommentsPostErrors];
+
+export type CreateCommentV1BlogPostsSlugCommentsPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: CommentPublic;
+};
+
+export type CreateCommentV1BlogPostsSlugCommentsPostResponse = CreateCommentV1BlogPostsSlugCommentsPostResponses[keyof CreateCommentV1BlogPostsSlugCommentsPostResponses];
+
+export type GetRecentCommentsV1BlogCommentsRecentGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/v1/blog/comments/recent';
+};
+
+export type GetRecentCommentsV1BlogCommentsRecentGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetRecentCommentsV1BlogCommentsRecentGetError = GetRecentCommentsV1BlogCommentsRecentGetErrors[keyof GetRecentCommentsV1BlogCommentsRecentGetErrors];
+
+export type GetRecentCommentsV1BlogCommentsRecentGetResponses = {
+    /**
+     * Response Get Recent Comments V1 Blog Comments Recent Get
+     *
+     * Successful Response
+     */
+    200: Array<RecentCommentPublic>;
+};
+
+export type GetRecentCommentsV1BlogCommentsRecentGetResponse = GetRecentCommentsV1BlogCommentsRecentGetResponses[keyof GetRecentCommentsV1BlogCommentsRecentGetResponses];
+
+export type DeleteCommentV1BlogCommentsCommentIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Comment Id
+         */
+        comment_id: string;
+    };
+    query?: never;
+    url: '/v1/blog/comments/{comment_id}';
+};
+
+export type DeleteCommentV1BlogCommentsCommentIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteCommentV1BlogCommentsCommentIdDeleteError = DeleteCommentV1BlogCommentsCommentIdDeleteErrors[keyof DeleteCommentV1BlogCommentsCommentIdDeleteErrors];
+
+export type DeleteCommentV1BlogCommentsCommentIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeleteCommentV1BlogCommentsCommentIdDeleteResponse = DeleteCommentV1BlogCommentsCommentIdDeleteResponses[keyof DeleteCommentV1BlogCommentsCommentIdDeleteResponses];

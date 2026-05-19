@@ -3,6 +3,37 @@
 import * as z from 'zod';
 
 /**
+ * ArchivePostBrief
+ *
+ * 归档文章简要信息
+ */
+export const zArchivePostBrief = z.object({
+    slug: z.string(),
+    title: z.string(),
+    published_at: z.iso.datetime().nullish()
+});
+
+/**
+ * ArchiveEntry
+ *
+ * 单条归档记录（某年某月）
+ */
+export const zArchiveEntry = z.object({
+    year: z.int(),
+    month: z.int(),
+    posts: z.array(zArchivePostBrief)
+});
+
+/**
+ * ArchiveResponse
+ *
+ * 归档响应
+ */
+export const zArchiveResponse = z.object({
+    archives: z.array(zArchiveEntry)
+});
+
+/**
  * Body_login_access_token_v1_login_access_token_post
  */
 export const zBodyLoginAccessTokenV1LoginAccessTokenPost = z.object({
@@ -12,6 +43,89 @@ export const zBodyLoginAccessTokenV1LoginAccessTokenPost = z.object({
     scope: z.string().optional().default(''),
     client_id: z.string().nullish(),
     client_secret: z.string().nullish()
+});
+
+/**
+ * CategoriesPublic
+ *
+ * 分类分页响应
+ */
+export const zCategoriesPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
+});
+
+/**
+ * CategoryCreate
+ *
+ * 创建分类请求
+ */
+export const zCategoryCreate = z.object({
+    name: z.string().max(50),
+    slug: z.string().max(50)
+});
+
+/**
+ * CategoryPublic
+ *
+ * 公开分类响应（含文章计数）
+ */
+export const zCategoryPublic = z.object({
+    name: z.string().max(50),
+    slug: z.string().max(50),
+    id: z.uuid(),
+    post_count: z.int().optional().default(0),
+    created_at: z.iso.datetime().nullish()
+});
+
+/**
+ * CategoryUpdate
+ *
+ * 更新分类请求（所有字段可选）
+ */
+export const zCategoryUpdate = z.object({
+    name: z.string().max(50).nullish(),
+    slug: z.string().max(50).nullish()
+});
+
+/**
+ * CommentCreate
+ *
+ * 创建评论请求
+ */
+export const zCommentCreate = z.object({
+    author_name: z.string().max(80),
+    content: z.string()
+});
+
+/**
+ * CommentPublic
+ *
+ * 公开评论响应
+ */
+export const zCommentPublic = z.object({
+    id: z.uuid(),
+    post_id: z.uuid(),
+    author_id: z.uuid().nullish(),
+    author_name: z.string(),
+    content: z.string(),
+    created_at: z.iso.datetime().nullish()
+});
+
+/**
+ * CommentsPublic
+ *
+ * 评论分页响应
+ */
+export const zCommentsPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
 });
 
 /**
@@ -59,6 +173,120 @@ export const zItemsPublic = z.object({
  */
 export const zMessage = z.object({
     message: z.string()
+});
+
+/**
+ * PaginationParams
+ *
+ * 分页查询参数
+ *
+ * 用于统一分页请求参数:
+ * - page: 页码，从 1 开始
+ * - page_size: 每页数量，默认 20，最大 100
+ */
+export const zPaginationParams = z.object({
+    page: z.int().optional().default(1),
+    page_size: z.int().optional().default(20)
+});
+
+/**
+ * PostCreate
+ *
+ * 创建文章请求
+ */
+export const zPostCreate = z.object({
+    slug: z.string().max(255),
+    title: z.string().max(255),
+    excerpt: z.string().max(500).nullish(),
+    body: z.string(),
+    is_published: z.boolean().optional().default(false),
+    category_id: z.uuid().nullish(),
+    published_at: z.iso.datetime().nullish()
+});
+
+/**
+ * PostDetailPublic
+ *
+ * 文章详情响应（包含 body）
+ */
+export const zPostDetailPublic = z.object({
+    id: z.uuid(),
+    slug: z.string(),
+    title: z.string(),
+    excerpt: z.string().nullish(),
+    is_published: z.boolean(),
+    category_id: z.uuid().nullish(),
+    category: zCategoryPublic.nullish(),
+    author_id: z.uuid(),
+    author_name: z.string().nullish(),
+    comments_count: z.int().optional().default(0),
+    published_at: z.iso.datetime().nullish(),
+    created_at: z.iso.datetime().nullish(),
+    updated_at: z.iso.datetime().nullish(),
+    body: z.string()
+});
+
+/**
+ * PostPublic
+ *
+ * 公开文章响应（列表视图，不含 body）
+ */
+export const zPostPublic = z.object({
+    id: z.uuid(),
+    slug: z.string(),
+    title: z.string(),
+    excerpt: z.string().nullish(),
+    is_published: z.boolean(),
+    category_id: z.uuid().nullish(),
+    category: zCategoryPublic.nullish(),
+    author_id: z.uuid(),
+    author_name: z.string().nullish(),
+    comments_count: z.int().optional().default(0),
+    published_at: z.iso.datetime().nullish(),
+    created_at: z.iso.datetime().nullish(),
+    updated_at: z.iso.datetime().nullish()
+});
+
+/**
+ * PostUpdate
+ *
+ * 更新文章请求（所有字段可选）
+ */
+export const zPostUpdate = z.object({
+    slug: z.string().max(255).nullish(),
+    title: z.string().max(255).nullish(),
+    excerpt: z.string().max(500).nullish(),
+    body: z.string().nullish(),
+    category_id: z.uuid().nullish(),
+    is_published: z.boolean().nullish(),
+    published_at: z.iso.datetime().nullish()
+});
+
+/**
+ * PostsPublic
+ *
+ * 文章分页响应
+ */
+export const zPostsPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
+});
+
+/**
+ * RecentCommentPublic
+ *
+ * 最近评论响应（用于侧栏）
+ */
+export const zRecentCommentPublic = z.object({
+    id: z.uuid(),
+    author_name: z.string(),
+    post_slug: z.string(),
+    post_title: z.string(),
+    content: z.string(),
+    created_at: z.iso.datetime().nullish()
 });
 
 /**
@@ -300,3 +528,163 @@ export const zUpdateItemV1ItemsItemIdPutPath = z.object({
  * Successful Response
  */
 export const zUpdateItemV1ItemsItemIdPutResponse = zItemPublic;
+
+export const zListPostsV1BlogPostsGetQuery = z.object({
+    pagination: zPaginationParams,
+    q: z.string().nullish(),
+    category: z.string().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zListPostsV1BlogPostsGetResponse = zPostsPublic;
+
+export const zCreatePostV1BlogPostsPostBody = zPostCreate;
+
+/**
+ * Successful Response
+ */
+export const zCreatePostV1BlogPostsPostResponse = zPostPublic;
+
+/**
+ * Successful Response
+ */
+export const zGetArchivesV1BlogPostsArchivesGetResponse = zArchiveResponse;
+
+export const zGetPostDetailV1BlogPostsSlugGetPath = z.object({
+    slug: z.string()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetPostDetailV1BlogPostsSlugGetResponse = zPostDetailPublic;
+
+export const zAdminListPostsV1BlogPostsAdminListGetQuery = z.object({
+    pagination: zPaginationParams,
+    q: z.string().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminListPostsV1BlogPostsAdminListGetResponse = zPostsPublic;
+
+export const zDeletePostV1BlogPostsPostIdDeletePath = z.object({
+    post_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeletePostV1BlogPostsPostIdDeleteResponse = zMessage;
+
+export const zUpdatePostV1BlogPostsPostIdPatchBody = zPostUpdate;
+
+export const zUpdatePostV1BlogPostsPostIdPatchPath = z.object({
+    post_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdatePostV1BlogPostsPostIdPatchResponse = zPostPublic;
+
+export const zListCategoriesV1BlogCategoriesGetQuery = z.object({
+    page: z.int().optional().default(1),
+    page_size: z.int().optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zListCategoriesV1BlogCategoriesGetResponse = zCategoriesPublic;
+
+export const zCreateCategoryV1BlogCategoriesPostBody = zCategoryCreate;
+
+/**
+ * Successful Response
+ */
+export const zCreateCategoryV1BlogCategoriesPostResponse = zCategoryPublic;
+
+export const zListCategoryPostsV1BlogCategoriesSlugPostsGetPath = z.object({
+    slug: z.string()
+});
+
+export const zListCategoryPostsV1BlogCategoriesSlugPostsGetQuery = z.object({
+    page: z.int().optional().default(1),
+    page_size: z.int().optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zListCategoryPostsV1BlogCategoriesSlugPostsGetResponse = zPostsPublic;
+
+export const zDeleteCategoryV1BlogCategoriesCategoryIdDeletePath = z.object({
+    category_id: z.uuid()
+});
+
+/**
+ * Response Delete Category V1 Blog Categories  Category Id  Delete
+ *
+ * Successful Response
+ */
+export const zDeleteCategoryV1BlogCategoriesCategoryIdDeleteResponse = z.record(z.string(), z.unknown());
+
+export const zUpdateCategoryV1BlogCategoriesCategoryIdPatchBody = zCategoryUpdate;
+
+export const zUpdateCategoryV1BlogCategoriesCategoryIdPatchPath = z.object({
+    category_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateCategoryV1BlogCategoriesCategoryIdPatchResponse = zCategoryPublic;
+
+export const zListCommentsV1BlogPostsSlugCommentsGetPath = z.object({
+    slug: z.string()
+});
+
+export const zListCommentsV1BlogPostsSlugCommentsGetQuery = z.object({
+    page: z.int().optional().default(1),
+    page_size: z.int().optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zListCommentsV1BlogPostsSlugCommentsGetResponse = zCommentsPublic;
+
+export const zCreateCommentV1BlogPostsSlugCommentsPostBody = zCommentCreate;
+
+export const zCreateCommentV1BlogPostsSlugCommentsPostPath = z.object({
+    slug: z.string()
+});
+
+/**
+ * Successful Response
+ */
+export const zCreateCommentV1BlogPostsSlugCommentsPostResponse = zCommentPublic;
+
+export const zGetRecentCommentsV1BlogCommentsRecentGetQuery = z.object({
+    limit: z.int().gte(1).lte(50).optional().default(8)
+});
+
+/**
+ * Response Get Recent Comments V1 Blog Comments Recent Get
+ *
+ * Successful Response
+ */
+export const zGetRecentCommentsV1BlogCommentsRecentGetResponse = z.array(zRecentCommentPublic);
+
+export const zDeleteCommentV1BlogCommentsCommentIdDeletePath = z.object({
+    comment_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteCommentV1BlogCommentsCommentIdDeleteResponse = zMessage;

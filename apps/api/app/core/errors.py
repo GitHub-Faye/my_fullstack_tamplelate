@@ -42,6 +42,14 @@ class ErrorCode(str, Enum):
     ITEM_NOT_FOUND = "ITEM_NOT_FOUND"
     ITEM_NOT_OWNER = "ITEM_NOT_OWNER"
     
+    # ==================== 博客相关错误 (BLOG) ====================
+    BLOG_POST_NOT_FOUND = "BLOG_POST_NOT_FOUND"
+    BLOG_POST_SLUG_TAKEN = "BLOG_POST_SLUG_TAKEN"
+    BLOG_CATEGORY_NOT_FOUND = "BLOG_CATEGORY_NOT_FOUND"
+    BLOG_CATEGORY_SLUG_TAKEN = "BLOG_CATEGORY_SLUG_TAKEN"
+    BLOG_COMMENT_NOT_FOUND = "BLOG_COMMENT_NOT_FOUND"
+    BLOG_FORBIDDEN_NOT_AUTHOR = "BLOG_FORBIDDEN_NOT_AUTHOR"
+
     # ==================== 系统错误 (SYSTEM) ====================
     SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR"
     SYSTEM_VALIDATION_ERROR = "SYSTEM_VALIDATION_ERROR"
@@ -67,14 +75,22 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     ErrorCode.USER_CANNOT_DELETE_SELF: status.HTTP_403_FORBIDDEN,
     ErrorCode.USER_CANNOT_DELETE_SUPERUSER: status.HTTP_403_FORBIDDEN,
     ErrorCode.ITEM_NOT_OWNER: status.HTTP_403_FORBIDDEN,
+    ErrorCode.BLOG_FORBIDDEN_NOT_AUTHOR: status.HTTP_403_FORBIDDEN,
     
     # 404 Not Found
     ErrorCode.USER_NOT_FOUND: status.HTTP_404_NOT_FOUND,
     ErrorCode.ITEM_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+    ErrorCode.BLOG_POST_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+    ErrorCode.BLOG_CATEGORY_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+    ErrorCode.BLOG_COMMENT_NOT_FOUND: status.HTTP_404_NOT_FOUND,
     
     # 409 Conflict
     ErrorCode.USER_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     ErrorCode.USER_EMAIL_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
+    
+    # 409 Conflict
+    ErrorCode.BLOG_POST_SLUG_TAKEN: status.HTTP_409_CONFLICT,
+    ErrorCode.BLOG_CATEGORY_SLUG_TAKEN: status.HTTP_409_CONFLICT,
     
     # 429 Too Many Requests
     ErrorCode.SYSTEM_RATE_LIMIT: status.HTTP_429_TOO_MANY_REQUESTS,
@@ -103,7 +119,14 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     
     ErrorCode.ITEM_NOT_FOUND: "Item not found",
     ErrorCode.ITEM_NOT_OWNER: "Not enough permissions to access this item",
-    
+
+    ErrorCode.BLOG_POST_NOT_FOUND: "Blog post not found",
+    ErrorCode.BLOG_POST_SLUG_TAKEN: "Blog post slug already exists",
+    ErrorCode.BLOG_CATEGORY_NOT_FOUND: "Blog category not found",
+    ErrorCode.BLOG_CATEGORY_SLUG_TAKEN: "Blog category slug already exists",
+    ErrorCode.BLOG_COMMENT_NOT_FOUND: "Blog comment not found",
+    ErrorCode.BLOG_FORBIDDEN_NOT_AUTHOR: "Not the author of this blog post",
+
     ErrorCode.SYSTEM_INTERNAL_ERROR: "Internal server error",
     ErrorCode.SYSTEM_VALIDATION_ERROR: "Validation error",
     ErrorCode.SYSTEM_RATE_LIMIT: "Too many requests",
@@ -194,3 +217,35 @@ def raise_scope_missing(scope: str | None = None) -> None:
         code=ErrorCode.AUTH_MISSING_SCOPE,
         data=data,
     )
+
+
+# ==================== Blog 便捷工厂函数 ====================
+
+def raise_blog_post_not_found(detail: str | None = None) -> None:
+    """抛出博客文章不存在错误"""
+    raise BusinessException(code=ErrorCode.BLOG_POST_NOT_FOUND, detail=detail)
+
+
+def raise_blog_post_slug_taken(detail: str | None = None) -> None:
+    """抛出博客文章 slug 已存在错误"""
+    raise BusinessException(code=ErrorCode.BLOG_POST_SLUG_TAKEN, detail=detail)
+
+
+def raise_blog_category_not_found(detail: str | None = None) -> None:
+    """抛出博客分类不存在错误"""
+    raise BusinessException(code=ErrorCode.BLOG_CATEGORY_NOT_FOUND, detail=detail)
+
+
+def raise_blog_category_slug_taken(detail: str | None = None) -> None:
+    """抛出博客分类 slug 已存在错误"""
+    raise BusinessException(code=ErrorCode.BLOG_CATEGORY_SLUG_TAKEN, detail=detail)
+
+
+def raise_blog_comment_not_found(detail: str | None = None) -> None:
+    """抛出博客评论不存在错误"""
+    raise BusinessException(code=ErrorCode.BLOG_COMMENT_NOT_FOUND, detail=detail)
+
+
+def raise_blog_forbidden_not_author(detail: str | None = None) -> None:
+    """抛出非博客作者禁止操作错误"""
+    raise BusinessException(code=ErrorCode.BLOG_FORBIDDEN_NOT_AUTHOR, detail=detail)

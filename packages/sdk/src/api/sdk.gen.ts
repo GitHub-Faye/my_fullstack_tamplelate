@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client/index.js';
-import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostErrors, CreateItemV1ItemsPostResponses, CreateUserV1UsersPostData, CreateUserV1UsersPostErrors, CreateUserV1UsersPostResponses, DeleteItemV1ItemsItemIdDeleteData, DeleteItemV1ItemsItemIdDeleteErrors, DeleteItemV1ItemsItemIdDeleteResponses, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponses, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteErrors, DeleteUserV1UsersUserIdDeleteResponses, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponses, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostErrors, LoginAccessTokenV1LoginAccessTokenPostResponses, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetErrors, ReadItemsV1ItemsGetResponses, ReadItemV1ItemsItemIdGetData, ReadItemV1ItemsItemIdGetErrors, ReadItemV1ItemsItemIdGetResponses, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetErrors, ReadUserByIdV1UsersUserIdGetResponses, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponses, ReadUsersV1UsersGetData, ReadUsersV1UsersGetErrors, ReadUsersV1UsersGetResponses, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostErrors, RegisterUserV1UsersSignupPostResponses, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponses, UpdateItemV1ItemsItemIdPutData, UpdateItemV1ItemsItemIdPutErrors, UpdateItemV1ItemsItemIdPutResponses, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchErrors, UpdatePasswordMeV1UsersMePasswordPatchResponses, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchErrors, UpdateUserMeV1UsersMePatchResponses, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchErrors, UpdateUserV1UsersUserIdPatchResponses } from './types.gen.js';
+import type { AdminListPostsV1BlogPostsAdminListGetData, AdminListPostsV1BlogPostsAdminListGetErrors, AdminListPostsV1BlogPostsAdminListGetResponses, CreateCategoryV1BlogCategoriesPostData, CreateCategoryV1BlogCategoriesPostErrors, CreateCategoryV1BlogCategoriesPostResponses, CreateCommentV1BlogPostsSlugCommentsPostData, CreateCommentV1BlogPostsSlugCommentsPostErrors, CreateCommentV1BlogPostsSlugCommentsPostResponses, CreateItemV1ItemsPostData, CreateItemV1ItemsPostErrors, CreateItemV1ItemsPostResponses, CreatePostV1BlogPostsPostData, CreatePostV1BlogPostsPostErrors, CreatePostV1BlogPostsPostResponses, CreateUserV1UsersPostData, CreateUserV1UsersPostErrors, CreateUserV1UsersPostResponses, DeleteCategoryV1BlogCategoriesCategoryIdDeleteData, DeleteCategoryV1BlogCategoriesCategoryIdDeleteErrors, DeleteCategoryV1BlogCategoriesCategoryIdDeleteResponses, DeleteCommentV1BlogCommentsCommentIdDeleteData, DeleteCommentV1BlogCommentsCommentIdDeleteErrors, DeleteCommentV1BlogCommentsCommentIdDeleteResponses, DeleteItemV1ItemsItemIdDeleteData, DeleteItemV1ItemsItemIdDeleteErrors, DeleteItemV1ItemsItemIdDeleteResponses, DeletePostV1BlogPostsPostIdDeleteData, DeletePostV1BlogPostsPostIdDeleteErrors, DeletePostV1BlogPostsPostIdDeleteResponses, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponses, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteErrors, DeleteUserV1UsersUserIdDeleteResponses, GetArchivesV1BlogPostsArchivesGetData, GetArchivesV1BlogPostsArchivesGetResponses, GetPostDetailV1BlogPostsSlugGetData, GetPostDetailV1BlogPostsSlugGetErrors, GetPostDetailV1BlogPostsSlugGetResponses, GetRecentCommentsV1BlogCommentsRecentGetData, GetRecentCommentsV1BlogCommentsRecentGetErrors, GetRecentCommentsV1BlogCommentsRecentGetResponses, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponses, ListCategoriesV1BlogCategoriesGetData, ListCategoriesV1BlogCategoriesGetErrors, ListCategoriesV1BlogCategoriesGetResponses, ListCategoryPostsV1BlogCategoriesSlugPostsGetData, ListCategoryPostsV1BlogCategoriesSlugPostsGetErrors, ListCategoryPostsV1BlogCategoriesSlugPostsGetResponses, ListCommentsV1BlogPostsSlugCommentsGetData, ListCommentsV1BlogPostsSlugCommentsGetErrors, ListCommentsV1BlogPostsSlugCommentsGetResponses, ListPostsV1BlogPostsGetData, ListPostsV1BlogPostsGetErrors, ListPostsV1BlogPostsGetResponses, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostErrors, LoginAccessTokenV1LoginAccessTokenPostResponses, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetErrors, ReadItemsV1ItemsGetResponses, ReadItemV1ItemsItemIdGetData, ReadItemV1ItemsItemIdGetErrors, ReadItemV1ItemsItemIdGetResponses, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetErrors, ReadUserByIdV1UsersUserIdGetResponses, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponses, ReadUsersV1UsersGetData, ReadUsersV1UsersGetErrors, ReadUsersV1UsersGetResponses, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostErrors, RegisterUserV1UsersSignupPostResponses, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponses, UpdateCategoryV1BlogCategoriesCategoryIdPatchData, UpdateCategoryV1BlogCategoriesCategoryIdPatchErrors, UpdateCategoryV1BlogCategoriesCategoryIdPatchResponses, UpdateItemV1ItemsItemIdPutData, UpdateItemV1ItemsItemIdPutErrors, UpdateItemV1ItemsItemIdPutResponses, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchErrors, UpdatePasswordMeV1UsersMePasswordPatchResponses, UpdatePostV1BlogPostsPostIdPatchData, UpdatePostV1BlogPostsPostIdPatchErrors, UpdatePostV1BlogPostsPostIdPatchResponses, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchErrors, UpdateUserMeV1UsersMePatchResponses, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchErrors, UpdateUserV1UsersUserIdPatchResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -436,4 +436,205 @@ export const updateItemV1ItemsItemIdPut = <ThrowOnError extends boolean = false>
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * List Posts
+ *
+ * 公开文章列表（仅已发布）。
+ *
+ * 权限：公开
+ * 支持搜索（q）和分类筛选（category）
+ */
+export const listPostsV1BlogPostsGet = <ThrowOnError extends boolean = false>(options: Options<ListPostsV1BlogPostsGetData, ThrowOnError>) => (options.client ?? client).get<ListPostsV1BlogPostsGetResponses, ListPostsV1BlogPostsGetErrors, ThrowOnError>({ url: '/v1/blog/posts/', ...options });
+
+/**
+ * Create Post
+ *
+ * 创建新文章。
+ *
+ * 权限：BlogScope.CREATE
+ */
+export const createPostV1BlogPostsPost = <ThrowOnError extends boolean = false>(options: Options<CreatePostV1BlogPostsPostData, ThrowOnError>) => (options.client ?? client).post<CreatePostV1BlogPostsPostResponses, CreatePostV1BlogPostsPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/blog/posts/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Archives
+ *
+ * 归档视图：按年/月聚合所有已发布文章。
+ *
+ * 权限：公开
+ */
+export const getArchivesV1BlogPostsArchivesGet = <ThrowOnError extends boolean = false>(options?: Options<GetArchivesV1BlogPostsArchivesGetData, ThrowOnError>) => (options?.client ?? client).get<GetArchivesV1BlogPostsArchivesGetResponses, unknown, ThrowOnError>({ url: '/v1/blog/posts/archives', ...options });
+
+/**
+ * Get Post Detail
+ *
+ * 文章详情（含正文 body）。
+ *
+ * 权限：公开（仅已发布），后台可查看未发布
+ */
+export const getPostDetailV1BlogPostsSlugGet = <ThrowOnError extends boolean = false>(options: Options<GetPostDetailV1BlogPostsSlugGetData, ThrowOnError>) => (options.client ?? client).get<GetPostDetailV1BlogPostsSlugGetResponses, GetPostDetailV1BlogPostsSlugGetErrors, ThrowOnError>({ url: '/v1/blog/posts/{slug}', ...options });
+
+/**
+ * Admin List Posts
+ *
+ * 后台文章列表（含未发布）。
+ *
+ * 权限：BlogScope.UPDATE
+ */
+export const adminListPostsV1BlogPostsAdminListGet = <ThrowOnError extends boolean = false>(options: Options<AdminListPostsV1BlogPostsAdminListGetData, ThrowOnError>) => (options.client ?? client).get<AdminListPostsV1BlogPostsAdminListGetResponses, AdminListPostsV1BlogPostsAdminListGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/blog/posts/admin/list',
+    ...options
+});
+
+/**
+ * Delete Post
+ *
+ * 删除文章。
+ *
+ * 权限：作者本人或 BlogScope.ADMIN
+ */
+export const deletePostV1BlogPostsPostIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeletePostV1BlogPostsPostIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeletePostV1BlogPostsPostIdDeleteResponses, DeletePostV1BlogPostsPostIdDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/blog/posts/{post_id}',
+    ...options
+});
+
+/**
+ * Update Post
+ *
+ * 更新文章。
+ *
+ * 权限：作者本人或 BlogScope.ADMIN
+ */
+export const updatePostV1BlogPostsPostIdPatch = <ThrowOnError extends boolean = false>(options: Options<UpdatePostV1BlogPostsPostIdPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdatePostV1BlogPostsPostIdPatchResponses, UpdatePostV1BlogPostsPostIdPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/blog/posts/{post_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List Categories
+ *
+ * 获取全量分类列表（含各分类文章计数）。
+ *
+ * 权限：公开
+ */
+export const listCategoriesV1BlogCategoriesGet = <ThrowOnError extends boolean = false>(options?: Options<ListCategoriesV1BlogCategoriesGetData, ThrowOnError>) => (options?.client ?? client).get<ListCategoriesV1BlogCategoriesGetResponses, ListCategoriesV1BlogCategoriesGetErrors, ThrowOnError>({ url: '/v1/blog/categories/', ...options });
+
+/**
+ * Create Category
+ *
+ * 创建新分类。
+ *
+ * 权限：BlogScope.ADMIN
+ */
+export const createCategoryV1BlogCategoriesPost = <ThrowOnError extends boolean = false>(options: Options<CreateCategoryV1BlogCategoriesPostData, ThrowOnError>) => (options.client ?? client).post<CreateCategoryV1BlogCategoriesPostResponses, CreateCategoryV1BlogCategoriesPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/blog/categories/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List Category Posts
+ *
+ * 获取指定分类下的已发布文章列表（分页）。
+ *
+ * 权限：公开
+ */
+export const listCategoryPostsV1BlogCategoriesSlugPostsGet = <ThrowOnError extends boolean = false>(options: Options<ListCategoryPostsV1BlogCategoriesSlugPostsGetData, ThrowOnError>) => (options.client ?? client).get<ListCategoryPostsV1BlogCategoriesSlugPostsGetResponses, ListCategoryPostsV1BlogCategoriesSlugPostsGetErrors, ThrowOnError>({ url: '/v1/blog/categories/{slug}/posts', ...options });
+
+/**
+ * Delete Category
+ *
+ * 删除分类。
+ *
+ * 权限：BlogScope.ADMIN
+ */
+export const deleteCategoryV1BlogCategoriesCategoryIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteCategoryV1BlogCategoriesCategoryIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteCategoryV1BlogCategoriesCategoryIdDeleteResponses, DeleteCategoryV1BlogCategoriesCategoryIdDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/blog/categories/{category_id}',
+    ...options
+});
+
+/**
+ * Update Category
+ *
+ * 更新分类。
+ *
+ * 权限：BlogScope.ADMIN
+ */
+export const updateCategoryV1BlogCategoriesCategoryIdPatch = <ThrowOnError extends boolean = false>(options: Options<UpdateCategoryV1BlogCategoriesCategoryIdPatchData, ThrowOnError>) => (options.client ?? client).patch<UpdateCategoryV1BlogCategoriesCategoryIdPatchResponses, UpdateCategoryV1BlogCategoriesCategoryIdPatchErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/blog/categories/{category_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List Comments
+ *
+ * 获取指定文章的评论列表（分页）。
+ *
+ * 权限：公开
+ */
+export const listCommentsV1BlogPostsSlugCommentsGet = <ThrowOnError extends boolean = false>(options: Options<ListCommentsV1BlogPostsSlugCommentsGetData, ThrowOnError>) => (options.client ?? client).get<ListCommentsV1BlogPostsSlugCommentsGetResponses, ListCommentsV1BlogPostsSlugCommentsGetErrors, ThrowOnError>({ url: '/v1/blog/posts/{slug}/comments', ...options });
+
+/**
+ * Create Comment
+ *
+ * 提交新评论。
+ *
+ * 权限：登录用户（不允许匿名）
+ */
+export const createCommentV1BlogPostsSlugCommentsPost = <ThrowOnError extends boolean = false>(options: Options<CreateCommentV1BlogPostsSlugCommentsPostData, ThrowOnError>) => (options.client ?? client).post<CreateCommentV1BlogPostsSlugCommentsPostResponses, CreateCommentV1BlogPostsSlugCommentsPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/blog/posts/{slug}/comments',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Recent Comments
+ *
+ * 最近评论（用于侧栏展示）。
+ *
+ * 权限：公开
+ */
+export const getRecentCommentsV1BlogCommentsRecentGet = <ThrowOnError extends boolean = false>(options?: Options<GetRecentCommentsV1BlogCommentsRecentGetData, ThrowOnError>) => (options?.client ?? client).get<GetRecentCommentsV1BlogCommentsRecentGetResponses, GetRecentCommentsV1BlogCommentsRecentGetErrors, ThrowOnError>({ url: '/v1/blog/comments/recent', ...options });
+
+/**
+ * Delete Comment
+ *
+ * 删除评论。
+ *
+ * 权限：评论作者或 BlogScope.ADMIN
+ */
+export const deleteCommentV1BlogCommentsCommentIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteCommentV1BlogCommentsCommentIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteCommentV1BlogCommentsCommentIdDeleteResponses, DeleteCommentV1BlogCommentsCommentIdDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/blog/comments/{comment_id}',
+    ...options
 });
