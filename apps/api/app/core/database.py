@@ -7,13 +7,14 @@
 from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import NullPool
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from typing import AsyncGenerator
 
 from app.core.config import get_settings
-from app.core.models import Role, RoleScope
+from app.core.models import Role, RoleScope, User, UserRole
 from app.core.scopes import DEFAULT_ROLE_SCOPES
+from app.core.security import get_password_hash
 
 settings = get_settings()
 
@@ -79,6 +80,50 @@ async def init_roles_and_scopes(session: AsyncSession) -> None:
     await session.commit()
 
 
+async def init_default_admin(session: AsyncSession) -> None:
+    """
+    如果系统中没有任何用户，创建一个默认 admin 用户。
+    
+    默认管理员账号：
+    - 邮箱: admin@admin.com
+    - 密码: admin
+    - 角色: admin（拥有所有 item 权限）+ superuser
+    """
+    # 检查是否已有用户
+    result = await session.execute(select(func.count()).select_from(User))
+    user_count = result.scalar_one()
+    
+    if user_count > 0:
+        print("Users already exist, skipping default admin creation.")
+        return
+    
+    # 查找 admin 角色
+    result = await session.execute(select(Role).where(Role.name == "admin"))
+    admin_role = result.scalar_one_or_none()
+    
+    if not admin_role:
+        print("Admin role not found, skipping default admin creation.")
+        return
+    
+    # 创建默认 admin 用户
+    admin_user = User(
+        email="1@qq.com",
+        hashed_password=get_password_hash("11111111"),
+        full_name="Default Admin",
+        is_superuser=True,
+        is_active=True,
+    )
+    session.add(admin_user)
+    await session.flush()
+    
+    # 分配 admin 角色
+    user_role = UserRole(user_id=admin_user.id, role_id=admin_role.id)
+    session.add(user_role)
+    
+    await session.commit()
+    print("Created default admin user (email: admin@admin.com, password: admin)")
+
+
 async def init_db():
     """初始化数据库（创建所有表，并添加默认角色和权限）"""
     async with engine.begin() as conn:
@@ -87,3 +132,4 @@ async def init_db():
     # 初始化默认角色和 scopes
     async with AsyncSessionLocal() as session:
         await init_roles_and_scopes(session)
+        await init_default_admin(session)
