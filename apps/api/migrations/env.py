@@ -25,7 +25,8 @@ if config.config_file_name is not None:
 from app.core.models import (
     Role, RoleScope, User, UserRole, Item, UserRoleType,
     Task, TaskStatus, TaskType, Bid, Attachment,
-    DailyReport, StarPointRecord, ReportStage, JudgmentType
+    DailyReport, StarPointRecord, ReportStage, JudgmentType,
+    ClientResource, SystemRule, RuleCategory
 )  # noqa: F401, E402
 
 # SQLModel.metadata 是所有模型的公共元数据容器

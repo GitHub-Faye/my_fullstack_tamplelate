@@ -75,6 +75,23 @@ class JudgmentType(str, Enum):
     AUTO_THRESHOLD = "auto_threshold"
 
 
+class RuleCategory(str, Enum):
+    """
+    规则分类枚举
+
+    - starpoint_reward: 星点奖励规则
+    - salary_formula: 工资计算公式
+    - client_resource: 客资相关参数
+    - completion_judgment: 完成判定规则
+    - system_param: 系统参数
+    """
+    STARPOINT_REWARD = "starpoint_reward"
+    SALARY_FORMULA = "salary_formula"
+    CLIENT_RESOURCE = "client_resource"
+    COMPLETION_JUDGMENT = "completion_judgment"
+    SYSTEM_PARAM = "system_param"
+
+
 # ==================================== UserRole (Association Table) ====================================
 # 必须在 Role 和 User 之前定义，因为它们都引用了这个类
 
@@ -444,4 +461,65 @@ class StarPointRecord(StarPointRecordBase, table=True):
     # 关系
     engineer: Optional["User"] = Relationship()
     task: Optional["Task"] = Relationship()
+
+
+# ==================================== ClientResource ====================================
+class ClientResourceBase(SQLModel):
+    """客资基础模型"""
+    actual_count: int = Field(ge=0, description="实际客资数")
+    baseline_count: int = Field(ge=0, description="基准客资数")
+
+
+class ClientResource(ClientResourceBase, table=True):
+    """客资模型"""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    # 关联关系
+    pm_id: uuid.UUID = Field(
+        foreign_key="user.id",
+        nullable=False,
+        description="PM ID"
+    )
+
+    # 记录日期
+    date: datetime = Field(
+        sa_type=DateTime(timezone=True),
+        description="记录日期"
+    )
+
+    # 时间戳
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+
+    # 关系
+    pm: Optional["User"] = Relationship()
+
+
+# ==================================== SystemRule ====================================
+class SystemRuleBase(SQLModel):
+    """系统规则基础模型"""
+    category: RuleCategory = Field(description="规则分类")
+    name: str = Field(max_length=100, description="规则名称")
+    applies_to: Optional[str] = Field(default=None, max_length=50, description="适用对象（如角色类型）")
+    value: str = Field(max_length=500, description="规则值（JSON 或数值）")
+    is_public: bool = Field(default=False, description="是否对员工公开")
+    is_active: bool = Field(default=True, description="是否启用")
+
+
+class SystemRule(SystemRuleBase, table=True):
+    """系统规则模型"""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    # 时间戳
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+    updated_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"onupdate": get_datetime_utc}
+    )
 
