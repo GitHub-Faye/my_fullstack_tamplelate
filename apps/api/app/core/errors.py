@@ -14,13 +14,13 @@ from fastapi import HTTPException, status
 class ErrorCode(str, Enum):
     """
     业务错误码枚举
-    
+
     格式规范: DOMAIN_ACTION_DETAIL
-    - DOMAIN: 领域/模块 (AUTH, USER, ITEM, SYSTEM)
+    - DOMAIN: 领域/模块 (AUTH, USER, ITEM, SYSTEM, TASK, BID, REPORT, STARPOINT, SALARY)
     - ACTION: 操作 (INVALID, NOT_FOUND, ALREADY_EXISTS, FORBIDDEN, etc.)
     - DETAIL: 具体细节 (可选)
     """
-    
+
     # ==================== 认证相关错误 (AUTH) ====================
     AUTH_INVALID_CREDENTIALS = "AUTH_INVALID_CREDENTIALS"
     AUTH_INVALID_TOKEN = "AUTH_INVALID_TOKEN"
@@ -28,7 +28,7 @@ class ErrorCode(str, Enum):
     AUTH_INACTIVE_USER = "AUTH_INACTIVE_USER"
     AUTH_INSUFFICIENT_PERMISSIONS = "AUTH_INSUFFICIENT_PERMISSIONS"
     AUTH_MISSING_SCOPE = "AUTH_MISSING_SCOPE"
-    
+
     # ==================== 用户相关错误 (USER) ====================
     USER_NOT_FOUND = "USER_NOT_FOUND"
     USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS"
@@ -37,11 +37,38 @@ class ErrorCode(str, Enum):
     USER_PASSWORD_SAME_AS_OLD = "USER_PASSWORD_SAME_AS_OLD"
     USER_CANNOT_DELETE_SELF = "USER_CANNOT_DELETE_SELF"
     USER_CANNOT_DELETE_SUPERUSER = "USER_CANNOT_DELETE_SUPERUSER"
-    
+    USER_ROLE_MISMATCH = "USER_ROLE_MISMATCH"
+
     # ==================== 物品相关错误 (ITEM) ====================
     ITEM_NOT_FOUND = "ITEM_NOT_FOUND"
     ITEM_NOT_OWNER = "ITEM_NOT_OWNER"
-    
+
+    # ==================== 任务相关错误 (TASK) ====================
+    TASK_NOT_FOUND = "TASK_NOT_FOUND"
+    TASK_ALREADY_BIDDING = "TASK_ALREADY_BIDDING"
+    TASK_NOT_BIDDING = "TASK_NOT_BIDDING"
+    TASK_ALREADY_ASSIGNED = "TASK_ALREADY_ASSIGNED"
+    TASK_NOT_ASSIGNED_TO_USER = "TASK_NOT_ASSIGNED_TO_USER"
+    TASK_INVALID_STATUS_TRANSITION = "TASK_INVALID_STATUS_TRANSITION"
+    TASK_BIDDING_WINDOW_CLOSED = "TASK_BIDDING_WINDOW_CLOSED"
+
+    # ==================== 竞价相关错误 (BID) ====================
+    BID_NOT_FOUND = "BID_NOT_FOUND"
+    BID_ALREADY_EXISTS = "BID_ALREADY_EXISTS"
+    BID_CANNOT_UPDATE = "BID_CANNOT_UPDATE"
+    BID_WINDOW_CLOSED = "BID_WINDOW_CLOSED"
+
+    # ==================== 日报相关错误 (REPORT) ====================
+    REPORT_NOT_FOUND = "REPORT_NOT_FOUND"
+    REPORT_ALREADY_SUBMITTED = "REPORT_ALREADY_SUBMITTED"
+    REPORT_CANNOT_MODIFY = "REPORT_CANNOT_MODIFY"
+
+    # ==================== 星点相关错误 (STARPOINT) ====================
+    STARPOINT_INSUFFICIENT = "STARPOINT_INSUFFICIENT"
+
+    # ==================== 工资相关错误 (SALARY) ====================
+    SALARY_PARAM_NOT_SET = "SALARY_PARAM_NOT_SET"
+
     # ==================== 系统错误 (SYSTEM) ====================
     SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR"
     SYSTEM_VALIDATION_ERROR = "SYSTEM_VALIDATION_ERROR"
@@ -57,28 +84,46 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     ErrorCode.USER_INVALID_PASSWORD: status.HTTP_400_BAD_REQUEST,
     ErrorCode.USER_PASSWORD_SAME_AS_OLD: status.HTTP_400_BAD_REQUEST,
     ErrorCode.SYSTEM_VALIDATION_ERROR: status.HTTP_400_BAD_REQUEST,
-    
+    ErrorCode.TASK_ALREADY_BIDDING: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.TASK_NOT_BIDDING: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.TASK_ALREADY_ASSIGNED: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.TASK_INVALID_STATUS_TRANSITION: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.TASK_BIDDING_WINDOW_CLOSED: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.BID_ALREADY_EXISTS: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.BID_CANNOT_UPDATE: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.BID_WINDOW_CLOSED: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.REPORT_ALREADY_SUBMITTED: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.REPORT_CANNOT_MODIFY: status.HTTP_400_BAD_REQUEST,
+
     # 401 Unauthorized
     ErrorCode.AUTH_EXPIRED_TOKEN: status.HTTP_401_UNAUTHORIZED,
-    
+
     # 403 Forbidden
     ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS: status.HTTP_403_FORBIDDEN,
     ErrorCode.AUTH_MISSING_SCOPE: status.HTTP_403_FORBIDDEN,
     ErrorCode.USER_CANNOT_DELETE_SELF: status.HTTP_403_FORBIDDEN,
     ErrorCode.USER_CANNOT_DELETE_SUPERUSER: status.HTTP_403_FORBIDDEN,
+    ErrorCode.USER_ROLE_MISMATCH: status.HTTP_403_FORBIDDEN,
     ErrorCode.ITEM_NOT_OWNER: status.HTTP_403_FORBIDDEN,
-    
+    ErrorCode.TASK_NOT_ASSIGNED_TO_USER: status.HTTP_403_FORBIDDEN,
+
     # 404 Not Found
     ErrorCode.USER_NOT_FOUND: status.HTTP_404_NOT_FOUND,
     ErrorCode.ITEM_NOT_FOUND: status.HTTP_404_NOT_FOUND,
-    
+    ErrorCode.TASK_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+    ErrorCode.BID_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+    ErrorCode.REPORT_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+
     # 409 Conflict
     ErrorCode.USER_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     ErrorCode.USER_EMAIL_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
-    
+
+    # 422 Unprocessable Entity
+    ErrorCode.SALARY_PARAM_NOT_SET: status.HTTP_422_UNPROCESSABLE_ENTITY,
+
     # 429 Too Many Requests
     ErrorCode.SYSTEM_RATE_LIMIT: status.HTTP_429_TOO_MANY_REQUESTS,
-    
+
     # 500 Internal Server Error
     ErrorCode.SYSTEM_INTERNAL_ERROR: status.HTTP_500_INTERNAL_SERVER_ERROR,
 }
@@ -92,7 +137,7 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.AUTH_INACTIVE_USER: "Inactive user",
     ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS: "The user doesn't have enough privileges",
     ErrorCode.AUTH_MISSING_SCOPE: "Missing required scope",
-    
+
     ErrorCode.USER_NOT_FOUND: "User not found",
     ErrorCode.USER_ALREADY_EXISTS: "User already exists",
     ErrorCode.USER_EMAIL_ALREADY_EXISTS: "User with this email already exists",
@@ -100,10 +145,32 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.USER_PASSWORD_SAME_AS_OLD: "New password cannot be the same as the current one",
     ErrorCode.USER_CANNOT_DELETE_SELF: "Super users are not allowed to delete themselves",
     ErrorCode.USER_CANNOT_DELETE_SUPERUSER: "Cannot delete superuser",
-    
+    ErrorCode.USER_ROLE_MISMATCH: "User role mismatch",
+
     ErrorCode.ITEM_NOT_FOUND: "Item not found",
     ErrorCode.ITEM_NOT_OWNER: "Not enough permissions to access this item",
-    
+
+    ErrorCode.TASK_NOT_FOUND: "Task not found",
+    ErrorCode.TASK_ALREADY_BIDDING: "Task is already in bidding",
+    ErrorCode.TASK_NOT_BIDDING: "Task is not in bidding status",
+    ErrorCode.TASK_ALREADY_ASSIGNED: "Task is already assigned",
+    ErrorCode.TASK_NOT_ASSIGNED_TO_USER: "Task is not assigned to this user",
+    ErrorCode.TASK_INVALID_STATUS_TRANSITION: "Invalid task status transition",
+    ErrorCode.TASK_BIDDING_WINDOW_CLOSED: "Bidding window has closed",
+
+    ErrorCode.BID_NOT_FOUND: "Bid not found",
+    ErrorCode.BID_ALREADY_EXISTS: "Bid already exists for this task",
+    ErrorCode.BID_CANNOT_UPDATE: "Cannot update bid",
+    ErrorCode.BID_WINDOW_CLOSED: "Bidding window has closed",
+
+    ErrorCode.REPORT_NOT_FOUND: "Daily report not found",
+    ErrorCode.REPORT_ALREADY_SUBMITTED: "Daily report already submitted",
+    ErrorCode.REPORT_CANNOT_MODIFY: "Cannot modify daily report",
+
+    ErrorCode.STARPOINT_INSUFFICIENT: "Insufficient starpoint balance",
+
+    ErrorCode.SALARY_PARAM_NOT_SET: "Salary parameter not set",
+
     ErrorCode.SYSTEM_INTERNAL_ERROR: "Internal server error",
     ErrorCode.SYSTEM_VALIDATION_ERROR: "Validation error",
     ErrorCode.SYSTEM_RATE_LIMIT: "Too many requests",

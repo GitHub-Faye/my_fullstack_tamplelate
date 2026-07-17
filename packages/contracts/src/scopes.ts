@@ -1,6 +1,6 @@
 /**
  * 权限 Scope 定义
- * 
+ *
  * 与后端 apps/api/app/core/scopes.py 保持同步
  * 格式: "资源:操作"
  */
@@ -70,6 +70,146 @@ export const ALL_USER_SCOPES: UserScopeType[] = [
 ];
 
 /**
+ * 任务相关 Scope
+ */
+export const TaskScope = {
+  /** 读取任务列表/详情 */
+  READ: "task:read",
+  /** 创建任务 */
+  CREATE: "task:create",
+  /** 更新任务 */
+  UPDATE: "task:update",
+  /** 删除任务 */
+  DELETE: "task:delete",
+  /** 管理所有任务 */
+  ADMIN: "task:admin",
+  /** 审核任务 */
+  APPROVE: "task:approve",
+  /** 转换任务类型 */
+  CONVERT: "task:convert",
+  /** 改派任务 */
+  REASSIGN: "task:reassign",
+} as const;
+
+export type TaskScopeType = typeof TaskScope[keyof typeof TaskScope];
+
+export const ALL_TASK_SCOPES: TaskScopeType[] = [
+  TaskScope.READ,
+  TaskScope.CREATE,
+  TaskScope.UPDATE,
+  TaskScope.DELETE,
+  TaskScope.ADMIN,
+  TaskScope.APPROVE,
+  TaskScope.CONVERT,
+  TaskScope.REASSIGN,
+];
+
+/**
+ * 竞价相关 Scope
+ */
+export const BidScope = {
+  /** 提交报价 */
+  CREATE: "bid:create",
+  /** 修改报价 */
+  UPDATE: "bid:update",
+  /** 查看报价列表 */
+  READ: "bid:read",
+} as const;
+
+export type BidScopeType = typeof BidScope[keyof typeof BidScope];
+
+export const ALL_BID_SCOPES: BidScopeType[] = [
+  BidScope.CREATE,
+  BidScope.UPDATE,
+  BidScope.READ,
+];
+
+/**
+ * 日报相关 Scope
+ */
+export const ReportScope = {
+  /** 查看日报 */
+  READ: "report:read",
+  /** 填写日报 */
+  CREATE: "report:create",
+  /** 管理所有日报 */
+  ADMIN: "report:admin",
+} as const;
+
+export type ReportScopeType = typeof ReportScope[keyof typeof ReportScope];
+
+export const ALL_REPORT_SCOPES: ReportScopeType[] = [
+  ReportScope.READ,
+  ReportScope.CREATE,
+  ReportScope.ADMIN,
+];
+
+/**
+ * 星点相关 Scope
+ */
+export const StarPointScope = {
+  /** 查看自己的星点 */
+  READ: "starpoint:read",
+  /** 管理星点 */
+  ADMIN: "starpoint:admin",
+} as const;
+
+export type StarPointScopeType = typeof StarPointScope[keyof typeof StarPointScope];
+
+export const ALL_STARPOINT_SCOPES: StarPointScopeType[] = [
+  StarPointScope.READ,
+  StarPointScope.ADMIN,
+];
+
+/**
+ * 工资相关 Scope
+ */
+export const SalaryScope = {
+  /** 查看自己的工资试算 */
+  READ: "salary:read",
+  /** 管理工资 */
+  ADMIN: "salary:admin",
+} as const;
+
+export type SalaryScopeType = typeof SalaryScope[keyof typeof SalaryScope];
+
+export const ALL_SALARY_SCOPES: SalaryScopeType[] = [
+  SalaryScope.READ,
+  SalaryScope.ADMIN,
+];
+
+/**
+ * 客资相关 Scope
+ */
+export const ClientResourceScope = {
+  /** 查看客资 */
+  READ: "client-resource:read",
+  /** 录入客资 */
+  CREATE: "client-resource:create",
+} as const;
+
+export type ClientResourceScopeType = typeof ClientResourceScope[keyof typeof ClientResourceScope];
+
+export const ALL_CLIENT_RESOURCE_SCOPES: ClientResourceScopeType[] = [
+  ClientResourceScope.READ,
+  ClientResourceScope.CREATE,
+];
+
+/**
+ * 规则配置相关 Scope
+ */
+export const RuleScope = {
+  /** 管理规则配置 */
+  ADMIN: "rule:admin",
+} as const;
+
+export type RuleScopeType = typeof RuleScope[keyof typeof RuleScope];
+
+export const ALL_RULE_SCOPES: RuleScopeType[] = [
+  RuleScope.ADMIN,
+];
+
+/**
  * 系统管理 Scope
  */
 export const SystemScope = {
@@ -87,7 +227,17 @@ export type SystemScopeType = typeof SystemScope[keyof typeof SystemScope];
 /**
  * 所有 Scope 的联合类型
  */
-export type ScopeType = ItemScopeType | UserScopeType | SystemScopeType;
+export type ScopeType =
+  | ItemScopeType
+  | UserScopeType
+  | TaskScopeType
+  | BidScopeType
+  | ReportScopeType
+  | StarPointScopeType
+  | SalaryScopeType
+  | ClientResourceScopeType
+  | RuleScopeType
+  | SystemScopeType;
 
 /**
  * 所有 Scope 列表
@@ -95,6 +245,13 @@ export type ScopeType = ItemScopeType | UserScopeType | SystemScopeType;
 export const ALL_SCOPES: ScopeType[] = [
   ...ALL_ITEM_SCOPES,
   ...ALL_USER_SCOPES,
+  ...ALL_TASK_SCOPES,
+  ...ALL_BID_SCOPES,
+  ...ALL_REPORT_SCOPES,
+  ...ALL_STARPOINT_SCOPES,
+  ...ALL_SALARY_SCOPES,
+  ...ALL_CLIENT_RESOURCE_SCOPES,
+  ...ALL_RULE_SCOPES,
   ...Object.values(SystemScope),
 ];
 
@@ -104,7 +261,7 @@ export const ALL_SCOPES: ScopeType[] = [
 export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
   /** 只读用户 */
   viewer: [ItemScope.READ, UserScope.READ],
-  
+
   /** 编辑者 */
   editor: [
     ItemScope.READ,
@@ -113,7 +270,7 @@ export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
     ItemScope.DELETE,
     UserScope.READ,
   ],
-  
+
   /** 管理员 */
   admin: [
     ItemScope.READ,
@@ -128,7 +285,55 @@ export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
     UserScope.ADMIN,
     SystemScope.READ,
   ],
-  
+
+  /** 工程师 */
+  engineer: [
+    TaskScope.READ,
+    BidScope.CREATE,
+    BidScope.UPDATE,
+    ReportScope.CREATE,
+    ReportScope.READ,
+    StarPointScope.READ,
+    SalaryScope.READ,
+  ],
+
+  /** PM */
+  pm: [
+    TaskScope.READ,
+    TaskScope.CREATE,
+    TaskScope.UPDATE,
+    ReportScope.READ,
+    ClientResourceScope.READ,
+    ClientResourceScope.CREATE,
+    SalaryScope.READ,
+  ],
+
+  /** 管理员角色 */
+  admin_role: [
+    TaskScope.READ,
+    TaskScope.CREATE,
+    TaskScope.UPDATE,
+    TaskScope.DELETE,
+    TaskScope.ADMIN,
+    TaskScope.APPROVE,
+    TaskScope.CONVERT,
+    TaskScope.REASSIGN,
+    BidScope.READ,
+    ReportScope.READ,
+    ReportScope.ADMIN,
+    StarPointScope.READ,
+    StarPointScope.ADMIN,
+    SalaryScope.READ,
+    SalaryScope.ADMIN,
+    ClientResourceScope.READ,
+    UserScope.READ,
+    UserScope.CREATE,
+    UserScope.UPDATE,
+    UserScope.DELETE,
+    UserScope.ADMIN,
+    RuleScope.ADMIN,
+  ],
+
   /** 超级管理员 */
   superuser: [...ALL_SCOPES],
 };

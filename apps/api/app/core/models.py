@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime, timezone
+from enum import Enum
 from typing import List, Optional   # 保留 typing.List
 
 from pydantic import EmailStr
@@ -29,6 +30,24 @@ class UserRole(SQLModel, table=True):
         primary_key=True,
         ondelete="CASCADE",
     )
+
+
+# ==================================== 角色类型枚举 ====================================
+from enum import Enum
+
+
+class UserRoleType(str, Enum):
+    """
+    用户角色类型枚举
+
+    三种角色完全独立，不支持兼任：
+    - engineer: 工程师，参与竞价报价、执行任务、填报日报
+    - pm: 市场产品PM，发布任务需求、管理客资数据
+    - admin: 管理员，审核任务、管理工资与规则
+    """
+    ENGINEER = "engineer"
+    PM = "pm"
+    ADMIN = "admin"
 
 
 # ==================================== Role ====================================
@@ -82,11 +101,41 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: Optional[str] = Field(default=None, max_length=255)
+    # 用户角色：engineer | pm | admin（完全独立，不支持兼任）
+    role: UserRoleType = Field(default=UserRoleType.ENGINEER)
 
 
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+
+    # ==================== 工程师工资字段 ====================
+    # S0: 月度工资基数
+    S0: Optional[float] = Field(default=None, ge=0)
+    # H0: 基准时薪，由管理员手动设置
+    H0: Optional[float] = Field(default=None, ge=0)
+    # T_monthly_plan: 月度计划工时
+    T_monthly_plan: Optional[float] = Field(default=None, ge=0)
+    # current_starpoint: 当前星点总数
+    current_starpoint: int = Field(default=0)
+
+    # ==================== PM 工资字段 ====================
+    # S_base: 底薪
+    S_base: Optional[float] = Field(default=None, ge=0)
+    # S_assess: 考核部分
+    S_assess: Optional[float] = Field(default=None, ge=0)
+    # R_base: 底薪比例
+    R_base: Optional[float] = Field(default=None, ge=0, le=1)
+    # R_assess: 考核比例
+    R_assess: Optional[float] = Field(default=None, ge=0, le=1)
+
+    # ==================== PM 客资字段 ====================
+    # baseline_client_count: 基准客资数（L基）
+    baseline_client_count: Optional[int] = Field(default=None, ge=0)
     created_at: Optional[datetime] = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),
