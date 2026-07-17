@@ -10,7 +10,7 @@
 - [x] 后端：实现 Bid API（POST /tasks/{id}/bids, PUT /tasks/{id}/bids/{bid_id}, GET /tasks/{id}/bids）
 - [x] 后端：报价金额自动计算（amount = H0 × T_reported）
 - [x] 后端：权限控制（仅工程师角色可报价，报价窗口内可修改）
-- [ ] 后端：竞价任务列表 API（GET /tasks?status=bidding）
+- [x] 后端：竞价任务列表 API（GET /tasks?status=bidding）
 - [ ] 前端：工程师竞价任务列表页面（/engineer/bidding）
 - [ ] 前端：任务详情弹窗（显示报价倒计时）
 - [ ] 前端：提交报价弹窗（输入 T报，显示报价金额）

@@ -21,6 +21,7 @@ celery_app = Celery(
     include=[
         "app.tasks.email_tasks",
         "app.tasks.user_tasks",
+        "app.tasks.bidding_tasks",  # 竞价结算任务
     ],
 )
 

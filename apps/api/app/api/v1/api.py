@@ -5,6 +5,7 @@ from app.domains.item.router import router as item_router
 from app.domains.task.router import router as task_router
 from app.domains.task.router_admin import router as task_admin_router
 from app.domains.bid.router import router as bid_router
+from app.domains.bidding.router import router as bidding_router
 
 router = APIRouter()
 
@@ -21,3 +22,6 @@ router.include_router(task_admin_router, prefix="/tasks", tags=["tasks-admin"])
 
 # 竞价相关路由
 router.include_router(bid_router, tags=["bids"])
+
+# 竞价结算相关路由
+router.include_router(bidding_router, prefix="/tasks", tags=["bidding-settlement"])
