@@ -1,0 +1,38 @@
+"""
+Bid 模块数据传输对象（DTO）定义
+
+定义竞价报价相关的 API 请求和响应模型。
+"""
+
+import uuid
+from datetime import datetime
+from typing import Optional
+
+from sqlmodel import Field, SQLModel
+
+
+class BidCreate(SQLModel):
+    """创建竞价报价请求"""
+    T_reported: float = Field(ge=0, description="工程师报价工时")
+
+
+class BidUpdate(SQLModel):
+    """修改竞价报价请求"""
+    T_reported: float = Field(ge=0, description="工程师报价工时")
+
+
+class BidPublic(SQLModel):
+    """返回给客户端的竞价报价信息"""
+    id: uuid.UUID
+    task_id: uuid.UUID
+    engineer_id: uuid.UUID
+    T_reported: float
+    amount: float
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
+class BidsPublic(SQLModel):
+    """竞价报价列表响应"""
+    data: list[BidPublic]
+    count: int

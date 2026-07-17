@@ -28,7 +28,7 @@ from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.models import User, Role, RoleScope, UserRole
 from app.core.security import reusable_oauth2
-from app.core.scopes import ItemScope, TaskScope
+from app.core.scopes import ItemScope, TaskScope, BidScope
 from app.core.errors import (
     BusinessException,
     ErrorCode,
@@ -178,10 +178,15 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
     """
     # 超管拥有所有权限
     if user.is_superuser:
-        # 合并 ItemScope 和 TaskScope 的所有权限
+        # 合并所有模块的权限
         all_scopes = set()
-        for scope in list(ItemScope) + list(TaskScope):
-            all_scopes.add(scope.value)
+        from app.core.scopes import (
+            ItemScope, TaskScope, BidScope, ReportScope,
+            StarPointScope, SalaryScope, ClientResourceScope, RuleScope, UserScope
+        )
+        for scope in (ItemScope, TaskScope, BidScope, ReportScope,
+                      StarPointScope, SalaryScope, ClientResourceScope, RuleScope, UserScope):
+            all_scopes.update(s.value for s in scope)
         return all_scopes
     
     # 加载用户的 roles 和 scopes

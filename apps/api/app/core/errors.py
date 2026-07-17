@@ -266,3 +266,8 @@ def raise_scope_missing(scope: str | None = None) -> None:
 def raise_task_not_found(detail: str | None = None) -> None:
     """抛出任务不存在错误"""
     raise BusinessException(code=ErrorCode.TASK_NOT_FOUND, detail=detail)
+
+
+def raise_bid_not_found(detail: str | None = None) -> None:
+    """抛出报价不存在错误"""
+    raise BusinessException(code=ErrorCode.BID_NOT_FOUND, detail=detail)
