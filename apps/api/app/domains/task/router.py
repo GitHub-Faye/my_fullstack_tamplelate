@@ -18,10 +18,12 @@ from app.core.dependencies import (
     SessionDep,
     require_scope,
     require_any_scope,
+    get_user_scopes,
 )
 from app.core.scopes import TaskScope
 from app.core.schemas import Message, PaginationParams
 from app.core.errors import raise_task_not_found
+from app.core.models import Task, TaskStatus
 
 from app.domains.task import repository
 from app.domains.task.schemas import (
@@ -81,9 +83,10 @@ async def create_task(
 async def read_tasks(
     session: SessionDep,
     current_user: CurrentUser,
-    pagination: Annotated[PaginationParams, Query()],
     _: Annotated[None, Depends(require_any_scope(TaskScope.READ, TaskScope.ADMIN))],
     status: Annotated[str | None, Query(description="按状态过滤")] = None,
+    page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100, description="每页数量，默认20，最大100")] = 20,
 ) -> Any:
     """
     获取任务列表
@@ -106,12 +109,23 @@ async def read_tasks(
     # PM 只能查看自己的任务
     pm_id = None if is_admin else current_user.id
 
+    # 计算offset
+    offset = (page - 1) * page_size
+
     tasks, count = await repository.get_tasks(
         session=session,
         pm_id=pm_id,
         status=status_filter,
-        skip=pagination.offset,
-        limit=pagination.limit,
+        skip=offset,
+        limit=page_size,
+    )
+
+    return TasksPublic(
+        data=tasks,
+        count=count,
+        page=page,
+        page_size=page_size,
+        total_pages=(count + page_size - 1) // page_size if count > 0 else 0,
     )
 
     return TasksPublic(
@@ -217,7 +231,3 @@ async def delete_task(
 
     await repository.delete_task(session=session, db_task=task)
     return Message(message="Task deleted successfully")
-
-
-# 导入 get_user_scopes 用于 read_tasks
-from app.core.dependencies import get_user_scopes

@@ -6,6 +6,7 @@
 
 from typing import Any, Generic, TypeVar
 
+from pydantic import BaseModel, Field
 from sqlmodel import SQLModel
 
 
@@ -41,33 +42,26 @@ class PaginatedResponse(SQLModel, Generic[T]):
     total_pages: int | None = None
 
 
-class PaginationParams(SQLModel):
+class PaginationParams(BaseModel):
     """
     分页查询参数
-    
+
     用于统一分页请求参数:
     - page: 页码，从 1 开始
     - page_size: 每页数量，默认 20，最大 100
     """
-    page: int = 1
-    page_size: int = 20
-    
-    def __init__(self, **data):
-        super().__init__(**data)
-        # 确保 page 至少为 1
-        if self.page < 1:
-            self.page = 1
-        # 限制 page_size 范围
-        if self.page_size < 1:
-            self.page_size = 1
-        elif self.page_size > 100:
-            self.page_size = 100
-    
+    model_config = {
+        "extra": "forbid",
+    }
+
+    page: int = Field(1, ge=1)
+    page_size: int = Field(20, ge=1, le=100)
+
     @property
     def offset(self) -> int:
         """计算数据库 offset"""
         return (self.page - 1) * self.page_size
-    
+
     @property
     def limit(self) -> int:
         """返回 limit (即 page_size)"""
