@@ -47,6 +47,34 @@ class TaskType(str, Enum):
     CONVENIENT = "convenient"
 
 
+class ReportStage(str, Enum):
+    """
+    日报阶段枚举
+
+    - developing: 开发中
+    - testing: 测试中
+    - completed: 已完成
+    - paused: 已暂停
+    """
+    DEVELOPING = "developing"
+    TESTING = "testing"
+    COMPLETED = "completed"
+    PAUSED = "paused"
+
+
+class JudgmentType(str, Enum):
+    """
+    星点判定类型枚举
+
+    - manual: 手动判定（管理员手动调整）
+    - auto_ratio: 按比例自动判定
+    - auto_threshold: 按阈值自动判定
+    """
+    MANUAL = "manual"
+    AUTO_RATIO = "auto_ratio"
+    AUTO_THRESHOLD = "auto_threshold"
+
+
 # ==================================== UserRole (Association Table) ====================================
 # 必须在 Role 和 User 之前定义，因为它们都引用了这个类
 
@@ -333,4 +361,87 @@ class Attachment(AttachmentBase, table=True):
     uploader: Optional["User"] = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Attachment.uploaded_by]"}
     )
+
+
+# ==================================== DailyReport ====================================
+class DailyReportBase(SQLModel):
+    """日报基础模型"""
+    today_hours: float = Field(ge=0, description="今日工作时长（小时）")
+    current_stage: ReportStage = Field(description="当前阶段")
+    progress: Optional[str] = Field(default=None, max_length=500, description="进度描述")
+    completion_judgment: Optional[str] = Field(default=None, max_length=500, description="完成判定说明")
+    starpoint_change: Optional[int] = Field(default=0, description="星点变化量")
+    notes: Optional[str] = Field(default=None, max_length=1000, description="备注说明")
+    summary: Optional[str] = Field(default=None, max_length=1000, description="工作总结")
+    has_blocker: bool = Field(default=False, description="是否有阻塞问题")
+
+
+class DailyReport(DailyReportBase, table=True):
+    """日报模型"""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    # 关联关系
+    engineer_id: uuid.UUID = Field(
+        foreign_key="user.id",
+        nullable=False,
+        description="填报工程师ID"
+    )
+    task_id: uuid.UUID = Field(
+        foreign_key="task.id",
+        nullable=False,
+        description="关联任务ID"
+    )
+
+    # 报告日期
+    report_date: datetime = Field(
+        sa_type=DateTime(timezone=True),
+        description="报告日期"
+    )
+
+    # 时间戳
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+
+    # 关系
+    engineer: Optional["User"] = Relationship()
+    task: Optional["Task"] = Relationship()
+
+
+# ==================================== StarPoint Record ====================================
+class StarPointRecordBase(SQLModel):
+    """星点记录基础模型"""
+    change_amount: int = Field(description="星点变化量（可正可负）")
+    reason: Optional[str] = Field(default=None, max_length=500, description="变化原因")
+    judgment_type: JudgmentType = Field(description="判定类型")
+    T_reported: Optional[float] = Field(default=None, ge=0, description="报价工时")
+    T_actual: Optional[float] = Field(default=None, ge=0, description="实际工时")
+
+
+class StarPointRecord(StarPointRecordBase, table=True):
+    """星点记录模型"""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    # 关联关系
+    engineer_id: uuid.UUID = Field(
+        foreign_key="user.id",
+        nullable=False,
+        description="工程师ID"
+    )
+    task_id: Optional[uuid.UUID] = Field(
+        default=None,
+        foreign_key="task.id",
+        description="关联任务ID（可为空，如手动调整）"
+    )
+
+    # 时间戳
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+
+    # 关系
+    engineer: Optional["User"] = Relationship()
+    task: Optional["Task"] = Relationship()
 

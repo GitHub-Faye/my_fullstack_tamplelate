@@ -24,7 +24,8 @@ if config.config_file_name is not None:
 # 必须先导入模型，再赋值 target_metadata
 from app.core.models import (
     Role, RoleScope, User, UserRole, Item, UserRoleType,
-    Task, TaskStatus, TaskType, Bid, Attachment
+    Task, TaskStatus, TaskType, Bid, Attachment,
+    DailyReport, StarPointRecord, ReportStage, JudgmentType
 )  # noqa: F401, E402
 
 # SQLModel.metadata 是所有模型的公共元数据容器
