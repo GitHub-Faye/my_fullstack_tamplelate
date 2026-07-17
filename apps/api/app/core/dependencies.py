@@ -28,7 +28,7 @@ from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.models import User, Role, RoleScope, UserRole
 from app.core.security import reusable_oauth2
-from app.core.scopes import ItemScope
+from app.core.scopes import ItemScope, TaskScope
 from app.core.errors import (
     BusinessException,
     ErrorCode,
@@ -178,7 +178,11 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
     """
     # 超管拥有所有权限
     if user.is_superuser:
-        return {scope.value for scope in ItemScope}
+        # 合并 ItemScope 和 TaskScope 的所有权限
+        all_scopes = set()
+        for scope in list(ItemScope) + list(TaskScope):
+            all_scopes.add(scope.value)
+        return all_scopes
     
     # 加载用户的 roles 和 scopes
     scopes = set()
@@ -197,16 +201,16 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
     return scopes
 
 
-def require_scope(required_scope: ItemScope):
+def require_scope(required_scope):
     """
     创建依赖项，检查用户是否拥有指定的 scope 权限。
-    
+
     参数：
-    - required_scope：需要的权限范围
-    
+    - required_scope：需要的权限范围（ItemScope 或 TaskScope）
+
     返回值：
     - 依赖函数，可在路由的 dependencies 中使用
-    
+
     使用示例：
     @router.post("/", dependencies=[Depends(require_scope(ItemScope.CREATE))])
     async def create_item(...):
@@ -217,23 +221,23 @@ def require_scope(required_scope: ItemScope):
         current_user: CurrentUser,
     ) -> None:
         user_scopes = await get_user_scopes(session, current_user)
-        
+
         if required_scope.value not in user_scopes:
             raise_scope_missing(required_scope.value)
-    
+
     return scope_checker
 
 
-def require_any_scope(*required_scopes: ItemScope):
+def require_any_scope(*required_scopes):
     """
     创建依赖项，检查用户是否拥有任意一个指定的 scope 权限。
-    
+
     参数：
     - required_scopes：需要的权限范围列表（满足其一即可）
-    
+
     返回值：
     - 依赖函数，可在路由的 dependencies 中使用
-    
+
     使用示例：
     @router.get("/", dependencies=[Depends(require_any_scope(ItemScope.READ, ItemScope.ADMIN))])
     async def read_items(...):
@@ -245,12 +249,12 @@ def require_any_scope(*required_scopes: ItemScope):
     ) -> None:
         user_scopes = await get_user_scopes(session, current_user)
         required_scope_values = {scope.value for scope in required_scopes}
-        
+
         if not user_scopes.intersection(required_scope_values):
             raise_permission_denied(
                 f"Permission denied: one of {[s.value for s in required_scopes]} required"
             )
-    
+
     return scope_checker
 
 

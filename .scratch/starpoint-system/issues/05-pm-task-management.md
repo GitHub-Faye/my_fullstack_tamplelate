@@ -4,16 +4,16 @@
 
 **Blocked by:** 02 — Prefactor: 创建任务管理基础模型
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] 后端：创建 domains/task 模块（schemas, repository, router, dependencies）
-- [ ] 后端：实现 Task API（POST /tasks, GET /tasks, GET /tasks/{id}, PUT /tasks/{id}）
-- [ ] 后端：任务状态自动设为 unconfirmed，pm_id 为当前用户
-- [ ] 后端：权限控制（仅 PM 角色可创建，仅自己创建的可编辑）
+- [x] 后端：创建 domains/task 模块（schemas, repository, router, dependencies）
+- [x] 后端：实现 Task API（POST /tasks, GET /tasks, GET /tasks/{id}, PUT /tasks/{id}）
+- [x] 后端：任务状态自动设为 unconfirmed，pm_id 为当前用户
+- [x] 后端：权限控制（仅 PM 角色可创建，仅自己创建的可编辑）
 - [ ] 前端：创建 features/task 模块（PM 视图）
 - [ ] 前端：PM 任务列表页面（/pm/tasks）
 - [ ] 前端：发布任务弹窗/页面（/pm/tasks/new）
 - [ ] 前端：任务详情页面（/pm/tasks/[id]）
 - [ ] 前端：编辑任务功能
 - [ ] SDK：运行 pnpm generate 更新 SDK
-- [ ] 测试：API 集成测试
+- [x] 测试：API 集成测试
