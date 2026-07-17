@@ -15,6 +15,38 @@ def get_datetime_utc() -> datetime:
     return datetime.now(timezone.utc)
 
 
+# ==================================== 任务状态枚举 ====================================
+
+class TaskStatus(str, Enum):
+    """
+    任务状态枚举
+
+    状态流转：
+    unconfirmed -> confirmed_unpublished -> bidding -> pending_start -> in_progress -> completed
+    中间状态：paused（可从 in_progress 暂停）
+    """
+    UNCONFIRMED = "unconfirmed"                      # 未确认（PM提交，待管理员审核）
+    CONFIRMED_UNPUBLISHED = "confirmed_unpublished"  # 已确认未发布（管理员审核通过，待发布）
+    BIDDING = "bidding"                              # 竞价中
+    PENDING_START = "pending_start"                  # 待开工
+    IN_PROGRESS = "in_progress"                      # 进行中
+    PAUSED = "paused"                                # 已暂停
+    COMPLETED = "completed"                          # 已完成
+
+
+class TaskType(str, Enum):
+    """
+    任务类型枚举
+
+    - normal: 普通任务，按标准竞价流程
+    - urgent: 紧急任务，优先竞价
+    - convenient: 便捷任务，不参与竞价，按需执行
+    """
+    NORMAL = "normal"
+    URGENT = "urgent"
+    CONVENIENT = "convenient"
+
+
 # ==================================== UserRole (Association Table) ====================================
 # 必须在 Role 和 User 之前定义，因为它们都引用了这个类
 
@@ -171,3 +203,134 @@ class Item(ItemBase, table=True):
 
     # 关键修改在这里
     owner: Optional["User"] = Relationship(back_populates="items")
+
+
+# ==================================== Task ====================================
+class TaskBase(SQLModel):
+    """任务基础模型"""
+    name: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=2000)
+    task_type: TaskType = Field(default=TaskType.NORMAL)
+    status: TaskStatus = Field(default=TaskStatus.UNCONFIRMED)
+    T_reported: Optional[float] = Field(default=None, ge=0, description="工程师填报工时")
+    T_actual: Optional[float] = Field(default=None, ge=0, description="实际结算工时")
+
+
+class Task(TaskBase, table=True):
+    """任务模型"""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    # 关联关系
+    pm_id: uuid.UUID = Field(
+        foreign_key="user.id",
+        nullable=False,
+        description="发布任务的PM ID"
+    )
+    engineer_id: Optional[uuid.UUID] = Field(
+        default=None,
+        foreign_key="user.id",
+        description="被分配的工程师ID"
+    )
+
+    # 竞价截止时间
+    bidding_deadline: Optional[datetime] = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),
+        description="竞价截止时间"
+    )
+
+    # 时间戳
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+    updated_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"onupdate": get_datetime_utc}
+    )
+
+    # 关系
+    pm: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Task.pm_id]"}
+    )
+    engineer: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Task.engineer_id]"}
+    )
+    bids: List["Bid"] = Relationship(back_populates="task", cascade_delete=True)
+    attachments: List["Attachment"] = Relationship(back_populates="task", cascade_delete=True)
+
+
+# ==================================== Bid ====================================
+class BidBase(SQLModel):
+    """竞价基础模型"""
+    T_reported: float = Field(ge=0, description="工程师报价工时")
+    amount: float = Field(ge=0, description="竞价金额")
+
+
+class Bid(BidBase, table=True):
+    """竞价模型"""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    # 关联关系
+    task_id: uuid.UUID = Field(
+        foreign_key="task.id",
+        nullable=False,
+        ondelete="CASCADE"
+    )
+    engineer_id: uuid.UUID = Field(
+        foreign_key="user.id",
+        nullable=False
+    )
+
+    # 时间戳
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+    updated_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+        sa_column_kwargs={"onupdate": get_datetime_utc}
+    )
+
+    # 关系
+    task: Optional["Task"] = Relationship(back_populates="bids")
+    engineer: Optional["User"] = Relationship()
+
+
+# ==================================== Attachment ====================================
+class AttachmentBase(SQLModel):
+    """附件基础模型"""
+    file_name: str = Field(max_length=255)
+    file_path: str = Field(max_length=500)
+    file_size: int = Field(ge=0, description="文件大小（字节）")
+
+
+class Attachment(AttachmentBase, table=True):
+    """附件模型"""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    # 关联关系
+    task_id: uuid.UUID = Field(
+        foreign_key="task.id",
+        nullable=False,
+        ondelete="CASCADE"
+    )
+    uploaded_by: uuid.UUID = Field(
+        foreign_key="user.id",
+        nullable=False
+    )
+
+    # 时间戳
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+
+    # 关系
+    task: Optional["Task"] = Relationship(back_populates="attachments")
+    uploader: Optional["User"] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[Attachment.uploaded_by]"}
+    )
+
