@@ -5,13 +5,17 @@
 - 查看自己的工资试算
 - 管理员查看全员工资汇总
 - 管理员设置工资参数
+- 管理员导出工资表（CSV）
 """
 
+import csv
+import io
 import uuid
 from datetime import datetime, timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 
 from app.core.dependencies import (
     CurrentUser,
@@ -32,7 +36,6 @@ from app.domains.salary.schemas import (
     SalarySummary,
     SalarySummaryList,
     SalaryExportRequest,
-    SalaryExportResponse,
 )
 from app.domains.salary.calculation import calculate_user_salary
 from app.domains.starpoint import repository as starpoint_repo
@@ -111,28 +114,28 @@ async def read_salary_summary(
     """
     offset = (page - 1) * page_size
 
-    # 获取基础列表
-    salaries, count = await repository.get_all_salaries(
+    # 获取用户列表（已返回 User 对象，无需 N+1）
+    users, count = await repository.get_all_salaries(
         session=session,
         skip=offset,
         limit=page_size,
     )
 
-    # 完整计算工资（需要 K 系数）
+    # 计算每个员工的工资
     result_salaries = []
-    for salary_dict in salaries:
+    for user in users:
         try:
-            user = await session.get(User, salary_dict["user_id"])
-            if user:
-                calculated = await calculate_user_salary(session=session, user=user)
-                salary_dict["salary"] = calculated.get("salary_final") or calculated.get("salary_total", 0)
+            calculated = await calculate_user_salary(session=session, user=user)
+            salary = calculated.get("salary_final") or calculated.get("salary_total", 0)
         except BusinessException:
-            # 工资参数未设置或角色不匹配时跳过该用户
-            pass
-        except Exception as e:
-            # 其他意外错误不影响汇总结果
-            pass
-        result_salaries.append(SalarySummary(**salary_dict))
+            salary = 0.0
+
+        result_salaries.append(SalarySummary(
+            user_id=user.id,
+            full_name=user.full_name,
+            role=user.role.value,
+            salary=salary,
+        ))
 
     return SalarySummaryList(
         data=result_salaries,
@@ -193,9 +196,8 @@ async def update_salary_params(
 
 @router.post(
     "/export",
-    response_model=SalaryExportResponse,
     summary="导出工资表（管理员）",
-    description="管理员导出工资汇总表为 CSV"
+    description="管理员导出全员工资汇总表为 CSV 文件流"
 )
 async def export_salaries(
     *,
@@ -205,45 +207,48 @@ async def export_salaries(
     _: Annotated[None, Depends(require_scope(SalaryScope.ADMIN))] = None,
 ) -> Any:
     """
-    导出工资表
+    导出工资表为 CSV
 
     权限：管理员（需 salary:admin 权限）
-
-    导出格式：CSV
     """
-    # 获取所有员工工资
-    salaries, _ = await repository.get_all_salaries(
+    # 获取所有员工
+    users, _ = await repository.get_all_salaries(
         session=session,
         skip=0,
-        limit=1000,  # 假设不超过 1000 人
+        limit=1000,
     )
 
-    # 完整计算工资
-    result_salaries = []
-    for salary_dict in salaries:
+    # 计算每个员工的工资
+    rows = []
+    for user in users:
         try:
-            user = await session.get(User, salary_dict["user_id"])
-            if user:
-                calculated = await calculate_user_salary(session=session, user=user)
-                salary_dict["salary"] = calculated.get("salary_final") or calculated.get("salary_total", 0)
+            calculated = await calculate_user_salary(session=session, user=user)
+            salary = calculated.get("salary_final") or calculated.get("salary_total", 0)
         except BusinessException:
-            pass
-        except Exception as e:
-            pass
-        result_salaries.append(salary_dict)
+            salary = 0.0
 
-    # 生成文件名
+        rows.append({
+            "user_id": str(user.id),
+            "full_name": user.full_name or "",
+            "role": user.role.value,
+            "salary": round(salary, 2),
+        })
+
+    # 生成 CSV
     month = request.month or datetime.now(timezone.utc).strftime("%Y-%m")
     filename = f"salary_export_{month}.csv"
 
-    # 注意：这里返回的是模拟的下载链接
-    # 实际实现中，应该：
-    # 1. 生成文件并保存到对象存储（如 S3、MinIO）
-    # 2. 返回真实的下载链接
-    # 当前简化实现：直接返回数据
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=["user_id", "full_name", "role", "salary"])
+    writer.writeheader()
+    writer.writerows(rows)
+    csv_content = output.getvalue()
 
-    return SalaryExportResponse(
-        download_url=f"/api/v1/salaries/download/{filename}",
-        filename=filename,
-        record_count=len(result_salaries),
+    headers = {
+        "Content-Disposition": f"attachment; filename=\"{filename}\"",
+    }
+    return StreamingResponse(
+        iter([csv_content]),
+        media_type="text/csv",
+        headers=headers,
     )

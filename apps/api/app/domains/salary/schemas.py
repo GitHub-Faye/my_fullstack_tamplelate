@@ -75,7 +75,6 @@ class SalarySummary(SQLModel):
     full_name: Optional[str] = None
     role: str
     salary: float = Field(description="工资金额")
-    department: Optional[str] = None  # 预留字段
 
 
 class SalarySummaryList(PaginatedResponse[SalarySummary]):
@@ -86,11 +85,8 @@ class SalarySummaryList(PaginatedResponse[SalarySummary]):
 class SalaryExportRequest(SQLModel):
     """工资导出请求"""
     month: Optional[str] = Field(default=None, description="导出月份（YYYY-MM），默认当前月")
-    format: str = Field(default="csv", description="导出格式：csv | xlsx")
 
 
 class SalaryExportResponse(SQLModel):
     """工资导出响应"""
-    download_url: str = Field(description="下载链接")
-    filename: str = Field(description="文件名")
     record_count: int = Field(description="记录数")

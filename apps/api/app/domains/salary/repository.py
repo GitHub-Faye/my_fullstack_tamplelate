@@ -149,12 +149,9 @@ async def get_all_salaries(
     session: AsyncSession,
     skip: int = 0,
     limit: int = 100,
-) -> Tuple[list[dict], int]:
+) -> Tuple[list[User], int]:
     """
-    获取所有员工的工资汇总
-
-    只返回基础用户信息（不含完整工资计算），
-    上层的 API 路由负责调用 calculate_user_salary 进行完整计算。
+    获取所有工程师和 PM 用户列表
 
     Args:
         session: 数据库会话
@@ -162,7 +159,7 @@ async def get_all_salaries(
         limit: 返回记录数上限
 
     Returns:
-        (用户基础信息列表, 总数) 元组
+        (用户列表, 总数) 元组
     """
     # 计数（工程师 + PM）
     count_stmt = select(func.count()).select_from(User).where(_SALARY_USER_FILTER)
@@ -179,16 +176,7 @@ async def get_all_salaries(
     result = await session.execute(stmt)
     users = list(result.scalars().all())
 
-    salaries = []
-    for user in users:
-        salaries.append({
-            "user_id": user.id,
-            "full_name": user.full_name,
-            "role": user.role.value,
-            "salary": 0.0,  # 占位，由上层路由计算
-        })
-
-    return salaries, count
+    return users, count
 
 
 async def update_user_salary_params(

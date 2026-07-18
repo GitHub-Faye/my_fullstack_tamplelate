@@ -285,13 +285,11 @@ class TestSalaryAPIs:
             "/v1/salaries/export",
             json={
                 "month": "2026-07",
-                "format": "csv",
             },
             headers={"Authorization": f"Bearer {token}"},
         )
 
         assert response.status_code == 200
-        data = response.json()
-        assert "download_url" in data
-        assert "filename" in data
-        assert "record_count" in data
+        assert response.headers["content-type"].startswith("text/csv")
+        assert "Content-Disposition" in response.headers
+        assert "salary_export" in response.headers["content-disposition"]
