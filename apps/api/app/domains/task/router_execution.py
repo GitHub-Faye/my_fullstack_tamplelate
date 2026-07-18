@@ -103,7 +103,6 @@ async def start_task(
     session: SessionDep,
     current_user: CurrentUser,
     task_id: uuid.UUID,
-    request: TaskStartRequest = None,
 ) -> Any:
     """
     启动任务
@@ -137,17 +136,16 @@ async def start_task(
 
 
 @router.post(
-    "/{task_id}/reject",
+    "/{task_id}/decline",
     response_model=TaskPublic,
     summary="拒绝任务",
     description="工程师拒绝待开工的任务，任务回退到已确认未发布状态"
 )
-async def reject_task(
+async def decline_task(
     *,
     session: SessionDep,
     current_user: CurrentUser,
     task_id: uuid.UUID,
-    request: TaskRejectRequest = None,
 ) -> Any:
     """
     拒绝任务
@@ -192,7 +190,6 @@ async def pause_request_task(
     session: SessionDep,
     current_user: CurrentUser,
     task_id: uuid.UUID,
-    request: TaskPauseRequest = None,
 ) -> Any:
     """
     申请暂停任务
@@ -236,7 +233,6 @@ async def resume_task(
     session: SessionDep,
     current_user: CurrentUser,
     task_id: uuid.UUID,
-    request: TaskResumeRequest = None,
 ) -> Any:
     """
     恢复任务

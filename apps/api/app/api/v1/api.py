@@ -8,6 +8,7 @@ from app.domains.task.router_execution import router as task_execution_router
 from app.domains.task.router_admin_execution import router as task_admin_execution_router
 from app.domains.bid.router import router as bid_router
 from app.domains.bidding.router import router as bidding_router
+from app.domains.daily_report.router import router as daily_report_router
 
 router = APIRouter()
 
@@ -29,3 +30,6 @@ router.include_router(bid_router, tags=["bids"])
 
 # 竞价结算相关路由
 router.include_router(bidding_router, prefix="/tasks", tags=["bidding-settlement"])
+
+# 日报相关路由
+router.include_router(daily_report_router, prefix="/daily-reports", tags=["daily-reports"])

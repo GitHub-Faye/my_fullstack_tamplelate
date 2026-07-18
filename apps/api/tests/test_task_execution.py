@@ -233,7 +233,7 @@ class TestTaskExecution:
         # 3. 工程师拒绝任务
         token = create_test_token(engineer.id)
         response = await client.post(
-            f"/v1/tasks/{task.id}/reject",
+            f"/v1/tasks/{task.id}/decline",
             headers=get_auth_headers(token),
         )
 
