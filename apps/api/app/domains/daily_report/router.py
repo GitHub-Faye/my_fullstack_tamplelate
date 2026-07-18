@@ -24,7 +24,7 @@ from app.core.dependencies import (
 from app.core.scopes import ReportScope
 from app.core.schemas import Message
 from app.core.errors import BusinessException, ErrorCode
-from app.core.models import User, UserRoleType
+from app.core.models import User, UserRoleType, Task, TaskStatus, ReportStage
 
 from app.domains.daily_report import repository
 from app.domains.daily_report.schemas import (
@@ -113,6 +113,7 @@ async def create_daily_report(
     3. 检查是否已有当日该任务的日报
     4. 创建日报
     5. 累加任务的 T_actual（根据今日投入工时）
+    6. 同步任务状态（根据日报的 current_stage）
     """
     # 1. 检查用户是否是工程师
     await check_engineer_role(session, current_user)
@@ -158,8 +159,20 @@ async def create_daily_report(
     if task.T_actual is None:
         task.T_actual = 0.0
     task.T_actual += report_in.today_hours
+
+    # 6. 同步任务状态（根据日报的 current_stage）
+    # 如果日报标记为 completed，则同步任务状态为 COMPLETED
+    if report_in.current_stage == ReportStage.COMPLETED and task.status == TaskStatus.IN_PROGRESS:
+        task.status = TaskStatus.COMPLETED
+    # 如果日报标记为 paused，则同步任务状态为 PAUSED
+    elif report_in.current_stage == ReportStage.PAUSED and task.status == TaskStatus.IN_PROGRESS:
+        task.status = TaskStatus.PAUSED
+    # 如果日报有 progress 且有 has_blocker，可以记录但状态不变
     session.add(task)
     await session.commit()
+
+    await session.refresh(report)
+    return report
 
     return report
 

@@ -19,7 +19,7 @@ from app.core.dependencies import (
 )
 from app.core.scopes import BidScope
 from app.core.errors import raise_task_not_found, raise_bid_not_found
-from app.core.models import Task
+from app.core.models import Task, User
 
 from app.domains.bid import repository
 from app.domains.bid.schemas import BidCreate, BidUpdate, BidPublic, BidsPublic
@@ -62,6 +62,15 @@ async def create_bid(
     # 检查工程师角色
     check_engineer_role(session=session, user=current_user)
 
+    # 获取工程师的 H0（基准时薪）
+    # 重新加载用户以获取 H0 字段
+    engineer = await session.get(User, current_user.id)
+    if not engineer or not engineer.H0:
+        # 如果工程师未设置 H0，使用默认值 100
+        H0 = 100.0
+    else:
+        H0 = engineer.H0
+
     # 获取任务
     task = await session.get(Task, task_id)
     if not task:
@@ -85,6 +94,7 @@ async def create_bid(
             session=session,
             db_bid=existing_bid,
             T_reported=bid_in.T_reported,
+            H0=H0,
         )
     else:
         # 创建新报价
@@ -93,6 +103,7 @@ async def create_bid(
             task_id=task_id,
             engineer_id=current_user.id,
             T_reported=bid_in.T_reported,
+            H0=H0,
         )
 
     return bid
@@ -124,6 +135,13 @@ async def update_bid(
     # 检查工程师角色
     check_engineer_role(session=session, user=current_user)
 
+    # 获取工程师的 H0（基准时薪）
+    engineer = await session.get(User, current_user.id)
+    if not engineer or not engineer.H0:
+        H0 = 100.0
+    else:
+        H0 = engineer.H0
+
     # 获取报价
     bid = await repository.get_bid(session=session, bid_id=bid_id)
     if not bid:
@@ -148,6 +166,7 @@ async def update_bid(
         session=session,
         db_bid=bid,
         T_reported=bid_in.T_reported,
+        H0=H0,
     )
 
     return bid

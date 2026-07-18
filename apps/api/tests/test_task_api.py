@@ -81,7 +81,7 @@ async def test_create_task_as_pm(client: AsyncClient, db_session: AsyncSession) 
 
     # 创建任务
     response = await client.post(
-        "/api/v1/tasks/",
+        "/v1/tasks/",
         json={
             "name": "测试任务",
             "description": "这是一个测试任务",
@@ -114,7 +114,7 @@ async def test_create_task_as_engineer_fails(client: AsyncClient, session: Async
 
     # 尝试创建任务
     response = await client.post(
-        "/api/v1/tasks/",
+        "/v1/tasks/",
         json={
             "name": "测试任务",
             "description": "这是一个测试任务",
@@ -153,7 +153,7 @@ async def test_read_tasks_as_pm(client: AsyncClient, session: AsyncSession) -> N
 
     # 查询任务列表
     response = await client.get(
-        "/api/v1/tasks/",
+        "/v1/tasks/",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -192,7 +192,7 @@ async def test_read_task_by_id(client: AsyncClient, session: AsyncSession) -> No
 
     # 查询任务详情
     response = await client.get(
-        f"/api/v1/tasks/{task.id}",
+        f"/v1/tasks/{task.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -230,7 +230,7 @@ async def test_update_task_as_owner(client: AsyncClient, session: AsyncSession) 
 
     # 更新任务
     response = await client.put(
-        f"/api/v1/tasks/{task.id}",
+        f"/v1/tasks/{task.id}",
         json={
             "name": "更新后的任务",
             "description": "新描述",
@@ -272,7 +272,7 @@ async def test_update_task_with_wrong_status_fails(client: AsyncClient, session:
 
     # 尝试更新任务
     response = await client.put(
-        f"/api/v1/tasks/{task.id}",
+        f"/v1/tasks/{task.id}",
         json={"name": "尝试更新"},
         headers={"Authorization": f"Bearer {token}"},
     )
@@ -312,7 +312,7 @@ async def test_delete_task(client: AsyncClient, session: AsyncSession) -> None:
 
     # 删除任务
     response = await client.delete(
-        f"/api/v1/tasks/{task.id}",
+        f"/v1/tasks/{task.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -320,7 +320,7 @@ async def test_delete_task(client: AsyncClient, session: AsyncSession) -> None:
 
     # 验证任务已删除
     response = await client.get(
-        f"/api/v1/tasks/{task.id}",
+        f"/v1/tasks/{task.id}",
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404

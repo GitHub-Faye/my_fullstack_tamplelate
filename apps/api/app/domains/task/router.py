@@ -93,6 +93,7 @@ async def read_tasks(
 
     - PM 只能看自己的任务
     - 管理员可看所有任务
+    - 工程师可查看竞价中的任务（用于报价）
     - 支持按状态过滤
     """
     user_scopes = await get_user_scopes(session, current_user)
@@ -108,6 +109,15 @@ async def read_tasks(
 
     # PM 只能查看自己的任务
     pm_id = None if is_admin else current_user.id
+
+    # 工程师查看竞价任务列表时，不过滤 pm_id
+    from app.core.models import UserRoleType, User
+    from sqlalchemy import select
+    stmt = select(User).where(User.id == current_user.id)
+    result = await session.execute(stmt)
+    user_with_role = result.scalar_one_or_none()
+    if user_with_role and user_with_role.role == UserRoleType.ENGINEER:
+        pm_id = None
 
     # 计算offset
     offset = (page - 1) * page_size
@@ -126,14 +136,6 @@ async def read_tasks(
         page=page,
         page_size=page_size,
         total_pages=(count + page_size - 1) // page_size if count > 0 else 0,
-    )
-
-    return TasksPublic(
-        data=tasks,
-        count=count,
-        page=pagination.page,
-        page_size=pagination.page_size,
-        total_pages=(count + pagination.page_size - 1) // pagination.page_size if count > 0 else 0,
     )
 
 
