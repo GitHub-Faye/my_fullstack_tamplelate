@@ -6,7 +6,7 @@
 
 import uuid
 from datetime import datetime, timezone, timedelta
-from typing import Optional
+from typing import Optional, Tuple
 
 from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +28,14 @@ from app.domains.dashboard.schemas import (
 )
 
 
+def _get_time_bounds() -> Tuple[datetime, datetime, datetime]:
+    """获取当前时间相关的裁剪时间：now, today_start, month_start"""
+    now = datetime.now(timezone.utc)
+    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    return now, today_start, month_start
+
+
 async def get_engineer_dashboard(
     *,
     session: AsyncSession,
@@ -45,8 +53,7 @@ async def get_engineer_dashboard(
     Returns:
         EngineerDashboard DTO
     """
-    now = datetime.now(timezone.utc)
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    _, _, month_start = _get_time_bounds()
 
     # 本月实际工时（已完成任务）
     stmt = (
@@ -62,7 +69,7 @@ async def get_engineer_dashboard(
     result = await session.execute(stmt)
     T_actual_monthly = float(result.scalar_one() or 0)
 
-    # T报准确率：本月已完成任务的 T_actual / T_reported 比值
+    # T报准确率：本月已完成任务的 T_actual / T_reported 比值（cap at 100%）
     accuracy_stmt = (
         select(
             func.coalesce(func.sum(Task.T_actual), 0),
@@ -81,7 +88,11 @@ async def get_engineer_dashboard(
     row = result.one()
     T_actual_sum = float(row[0] or 0)
     T_reported_sum = float(row[1] or 0)
-    accuracy_rate = (T_actual_sum / T_reported_sum * 100) if T_reported_sum > 0 else 100.0
+
+    if T_reported_sum > 0:
+        accuracy_rate = min(T_actual_sum / T_reported_sum * 100, 100.0)
+    else:
+        accuracy_rate = 100.0
 
     # 剩余工时 = 月度计划 - 本月实际
     T_monthly_plan = engineer.T_monthly_plan or 0.0
@@ -116,9 +127,7 @@ async def get_pm_dashboard(
     Returns:
         PMDashboard DTO
     """
-    now = datetime.now(timezone.utc)
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    _, today_start, month_start = _get_time_bounds()
 
     # 今日新增客资
     today_stmt = select(func.count()).select_from(ClientResource).where(
@@ -152,19 +161,23 @@ async def get_pm_dashboard(
 async def get_admin_dashboard(
     *,
     session: AsyncSession,
+    total_salary: float = 0.0,
+    engineer_salary_cost: float = 0.0,
+    pm_salary_cost: float = 0.0,
 ) -> AdminDashboard:
     """
     获取管理员仪表板数据
 
     Args:
         session: 数据库会话
+        total_salary: 月度总收入（由调用方通过 calculate_user_salary 计算）
+        engineer_salary_cost: 工程师总成本
+        pm_salary_cost: PM 总成本
 
     Returns:
         AdminDashboard DTO
     """
-    now = datetime.now(timezone.utc)
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    _, today_start, month_start = _get_time_bounds()
 
     # 今日新增客资
     today_clients_stmt = select(func.count()).select_from(ClientResource).where(
@@ -194,35 +207,58 @@ async def get_admin_dashboard(
     result = await session.execute(ongoing_stmt)
     ongoing_tasks = result.scalar_one() or 0
 
-    # 工程师负载：每个工程师的进行中任务数 + 本月实际工时
-    month_start_for_tasks = month_start
+    # 工程师负载：进行中任务数 + 本月实际工时 + 剩余工时 + T报准确率
     engineer_load_stmt = (
         select(
             User.id,
             User.full_name,
+            User.T_monthly_plan,
             func.count(Task.id).filter(Task.status == TaskStatus.IN_PROGRESS).label("ongoing_tasks"),
             func.coalesce(func.sum(Task.T_actual).filter(
                 and_(
                     Task.status == TaskStatus.COMPLETED,
-                    Task.updated_at >= month_start_for_tasks,
+                    Task.updated_at >= month_start,
                 )
             ), 0).label("T_actual_monthly"),
+            func.coalesce(func.sum(Task.T_actual).filter(
+                and_(
+                    Task.status == TaskStatus.COMPLETED,
+                    Task.updated_at >= month_start,
+                    Task.T_reported > 0,
+                )
+            ), 0).label("T_actual_for_accuracy"),
+            func.coalesce(func.sum(Task.T_reported).filter(
+                and_(
+                    Task.status == TaskStatus.COMPLETED,
+                    Task.updated_at >= month_start,
+                    Task.T_reported > 0,
+                )
+            ), 0).label("T_reported_for_accuracy"),
         )
         .select_from(User)
         .outerjoin(Task, Task.engineer_id == User.id)
         .where(User.role == UserRoleType.ENGINEER)
-        .group_by(User.id)
+        .group_by(User.id, User.full_name, User.T_monthly_plan)
     )
     result = await session.execute(engineer_load_stmt)
-    engineer_loads = [
-        EngineerLoad(
+    engineer_loads = []
+    for row in result.all():
+        T_monthly_plan = float(row.T_monthly_plan or 0)
+        T_actual_monthly = float(row.T_actual_monthly or 0)
+        T_remaining = max(0, T_monthly_plan - T_actual_monthly)
+
+        T_actual_acc = float(row.T_actual_for_accuracy or 0)
+        T_reported_acc = float(row.T_reported_for_accuracy or 0)
+        accuracy_rate = min(T_actual_acc / T_reported_acc * 100, 100.0) if T_reported_acc > 0 else 100.0
+
+        engineer_loads.append(EngineerLoad(
             user_id=row.id,
             full_name=row.full_name,
             current_tasks=row.ongoing_tasks or 0,
-            T_actual_monthly=float(row.T_actual_monthly or 0),
-        )
-        for row in result.all()
-    ]
+            T_actual_monthly=T_actual_monthly,
+            T_remaining=round(T_remaining, 2),
+            accuracy_rate=round(accuracy_rate, 2),
+        ))
 
     # 星点排行榜 Top 10
     starpoint_stmt = (
@@ -241,22 +277,6 @@ async def get_admin_dashboard(
         for row in result.all()
     ]
 
-    # 收入统计：所有工程师和 PM 的工资总和（简化计算）
-    # 使用工资参数估算，不调用完整工资计算
-    engineer_salary_stmt = select(func.coalesce(func.sum(User.S0), 0)).where(
-        User.role == UserRoleType.ENGINEER
-    )
-    result = await session.execute(engineer_salary_stmt)
-    engineer_salary_sum = float(result.scalar_one() or 0)
-
-    pm_salary_stmt = select(
-        func.coalesce(func.sum(User.S_base), 0) + func.coalesce(func.sum(User.S_assess), 0)
-    ).where(User.role == UserRoleType.PM)
-    result = await session.execute(pm_salary_stmt)
-    pm_salary_sum = float(result.scalar_one() or 0)
-
-    total_salary = engineer_salary_sum + pm_salary_sum
-
     return AdminDashboard(
         today_new_clients=today_new_clients,
         monthly_new_clients=monthly_new_clients,
@@ -265,4 +285,6 @@ async def get_admin_dashboard(
         engineer_loads=engineer_loads,
         starpoint_ranks=starpoint_ranks,
         total_salary=total_salary,
+        engineer_salary_cost=engineer_salary_cost,
+        pm_salary_cost=pm_salary_cost,
     )

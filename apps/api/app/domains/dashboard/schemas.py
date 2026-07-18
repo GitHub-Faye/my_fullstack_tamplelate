@@ -55,6 +55,8 @@ class EngineerLoad(SQLModel):
     full_name: Optional[str] = None
     current_tasks: int = Field(description="当前进行中任务数")
     T_actual_monthly: float = Field(description="本月实际工时")
+    T_remaining: float = Field(description="本月剩余工时")
+    accuracy_rate: float = Field(description="T报准确率（%）")
 
 
 class StarpointRank(SQLModel):
@@ -83,4 +85,6 @@ class AdminDashboard(SQLModel):
     starpoint_ranks: list[StarpointRank] = Field(default_factory=list, description="星点排行榜（Top 10）")
 
     # 收入统计
-    total_salary: float = Field(description="总收入统计（元）")
+    total_salary: float = Field(description="月度总收入（元）")
+    engineer_salary_cost: float = Field(description="工程师总成本（元）")
+    pm_salary_cost: float = Field(description="PM 总成本（元）")
