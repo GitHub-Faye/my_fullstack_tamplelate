@@ -3,10 +3,12 @@
 
 提供管理员操作任务相关的 RESTful API 端点：
 - 审批暂停
+- 驳回暂停
 - 改派任务
 """
 
 import uuid
+from datetime import datetime, timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
@@ -36,7 +38,7 @@ router = APIRouter()
     "/{task_id}/pause-approve",
     response_model=TaskPublic,
     summary="审批暂停（管理员）",
-    description="管理员审批确认任务暂停"
+    description="管理员审批确认任务暂停，状态从 PAUSE_REQUESTED 变为 PAUSED"
 )
 async def pause_approve_task(
     *,
@@ -52,8 +54,8 @@ async def pause_approve_task(
     业务流程：
     1. 检查任务是否存在
     2. 检查权限（管理员）
-    3. 检查状态（必须是 PAUSED）
-    4. 确认暂停（状态保持 PAUSED）
+    3. 检查状态（必须是 PAUSE_REQUESTED）
+    4. 确认暂停，状态变为 PAUSED
     """
     # 1. 查询任务
     task = await repository.get_task(session=session, task_id=task_id)
@@ -68,15 +70,71 @@ async def pause_approve_task(
             detail="Only admin can perform this action"
         )
 
-    # 3. 检查状态
-    if task.status != TaskStatus.PAUSED:
+    # 3. 检查状态（必须是 PAUSE_REQUESTED）
+    if task.status != TaskStatus.PAUSE_REQUESTED:
         raise BusinessException(
             code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
-            detail=f"Task status must be 'paused', current status is '{task.status.value}'"
+            detail=f"Task status must be 'pause_requested', current status is '{task.status.value}'"
         )
 
-    # 4. 确认暂停（状态保持，可添加审计日志）
-    # 当前仅确认状态，可扩展：记录审批时间、审批人等
+    # 4. 确认暂停，状态变为 PAUSED
+    task.status = TaskStatus.PAUSED
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+
+    return task
+
+
+@router.post(
+    "/{task_id}/pause-reject",
+    response_model=TaskPublic,
+    summary="驳回暂停（管理员）",
+    description="管理员驳回工程师的暂停申请，状态从 PAUSE_REQUESTED 回到 IN_PROGRESS"
+)
+async def pause_reject_task(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    task_id: uuid.UUID,
+) -> Any:
+    """
+    驳回暂停申请
+
+    权限：管理员或超管
+
+    业务流程：
+    1. 检查任务是否存在
+    2. 检查权限（管理员）
+    3. 检查状态（必须是 PAUSE_REQUESTED）
+    4. 驳回申请，状态回到 IN_PROGRESS
+    """
+    # 1. 查询任务
+    task = await repository.get_task(session=session, task_id=task_id)
+    if not task:
+        raise_task_not_found()
+
+    # 2. 检查权限（管理员）
+    user_scopes = await get_user_scopes(session, current_user)
+    if TaskScope.ADMIN.value not in user_scopes:
+        raise BusinessException(
+            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
+            detail="Only admin can perform this action"
+        )
+
+    # 3. 检查状态（必须是 PAUSE_REQUESTED）
+    if task.status != TaskStatus.PAUSE_REQUESTED:
+        raise BusinessException(
+            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
+            detail=f"Task status must be 'pause_requested', current status is '{task.status.value}'"
+        )
+
+    # 4. 驳回申请，状态回到 IN_PROGRESS
+    task.status = TaskStatus.IN_PROGRESS
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+
     return task
 
 

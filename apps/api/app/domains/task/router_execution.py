@@ -200,7 +200,7 @@ async def pause_request_task(
     1. 检查任务是否存在
     2. 检查权限（被分配的工程师）
     3. 检查状态（必须是 IN_PROGRESS）
-    4. 更新状态为 PAUSED
+    4. 更新状态为 PAUSE_REQUESTED（待管理员审批）
     """
     # 1. 查询任务
     task = await repository.get_task(session=session, task_id=task_id)
@@ -213,8 +213,8 @@ async def pause_request_task(
     # 3. 检查状态
     await check_task_status(task, TaskStatus.IN_PROGRESS)
 
-    # 4. 更新状态
-    task.status = TaskStatus.PAUSED
+    # 4. 更新状态为 PAUSE_REQUESTED（等待管理员审批）
+    task.status = TaskStatus.PAUSE_REQUESTED
     session.add(task)
     await session.commit()
     await session.refresh(task)

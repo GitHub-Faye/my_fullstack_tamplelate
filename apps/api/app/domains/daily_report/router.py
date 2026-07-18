@@ -168,9 +168,9 @@ async def create_daily_report(
     elif report_in.current_stage == ReportStage.PAUSED and task.status == TaskStatus.IN_PROGRESS:
         task.status = TaskStatus.PAUSED
 
-    # 同步进度描述到任务
+    # 同步进度描述到任务（使用专用 progress 字段，不污染 PM 原始描述）
     if report_in.progress:
-        task.description = f"{task.description or ''}\n[日报进度] {report_in.progress}"
+        task.progress = report_in.progress
 
     session.add(task)
     await session.commit()

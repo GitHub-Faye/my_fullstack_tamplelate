@@ -30,7 +30,8 @@ class TaskStatus(str, Enum):
     BIDDING = "bidding"                              # 竞价中
     PENDING_START = "pending_start"                  # 待开工
     IN_PROGRESS = "in_progress"                      # 进行中
-    PAUSED = "paused"                                # 已暂停
+    PAUSE_REQUESTED = "pause_requested"              # 暂停待审批（工程师申请，待管理员审批）
+    PAUSED = "paused"                                # 已暂停（管理员审批通过）
     COMPLETED = "completed"                          # 已完成
 
 
@@ -255,6 +256,7 @@ class TaskBase(SQLModel):
     """任务基础模型"""
     name: str = Field(min_length=1, max_length=255)
     description: Optional[str] = Field(default=None, max_length=2000)
+    progress: Optional[str] = Field(default=None, max_length=5000, description="工程师日报进度描述（与 description 分离，不污染 PM 原始描述）")
     task_type: TaskType = Field(default=TaskType.NORMAL)
     status: TaskStatus = Field(default=TaskStatus.UNCONFIRMED)
     T_reported: Optional[float] = Field(default=None, ge=0, description="工程师填报工时")
