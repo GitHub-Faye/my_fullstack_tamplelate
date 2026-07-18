@@ -202,12 +202,18 @@ async def export_salaries(
 
     权限：管理员（需 salary:admin 权限）
     """
-    # 获取所有员工
-    users, _ = await repository.get_all_salaries(
+    # 获取所有员工（先获取总数，避免硬编码截断）
+    users, count = await repository.get_all_salaries(
         session=session,
         skip=0,
-        limit=1000,
+        limit=0,
     )
+    if count > 0:
+        users, _ = await repository.get_all_salaries(
+            session=session,
+            skip=0,
+            limit=count,
+        )
 
     # 计算每个员工的工资并生成 CSV
     result_salaries = await _calculate_salaries(session, users)
