@@ -6,18 +6,15 @@ Bid 模块依赖项（Dependencies）
 
 from datetime import datetime, timezone
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.models import Task, TaskStatus, User, UserRoleType
 from app.core.errors import BusinessException, ErrorCode
 
 
-def check_task_bidding(*, session: AsyncSession, task: Task) -> None:
+def check_task_bidding(*, task: Task) -> None:
     """
     检查任务是否在竞价中
 
     Args:
-        session: 数据库会话
         task: 任务对象
 
     Raises:
@@ -30,12 +27,11 @@ def check_task_bidding(*, session: AsyncSession, task: Task) -> None:
         )
 
 
-def check_bidding_deadline(*, session: AsyncSession, task: Task) -> None:
+def check_bidding_deadline(*, task: Task) -> None:
     """
     检查是否在竞价截止时间前
 
     Args:
-        session: 数据库会话
         task: 任务对象
 
     Raises:
@@ -54,12 +50,11 @@ def check_bidding_deadline(*, session: AsyncSession, task: Task) -> None:
             )
 
 
-def check_engineer_role(*, session: AsyncSession, user: User) -> None:
+def check_engineer_role(*, user: User) -> None:
     """
     检查用户是否是工程师角色
 
     Args:
-        session: 数据库会话
         user: 用户对象
 
     Raises:
@@ -72,12 +67,11 @@ def check_engineer_role(*, session: AsyncSession, user: User) -> None:
         )
 
 
-def check_bid_owner(*, session: AsyncSession, user_id: str, engineer_id: str) -> None:
+def check_bid_owner(*, user_id: str, engineer_id: str) -> None:
     """
     检查用户是否是报价所有者
 
     Args:
-        session: 数据库会话
         user_id: 当前用户 ID
         engineer_id: 报价工程师 ID
 

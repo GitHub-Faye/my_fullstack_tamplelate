@@ -155,7 +155,12 @@ async def settle_bidding_task_async(session: AsyncSession, task_id: str) -> dict
 def settle_bidding_task(self, task_id: str) -> dict:
     """
     Celery 任务：竞价结算
-    触发结算任务的 Celery 入口点。实际逻辑在 settle_bidding_task_async 中。
+
+    执行完整的竞价结算逻辑：
+    1. 计算所有报价的平均值
+    2. 选择报价最接近均价的工程师中标
+    3. 更新任务状态为 PENDING_START
+    4. 设置 engineer_id
 
     参数:
         task_id: 任务ID (UUID字符串)
@@ -163,15 +168,32 @@ def settle_bidding_task(self, task_id: str) -> dict:
     返回:
         dict: 结算结果
     """
+    import asyncio
+    from app.core.database import get_db
+
     logger.info(
-        "settle_bidding_task_dispatched",
+        "settle_bidding_task_started",
         task_id=task_id,
         celery_task_id=self.request.id,
     )
-    # Celery 任务本身不执行异步操作，由 Beat 调度或 API 调用触发
-    # 实际异步结算由 API 端点直接调用 settle_bidding_task_async
-    return {
-        "task_id": task_id,
-        "status": "dispatched",
-        "message": "Settlement task dispatched. Use API to execute."
-    }
+
+    async def _run():
+        async for session in get_db():
+            result = await settle_bidding_task_async(session, task_id)
+            return result
+
+    try:
+        result = asyncio.run(_run())
+        logger.info(
+            "settle_bidding_task_completed",
+            task_id=task_id,
+            status=result.get("status"),
+        )
+        return result
+    except Exception as e:
+        logger.error(
+            "settle_bidding_task_failed",
+            task_id=task_id,
+            error=str(e),
+        )
+        raise self.retry(exc=e)

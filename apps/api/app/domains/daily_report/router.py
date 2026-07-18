@@ -167,13 +167,15 @@ async def create_daily_report(
     # 如果日报标记为 paused，则同步任务状态为 PAUSED
     elif report_in.current_stage == ReportStage.PAUSED and task.status == TaskStatus.IN_PROGRESS:
         task.status = TaskStatus.PAUSED
-    # 如果日报有 progress 且有 has_blocker，可以记录但状态不变
+
+    # 同步进度描述到任务
+    if report_in.progress:
+        task.description = f"{task.description or ''}\n[日报进度] {report_in.progress}"
+
     session.add(task)
     await session.commit()
 
     await session.refresh(report)
-    return report
-
     return report
 
 

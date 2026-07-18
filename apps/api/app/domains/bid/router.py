@@ -60,7 +60,7 @@ async def create_bid(
     - 报价金额自动计算
     """
     # 检查工程师角色
-    check_engineer_role(session=session, user=current_user)
+    check_engineer_role(user=current_user)
 
     # 获取工程师的 H0（基准时薪）
     # 重新加载用户以获取 H0 字段
@@ -77,10 +77,10 @@ async def create_bid(
         raise_task_not_found()
 
     # 检查任务状态
-    check_task_bidding(session=session, task=task)
+    check_task_bidding(task=task)
 
     # 检查竞价截止时间
-    check_bidding_deadline(session=session, task=task)
+    check_bidding_deadline(task=task)
 
     # 检查是否已报价（每个工程师对同一任务只能报价一次）
     existing_bid = await repository.get_bid_by_engineer_task(
@@ -133,7 +133,7 @@ async def update_bid(
     - 必须在竞价截止时间前
     """
     # 检查工程师角色
-    check_engineer_role(session=session, user=current_user)
+    check_engineer_role(user=current_user)
 
     # 获取工程师的 H0（基准时薪）
     engineer = await session.get(User, current_user.id)
@@ -148,7 +148,7 @@ async def update_bid(
         raise_bid_not_found()
 
     # 检查报价所有权
-    check_bid_owner(session=session, user_id=current_user.id, engineer_id=bid.engineer_id)
+    check_bid_owner(user_id=current_user.id, engineer_id=bid.engineer_id)
 
     # 获取任务
     task = await session.get(Task, task_id)
@@ -156,10 +156,10 @@ async def update_bid(
         raise_task_not_found()
 
     # 检查任务状态
-    check_task_bidding(session=session, task=task)
+    check_task_bidding(task=task)
 
     # 检查竞价截止时间
-    check_bidding_deadline(session=session, task=task)
+    check_bidding_deadline(task=task)
 
     # 更新报价
     bid = await repository.update_bid(
