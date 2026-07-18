@@ -141,6 +141,9 @@ async def calculate_pm_salary(
 
 # ============================== 工资汇总（管理员） ==============================
 
+_SALARY_USER_FILTER = User.role.in_([UserRoleType.ENGINEER.value, UserRoleType.PM.value])
+
+
 async def get_all_salaries(
     *,
     session: AsyncSession,
@@ -150,25 +153,26 @@ async def get_all_salaries(
     """
     获取所有员工的工资汇总
 
+    只返回基础用户信息（不含完整工资计算），
+    上层的 API 路由负责调用 calculate_user_salary 进行完整计算。
+
     Args:
         session: 数据库会话
         skip: 跳过记录数
         limit: 返回记录数上限
 
     Returns:
-        (工资列表, 总数) 元组
+        (用户基础信息列表, 总数) 元组
     """
     # 计数（工程师 + PM）
-    count_stmt = select(func.count()).select_from(User).where(
-        User.role.in_([UserRoleType.ENGINEER.value, UserRoleType.PM.value])
-    )
+    count_stmt = select(func.count()).select_from(User).where(_SALARY_USER_FILTER)
     result = await session.execute(count_stmt)
     count = result.scalar_one()
 
     # 查询所有工程师和 PM
     stmt = (
         select(User)
-        .where(User.role.in_([UserRoleType.ENGINEER.value, UserRoleType.PM.value]))
+        .where(_SALARY_USER_FILTER)
         .offset(skip)
         .limit(limit)
     )
@@ -177,20 +181,11 @@ async def get_all_salaries(
 
     salaries = []
     for user in users:
-        if user.role == UserRoleType.ENGINEER:
-            # 工程师工资需要 K 系数，这里暂时用 1.0（实际调用时需要从星点模块获取）
-            # 为了简化，这里先用简化逻辑，实际 API 中会调用星点模块
-            S0 = user.S0 or 0.0
-            # 简化，实际需要完整计算
-            salary = S0
-        else:  # PM
-            salary = (user.S_base or 0.0) + (user.S_assess or 0.0)
-
         salaries.append({
             "user_id": user.id,
             "full_name": user.full_name,
             "role": user.role.value,
-            "salary": salary,
+            "salary": 0.0,  # 占位，由上层路由计算
         })
 
     return salaries, count

@@ -121,14 +121,17 @@ async def read_salary_summary(
     # 完整计算工资（需要 K 系数）
     result_salaries = []
     for salary_dict in salaries:
-        user = await session.get(User, salary_dict["user_id"])
-        if user:
-            try:
+        try:
+            user = await session.get(User, salary_dict["user_id"])
+            if user:
                 calculated = await calculate_user_salary(session=session, user=user)
                 salary_dict["salary"] = calculated.get("salary_final") or calculated.get("salary_total", 0)
-            except Exception:
-                # 计算失败，使用默认值
-                pass
+        except BusinessException:
+            # 工资参数未设置或角色不匹配时跳过该用户
+            pass
+        except Exception as e:
+            # 其他意外错误不影响汇总结果
+            pass
         result_salaries.append(SalarySummary(**salary_dict))
 
     return SalarySummaryList(
@@ -218,13 +221,15 @@ async def export_salaries(
     # 完整计算工资
     result_salaries = []
     for salary_dict in salaries:
-        user = await session.get(User, salary_dict["user_id"])
-        if user:
-            try:
+        try:
+            user = await session.get(User, salary_dict["user_id"])
+            if user:
                 calculated = await calculate_user_salary(session=session, user=user)
                 salary_dict["salary"] = calculated.get("salary_final") or calculated.get("salary_total", 0)
-            except Exception:
-                pass
+        except BusinessException:
+            pass
+        except Exception as e:
+            pass
         result_salaries.append(salary_dict)
 
     # 生成文件名

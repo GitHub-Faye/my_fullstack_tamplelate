@@ -9,6 +9,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import User, UserRoleType
+from app.core.errors import BusinessException, ErrorCode
 from app.domains.salary import repository as salary_repo
 from app.domains.starpoint import repository as starpoint_repo
 
@@ -45,4 +46,7 @@ async def calculate_user_salary(
     elif user.role == UserRoleType.PM:
         return await salary_repo.calculate_pm_salary(pm=user)
     else:
-        raise ValueError(f"User role {user.role} does not support salary calculation")
+        raise BusinessException(
+            code=ErrorCode.USER_ROLE_MISMATCH,
+            detail=f"User role {user.role} does not support salary calculation"
+        )
