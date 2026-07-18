@@ -65,7 +65,7 @@ async def check_task_status_editable(
     if task.status != TaskStatus.UNCONFIRMED:
         from app.core.errors import BusinessException, ErrorCode
         raise BusinessException(
-            code=ErrorCode.VALIDATION_ERROR,
+            code=ErrorCode.SYSTEM_VALIDATION_ERROR,
             detail=f"Task status '{task.status.value}' cannot be edited. Only 'unconfirmed' tasks can be modified."
         )
 
