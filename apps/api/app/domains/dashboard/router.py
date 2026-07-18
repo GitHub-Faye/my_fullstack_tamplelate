@@ -17,7 +17,8 @@ from app.core.dependencies import (
     require_scope,
 )
 from app.core.scopes import DashboardScope
-from app.core.models import User, UserRoleType
+from app.core.models import UserRoleType
+from app.core.errors import BusinessException
 
 from app.domains.dashboard import repository
 from app.domains.salary import repository as salary_repo
@@ -100,8 +101,10 @@ async def read_admin_dashboard(
 
     权限：管理员（需 dashboard:admin 权限）
     """
-    # 获取所有工程师和 PM 用户列表
-    users, _ = await salary_repo.get_all_salaries(session=session, skip=0, limit=1000)
+    # 获取所有工程师和 PM 用户列表（先获取总数，避免硬编码截断）
+    users, count = await salary_repo.get_all_salaries(session=session, skip=0, limit=0)
+    if count > 0:
+        users, _ = await salary_repo.get_all_salaries(session=session, skip=0, limit=count)
 
     # 计算每个用户的工资（使用完整工资计算）
     engineer_cost = 0.0
@@ -115,7 +118,7 @@ async def read_admin_dashboard(
                 engineer_cost += amount
             else:
                 pm_cost += amount
-        except Exception:
+        except BusinessException:
             continue
 
     total_salary = engineer_cost + pm_cost
