@@ -510,6 +510,31 @@ class SystemRuleBase(SQLModel):
     is_active: bool = Field(default=True, description="是否启用")
 
 
+# ==================================== AuditLog ====================================
+
+class AuditLogBase(SQLModel):
+    """操作审计日志基础模型"""
+    user_id: uuid.UUID = Field(foreign_key="user.id", nullable=False, description="操作人ID")
+    action: str = Field(max_length=100, description="操作类型（如 user.create, user.toggle_active）")
+    target_type: str = Field(max_length=50, description="操作对象类型（如 user, task）")
+    target_id: Optional[str] = Field(default=None, max_length=100, description="操作对象ID")
+    details: Optional[str] = Field(default=None, max_length=2000, description="操作详情（JSON 格式）")
+    ip_address: Optional[str] = Field(default=None, max_length=50, description="操作IP")
+
+
+class AuditLog(AuditLogBase, table=True):
+    """操作审计日志模型"""
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+
+    created_at: Optional[datetime] = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+    )
+
+    # 关系
+    operator: Optional["User"] = Relationship()
+
+
 class SystemRule(SystemRuleBase, table=True):
     """系统规则模型"""
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
