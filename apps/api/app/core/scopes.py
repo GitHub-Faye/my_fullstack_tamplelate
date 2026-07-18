@@ -84,6 +84,14 @@ class RuleScope(str, Enum):
     ADMIN = "rule:admin"  # 管理规则配置
 
 
+class DashboardScope(str, Enum):
+    """Dashboard 的权限范围"""
+
+    ENGINEER = "dashboard:engineer"  # 查看工程师仪表板
+    PM = "dashboard:pm"              # 查看 PM 仪表板
+    ADMIN = "dashboard:admin"        # 查看管理员仪表板
+
+
 # 所有 scope 的集合（用于初始化或验证）
 ALL_ITEM_SCOPES = list(ItemScope)
 ALL_USER_SCOPES = list(UserScope)
@@ -94,6 +102,7 @@ ALL_STARPOINT_SCOPES = list(StarPointScope)
 ALL_SALARY_SCOPES = list(SalaryScope)
 ALL_CLIENT_RESOURCE_SCOPES = list(ClientResourceScope)
 ALL_RULE_SCOPES = list(RuleScope)
+ALL_DASHBOARD_SCOPES = list(DashboardScope)
 
 
 # 预定义角色对应的 scopes
@@ -123,6 +132,7 @@ DEFAULT_ROLE_SCOPES = {
         ReportScope.READ,
         StarPointScope.READ,
         SalaryScope.READ,
+        DashboardScope.ENGINEER,
     ],
     # PM 角色权限
     "pm": [
@@ -133,6 +143,7 @@ DEFAULT_ROLE_SCOPES = {
         ClientResourceScope.READ,
         ClientResourceScope.CREATE,
         SalaryScope.READ,
+        DashboardScope.PM,
     ],
     # 管理员角色权限
     "admin_role": [
@@ -158,5 +169,6 @@ DEFAULT_ROLE_SCOPES = {
         UserScope.DELETE,
         UserScope.ADMIN,
         RuleScope.ADMIN,
+        DashboardScope.ADMIN,
     ],
 }
