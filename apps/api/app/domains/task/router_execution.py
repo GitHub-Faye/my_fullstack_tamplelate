@@ -28,6 +28,7 @@ from app.domains.task.schemas_execution import (
     TaskResumeRequest,
     TaskCompleteRequest,
 )
+from app.domains.starpoint.calculation import trigger_starpoint_calculation
 
 
 router = APIRouter()
@@ -307,4 +308,15 @@ async def complete_task(
     await session.commit()
     await session.refresh(task)
 
+    # 5. 触发星点计算
+    try:
+        await trigger_starpoint_calculation(
+            session=session,
+            task=task,
+        )
+    except Exception:
+        # 星点计算失败不应影响任务完成操作
+        pass
+
+    await session.refresh(task)
     return task
