@@ -25,7 +25,7 @@ from app.core.dependencies import (
 from app.core.scopes import SalaryScope
 from app.core.schemas import Message
 from app.core.errors import BusinessException, ErrorCode
-from app.core.models import User, UserRoleType
+from app.core.models import User
 
 from app.domains.salary import repository
 from app.domains.salary.schemas import (
@@ -40,6 +40,34 @@ from app.domains.salary.calculation import calculate_user_salary
 
 
 router = APIRouter()
+
+
+# ==================== 辅助函数 ====================
+
+async def _calculate_salaries(
+    session: SessionDep,
+    users: list[User],
+) -> list[SalarySummary]:
+    """
+    批量计算用户工资，返回 SalarySummary 列表
+
+    遍历用户调用 calculate_user_salary，捕获 BusinessException 异常。
+    """
+    result = []
+    for user in users:
+        try:
+            calculated = await calculate_user_salary(session=session, user=user)
+            salary = calculated.salary_final if isinstance(calculated, EngineerSalaryDetail) else calculated.salary_total
+        except BusinessException:
+            salary = 0.0
+
+        result.append(SalarySummary(
+            user_id=user.id,
+            full_name=user.full_name,
+            role=user.role.value,
+            salary=salary,
+        ))
+    return result
 
 
 # ==================== 工程师/PM 端点：工资试算 ====================
@@ -60,19 +88,12 @@ async def read_my_salary(
     获取当前用户的工资试算
 
     权限：工程师或 PM（需 salary:read 权限）
+    require_scope 已确保权限，calculate_user_salary 内部校验角色。
 
     计算规则：
     - 工程师：S下 = (S0 - P差额) × K
     - PM：S总 = S底 + S考
     """
-    # 检查角色
-    if current_user.role not in [UserRoleType.ENGINEER, UserRoleType.PM]:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
-            detail="Only engineers and PMs can view salary"
-        )
-
-    # 计算工资（现在返回 typed DTO，直接返回）
     return await calculate_user_salary(session=session, user=current_user)
 
 
@@ -99,28 +120,15 @@ async def read_salary_summary(
     """
     offset = (page - 1) * page_size
 
-    # 获取用户列表（已返回 User 对象，无需 N+1）
+    # 获取用户列表
     users, count = await repository.get_all_salaries(
         session=session,
         skip=offset,
         limit=page_size,
     )
 
-    # 计算每个员工的工资
-    result_salaries = []
-    for user in users:
-        try:
-            calculated = await calculate_user_salary(session=session, user=user)
-            salary = calculated.salary_final if isinstance(calculated, EngineerSalaryDetail) else calculated.salary_total
-        except BusinessException:
-            salary = 0.0
-
-        result_salaries.append(SalarySummary(
-            user_id=user.id,
-            full_name=user.full_name,
-            role=user.role.value,
-            salary=salary,
-        ))
+    # 计算工资
+    result_salaries = await _calculate_salaries(session, users)
 
     return SalarySummaryList(
         data=result_salaries,
@@ -155,9 +163,7 @@ async def update_salary_params(
     - PM：S_base, S_assess, R_base, R_assess, baseline_client_count
     """
     # 转换为字典，过滤 None 值
-    params_dict = params.model_dump(exclude_none=True)
-
-    if not params_dict:
+    if not params.model_dump(exclude_none=True):
         raise BusinessException(
             code=ErrorCode.SYSTEM_VALIDATION_ERROR,
             detail="No parameters provided"
@@ -203,20 +209,15 @@ async def export_salaries(
         limit=1000,
     )
 
-    # 计算每个员工的工资
+    # 计算每个员工的工资并生成 CSV
+    result_salaries = await _calculate_salaries(session, users)
     rows = []
-    for user in users:
-        try:
-            calculated = await calculate_user_salary(session=session, user=user)
-            salary = calculated.salary_final if isinstance(calculated, EngineerSalaryDetail) else calculated.salary_total
-        except BusinessException:
-            salary = 0.0
-
+    for s in result_salaries:
         rows.append({
-            "user_id": str(user.id),
-            "full_name": user.full_name or "",
-            "role": user.role.value,
-            "salary": round(salary, 2),
+            "user_id": str(s.user_id),
+            "full_name": s.full_name or "",
+            "role": s.role,
+            "salary": round(s.salary, 2),
         })
 
     # 生成 CSV
