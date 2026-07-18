@@ -85,8 +85,3 @@ class SalarySummaryList(PaginatedResponse[SalarySummary]):
 class SalaryExportRequest(SQLModel):
     """工资导出请求"""
     month: Optional[str] = Field(default=None, description="导出月份（YYYY-MM），默认当前月")
-
-
-class SalaryExportResponse(SQLModel):
-    """工资导出响应"""
-    record_count: int = Field(description="记录数")

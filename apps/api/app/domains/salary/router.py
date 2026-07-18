@@ -21,7 +21,6 @@ from app.core.dependencies import (
     CurrentUser,
     SessionDep,
     require_scope,
-    get_user_scopes,
 )
 from app.core.scopes import SalaryScope
 from app.core.schemas import Message
@@ -38,7 +37,6 @@ from app.domains.salary.schemas import (
     SalaryExportRequest,
 )
 from app.domains.salary.calculation import calculate_user_salary
-from app.domains.starpoint import repository as starpoint_repo
 
 
 router = APIRouter()
@@ -56,6 +54,7 @@ router = APIRouter()
 async def read_my_salary(
     session: SessionDep,
     current_user: CurrentUser,
+    _: Annotated[None, Depends(require_scope(SalaryScope.READ))] = None,
 ) -> Any:
     """
     获取当前用户的工资试算
@@ -66,14 +65,6 @@ async def read_my_salary(
     - 工程师：S下 = (S0 - P差额) × K
     - PM：S总 = S底 + S考
     """
-    # 检查权限
-    user_scopes = await get_user_scopes(session, current_user)
-    if SalaryScope.READ.value not in user_scopes:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
-            detail="You don't have permission to view salary"
-        )
-
     # 检查角色
     if current_user.role not in [UserRoleType.ENGINEER, UserRoleType.PM]:
         raise BusinessException(
@@ -81,14 +72,8 @@ async def read_my_salary(
             detail="Only engineers and PMs can view salary"
         )
 
-    # 计算工资
-    result = await calculate_user_salary(session=session, user=current_user)
-
-    # 根据角色返回不同模型
-    if current_user.role == UserRoleType.ENGINEER:
-        return EngineerSalaryDetail(**result)
-    else:
-        return PMSalaryDetail(**result)
+    # 计算工资（现在返回 typed DTO，直接返回）
+    return await calculate_user_salary(session=session, user=current_user)
 
 
 # ==================== 管理员端点：工资汇总和设置 ====================
@@ -126,7 +111,7 @@ async def read_salary_summary(
     for user in users:
         try:
             calculated = await calculate_user_salary(session=session, user=user)
-            salary = calculated.get("salary_final") or calculated.get("salary_total", 0)
+            salary = calculated.salary_final if isinstance(calculated, EngineerSalaryDetail) else calculated.salary_total
         except BusinessException:
             salary = 0.0
 
@@ -178,11 +163,11 @@ async def update_salary_params(
             detail="No parameters provided"
         )
 
-    # 更新参数
+    # 更新参数（直接传入 typed DTO，按角色过滤字段）
     user = await repository.update_user_salary_params(
         session=session,
         user_id=user_id,
-        params=params_dict,
+        params=params,
     )
 
     if not user:
@@ -223,7 +208,7 @@ async def export_salaries(
     for user in users:
         try:
             calculated = await calculate_user_salary(session=session, user=user)
-            salary = calculated.get("salary_final") or calculated.get("salary_total", 0)
+            salary = calculated.salary_final if isinstance(calculated, EngineerSalaryDetail) else calculated.salary_total
         except BusinessException:
             salary = 0.0
 

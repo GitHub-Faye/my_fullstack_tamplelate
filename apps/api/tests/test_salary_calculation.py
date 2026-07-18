@@ -19,6 +19,7 @@ from app.domains.salary.repository import (
     calculate_pm_salary,
     update_user_salary_params,
 )
+from app.domains.salary.schemas import EngineerSalaryDetail, PMSalaryDetail, SalaryParamsUpdate
 from app.domains.salary.calculation import calculate_user_salary
 
 
@@ -64,10 +65,10 @@ async def test_calculate_pm_salary():
     pm = create_pm_user()
     result = await calculate_pm_salary(pm=pm)
 
-    assert result["S_base"] == 8000.0
-    assert result["S_assess"] == 2000.0
-    assert result["salary_total"] == 10000.0
-    assert result["role"] == "pm"
+    assert result.S_base == 8000.0
+    assert result.S_assess == 2000.0
+    assert result.salary_total == 10000.0
+    assert result.role == "pm"
 
 
 @pytest.mark.asyncio
@@ -78,7 +79,7 @@ async def test_calculate_pm_salary_zero_values():
     pm.S_assess = 0.0
     result = await calculate_pm_salary(pm=pm)
 
-    assert result["salary_total"] == 0.0
+    assert result.salary_total == 0.0
 
 
 @pytest.mark.asyncio
@@ -110,12 +111,12 @@ async def test_calculate_engineer_salary_accurate(db_session: AsyncSession):
         k_coefficient=1.0,
     )
 
-    assert result["S0"] == 10000.0
-    assert result["T_actual_monthly"] == 10.0
-    assert result["T_reported_monthly"] == 10.0
-    assert result["P_diff"] == 0.0  # 50 * (10 - 10) = 0
-    assert result["k_coefficient"] == 1.0
-    assert result["salary_final"] == 10000.0  # (10000 - 0) * 1.0 = 10000
+    assert result.S0 == 10000.0
+    assert result.T_actual_monthly == 10.0
+    assert result.T_reported_monthly == 10.0
+    assert result.P_diff == 0.0  # 50 * (10 - 10) = 0
+    assert result.k_coefficient == 1.0
+    assert result.salary_final == 10000.0  # (10000 - 0) * 1.0 = 10000
 
 
 @pytest.mark.asyncio
@@ -147,9 +148,9 @@ async def test_calculate_engineer_salary_with_p_diff(db_session: AsyncSession):
     )
 
     # P差额 = 50 * (12 - 10) = 100
-    assert result["P_diff"] == 100.0
+    assert result.P_diff == 100.0
     # 工资 = (10000 - 100) * 1.0 = 9900
-    assert result["salary_final"] == 9900.0
+    assert result.salary_final == 9900.0
 
 
 @pytest.mark.asyncio
@@ -181,7 +182,7 @@ async def test_calculate_engineer_salary_with_k_coefficient(db_session: AsyncSes
     )
 
     # 工资 = (10000 - 0) * 1.1 = 11000
-    assert result["salary_final"] == 11000.0
+    assert result.salary_final == 11000.0
 
 
 @pytest.mark.asyncio
@@ -199,11 +200,11 @@ async def test_calculate_engineer_salary_no_tasks(db_session: AsyncSession):
         k_coefficient=1.0,
     )
 
-    assert result["T_actual_monthly"] == 0.0
-    assert result["T_reported_monthly"] == 0.0
-    assert result["P_diff"] == 0.0
+    assert result.T_actual_monthly == 0.0
+    assert result.T_reported_monthly == 0.0
+    assert result.P_diff == 0.0
     # 工资 = (10000 - 0) * 1.0 = 10000
-    assert result["salary_final"] == 10000.0
+    assert result.salary_final == 10000.0
 
 
 @pytest.mark.asyncio
@@ -236,7 +237,7 @@ async def test_calculate_engineer_salary_negative_result(db_session: AsyncSessio
 
     # P差额 = 100 * (20 - 5) = 1500
     # 工资 = (1000 - 1500) * 1.0 = -500 → 取 0
-    assert result["salary_final"] == 0.0
+    assert result.salary_final == 0.0
 
 
 @pytest.mark.asyncio
@@ -249,7 +250,7 @@ async def test_update_user_salary_params(db_session: AsyncSession):
     updated = await update_user_salary_params(
         session=db_session,
         user_id=engineer.id,
-        params={"S0": 15000.0, "H0": 60.0},
+        params=SalaryParamsUpdate(S0=15000.0, H0=60.0),
     )
 
     assert updated is not None
@@ -265,7 +266,7 @@ async def test_update_user_salary_params_not_found(db_session: AsyncSession):
     result = await update_user_salary_params(
         session=db_session,
         user_id=uuid.uuid4(),
-        params={"S0": 15000.0},
+        params=SalaryParamsUpdate(S0=15000.0),
     )
     assert result is None
 
@@ -294,9 +295,9 @@ async def test_calculate_user_salary_engineer(db_session: AsyncSession):
 
     result = await calculate_user_salary(session=db_session, user=engineer)
 
-    assert result["role"] == "engineer"
-    assert "salary_final" in result
-    assert "k_coefficient" in result
+    assert result.role == "engineer"
+    assert hasattr(result, "salary_final")
+    assert hasattr(result, "k_coefficient")
 
 
 @pytest.mark.asyncio
@@ -305,5 +306,5 @@ async def test_calculate_user_salary_pm():
     pm = create_pm_user()
     result = await calculate_user_salary(session=None, user=pm)  # type: ignore
 
-    assert result["role"] == "pm"
-    assert result["salary_total"] == 10000.0
+    assert result.role == "pm"
+    assert result.salary_total == 10000.0

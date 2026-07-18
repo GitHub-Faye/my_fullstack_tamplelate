@@ -12,6 +12,11 @@ from sqlalchemy import func, select, and_, literal
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import User, Task, TaskStatus, UserRoleType
+from app.domains.salary.schemas import (
+    SalaryParamsUpdate,
+    EngineerSalaryDetail,
+    PMSalaryDetail,
+)
 
 
 # ============================== 工程师工资计算 ==============================
@@ -58,7 +63,7 @@ async def calculate_engineer_salary(
     session: AsyncSession,
     engineer: User,
     k_coefficient: float,
-) -> dict:
+) -> EngineerSalaryDetail:
     """
     计算工程师工资
 
@@ -71,7 +76,7 @@ async def calculate_engineer_salary(
         k_coefficient: K 系数
 
     Returns:
-        工资计算详情字典
+        EngineerSalaryDetail DTO
     """
     # 获取本月工时
     T_actual, T_reported = await get_engineer_monthly_hours(
@@ -87,22 +92,22 @@ async def calculate_engineer_salary(
     P_diff = H0 * (T_actual - T_reported)
 
     # 最终工资
-    salary_final = (S0 - P_diff) * k_coefficient
+    salary_final = max(0, (S0 - P_diff) * k_coefficient)  # 工资不能为负
 
-    return {
-        "user_id": engineer.id,
-        "full_name": engineer.full_name,
-        "role": "engineer",
-        "S0": S0,
-        "H0": H0,
-        "T_monthly_plan": engineer.T_monthly_plan,
-        "T_actual_monthly": T_actual,
-        "T_reported_monthly": T_reported,
-        "P_diff": P_diff,
-        "current_starpoint": engineer.current_starpoint,
-        "k_coefficient": k_coefficient,
-        "salary_final": max(0, salary_final),  # 工资不能为负
-    }
+    return EngineerSalaryDetail(
+        user_id=engineer.id,
+        full_name=engineer.full_name,
+        role="engineer",
+        S0=S0,
+        H0=H0,
+        T_monthly_plan=engineer.T_monthly_plan,
+        T_actual_monthly=T_actual,
+        T_reported_monthly=T_reported,
+        P_diff=P_diff,
+        current_starpoint=engineer.current_starpoint,
+        k_coefficient=k_coefficient,
+        salary_final=salary_final,
+    )
 
 
 # ============================== PM 工资计算 ==============================
@@ -110,7 +115,7 @@ async def calculate_engineer_salary(
 async def calculate_pm_salary(
     *,
     pm: User,
-) -> dict:
+) -> PMSalaryDetail:
     """
     计算 PM 工资
 
@@ -120,23 +125,23 @@ async def calculate_pm_salary(
         pm: PM 用户对象
 
     Returns:
-        工资计算详情字典
+        PMSalaryDetail DTO（不需要 session，仅使用 User 字段）
     """
     S_base = pm.S_base or 0.0
     S_assess = pm.S_assess or 0.0
 
     salary_total = S_base + S_assess
 
-    return {
-        "user_id": pm.id,
-        "full_name": pm.full_name,
-        "role": "pm",
-        "S_base": S_base,
-        "S_assess": S_assess,
-        "R_base": pm.R_base,
-        "R_assess": pm.R_assess,
-        "salary_total": salary_total,
-    }
+    return PMSalaryDetail(
+        user_id=pm.id,
+        full_name=pm.full_name,
+        role="pm",
+        S_base=S_base,
+        S_assess=S_assess,
+        R_base=pm.R_base,
+        R_assess=pm.R_assess,
+        salary_total=salary_total,
+    )
 
 
 # ============================== 工资汇总（管理员） ==============================
@@ -183,15 +188,19 @@ async def update_user_salary_params(
     *,
     session: AsyncSession,
     user_id: uuid.UUID,
-    params: dict,
+    params: SalaryParamsUpdate,
 ) -> Optional[User]:
     """
     更新用户工资参数
 
+    根据用户角色，仅更新该角色对应的字段：
+    - 工程师：S0, H0, T_monthly_plan
+    - PM：S_base, S_assess, R_base, R_assess, baseline_client_count
+
     Args:
         session: 数据库会话
         user_id: 用户 ID
-        params: 参数字典
+        params: SalaryParamsUpdate DTO
 
     Returns:
         更新后的用户对象，或 None（用户不存在）
@@ -200,10 +209,25 @@ async def update_user_salary_params(
     if not user:
         return None
 
-    # 更新字段
-    for key, value in params.items():
-        if value is not None and hasattr(user, key):
-            setattr(user, key, value)
+    # 按角色更新对应字段
+    if user.role == UserRoleType.ENGINEER:
+        if params.S0 is not None:
+            user.S0 = params.S0
+        if params.H0 is not None:
+            user.H0 = params.H0
+        if params.T_monthly_plan is not None:
+            user.T_monthly_plan = params.T_monthly_plan
+    elif user.role == UserRoleType.PM:
+        if params.S_base is not None:
+            user.S_base = params.S_base
+        if params.S_assess is not None:
+            user.S_assess = params.S_assess
+        if params.R_base is not None:
+            user.R_base = params.R_base
+        if params.R_assess is not None:
+            user.R_assess = params.R_assess
+        if params.baseline_client_count is not None:
+            user.baseline_client_count = params.baseline_client_count
 
     session.add(user)
     await session.commit()

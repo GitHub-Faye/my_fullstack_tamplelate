@@ -12,13 +12,14 @@ from app.core.models import User, UserRoleType
 from app.core.errors import BusinessException, ErrorCode
 from app.domains.salary import repository as salary_repo
 from app.domains.starpoint import repository as starpoint_repo
+from app.domains.salary.schemas import EngineerSalaryDetail, PMSalaryDetail
 
 
 async def calculate_user_salary(
     *,
     session: AsyncSession,
     user: User,
-) -> dict:
+) -> EngineerSalaryDetail | PMSalaryDetail:
     """
     计算用户工资（工程师或 PM）
 
@@ -27,10 +28,10 @@ async def calculate_user_salary(
         user: 用户对象
 
     Returns:
-        工资计算详情字典
+        EngineerSalaryDetail 或 PMSalaryDetail 的 DTO 实例
 
     Raises:
-        ValueError: 用户角色不支持工资计算
+        BusinessException: 用户角色不支持工资计算
     """
     if user.role == UserRoleType.ENGINEER:
         # 获取 K 系数
