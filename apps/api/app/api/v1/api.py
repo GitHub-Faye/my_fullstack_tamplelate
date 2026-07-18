@@ -10,6 +10,7 @@ from app.domains.bid.router import router as bid_router
 from app.domains.bidding.router import router as bidding_router
 from app.domains.daily_report.router import router as daily_report_router
 from app.domains.starpoint.router import router as starpoint_router
+from app.domains.salary.router import router as salary_router
 
 router = APIRouter()
 
@@ -37,3 +38,6 @@ router.include_router(daily_report_router, prefix="/daily-reports", tags=["daily
 
 # 星点相关路由
 router.include_router(starpoint_router, prefix="/starpoints", tags=["starpoints"])
+
+# 工资相关路由
+router.include_router(salary_router, prefix="/salaries", tags=["salaries"])

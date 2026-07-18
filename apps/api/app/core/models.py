@@ -7,6 +7,7 @@ from typing import List, Optional   # 保留 typing.List
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy.ext.declarative import declared_attr
 from sqlmodel import Field, Relationship, SQLModel
 
 
