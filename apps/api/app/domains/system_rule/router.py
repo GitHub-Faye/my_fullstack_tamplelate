@@ -20,7 +20,7 @@ from app.core.dependencies import (
 )
 from app.core.scopes import RuleScope
 from app.core.schemas import Message
-from app.core.errors import BusinessException, ErrorCode
+from app.core.errors import BusinessException, ErrorCode, raise_rule_not_found
 from app.core.models import RuleCategory
 
 from app.domains.system_rule import repository
@@ -114,7 +114,7 @@ async def create_rule(
     - system_param: 系统参数
     """
     rule = await repository.create_rule(session=session, rule_in=rule_in)
-    return SystemRulePublic.model_validate(rule)
+    return rule
 
 
 @router.get(
@@ -137,12 +137,9 @@ async def read_rule(
     """
     rule = await repository.get_rule(session=session, rule_id=rule_id)
     if not rule:
-        raise BusinessException(
-            code=ErrorCode.SYSTEM_RULE_NOT_FOUND,
-            detail=f"Rule with id {rule_id} not found"
-        )
+        raise_rule_not_found(detail=f"Rule with id {rule_id} not found")
 
-    return SystemRulePublic.model_validate(rule)
+    return rule
 
 
 @router.put(
@@ -174,10 +171,7 @@ async def update_rule(
     """
     rule = await repository.get_rule(session=session, rule_id=rule_id)
     if not rule:
-        raise BusinessException(
-            code=ErrorCode.SYSTEM_RULE_NOT_FOUND,
-            detail=f"Rule with id {rule_id} not found"
-        )
+        raise_rule_not_found(detail=f"Rule with id {rule_id} not found")
 
     # 检查是否有更新字段
     if not rule_in.model_dump(exclude_none=True):
@@ -191,7 +185,7 @@ async def update_rule(
         db_rule=rule,
         rule_in=rule_in,
     )
-    return SystemRulePublic.model_validate(updated_rule)
+    return updated_rule
 
 
 @router.delete(
@@ -214,10 +208,7 @@ async def delete_rule(
     """
     rule = await repository.get_rule(session=session, rule_id=rule_id)
     if not rule:
-        raise BusinessException(
-            code=ErrorCode.SYSTEM_RULE_NOT_FOUND,
-            detail=f"Rule with id {rule_id} not found"
-        )
+        raise_rule_not_found(detail=f"Rule with id {rule_id} not found")
 
     await repository.delete_rule(session=session, db_rule=rule)
     return Message(message="Rule deleted successfully")

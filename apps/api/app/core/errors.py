@@ -73,7 +73,9 @@ class ErrorCode(str, Enum):
     SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR"
     SYSTEM_VALIDATION_ERROR = "SYSTEM_VALIDATION_ERROR"
     SYSTEM_RATE_LIMIT = "SYSTEM_RATE_LIMIT"
-    SYSTEM_RULE_NOT_FOUND = "SYSTEM_RULE_NOT_FOUND"
+
+    # ==================== 规则配置相关错误 (RULE) ====================
+    RULE_NOT_FOUND = "RULE_NOT_FOUND"
 
 
 # ==================== HTTP 状态码映射 ====================
@@ -114,6 +116,7 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     ErrorCode.TASK_NOT_FOUND: status.HTTP_404_NOT_FOUND,
     ErrorCode.BID_NOT_FOUND: status.HTTP_404_NOT_FOUND,
     ErrorCode.REPORT_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+    ErrorCode.RULE_NOT_FOUND: status.HTTP_404_NOT_FOUND,
 
     # 409 Conflict
     ErrorCode.USER_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
@@ -124,9 +127,6 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
 
     # 429 Too Many Requests
     ErrorCode.SYSTEM_RATE_LIMIT: status.HTTP_429_TOO_MANY_REQUESTS,
-
-    # 404 Not Found (system rules)
-    ErrorCode.SYSTEM_RULE_NOT_FOUND: status.HTTP_404_NOT_FOUND,
 
     # 500 Internal Server Error
     ErrorCode.SYSTEM_INTERNAL_ERROR: status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -178,7 +178,7 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.SYSTEM_INTERNAL_ERROR: "Internal server error",
     ErrorCode.SYSTEM_VALIDATION_ERROR: "Validation error",
     ErrorCode.SYSTEM_RATE_LIMIT: "Too many requests",
-    ErrorCode.SYSTEM_RULE_NOT_FOUND: "System rule not found",
+    ErrorCode.RULE_NOT_FOUND: "Rule not found",
 }
 
 
@@ -276,3 +276,8 @@ def raise_task_not_found(detail: str | None = None) -> None:
 def raise_bid_not_found(detail: str | None = None) -> None:
     """抛出报价不存在错误"""
     raise BusinessException(code=ErrorCode.BID_NOT_FOUND, detail=detail)
+
+
+def raise_rule_not_found(detail: str | None = None) -> None:
+    """抛出规则不存在错误"""
+    raise BusinessException(code=ErrorCode.RULE_NOT_FOUND, detail=detail)
