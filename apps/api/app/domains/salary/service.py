@@ -14,6 +14,7 @@ from app.domains.salary.schemas import (
     PMSalaryDetail,
     SalarySummary,
 )
+from app.domains.shared.queries import get_engineer_monthly_hours
 
 
 async def calculate_engineer_salary(
@@ -28,7 +29,7 @@ async def calculate_engineer_salary(
     公式：S下 = (S0 - P差额) × K
     其中 P差额 = H0 × (T实际 - T报价)
     """
-    T_actual, T_reported = await salary_repo.get_engineer_monthly_hours(
+    T_actual, T_reported = await get_engineer_monthly_hours(
         session=session,
         engineer_id=engineer.id,
     )
@@ -36,7 +37,7 @@ async def calculate_engineer_salary(
     S0 = engineer.S0 or 0.0
     H0 = engineer.H0 or 0.0
     P_diff = H0 * (T_actual - T_reported)
-    T_effective = T_actual  # 已完成任务的 T实 合计
+    T_effective = T_actual
     salary_final = max(0, (S0 - P_diff) * k_coefficient)
 
     return EngineerSalaryDetail(
@@ -61,11 +62,7 @@ async def calculate_pm_salary(
     session: AsyncSession,
     pm: User,
 ) -> PMSalaryDetail:
-    """
-    计算 PM 工资
-
-    公式：S总 = S底 + S考
-    """
+    """计算 PM 工资：S总 = S底 + S考"""
     S_base = pm.S_base or 0.0
     S_assess = pm.S_assess or 0.0
     salary_total = S_base + S_assess

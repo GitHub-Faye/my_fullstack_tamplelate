@@ -4,42 +4,17 @@
 负责工资相关的数据库查询操作。
 """
 import uuid
-from datetime import datetime, timezone
 from typing import Optional, Tuple
 
-from sqlalchemy import func, select, and_
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import User, Task, TaskStatus, UserRoleType
+from app.core.models import User, TaskStatus, UserRoleType
 from app.domains.salary.schemas import SalaryParamsUpdate
 from app.core.db_utils import paginated_query
 
 
-async def get_engineer_monthly_hours(
-    *,
-    session: AsyncSession,
-    engineer_id: uuid.UUID,
-) -> Tuple[float, float]:
-    """获取工程师本月实际工时和报价工时"""
-    now = datetime.now(timezone.utc)
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-
-    stmt = (
-        select(
-            func.coalesce(func.sum(Task.T_actual), 0).label("T_actual_total"),
-            func.coalesce(func.sum(Task.T_reported), 0).label("T_reported_total"),
-        )
-        .where(
-            and_(
-                Task.engineer_id == engineer_id,
-                Task.status == TaskStatus.COMPLETED,
-                Task.updated_at >= month_start,
-            )
-        )
-    )
-    result = await session.execute(stmt)
-    row = result.one()
-    return float(row.T_actual_total or 0), float(row.T_reported_total or 0)
+_SALARY_USER_FILTER = User.role.in_([UserRoleType.ENGINEER.value, UserRoleType.PM.value])
 
 
 async def get_pm_monthly_client_actual(
@@ -48,6 +23,8 @@ async def get_pm_monthly_client_actual(
     pm_id: uuid.UUID,
 ) -> int:
     """获取 PM 本月实际客资数（L实）"""
+    from datetime import datetime, timezone
+    from sqlalchemy import and_
     from app.core.models import ClientResource
 
     now = datetime.now(timezone.utc)
@@ -61,9 +38,6 @@ async def get_pm_monthly_client_actual(
     )
     result = await session.execute(stmt)
     return int(result.scalar_one() or 0)
-
-
-_SALARY_USER_FILTER = User.role.in_([UserRoleType.ENGINEER.value, UserRoleType.PM.value])
 
 
 async def get_all_salaries(

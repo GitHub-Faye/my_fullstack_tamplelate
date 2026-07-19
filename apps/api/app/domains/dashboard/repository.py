@@ -27,8 +27,8 @@ from app.domains.dashboard.schemas import (
     StarpointRank,
 )
 from app.domains.task.repository import get_ongoing_task_count
-from app.domains.user.repository import get_engineer_loads
 from app.domains.starpoint.repository import get_leaderboard
+from app.domains.shared.queries import get_engineer_monthly_hours, get_engineer_loads
 
 
 def _get_time_bounds() -> Tuple[datetime, datetime, datetime]:
@@ -58,42 +58,14 @@ async def get_engineer_dashboard(
     """
     _, _, month_start = _get_time_bounds()
 
-    # 本月实际工时（已完成任务）
-    stmt = (
-        select(func.coalesce(func.sum(Task.T_actual), 0))
-        .where(
-            and_(
-                Task.engineer_id == engineer.id,
-                Task.status == TaskStatus.COMPLETED,
-                Task.updated_at >= month_start,
-            )
-        )
+    # 本月实际工时 + T报准确率（共享查询）
+    T_actual_monthly, T_reported_monthly = await get_engineer_monthly_hours(
+        session=session,
+        engineer_id=engineer.id,
     )
-    result = await session.execute(stmt)
-    T_actual_monthly = float(result.scalar_one() or 0)
 
-    # T报准确率：本月已完成任务的 T_actual / T_reported 比值（cap at 100%）
-    accuracy_stmt = (
-        select(
-            func.coalesce(func.sum(Task.T_actual), 0),
-            func.coalesce(func.sum(Task.T_reported), 0),
-        )
-        .where(
-            and_(
-                Task.engineer_id == engineer.id,
-                Task.status == TaskStatus.COMPLETED,
-                Task.updated_at >= month_start,
-                Task.T_reported > 0,
-            )
-        )
-    )
-    result = await session.execute(accuracy_stmt)
-    row = result.one()
-    T_actual_sum = float(row[0] or 0)
-    T_reported_sum = float(row[1] or 0)
-
-    if T_reported_sum > 0:
-        accuracy_rate = min(T_actual_sum / T_reported_sum * 100, 100.0)
+    if T_reported_monthly > 0:
+        accuracy_rate = min(T_actual_monthly / T_reported_monthly * 100, 100.0)
     else:
         accuracy_rate = 100.0
 

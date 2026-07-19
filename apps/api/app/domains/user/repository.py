@@ -10,6 +10,7 @@ from app.core.security import get_password_hash, verify_password
 from app.domains.user.schemas import UserCreate, UserUpdate, UserUpdateMe, UpdatePassword
 from app.core.models import User, Item, Role, UserRole, UserRoleType, Task, TaskStatus
 from app.core.db_utils import paginated_query
+from app.domains.shared.queries import get_engineer_loads
 
 # ============================== 用户 CRUD 操作 ==============================
 async def get_user(*, session: AsyncSession, user_id: uuid.UUID) -> User | None:
@@ -395,57 +396,3 @@ async def get_user_detail(
         用户对象或 None
     """
     return await session.get(User, user_id)
-
-
-async def get_engineer_loads(
-    *,
-    session: AsyncSession,
-    month_start: datetime,
-) -> list[dict]:
-    """
-    获取所有工程师的负载数据（进行中任务数、本月工时、准确率）。
-
-    Args:
-        session: 数据库会话
-        month_start: 月度起始时间
-
-    Returns:
-        工程师负载数据列表，每项包含 id, full_name, T_monthly_plan,
-        ongoing_tasks, T_actual_monthly, T_actual_for_accuracy,
-        T_reported_for_accuracy
-    """
-    from sqlalchemy import and_
-    stmt = (
-        select(
-            User.id,
-            User.full_name,
-            User.T_monthly_plan,
-            func.count(Task.id).filter(Task.status == TaskStatus.IN_PROGRESS).label("ongoing_tasks"),
-            func.coalesce(func.sum(Task.T_actual).filter(
-                and_(
-                    Task.status == TaskStatus.COMPLETED,
-                    Task.updated_at >= month_start,
-                )
-            ), 0).label("T_actual_monthly"),
-            func.coalesce(func.sum(Task.T_actual).filter(
-                and_(
-                    Task.status == TaskStatus.COMPLETED,
-                    Task.updated_at >= month_start,
-                    Task.T_reported > 0,
-                )
-            ), 0).label("T_actual_for_accuracy"),
-            func.coalesce(func.sum(Task.T_reported).filter(
-                and_(
-                    Task.status == TaskStatus.COMPLETED,
-                    Task.updated_at >= month_start,
-                    Task.T_reported > 0,
-                )
-            ), 0).label("T_reported_for_accuracy"),
-        )
-        .select_from(User)
-        .outerjoin(Task, Task.engineer_id == User.id)
-        .where(User.role == UserRoleType.ENGINEER)
-        .group_by(User.id, User.full_name, User.T_monthly_plan)
-    )
-    result = await session.execute(stmt)
-    return result.all()

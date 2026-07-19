@@ -14,7 +14,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import User, UserRoleType, Task, TaskStatus, TaskType, ClientResource
 from app.domains.salary.repository import (
-    get_engineer_monthly_hours,
     update_user_salary_params,
 )
 from app.domains.salary.service import (
@@ -23,6 +22,7 @@ from app.domains.salary.service import (
     calculate_user_salary,
 )
 from app.domains.salary.schemas import EngineerSalaryDetail, PMSalaryDetail, SalaryParamsUpdate
+from app.domains.shared.queries import get_engineer_monthly_hours
 
 
 def create_engineer_user() -> User:
