@@ -38,10 +38,10 @@ from app.domains.user.schemas import (
     UserToggleActive,
     AdminPasswordReset,
     UsersAdminPublic,
-    AuditLogPublic,
-    AuditLogList,
     ClientResourceParamsUpdate,
 )
+from app.domains.audit.schemas import AuditLogPublic, AuditLogList
+from app.domains.audit.repository import create_audit_log, get_audit_logs
 
 
 router = APIRouter()
@@ -89,7 +89,7 @@ async def admin_create_user(
         "role": user_in.role.value,
         "full_name": user_in.full_name,
     }
-    await repository.create_audit_log(
+    await create_audit_log(
         session=session,
         user_id=current_user.id,
         action="user.create",
@@ -204,7 +204,7 @@ async def admin_update_user(
 
     # 记录审计日志
     changed_fields = user_in.model_dump(exclude_unset=True, exclude_none=True)
-    await repository.create_audit_log(
+    await create_audit_log(
         session=session,
         user_id=current_user.id,
         action="user.update",
@@ -253,7 +253,7 @@ async def admin_toggle_user_active(
     )
 
     # 记录审计日志
-    await repository.create_audit_log(
+    await create_audit_log(
         session=session,
         user_id=current_user.id,
         action="user.toggle_active",
@@ -295,7 +295,7 @@ async def admin_reset_password(
     )
 
     # 记录审计日志
-    await repository.create_audit_log(
+    await create_audit_log(
         session=session,
         user_id=current_user.id,
         action="user.reset_password",
@@ -345,7 +345,7 @@ async def admin_set_pm_client_resource_params(
     )
 
     # 记录审计日志
-    await repository.create_audit_log(
+    await create_audit_log(
         session=session,
         user_id=current_user.id,
         action="user.set_client_resource_params",
@@ -379,7 +379,7 @@ async def admin_read_audit_logs(
     权限：管理员（需 user:admin 权限）
     """
     offset = (page - 1) * page_size
-    logs, count = await repository.get_audit_logs(
+    logs, count = await get_audit_logs(
         session=session,
         skip=offset,
         limit=page_size,

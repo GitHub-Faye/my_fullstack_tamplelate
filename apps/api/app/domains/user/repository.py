@@ -8,7 +8,7 @@ from sqlmodel import select
 
 from app.core.security import get_password_hash, verify_password
 from app.domains.user.schemas import UserCreate, UserUpdate, UserUpdateMe, UpdatePassword
-from app.core.models import User, Item, AuditLog, Role, UserRole, UserRoleType, Task, TaskStatus
+from app.core.models import User, Item, Role, UserRole, UserRoleType, Task, TaskStatus
 from app.core.db_utils import paginated_query
 
 # ============================== 用户 CRUD 操作 ==============================
@@ -203,96 +203,6 @@ async def authenticate(*, session: AsyncSession, email: str, password: str) -> U
         await session.commit()
         await session.refresh(db_user)
     return db_user
-
-
-# ============================== 审计日志操作 ==============================
-
-async def create_audit_log(
-    *,
-    session: AsyncSession,
-    user_id: uuid.UUID,
-    action: str,
-    target_type: str,
-    target_id: str | None = None,
-    details: str | None = None,
-    ip_address: str | None = None,
-) -> AuditLog:
-    """
-    创建操作审计日志。
-
-    Args:
-        session: 数据库会话
-        user_id: 操作人ID
-        action: 操作类型（如 user.create, user.toggle_active）
-        target_type: 操作对象类型
-        target_id: 操作对象ID
-        details: 操作详情
-        ip_address: 操作IP
-
-    Returns:
-        创建的审计日志对象
-    """
-    log = AuditLog(
-        user_id=user_id,
-        action=action,
-        target_type=target_type,
-        target_id=target_id,
-        details=details,
-        ip_address=ip_address,
-    )
-    session.add(log)
-    await session.commit()
-    await session.refresh(log)
-    return log
-
-
-async def get_audit_logs(
-    *,
-    session: AsyncSession,
-    skip: int = 0,
-    limit: int = 20,
-    target_type: str | None = None,
-    user_id: uuid.UUID | None = None,
-) -> Tuple[list[AuditLog], int]:
-    """
-    获取操作审计日志列表（分页）。
-
-    Args:
-        session: 数据库会话
-        skip: 跳过的记录数
-        limit: 返回的记录数
-        target_type: 筛选目标类型
-        user_id: 筛选操作人
-
-    Returns:
-        tuple: (审计日志列表, 总记录数)
-    """
-    conditions = []
-    if target_type:
-        conditions.append(AuditLog.target_type == target_type)
-    if user_id:
-        conditions.append(AuditLog.user_id == user_id)
-
-    from sqlalchemy import and_
-
-    # 获取总数
-    count_stmt = select(func.count()).select_from(AuditLog)
-    if conditions:
-        count_stmt = count_stmt.where(and_(*conditions))
-    result = await session.execute(count_stmt)
-    count = result.scalar_one()
-
-    # 获取分页数据
-    from sqlalchemy import and_
-    logs, count = await paginated_query(
-        session=session,
-        model=AuditLog,
-        skip=skip,
-        limit=limit,
-        conditions=conditions if conditions else None,
-        order_by=AuditLog.created_at.desc(),
-    )
-    return logs, count
 
 
 # ============================== 管理员用户操作 ==============================

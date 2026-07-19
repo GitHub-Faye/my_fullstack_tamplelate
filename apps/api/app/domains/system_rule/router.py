@@ -32,8 +32,8 @@ from app.domains.system_rule.schemas import (
     SystemRulePublic,
     SystemRulesPublic,
 )
-from app.domains.user.schemas import AuditLogPublic, AuditLogList
-from app.domains.user.repository import create_audit_log, get_audit_logs
+from app.domains.audit.schemas import AuditLogPublic, AuditLogList
+from app.domains.audit.repository import create_audit_log, get_audit_logs
 
 
 router = APIRouter()
