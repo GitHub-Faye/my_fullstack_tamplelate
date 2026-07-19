@@ -102,21 +102,15 @@ async def settle_bidding_task_async(session: AsyncSession, task_id: str) -> dict
     )
     bids = bids_result.scalars().all()
 
-    # 5. 查询所有工程师（用于计算总应报价人数）
-    # 查询所有工程师角色用户
+    # 5. 查询可竞价工程师人数（已报价 + 未报价）
+    # 查询所有工程师角色用户（系统中所有工程师都有资格竞价）
     engineer_result = await session.execute(
         select(User).where(User.role == UserRoleType.ENGINEER)
     )
     all_engineers = engineer_result.scalars().all()
     total_engineers = len(all_engineers)
 
-    # 6. 查询所有报价
-    bids_result = await session.execute(
-        select(Bid).where(Bid.task_id == task_uuid)
-    )
-    bids = bids_result.scalars().all()
-
-    # 7. 处理边界情况：无人报价
+    # 6. 处理边界情况：无人报价
     if len(bids) == 0:
         task.status = TaskStatus.CONFIRMED_UNPUBLISHED
         task.bidding_deadline = None
@@ -136,7 +130,7 @@ async def settle_bidding_task_async(session: AsyncSession, task_id: str) -> dict
             "status": "no_bids"
         }
 
-    # 8. 检查是否所有工程师都已报价（提前截止条件）
+    # 7. 检查是否所有工程师都已报价（提前截止条件）
     all_bid = len(bids) >= total_engineers
     if all_bid:
         logger.info(
@@ -146,19 +140,14 @@ async def settle_bidding_task_async(session: AsyncSession, task_id: str) -> dict
             total_engineers=total_engineers,
         )
 
-    # 9. 计算平均报价
+    # 8. 计算平均报价
     total_amount = sum(bid.amount for bid in bids)
     avg_amount = total_amount / len(bids)
 
-    # 10. 选择中标人（报价最接近平均值）
+    # 9. 选择中标人（报价最接近平均值）
     winner = min(bids, key=lambda b: abs(b.amount - avg_amount))
 
-    # 11. 检查中标人是否拒绝（全部拒绝 → 进入下一轮）
-    # 简单实现：如果中标人拒绝，回退到 CONFIRMED_UNPUBLISHED
-    # 注意：工程师通过 /tasks/{id}/decline 拒绝后，状态已变更，
-    # 此处不额外处理"全部拒绝"逻辑，该逻辑由 decline 端点实现
-
-    # 12. 更新任务状态
+    # 10. 更新任务状态
     task.status = TaskStatus.PENDING_START
     task.engineer_id = winner.engineer_id
     await session.commit()

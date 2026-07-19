@@ -203,7 +203,7 @@ class TestTaskExecution:
     ):
         """
         测试工程师成功拒绝任务
-        - 任务状态回退到 CONFIRMED_UNPUBLISHED
+        - 任务重新进入竞价（BIDDING），设置新的竞价截止时间
         - engineer_id 被清空
         """
         # 1. 创建 PM 和工程师
@@ -244,8 +244,9 @@ class TestTaskExecution:
 
         # 5. 验证数据库
         updated_task = await db_session.get(Task, task.id)
-        assert updated_task.status == TaskStatus.CONFIRMED_UNPUBLISHED
+        assert updated_task.status == TaskStatus.BIDDING
         assert updated_task.engineer_id is None
+        assert updated_task.bidding_deadline is not None
 
     @pytest.mark.asyncio
     async def test_pause_request_success(

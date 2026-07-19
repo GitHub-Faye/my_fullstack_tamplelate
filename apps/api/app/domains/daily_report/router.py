@@ -253,35 +253,24 @@ async def get_remind_report(
 
     权限：管理员（需 report:admin 权限）
     """
-    from app.core.models import DailyReport as DailyReportModel
-
     today = date.today()
-    start_dt = datetime.combine(today, datetime.min.time())
-    end_dt = datetime.combine(today, datetime.max.time())
 
-    stmt = select(User).where(User.role == UserRoleType.ENGINEER)
+    not_submitted = await repository.get_engineers_not_submitted_today(
+        session=session,
+        report_date=today,
+    )
+
+    # 查询所有工程师总数
+    from app.core.models import User as UserModel, UserRoleType as UserRoleEnum
+    stmt = select(UserModel).where(UserModel.role == UserRoleEnum.ENGINEER)
     result = await session.execute(stmt)
     all_engineers = result.scalars().all()
     total_engineers = len(all_engineers)
-
-    submitted_stmt = (
-        select(DailyReportModel.engineer_id)
-        .where(
-            and_(
-                DailyReportModel.report_date >= start_dt,
-                DailyReportModel.report_date <= end_dt,
-            )
-        )
-        .distinct()
-    )
-    submitted_result = await session.execute(submitted_stmt)
-    submitted_ids = {row[0] for row in submitted_result}
-
-    not_submitted = [e for e in all_engineers if e.id not in submitted_ids]
+    submitted_today = total_engineers - len(not_submitted)
 
     return RemindResult(
         total_engineers=total_engineers,
-        submitted_today=len(submitted_ids),
+        submitted_today=submitted_today,
         not_submitted=len(not_submitted),
         not_submitted_engineers=[e.full_name or e.email for e in not_submitted],
     )

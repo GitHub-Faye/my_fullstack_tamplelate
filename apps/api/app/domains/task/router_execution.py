@@ -10,6 +10,7 @@
 """
 
 import uuid
+from datetime import datetime, timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
@@ -97,7 +98,7 @@ async def start_task(
     "/{task_id}/decline",
     response_model=TaskPublic,
     summary="拒绝任务",
-    description="工程师拒绝待开工的任务，任务回退到已确认未发布状态"
+    description="工程师拒绝待开工的任务，任务重新进入竞价（设置新的竞价截止时间）"
 )
 async def decline_task(
     *,
@@ -110,12 +111,15 @@ async def decline_task(
 
     权限：被分配的工程师
 
+    Spec §23：全部拒绝时进入下一轮竞价。
     业务流程：
     1. 检查任务是否存在
     2. 检查权限（被分配的工程师）
     3. 检查状态（必须是 PENDING_START）
-    4. 更新状态为 CONFIRMED_UNPUBLISHED，清空 engineer_id
+    4. 清空 engineer_id，重新进入竞价（bidding 状态），设置新的竞价截止时间
     """
+    from datetime import timedelta
+
     # 1. 查询任务
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
@@ -127,9 +131,10 @@ async def decline_task(
     # 3. 检查状态
     await check_task_status(task, TaskStatus.PENDING_START)
 
-    # 4. 更新状态
-    task.status = TaskStatus.CONFIRMED_UNPUBLISHED
+    # 4. 更新状态：重新进入竞价（进入下一轮）
+    task.status = TaskStatus.BIDDING
     task.engineer_id = None
+    task.bidding_deadline = datetime.now(timezone.utc) + timedelta(days=1)
     session.add(task)
     await session.commit()
     await session.refresh(task)
@@ -141,7 +146,7 @@ async def decline_task(
         action="task.decline",
         target_type="task",
         target_id=str(task_id),
-        details=f"Task declined by engineer, reverted to confirmed_unpublished",
+        details=f"Task declined by engineer, re-entered bidding with new deadline",
         ip_address=None,
     )
 

@@ -92,7 +92,7 @@ async def calculate_engineer_salary(
     # 计算工时差额
     P_diff = H0 * (T_actual - T_reported)
 
-    # 计算 T有效 = 已完成任务的 T实 合计（即 T_actual）
+    # T有效 = 已完成任务的 T实 合计，由 get_engineer_monthly_hours 返回（已限定 COMPLETED 状态）
     T_effective = T_actual
 
     # 最终工资
