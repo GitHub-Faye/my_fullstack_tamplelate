@@ -5,11 +5,12 @@
 - POST /client-resources — PM 录入客资
 - GET /client-resources — PM 查看自己的客资历史
 - GET /client-resources/admin — 管理员查看所有 PM 汇总
+- GET /client-resources/all — 管理员查看所有客资明细
 - 权限控制（PM 可录入/查看自己的，管理员查看所有）
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 import pytest_asyncio
@@ -26,13 +27,15 @@ from app.core.models import (
 )
 from app.core.scopes import ClientResourceScope
 from app.core.security import create_access_token
-from datetime import timedelta
 
 
 pytestmark = pytest.mark.asyncio
 
 
-async def _create_test_pm(db_session: AsyncSession) -> User:
+async def _create_pm_with_scopes(
+    db_session: AsyncSession,
+    baseline_count: int | None = 100,
+) -> User:
     """创建测试 PM 用户（含 client-resource scope）"""
     pm = User(
         email=f"pm_cr_{uuid.uuid4().hex[:8]}@test.com",
@@ -40,7 +43,7 @@ async def _create_test_pm(db_session: AsyncSession) -> User:
         full_name="Test PM",
         role=UserRoleType.PM,
         is_active=True,
-        baseline_client_count=100,
+        baseline_client_count=baseline_count,
     )
     db_session.add(pm)
     await db_session.commit()
@@ -52,7 +55,6 @@ async def _create_test_pm(db_session: AsyncSession) -> User:
     user_role = UserRole(user_id=pm.id, role_id=role.id)
     db_session.add(user_role)
 
-    # 授予 client-resource scope
     for scope in [ClientResourceScope.READ, ClientResourceScope.CREATE]:
         rs = RoleScope(role_id=role.id, scope=scope.value)
         db_session.add(rs)
@@ -71,7 +73,22 @@ async def _create_test_admin(db_session: AsyncSession) -> User:
         is_active=True,
         is_superuser=True,
     )
+    # 需要为 admin 也创建 role + scope 以便 require_scope(UserScope.ADMIN) 工作
     db_session.add(admin)
+    await db_session.commit()
+
+    role = Role(name=f"admin_cr_role_{uuid.uuid4().hex[:8]}")
+    db_session.add(role)
+    await db_session.commit()
+
+    user_role = UserRole(user_id=admin.id, role_id=role.id)
+    db_session.add(user_role)
+
+    from app.core.scopes import UserScope
+    for scope in [UserScope.ADMIN]:
+        rs = RoleScope(role_id=role.id, scope=scope.value)
+        db_session.add(rs)
+
     await db_session.commit()
     return admin
 
@@ -92,7 +109,7 @@ async def _create_test_engineer(db_session: AsyncSession) -> User:
 
 @pytest_asyncio.fixture
 async def pm_user(db_session: AsyncSession) -> User:
-    return await _create_test_pm(db_session)
+    return await _create_pm_with_scopes(db_session)
 
 
 @pytest_asyncio.fixture
@@ -148,7 +165,7 @@ class TestClientResourceAPI:
         """PM 成功录入客资"""
         payload = {
             "actual_count": 150,
-            "date": "2026-07-18",
+            "date": "2026-07-18T00:00:00+00:00",
         }
         response = await client.post(
             self.BASE,
@@ -166,33 +183,12 @@ class TestClientResourceAPI:
         self, client: AsyncClient, db_session: AsyncSession
     ):
         """PM 未设置基准客资数时返回 400"""
-        pm = User(
-            email=f"pm_no_baseline_{uuid.uuid4().hex[:8]}@test.com",
-            hashed_password="hashed",
-            full_name="PM No Baseline",
-            role=UserRoleType.PM,
-            is_active=True,
-            baseline_client_count=None,  # 未设置基准客资数
-        )
-        db_session.add(pm)
-        await db_session.commit()
-
-        role = Role(name=f"pm_role_{uuid.uuid4().hex[:8]}")
-        db_session.add(role)
-        await db_session.commit()
-
-        user_role = UserRole(user_id=pm.id, role_id=role.id)
-        db_session.add(user_role)
-        for scope in [ClientResourceScope.READ, ClientResourceScope.CREATE]:
-            rs = RoleScope(role_id=role.id, scope=scope.value)
-            db_session.add(rs)
-        await db_session.commit()
-
+        pm = await _create_pm_with_scopes(db_session, baseline_count=None)
         token = create_access_token(subject=str(pm.id), expires_delta=timedelta(minutes=30))
 
         payload = {
             "actual_count": 150,
-            "date": "2026-07-18",
+            "date": "2026-07-18T00:00:00+00:00",
         }
         response = await client.post(
             self.BASE,
@@ -240,7 +236,7 @@ class TestClientResourceAPI:
         """工程师无法录入客资"""
         payload = {
             "actual_count": 100,
-            "date": "2026-07-18",
+            "date": "2026-07-18T00:00:00+00:00",
         }
         response = await client.post(
             self.BASE,
@@ -297,7 +293,6 @@ class TestClientResourceAPI:
         self, client: AsyncClient, admin_token: str, pm_user: User, db_session: AsyncSession
     ):
         """管理员查看所有 PM 客资汇总"""
-        # 创建两条客资记录
         await self._create_sample_resource(db_session, pm_user.id)
         await self._create_sample_resource(db_session, pm_user.id)
 
@@ -319,6 +314,33 @@ class TestClientResourceAPI:
         """PM 无法查看管理汇总"""
         response = await client.get(
             f"{self.BASE}/admin",
+            headers={"Authorization": f"Bearer {pm_token}"},
+        )
+        assert response.status_code == 403
+
+    # ==================== GET /client-resources/all ====================
+
+    async def test_admin_read_all_resources(
+        self, client: AsyncClient, admin_token: str, pm_user: User, db_session: AsyncSession
+    ):
+        """管理员查看所有客资明细"""
+        await self._create_sample_resource(db_session, pm_user.id)
+
+        response = await client.get(
+            f"{self.BASE}/all",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["count"] >= 1
+        assert data["data"][0]["actual_count"] == 120
+
+    async def test_pm_cannot_read_all_resources(
+        self, client: AsyncClient, pm_token: str
+    ):
+        """PM 无法查看所有客资"""
+        response = await client.get(
+            f"{self.BASE}/all",
             headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert response.status_code == 403
@@ -346,5 +368,16 @@ class TestClientResourceAPI:
             f"/v1/admin/users/{engineer_user.id}/client-resource-params",
             json={"baseline_client_count": 200},
             headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert response.status_code == 403
+
+    async def test_non_admin_cannot_set_params(
+        self, client: AsyncClient, pm_token: str, pm_user: User
+    ):
+        """非管理员无法设置基准客资参数"""
+        response = await client.put(
+            f"/v1/admin/users/{pm_user.id}/client-resource-params",
+            json={"baseline_client_count": 200},
+            headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert response.status_code == 403

@@ -30,8 +30,6 @@ from app.core.errors import (
 )
 from app.core.models import UserRoleType
 
-from app.core.models import UserRoleType
-
 from app.domains.user import repository
 from app.domains.user.schemas import (
     UserAdminCreate,

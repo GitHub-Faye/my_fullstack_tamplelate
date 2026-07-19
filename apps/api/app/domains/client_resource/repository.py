@@ -21,7 +21,7 @@ async def create_client_resource(
     pm_id: uuid.UUID,
     actual_count: int,
     baseline_count: int,
-    date: str,
+    date: datetime,
 ) -> ClientResource:
     """
     录入客资
@@ -40,7 +40,7 @@ async def create_client_resource(
         pm_id=pm_id,
         actual_count=actual_count,
         baseline_count=baseline_count,
-        date=datetime.fromisoformat(date) if isinstance(date, str) else date,
+        date=date,
     )
     session.add(resource)
     await session.commit()
@@ -130,24 +130,3 @@ async def get_admin_summary(
         })
 
     return summaries
-
-
-async def get_pm_baseline_count(
-    *,
-    session: AsyncSession,
-    pm_id: uuid.UUID,
-) -> int | None:
-    """
-    获取 PM 的基准客资数
-
-    Args:
-        session: 数据库会话
-        pm_id: PM 用户 ID
-
-    Returns:
-        基准客资数（未设置时返回 None）
-    """
-    user = await session.get(User, pm_id)
-    if not user:
-        return None
-    return user.baseline_client_count

@@ -17,9 +17,9 @@ from app.core.dependencies import (
     SessionDep,
     require_scope,
 )
-from app.core.scopes import ClientResourceScope
+from app.core.scopes import ClientResourceScope, UserScope
 from app.core.schemas import Message
-from app.core.models import UserRoleType
+from app.core.models import User, UserRoleType
 from app.core.errors import BusinessException, ErrorCode, raise_user_not_found
 
 from app.domains.client_resource import repository
@@ -55,11 +55,8 @@ async def create_client_resource(
     自动使用 PM 的 baseline_client_count 作为基准客资数。
     """
     # 获取 PM 的基准客资数
-    baseline_count = await repository.get_pm_baseline_count(
-        session=session,
-        pm_id=current_user.id,
-    )
-    if baseline_count is None:
+    user = await session.get(User, current_user.id)
+    if not user or user.baseline_client_count is None:
         raise BusinessException(
             code=ErrorCode.SYSTEM_VALIDATION_ERROR,
             detail="Baseline client count not set for this PM. Please contact admin.",
@@ -69,7 +66,7 @@ async def create_client_resource(
         session=session,
         pm_id=current_user.id,
         actual_count=resource_in.actual_count,
-        baseline_count=baseline_count,
+        baseline_count=user.baseline_client_count,
         date=resource_in.date,
     )
 
@@ -123,19 +120,49 @@ async def read_admin_client_resource_summary(
     *,
     session: SessionDep,
     current_user: CurrentUser,
+    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
 ) -> Any:
     """
     管理员查看所有 PM 客资汇总
 
-    权限：管理员（需 user:admin 权限 — 管理员角色的标准权限）
+    权限：管理员（需 user:admin 权限）
     """
-    # 仅管理员可访问
-    if current_user.role != UserRoleType.ADMIN:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
-            detail="Only admin can view all PM client resource summaries",
-        )
-
     summaries = await repository.get_admin_summary(session=session)
 
     return [ClientResourceSummary(**s) for s in summaries]
+
+
+@router.get(
+    "/all",
+    response_model=ClientResourcesPublic,
+    summary="管理员查看所有客资",
+    description="管理员查看所有 PM 的客资明细记录",
+)
+async def read_all_client_resources(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100, description="每页数量，默认20")] = 20,
+    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
+) -> Any:
+    """
+    获取所有客资记录（管理员操作）。
+
+    权限：管理员（需 user:admin 权限）
+    """
+    offset = (page - 1) * page_size
+
+    resources, count = await repository.get_client_resources(
+        session=session,
+        skip=offset,
+        limit=page_size,
+    )
+
+    return ClientResourcesPublic(
+        data=[ClientResourcePublic.model_validate(r) for r in resources],
+        count=count,
+        page=page,
+        page_size=page_size,
+        total_pages=(count + page_size - 1) // page_size if count > 0 else 0,
+    )

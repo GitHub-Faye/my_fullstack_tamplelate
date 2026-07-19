@@ -8,8 +8,6 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-from datetime import datetime, date
-
 from sqlmodel import Field, SQLModel
 
 from app.core.schemas import PaginatedResponse
@@ -20,7 +18,7 @@ from app.core.schemas import PaginatedResponse
 class ClientResourceCreate(SQLModel):
     """录入客资请求"""
     actual_count: int = Field(ge=0, description="实际客资数")
-    date: str = Field(description="记录日期（ISO 格式，如 2026-07-18）")
+    date: datetime = Field(description="记录日期")
 
 
 # ==================== API 响应模型 ====================
