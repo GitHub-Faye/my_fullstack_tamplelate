@@ -9,10 +9,11 @@
 """
 
 import uuid
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select, and_
 
 from app.core.dependencies import (
     CurrentUser,
@@ -32,6 +33,7 @@ from app.domains.daily_report.schemas import (
     DailyReportPublic,
     DailyReportsPublic,
     DailyReportUpdate,
+    RemindResult,
 )
 
 
@@ -164,12 +166,18 @@ async def create_daily_report(
     # 如果日报标记为 completed，则同步任务状态为 COMPLETED
     if report_in.current_stage == ReportStage.COMPLETED and task.status == TaskStatus.IN_PROGRESS:
         task.status = TaskStatus.COMPLETED
+        # Spec §27: 阶段选择"已完成"时，进度自动设为 100%
+        if not report_in.progress:
+            report_in.progress = "100%"
     # 如果日报标记为 paused，则同步任务状态为 PAUSED
     elif report_in.current_stage == ReportStage.PAUSED and task.status == TaskStatus.IN_PROGRESS:
         task.status = TaskStatus.PAUSED
 
     # 同步进度描述到任务（使用专用 progress 字段，不污染 PM 原始描述）
-    if report_in.progress:
+    # Spec §27: 阶段选择"已完成"时，进度自动设为 100%
+    if report_in.current_stage == ReportStage.COMPLETED:
+        task.progress = "100%"
+    elif report_in.progress:
         task.progress = report_in.progress
 
     session.add(task)
@@ -204,7 +212,9 @@ async def read_daily_reports(
     is_admin = ReportScope.ADMIN.value in user_scopes
 
     # 工程师只能查看自己的日报
-    engineer_id = None if is_admin else current_user.id
+    # PM 可查看所有日报（用于跟踪任务进度）
+    # 管理员可查看所有日报
+    engineer_id = None if (is_admin or current_user.role == UserRoleType.PM) else current_user.id
 
     # 计算offset
     offset = (page - 1) * page_size
@@ -224,6 +234,56 @@ async def read_daily_reports(
         page=page,
         page_size=page_size,
         total_pages=(count + page_size - 1) // page_size if count > 0 else 0,
+    )
+
+
+@router.get(
+    "/remind",
+    response_model=RemindResult,
+    summary="查看未提交日报的工程师（管理员）",
+    description="管理员查看今日未提交日报的工程师列表，用于提醒"
+)
+async def get_remind_report(
+    session: SessionDep,
+    current_user: CurrentUser,
+    _: Annotated[None, Depends(require_scope(ReportScope.ADMIN))] = None,
+) -> Any:
+    """
+    获取未提交日报的工程师列表
+
+    权限：管理员（需 report:admin 权限）
+    """
+    from app.core.models import DailyReport as DailyReportModel
+
+    today = date.today()
+    start_dt = datetime.combine(today, datetime.min.time())
+    end_dt = datetime.combine(today, datetime.max.time())
+
+    stmt = select(User).where(User.role == UserRoleType.ENGINEER)
+    result = await session.execute(stmt)
+    all_engineers = result.scalars().all()
+    total_engineers = len(all_engineers)
+
+    submitted_stmt = (
+        select(DailyReportModel.engineer_id)
+        .where(
+            and_(
+                DailyReportModel.report_date >= start_dt,
+                DailyReportModel.report_date <= end_dt,
+            )
+        )
+        .distinct()
+    )
+    submitted_result = await session.execute(submitted_stmt)
+    submitted_ids = {row[0] for row in submitted_result}
+
+    not_submitted = [e for e in all_engineers if e.id not in submitted_ids]
+
+    return RemindResult(
+        total_engineers=total_engineers,
+        submitted_today=len(submitted_ids),
+        not_submitted=len(not_submitted),
+        not_submitted_engineers=[e.full_name or e.email for e in not_submitted],
     )
 
 

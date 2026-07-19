@@ -19,10 +19,12 @@ from app.core.scopes import TaskScope
 from app.core.schemas import Message
 from app.core.errors import raise_task_not_found, BusinessException, ErrorCode
 from app.core.models import Task, TaskStatus, TaskType
+from app.core.models import Bid
 
 from app.domains.task import repository
 from app.domains.task.schemas import TaskPublic
 from app.domains.task.dependencies import check_task_owner_or_admin
+from app.domains.user.repository import create_audit_log
 
 router = APIRouter()
 
@@ -67,6 +69,17 @@ async def approve_task(
     await session.commit()
     await session.refresh(task)
 
+    # 记录审计日志
+    await create_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="task.approve",
+        target_type="task",
+        target_id=str(task_id),
+        details=f"Task approved, status changed to confirmed_unpublished",
+        ip_address=None,
+    )
+
     return task
 
 
@@ -103,6 +116,18 @@ async def reject_task(
 
     # 驳回操作：添加备注（此处简单返回任务信息，实际可在 PM 端显示驳回状态）
     # 状态保持 'unconfirmed'，PM 可重新编辑
+
+    # 记录审计日志
+    await create_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="task.reject",
+        target_type="task",
+        target_id=str(task_id),
+        details=f"Task rejected by admin",
+        ip_address=None,
+    )
+
     return task
 
 
@@ -145,6 +170,17 @@ async def publish_task(
     session.add(task)
     await session.commit()
     await session.refresh(task)
+
+    # 记录审计日志
+    await create_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="task.publish",
+        target_type="task",
+        target_id=str(task_id),
+        details=f"Task published to bidding pool, deadline in {bidding_days} days",
+        ip_address=None,
+    )
 
     return task
 

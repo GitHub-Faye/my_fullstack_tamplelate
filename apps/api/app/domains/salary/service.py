@@ -46,7 +46,7 @@ async def calculate_user_salary(
             k_coefficient=k_coefficient,
         )
     elif user.role == UserRoleType.PM:
-        return await salary_repo.calculate_pm_salary(pm=user)
+        return await salary_repo.calculate_pm_salary(session=session, pm=user)
     else:
         raise BusinessException(
             code=ErrorCode.USER_ROLE_MISMATCH,

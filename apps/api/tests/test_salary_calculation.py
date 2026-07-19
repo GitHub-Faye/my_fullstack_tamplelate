@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import User, UserRoleType, Task, TaskStatus, TaskType
+from app.core.models import User, UserRoleType, Task, TaskStatus, TaskType, ClientResource
 from app.domains.salary.repository import (
     get_engineer_monthly_hours,
     calculate_engineer_salary,
@@ -60,24 +60,30 @@ def create_pm_user() -> User:
 
 
 @pytest.mark.asyncio
-async def test_calculate_pm_salary():
+async def test_calculate_pm_salary(db_session: AsyncSession):
     """测试 PM 工资计算：S总 = S底 + S考"""
     pm = create_pm_user()
-    result = await calculate_pm_salary(pm=pm)
+    db_session.add(pm)
+    await db_session.commit()
+    result = await calculate_pm_salary(session=db_session, pm=pm)
 
     assert result.S_base == 8000.0
     assert result.S_assess == 2000.0
     assert result.salary_total == 10000.0
     assert result.role == "pm"
+    assert result.L_actual == 0
+    assert result.L_base == 0
 
 
 @pytest.mark.asyncio
-async def test_calculate_pm_salary_zero_values():
+async def test_calculate_pm_salary_zero_values(db_session: AsyncSession):
     """测试 PM 工资计算（参数为 0 时）"""
     pm = create_pm_user()
     pm.S_base = 0.0
     pm.S_assess = 0.0
-    result = await calculate_pm_salary(pm=pm)
+    db_session.add(pm)
+    await db_session.commit()
+    result = await calculate_pm_salary(session=db_session, pm=pm)
 
     assert result.salary_total == 0.0
 
@@ -301,10 +307,13 @@ async def test_calculate_user_salary_engineer(db_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_calculate_user_salary_pm():
+async def test_calculate_user_salary_pm(db_session: AsyncSession):
     """测试 calculate_user_salary 分发 PM 工资计算"""
     pm = create_pm_user()
-    result = await calculate_user_salary(session=None, user=pm)  # type: ignore
+    db_session.add(pm)
+    await db_session.commit()
+    result = await calculate_user_salary(session=db_session, user=pm)
 
     assert result.role == "pm"
+    assert isinstance(result, PMSalaryDetail)
     assert result.salary_total == 10000.0

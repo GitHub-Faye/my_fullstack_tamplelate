@@ -92,6 +92,9 @@ async def calculate_engineer_salary(
     # 计算工时差额
     P_diff = H0 * (T_actual - T_reported)
 
+    # 计算 T有效 = 已完成任务的 T实 合计（即 T_actual）
+    T_effective = T_actual
+
     # 最终工资
     salary_final = max(0, (S0 - P_diff) * k_coefficient)  # 工资不能为负
 
@@ -104,6 +107,7 @@ async def calculate_engineer_salary(
         T_monthly_plan=engineer.T_monthly_plan,
         T_actual_monthly=T_actual,
         T_reported_monthly=T_reported,
+        T_effective=T_effective,
         P_diff=P_diff,
         current_starpoint=engineer.current_starpoint,
         k_coefficient=k_coefficient,
@@ -115,6 +119,7 @@ async def calculate_engineer_salary(
 
 async def calculate_pm_salary(
     *,
+    session: AsyncSession,
     pm: User,
 ) -> PMSalaryDetail:
     """
@@ -123,15 +128,34 @@ async def calculate_pm_salary(
     公式：S总 = S底 + S考
 
     Args:
+        session: 数据库会话
         pm: PM 用户对象
 
     Returns:
-        PMSalaryDetail DTO（不需要 session，仅使用 User 字段）
+        PMSalaryDetail DTO
     """
     S_base = pm.S_base or 0.0
     S_assess = pm.S_assess or 0.0
 
     salary_total = S_base + S_assess
+
+    # 获取 L实（本月实际客资数）和 L基（基准客资数）
+    actual_total = 0
+    baseline_count = pm.baseline_client_count or 0
+
+    from app.core.models import ClientResource
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    stmt = select(func.coalesce(func.sum(ClientResource.actual_count), 0)).where(
+        and_(
+            ClientResource.pm_id == pm.id,
+            ClientResource.date >= month_start,
+        )
+    )
+    result = await session.execute(stmt)
+    actual_total = int(result.scalar_one() or 0)
 
     return PMSalaryDetail(
         user_id=pm.id,
@@ -141,6 +165,8 @@ async def calculate_pm_salary(
         S_assess=S_assess,
         R_base=pm.R_base,
         R_assess=pm.R_assess,
+        L_actual=actual_total,
+        L_base=baseline_count,
         salary_total=salary_total,
     )
 
@@ -216,6 +242,8 @@ async def update_user_salary_params(
             user.H0 = params.H0
         if params.T_monthly_plan is not None:
             user.T_monthly_plan = params.T_monthly_plan
+        if params.manual_adjustment is not None:
+            user.S0 = (user.S0 or 0.0) + params.manual_adjustment
     elif user.role == UserRoleType.PM:
         if params.S_base is not None:
             user.S_base = params.S_base
@@ -227,6 +255,8 @@ async def update_user_salary_params(
             user.R_assess = params.R_assess
         if params.baseline_client_count is not None:
             user.baseline_client_count = params.baseline_client_count
+        if params.manual_adjustment is not None:
+            user.S_base = (user.S_base or 0.0) + params.manual_adjustment
 
     session.add(user)
     await session.commit()

@@ -62,3 +62,13 @@ class DailyReportPublic(DailyReportBase):
 class DailyReportsPublic(PaginatedResponse[DailyReportPublic]):
     """日报列表分页响应"""
     pass
+
+
+# ==================== 提醒模型 ====================
+
+class RemindResult(SQLModel):
+    """提醒未提交日报结果"""
+    total_engineers: int = Field(description="工程师总数")
+    submitted_today: int = Field(description="今日已提交日报人数")
+    not_submitted: int = Field(description="未提交人数")
+    not_submitted_engineers: list[str] = Field(default_factory=list, description="未提交日报的工程师姓名列表")

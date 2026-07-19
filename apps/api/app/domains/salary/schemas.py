@@ -28,6 +28,11 @@ class SalaryParamsUpdate(SQLModel):
     R_assess: Optional[float] = Field(default=None, ge=0, le=1, description="R考（考核比例）")
     baseline_client_count: Optional[int] = Field(default=None, ge=0, description="L基（基准客资数）")
 
+    # 手动调整
+    manual_adjustment: Optional[float] = Field(
+        default=None, description="手动工资调整（正数=奖励，负数=扣减）"
+    )
+
 
 # ==================== API 响应模型 ====================
 
@@ -45,6 +50,7 @@ class EngineerSalaryDetail(SQLModel):
     # 计算字段
     T_actual_monthly: float = Field(default=0.0, description="本月实际工时")
     T_reported_monthly: float = Field(default=0.0, description="本月报价工时")
+    T_effective: float = Field(default=0.0, description="T有效（有效工时，已完成任务的 T实）")
     P_diff: float = Field(default=0.0, description="工时差额（T实际 - T报价）")
     current_starpoint: int = Field(default=0, description="当前星点总数")
     k_coefficient: float = Field(default=1.0, description="K系数")
@@ -64,6 +70,10 @@ class PMSalaryDetail(SQLModel):
     S_assess: float = Field(description="S考（考核部分）")
     R_base: Optional[float] = Field(default=None, description="R底（底薪比例）")
     R_assess: Optional[float] = Field(default=None, description="R考（考核比例）")
+
+    # 客资数据
+    L_actual: int = Field(default=0, description="L实（本月实际客资数）")
+    L_base: int = Field(default=0, description="L基（基准客资数）")
 
     # 最终工资
     salary_total: float = Field(description="总工资 S总 = S底 + S考")

@@ -29,6 +29,7 @@ from app.domains.task.dependencies import (
     check_task_assigned_to_engineer,
 )
 from app.domains.starpoint.calculation import trigger_starpoint_calculation
+from app.domains.user.repository import create_audit_log
 
 
 router = APIRouter()
@@ -78,6 +79,17 @@ async def start_task(
     await session.commit()
     await session.refresh(task)
 
+    # 记录审计日志
+    await create_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="task.start",
+        target_type="task",
+        target_id=str(task_id),
+        details=f"Task started by engineer",
+        ip_address=None,
+    )
+
     return task
 
 
@@ -122,6 +134,17 @@ async def decline_task(
     await session.commit()
     await session.refresh(task)
 
+    # 记录审计日志
+    await create_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="task.decline",
+        target_type="task",
+        target_id=str(task_id),
+        details=f"Task declined by engineer, reverted to confirmed_unpublished",
+        ip_address=None,
+    )
+
     return task
 
 
@@ -165,6 +188,17 @@ async def pause_request_task(
     await session.commit()
     await session.refresh(task)
 
+    # 记录审计日志
+    await create_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="task.pause_request",
+        target_type="task",
+        target_id=str(task_id),
+        details=f"Engineer requested pause",
+        ip_address=None,
+    )
+
     return task
 
 
@@ -207,6 +241,17 @@ async def resume_task(
     session.add(task)
     await session.commit()
     await session.refresh(task)
+
+    # 记录审计日志
+    await create_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="task.resume",
+        target_type="task",
+        target_id=str(task_id),
+        details=f"Task resumed",
+        ip_address=None,
+    )
 
     return task
 
@@ -262,6 +307,17 @@ async def complete_task(
     except Exception:
         # 星点计算失败不应影响任务完成操作
         pass
+
+    # 记录审计日志
+    await create_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="task.complete",
+        target_type="task",
+        target_id=str(task_id),
+        details=f"Task completed, T_reported={request.T_reported}",
+        ip_address=None,
+    )
 
     await session.refresh(task)
     return task

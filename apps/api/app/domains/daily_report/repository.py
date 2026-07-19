@@ -11,8 +11,50 @@ from typing import Optional, Tuple
 from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import DailyReport, User, Task
+from app.core.models import DailyReport, User, UserRoleType, Task
 from app.domains.daily_report.schemas import DailyReportCreate, DailyReportUpdate
+
+
+async def get_engineers_not_submitted_today(
+    *,
+    session: AsyncSession,
+    report_date: date,
+) -> list[User]:
+    """
+    获取今日未提交日报的工程师列表
+
+    Args:
+        session: 数据库会话
+        report_date: 报告日期
+
+    Returns:
+        未提交日报的工程师列表
+    """
+    start_datetime = datetime.combine(report_date, datetime.min.time())
+    end_datetime = datetime.combine(report_date, datetime.max.time())
+
+    # 查询所有工程师
+    engineer_stmt = select(User).where(User.role == UserRoleType.ENGINEER)
+    engineer_result = await session.execute(engineer_stmt)
+    all_engineers = engineer_result.scalars().all()
+
+    # 查询今日已提交日报的工程师 ID
+    submitted_stmt = (
+        select(DailyReport.engineer_id)
+        .where(
+            and_(
+                DailyReport.report_date >= start_datetime,
+                DailyReport.report_date <= end_datetime,
+            )
+        )
+        .distinct()
+    )
+    submitted_result = await session.execute(submitted_stmt)
+    submitted_ids = {row[0] for row in submitted_result}
+
+    # 筛选未提交的工程师
+    not_submitted = [e for e in all_engineers if e.id not in submitted_ids]
+    return not_submitted
 
 
 # ============================== DailyReport CRUD Operations ==============================
