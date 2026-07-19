@@ -98,6 +98,12 @@ class AdminPasswordReset(SQLModel):
     new_password: str = Field(min_length=8, max_length=128)
 
 
+# 管理员设置 PM 客资参数
+class ClientResourceParamsUpdate(SQLModel):
+    """管理员设置 PM 的基准客资数"""
+    baseline_client_count: int = Field(ge=0, description="基准客资数（L基）")
+
+
 # ---------------------------- API 响应模型（Response DTO） --------------------------------
 # 返回给客户端的 User 信息
 class UserPublic(UserBase):
