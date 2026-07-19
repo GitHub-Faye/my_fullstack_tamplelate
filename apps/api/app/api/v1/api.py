@@ -2,10 +2,8 @@ from fastapi import APIRouter
 
 from app.domains.user.router import login_router, user_router, admin_router
 from app.domains.item.router import router as item_router
-from app.domains.task.router import router as task_router
-from app.domains.task.router_admin import router as task_admin_router
-from app.domains.task.router_execution import router as task_execution_router
-from app.domains.task.router_admin_execution import router as task_admin_execution_router
+from app.domains.task.router_pm import router as task_router
+from app.domains.task.router_ops import router as task_ops_router
 from app.domains.bid.router import router as bid_router
 from app.domains.bidding.router import router as bidding_router
 from app.domains.daily_report.router import router as daily_report_router
@@ -27,9 +25,7 @@ router.include_router(item_router, prefix="/items", tags=["items"])
 
 # 任务相关路由
 router.include_router(task_router, prefix="/tasks", tags=["tasks"])
-router.include_router(task_admin_router, prefix="/tasks", tags=["tasks-admin"])
-router.include_router(task_execution_router, prefix="/tasks", tags=["tasks-execution"])
-router.include_router(task_admin_execution_router, prefix="/tasks", tags=["tasks-admin-execution"])
+router.include_router(task_ops_router, prefix="/tasks", tags=["tasks"])
 
 # 竞价相关路由
 router.include_router(bid_router, tags=["bids"])
