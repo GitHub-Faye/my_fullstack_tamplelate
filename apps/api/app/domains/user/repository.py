@@ -317,7 +317,7 @@ async def create_user_with_role(
     """
     user_data = user_create.model_dump(exclude={"password"})
     user_data["hashed_password"] = get_password_hash(user_create.password)
-    db_obj = User.model_validate(user_data)
+    db_obj = User(**user_data)
     session.add(db_obj)
     await session.commit()
     await session.refresh(db_obj)
@@ -377,6 +377,51 @@ async def admin_update_user(
     await session.commit()
     await session.refresh(db_user)
     return db_user
+
+
+async def update_user_role(
+    *,
+    session: AsyncSession,
+    user: User,
+    new_role: UserRoleType,
+) -> None:
+    """
+    更新用户的角色关联（UserRole 表）。
+
+    删除旧角色关联，创建新角色关联。
+
+    Args:
+        session: 数据库会话
+        user: 用户对象
+        new_role: 新角色类型
+    """
+    # 删除旧的 UserRole 关联
+    from sqlalchemy import delete as sa_delete
+    stmt = sa_delete(UserRole).where(UserRole.user_id == user.id)
+    await session.execute(stmt)
+
+    # 确定新的角色名称
+    role_mapping = {
+        UserRoleType.ENGINEER: "engineer",
+        UserRoleType.PM: "pm",
+        UserRoleType.ADMIN: "admin_role",
+    }
+    role_name = role_mapping.get(new_role, "engineer")
+
+    # 查找或创建角色
+    rstmt = select(Role).where(Role.name == role_name)
+    result = await session.execute(rstmt)
+    role = result.scalar_one_or_none()
+
+    if not role:
+        role = Role(name=role_name)
+        session.add(role)
+        await session.flush()
+
+    # 创建新关联
+    user_role = UserRole(user_id=user.id, role_id=role.id)
+    session.add(user_role)
+    await session.commit()
 
 
 async def admin_reset_password(

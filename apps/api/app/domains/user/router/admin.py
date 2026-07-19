@@ -57,12 +57,12 @@ async def admin_create_user(
     current_user: CurrentUser,
     user_in: UserAdminCreate,
     request: Request,
-    _: Annotated[None, Depends(require_scope(UserScope.CREATE))] = None,
+    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
 ) -> Any:
     """
     创建用户（管理员操作）。
 
-    权限：管理员（需 user:create 权限）
+    权限：管理员（需 user:admin 权限，该 scope 仅 admin_role 具有）
     """
     # 检查邮箱唯一性
     existing = await repository.get_user_by_email(session=session, email=user_in.email)
@@ -111,12 +111,12 @@ async def admin_read_users(
     current_user: CurrentUser,
     page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
     page_size: Annotated[int, Query(ge=1, le=100, description="每页数量")] = 20,
-    _: Annotated[None, Depends(require_scope(UserScope.READ))] = None,
+    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
 ) -> Any:
     """
     获取用户列表（管理员操作）。
 
-    权限：管理员（需 user:read 权限）
+    权限：管理员（需 user:admin 权限）
     """
     offset = (page - 1) * page_size
     users, count = await repository.get_users(session=session, skip=offset, limit=page_size)
@@ -141,12 +141,12 @@ async def admin_read_user(
     session: SessionDep,
     current_user: CurrentUser,
     user_id: uuid.UUID,
-    _: Annotated[None, Depends(require_scope(UserScope.READ))] = None,
+    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
 ) -> Any:
     """
     获取用户详情（管理员操作）。
 
-    权限：管理员（需 user:read 权限）
+    权限：管理员（需 user:admin 权限）
     """
     user = await repository.get_user_detail(session=session, user_id=user_id)
     if not user:
@@ -167,12 +167,12 @@ async def admin_update_user(
     user_id: uuid.UUID,
     user_in: UserAdminUpdate,
     request: Request,
-    _: Annotated[None, Depends(require_scope(UserScope.UPDATE))] = None,
+    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
 ) -> Any:
     """
     更新用户信息（管理员操作）。
 
-    权限：管理员（需 user:update 权限）
+    权限：管理员（需 user:admin 权限）
     """
     user = await repository.get_user_detail(session=session, user_id=user_id)
     if not user:
@@ -192,9 +192,13 @@ async def admin_update_user(
         session=session, db_user=user, user_in=user_in
     )
 
+    # 如果角色变更，重新分配 UserRole 关联
     if role_changed:
-        # 这里仅记录，角色实际通过 role 字段处理
-        pass
+        await repository.update_user_role(
+            session=session,
+            user=updated_user,
+            new_role=user_in.role,
+        )
 
     # 记录审计日志
     changed_fields = user_in.model_dump(exclude_unset=True, exclude_none=True)
@@ -224,12 +228,12 @@ async def admin_toggle_user_active(
     user_id: uuid.UUID,
     body: UserToggleActive,
     request: Request,
-    _: Annotated[None, Depends(require_scope(UserScope.UPDATE))] = None,
+    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
 ) -> Any:
     """
     启用/禁用用户账号（管理员操作）。
 
-    权限：管理员（需 user:update 权限）
+    权限：管理员（需 user:admin 权限）
     """
     user = await repository.get_user_detail(session=session, user_id=user_id)
     if not user:
@@ -273,12 +277,12 @@ async def admin_reset_password(
     user_id: uuid.UUID,
     body: AdminPasswordReset,
     request: Request,
-    _: Annotated[None, Depends(require_scope(UserScope.UPDATE))] = None,
+    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
 ) -> Any:
     """
     重置用户密码（管理员操作）。
 
-    权限：管理员（需 user:update 权限）
+    权限：管理员（需 user:admin 权限）
     """
     user = await repository.get_user_detail(session=session, user_id=user_id)
     if not user:
