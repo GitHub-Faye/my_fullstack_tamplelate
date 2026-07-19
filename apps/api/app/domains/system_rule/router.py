@@ -6,8 +6,10 @@
 - 创建规则
 - 更新规则
 - 删除规则
+- 查看规则修改历史
 """
 
+import json
 import uuid
 from typing import Annotated, Any
 
@@ -29,10 +31,64 @@ from app.domains.system_rule.schemas import (
     SystemRuleUpdate,
     SystemRulePublic,
     SystemRulesPublic,
+    RuleAuditLogPublic,
+    RuleAuditLogList,
 )
 
 
 router = APIRouter()
+
+
+# ==================== 规则修改历史（必须在 /{rule_id} 之前注册） ====================
+
+
+@router.get(
+    "/audit-logs",
+    response_model=RuleAuditLogList,
+    summary="查看规则修改历史",
+    description="管理员查看规则配置的修改历史记录",
+)
+async def read_rule_audit_logs(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100, description="每页数量，默认20")] = 20,
+    _: Annotated[None, Depends(require_scope(RuleScope.ADMIN))] = None,
+) -> Any:
+    """
+    获取规则修改历史
+
+    权限：管理员（需 rule:admin 权限）
+    """
+    offset = (page - 1) * page_size
+
+    logs, count = await repository.get_rule_audit_logs(
+        session=session,
+        skip=offset,
+        limit=page_size,
+    )
+
+    # 转成 public 模型
+    items = []
+    for log in logs:
+        items.append(RuleAuditLogPublic(
+            id=log.id,
+            user_id=log.user_id,
+            action=log.action,
+            target_id=log.target_id,
+            details=log.details,
+            created_at=log.created_at,
+            operator_name=log.operator.full_name if log.operator else None,
+        ))
+
+    return RuleAuditLogList(
+        data=items,
+        count=count,
+        page=page,
+        page_size=page_size,
+        total_pages=(count + page_size - 1) // page_size if count > 0 else 0,
+    )
 
 
 # ==================== 管理员端点：规则配置 ====================
@@ -60,7 +116,6 @@ async def read_rules(
 
     支持按分类过滤。
     """
-    # 解析分类过滤
     category_filter = None
     if category:
         try:
@@ -114,6 +169,19 @@ async def create_rule(
     - system_param: 系统参数
     """
     rule = await repository.create_rule(session=session, rule_in=rule_in)
+
+    # 记录审计日志
+    await repository.create_rule_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="rule.create",
+        target_id=str(rule.id),
+        details=json.dumps({
+            "category": rule_in.category.value,
+            "name": rule_in.name,
+        }, ensure_ascii=False),
+    )
+
     return rule
 
 
@@ -174,17 +242,41 @@ async def update_rule(
         raise_rule_not_found(detail=f"Rule with id {rule_id} not found")
 
     # 检查是否有更新字段
-    if not rule_in.model_dump(exclude_none=True):
+    update_data = rule_in.model_dump(exclude_none=True)
+    if not update_data:
         raise BusinessException(
             code=ErrorCode.SYSTEM_VALIDATION_ERROR,
             detail="No fields provided for update"
         )
+
+    # 记录变更前快照
+    old_values = {
+        "category": rule.category.value,
+        "name": rule.name,
+        "value": rule.value,
+        "is_active": rule.is_active,
+        "is_public": rule.is_public,
+    }
 
     updated_rule = await repository.update_rule(
         session=session,
         db_rule=rule,
         rule_in=rule_in,
     )
+
+    # 记录审计日志
+    changed_fields = list(update_data.keys())
+    await repository.create_rule_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="rule.update",
+        target_id=str(rule_id),
+        details=json.dumps({
+            "changed_fields": changed_fields,
+            "old_values": {k: v for k, v in old_values.items() if k in changed_fields},
+        }, ensure_ascii=False),
+    )
+
     return updated_rule
 
 
@@ -209,6 +301,18 @@ async def delete_rule(
     rule = await repository.get_rule(session=session, rule_id=rule_id)
     if not rule:
         raise_rule_not_found(detail=f"Rule with id {rule_id} not found")
+
+    # 记录审计日志
+    await repository.create_rule_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="rule.delete",
+        target_id=str(rule_id),
+        details=json.dumps({
+            "name": rule.name,
+            "category": rule.category.value,
+        }, ensure_ascii=False),
+    )
 
     await repository.delete_rule(session=session, db_rule=rule)
     return Message(message="Rule deleted successfully")

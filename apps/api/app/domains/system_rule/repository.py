@@ -10,7 +10,7 @@ from typing import Tuple
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import SystemRule, RuleCategory
+from app.core.models import SystemRule, RuleCategory, AuditLog
 from app.core.db_utils import paginated_query
 from app.domains.system_rule.schemas import SystemRuleCreate, SystemRuleUpdate
 
@@ -130,7 +130,45 @@ async def delete_rule(
     await session.commit()
 
 
-# ============================== 预置默认规则 ==============================
+# ============================== 审计日志 ==============================
+
+async def create_rule_audit_log(
+    *,
+    session: AsyncSession,
+    user_id: uuid.UUID,
+    action: str,
+    target_id: str | None = None,
+    details: str | None = None,
+) -> AuditLog:
+    """创建规则操作审计日志"""
+    log = AuditLog(
+        user_id=user_id,
+        action=action,
+        target_type="system_rule",
+        target_id=target_id,
+        details=details,
+    )
+    session.add(log)
+    await session.commit()
+    await session.refresh(log)
+    return log
+
+
+async def get_rule_audit_logs(
+    *,
+    session: AsyncSession,
+    skip: int = 0,
+    limit: int = 20,
+) -> Tuple[list[AuditLog], int]:
+    """获取规则操作审计日志列表（分页）"""
+    return await paginated_query(
+        session=session,
+        model=AuditLog,
+        skip=skip,
+        limit=limit,
+        conditions=[AuditLog.target_type == "system_rule"],
+        order_by=AuditLog.created_at.desc(),
+    )
 
 DEFAULT_RULES = [
     # 星点奖励规则

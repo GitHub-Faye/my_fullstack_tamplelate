@@ -397,3 +397,120 @@ class TestSystemRuleAPI:
         assert data["page"] == 1
         assert data["page_size"] == 2
         assert data["total_pages"] == 2
+
+    # ==================== 规则修改历史 ====================
+
+    async def test_audit_log_created_on_create(
+        self, client: AsyncClient, admin_token: str
+    ):
+        """创建规则时自动记录审计日志"""
+        payload = {
+            "category": "starpoint_reward",
+            "name": "审计测试规则",
+            "value": '{"test": 1}',
+        }
+        response = await client.post(
+            self.BASE,
+            json=payload,
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert response.status_code == 200
+        rule_id = response.json()["id"]
+
+        # 验证审计日志已生成
+        logs_response = await client.get(
+            f"{self.BASE}/audit-logs",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert logs_response.status_code == 200
+        logs_data = logs_response.json()
+        assert logs_data["count"] >= 1
+        # 找到刚创建的规则对应的日志
+        rule_logs = [log for log in logs_data["data"] if log["target_id"] == rule_id]
+        assert len(rule_logs) >= 1
+        assert rule_logs[0]["action"] == "rule.create"
+
+    async def test_audit_log_created_on_update(
+        self, client: AsyncClient, admin_token: str, db_session: AsyncSession
+    ):
+        """更新规则时自动记录审计日志"""
+        rule = await self._create_sample_rule(db_session)
+
+        response = await client.put(
+            f"{self.BASE}/{rule.id}",
+            json={"name": "更新后名称", "is_active": False},
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert response.status_code == 200
+
+        # 验证审计日志
+        logs_response = await client.get(
+            f"{self.BASE}/audit-logs",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert logs_response.status_code == 200
+        logs_data = logs_response.json()
+        rule_logs = [log for log in logs_data["data"] if log["target_id"] == str(rule.id) and log["action"] == "rule.update"]
+        assert len(rule_logs) >= 1
+        assert "changed_fields" in rule_logs[0]["details"]
+
+    async def test_audit_log_created_on_delete(
+        self, client: AsyncClient, admin_token: str, db_session: AsyncSession
+    ):
+        """删除规则时自动记录审计日志"""
+        rule = await self._create_sample_rule(db_session)
+
+        response = await client.delete(
+            f"{self.BASE}/{rule.id}",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert response.status_code == 200
+
+        # 验证审计日志
+        logs_response = await client.get(
+            f"{self.BASE}/audit-logs",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert logs_response.status_code == 200
+        logs_data = logs_response.json()
+        rule_logs = [log for log in logs_data["data"] if log["target_id"] == str(rule.id) and log["action"] == "rule.delete"]
+        assert len(rule_logs) >= 1
+
+    async def test_audit_logs_pagination(
+        self, client: AsyncClient, admin_token: str
+    ):
+        """审计日志分页正常工作"""
+        # 创建多条规则产生审计日志
+        for i in range(3):
+            payload = {
+                "category": "starpoint_reward",
+                "name": f"日志测试{i}",
+                "value": '{"v": 1}',
+            }
+            await client.post(
+                self.BASE,
+                json=payload,
+                headers={"Authorization": f"Bearer {admin_token}"},
+            )
+
+        # 验证分页
+        response = await client.get(
+            f"{self.BASE}/audit-logs?page=1&page_size=2",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["count"] >= 3
+        assert len(data["data"]) == 2
+        assert data["page"] == 1
+        assert data["page_size"] == 2
+
+    async def test_pm_cannot_read_audit_logs(
+        self, client: AsyncClient, pm_token: str
+    ):
+        """PM 无法查看规则修改历史"""
+        response = await client.get(
+            f"{self.BASE}/audit-logs",
+            headers={"Authorization": f"Bearer {pm_token}"},
+        )
+        assert response.status_code == 403
