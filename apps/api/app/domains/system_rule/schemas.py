@@ -54,21 +54,3 @@ class SystemRulePublic(SQLModel):
 class SystemRulesPublic(PaginatedResponse[SystemRulePublic]):
     """规则列表"""
     pass
-
-
-# ==================== 审计日志 DTO ====================
-
-class RuleAuditLogPublic(SQLModel):
-    """规则操作审计日志"""
-    id: uuid.UUID
-    user_id: uuid.UUID
-    action: str
-    target_id: str | None = None
-    details: str | None = None
-    created_at: datetime | None = None
-    operator_name: str | None = None
-
-
-class RuleAuditLogList(PaginatedResponse[RuleAuditLogPublic]):
-    """规则审计日志列表"""
-    pass

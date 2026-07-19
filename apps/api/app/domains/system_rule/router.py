@@ -31,20 +31,20 @@ from app.domains.system_rule.schemas import (
     SystemRuleUpdate,
     SystemRulePublic,
     SystemRulesPublic,
-    RuleAuditLogPublic,
-    RuleAuditLogList,
 )
+from app.domains.user.schemas import AuditLogPublic, AuditLogList
+from app.domains.user.repository import create_audit_log, get_audit_logs
 
 
 router = APIRouter()
 
 
-# ==================== 规则修改历史（必须在 /{rule_id} 之前注册） ====================
+# ==================== 规则修改历史 ====================
 
 
 @router.get(
     "/audit-logs",
-    response_model=RuleAuditLogList,
+    response_model=AuditLogList,
     summary="查看规则修改历史",
     description="管理员查看规则配置的修改历史记录",
 )
@@ -63,26 +63,32 @@ async def read_rule_audit_logs(
     """
     offset = (page - 1) * page_size
 
-    logs, count = await repository.get_rule_audit_logs(
+    logs, count = await get_audit_logs(
         session=session,
         skip=offset,
         limit=page_size,
+        target_type="system_rule",
     )
 
     # 转成 public 模型
     items = []
     for log in logs:
-        items.append(RuleAuditLogPublic(
+        operator_name = None
+        if log.operator:
+            operator_name = log.operator.full_name or log.operator.email
+        items.append(AuditLogPublic(
             id=log.id,
             user_id=log.user_id,
             action=log.action,
+            target_type=log.target_type,
             target_id=log.target_id,
             details=log.details,
+            ip_address=log.ip_address,
             created_at=log.created_at,
-            operator_name=log.operator.full_name if log.operator else None,
+            operator_name=operator_name,
         ))
 
-    return RuleAuditLogList(
+    return AuditLogList(
         data=items,
         count=count,
         page=page,
@@ -170,16 +176,14 @@ async def create_rule(
     """
     rule = await repository.create_rule(session=session, rule_in=rule_in)
 
-    # 记录审计日志
-    await repository.create_rule_audit_log(
+    # 记录审计日志（复用共享 create_audit_log）
+    await create_audit_log(
         session=session,
         user_id=current_user.id,
         action="rule.create",
+        target_type="system_rule",
         target_id=str(rule.id),
-        details=json.dumps({
-            "category": rule_in.category.value,
-            "name": rule_in.name,
-        }, ensure_ascii=False),
+        details=json.dumps({"category": rule_in.category.value, "name": rule_in.name}, ensure_ascii=False),
     )
 
     return rule
@@ -266,10 +270,11 @@ async def update_rule(
 
     # 记录审计日志
     changed_fields = list(update_data.keys())
-    await repository.create_rule_audit_log(
+    await create_audit_log(
         session=session,
         user_id=current_user.id,
         action="rule.update",
+        target_type="system_rule",
         target_id=str(rule_id),
         details=json.dumps({
             "changed_fields": changed_fields,
@@ -303,15 +308,13 @@ async def delete_rule(
         raise_rule_not_found(detail=f"Rule with id {rule_id} not found")
 
     # 记录审计日志
-    await repository.create_rule_audit_log(
+    await create_audit_log(
         session=session,
         user_id=current_user.id,
         action="rule.delete",
+        target_type="system_rule",
         target_id=str(rule_id),
-        details=json.dumps({
-            "name": rule.name,
-            "category": rule.category.value,
-        }, ensure_ascii=False),
+        details=json.dumps({"name": rule.name, "category": rule.category.value}, ensure_ascii=False),
     )
 
     await repository.delete_rule(session=session, db_rule=rule)
