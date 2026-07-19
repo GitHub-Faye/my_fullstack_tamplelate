@@ -26,6 +26,9 @@ from app.domains.dashboard.schemas import (
     EngineerLoad,
     StarpointRank,
 )
+from app.domains.task.repository import get_ongoing_task_count
+from app.domains.user.repository import get_engineer_loads
+from app.domains.starpoint.repository import get_leaderboard
 
 
 def _get_time_bounds() -> Tuple[datetime, datetime, datetime]:
@@ -201,48 +204,12 @@ async def get_admin_dashboard(
     today_submitted_reports = result.scalar_one() or 0
 
     # 进行中任务数
-    ongoing_stmt = select(func.count()).select_from(Task).where(
-        Task.status == TaskStatus.IN_PROGRESS
-    )
-    result = await session.execute(ongoing_stmt)
-    ongoing_tasks = result.scalar_one() or 0
+    ongoing_tasks = await get_ongoing_task_count(session=session)
 
     # 工程师负载：进行中任务数 + 本月实际工时 + 剩余工时 + T报准确率
-    engineer_load_stmt = (
-        select(
-            User.id,
-            User.full_name,
-            User.T_monthly_plan,
-            func.count(Task.id).filter(Task.status == TaskStatus.IN_PROGRESS).label("ongoing_tasks"),
-            func.coalesce(func.sum(Task.T_actual).filter(
-                and_(
-                    Task.status == TaskStatus.COMPLETED,
-                    Task.updated_at >= month_start,
-                )
-            ), 0).label("T_actual_monthly"),
-            func.coalesce(func.sum(Task.T_actual).filter(
-                and_(
-                    Task.status == TaskStatus.COMPLETED,
-                    Task.updated_at >= month_start,
-                    Task.T_reported > 0,
-                )
-            ), 0).label("T_actual_for_accuracy"),
-            func.coalesce(func.sum(Task.T_reported).filter(
-                and_(
-                    Task.status == TaskStatus.COMPLETED,
-                    Task.updated_at >= month_start,
-                    Task.T_reported > 0,
-                )
-            ), 0).label("T_reported_for_accuracy"),
-        )
-        .select_from(User)
-        .outerjoin(Task, Task.engineer_id == User.id)
-        .where(User.role == UserRoleType.ENGINEER)
-        .group_by(User.id, User.full_name, User.T_monthly_plan)
-    )
-    result = await session.execute(engineer_load_stmt)
+    rows = await get_engineer_loads(session=session, month_start=month_start)
     engineer_loads = []
-    for row in result.all():
+    for row in rows:
         T_monthly_plan = float(row.T_monthly_plan or 0)
         T_actual_monthly = float(row.T_actual_monthly or 0)
         T_remaining = max(0, T_monthly_plan - T_actual_monthly)
@@ -261,20 +228,14 @@ async def get_admin_dashboard(
         ))
 
     # 星点排行榜 Top 10
-    starpoint_stmt = (
-        select(User.id, User.full_name, User.current_starpoint)
-        .where(User.role == UserRoleType.ENGINEER)
-        .order_by(User.current_starpoint.desc())
-        .limit(10)
-    )
-    result = await session.execute(starpoint_stmt)
+    leaderboard = await get_leaderboard(session=session, limit=10)
     starpoint_ranks = [
         StarpointRank(
-            user_id=row.id,
-            full_name=row.full_name,
-            current_starpoint=row.current_starpoint or 0,
+            user_id=row["engineer_id"],
+            full_name=row["engineer_name"],
+            current_starpoint=row["total_starpoints"] or 0,
         )
-        for row in result.all()
+        for row in leaderboard
     ]
 
     return AdminDashboard(

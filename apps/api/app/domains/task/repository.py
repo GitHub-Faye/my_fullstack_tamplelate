@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import Task, TaskStatus
 from app.domains.task.schemas import TaskCreate, TaskUpdate
+from app.core.db_utils import paginated_query
 
 
 # ============================== Task CRUD Operations ==============================
@@ -52,28 +53,21 @@ async def get_tasks(
     Returns:
         (任务列表, 总数) 元组
     """
-    # 构建计数查询
-    count_statement = select(func.count()).select_from(Task)
+    # 构建条件列表
+    conditions = []
     if pm_id:
-        count_statement = count_statement.where(Task.pm_id == pm_id)
+        conditions.append(Task.pm_id == pm_id)
     if status:
-        count_statement = count_statement.where(Task.status == status)
+        conditions.append(Task.status == status)
 
-    result = await session.execute(count_statement)
-    count = result.scalar_one()
-
-    # 构建查询
-    statement = select(Task).order_by(Task.created_at.desc())
-    if pm_id:
-        statement = statement.where(Task.pm_id == pm_id)
-    if status:
-        statement = statement.where(Task.status == status)
-
-    statement = statement.offset(skip).limit(limit)
-    result = await session.execute(statement)
-    tasks = result.scalars().all()
-
-    return list(tasks), count
+    return await paginated_query(
+        session=session,
+        model=Task,
+        skip=skip,
+        limit=limit,
+        conditions=conditions if conditions else None,
+        order_by=Task.created_at.desc(),
+    )
 
 
 async def create_task(
@@ -173,3 +167,23 @@ async def can_update_task(*, session: AsyncSession, task: Task) -> bool:
         是否可编辑
     """
     return task.status == TaskStatus.UNCONFIRMED
+
+
+async def get_ongoing_task_count(
+    *,
+    session: AsyncSession,
+) -> int:
+    """
+    获取进行中的任务数。
+
+    Args:
+        session: 数据库会话
+
+    Returns:
+        进行中任务数量
+    """
+    stmt = select(func.count()).select_from(Task).where(
+        Task.status == TaskStatus.IN_PROGRESS
+    )
+    result = await session.execute(stmt)
+    return result.scalar_one() or 0

@@ -17,6 +17,7 @@ from app.domains.salary.schemas import (
     EngineerSalaryDetail,
     PMSalaryDetail,
 )
+from app.core.db_utils import paginated_query
 
 
 # ============================== 工程师工资计算 ==============================
@@ -172,15 +173,13 @@ async def get_all_salaries(
     count = result.scalar_one()
 
     # 查询所有工程师和 PM
-    stmt = (
-        select(User)
-        .where(_SALARY_USER_FILTER)
-        .offset(skip)
-        .limit(limit)
+    users, count = await paginated_query(
+        session=session,
+        model=User,
+        skip=skip,
+        limit=limit,
+        conditions=[_SALARY_USER_FILTER],
     )
-    result = await session.execute(stmt)
-    users = list(result.scalars().all())
-
     return users, count
 
 

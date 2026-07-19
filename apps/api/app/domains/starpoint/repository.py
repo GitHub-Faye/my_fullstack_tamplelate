@@ -12,6 +12,7 @@ from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import StarPointRecord, User, JudgmentType
+from app.core.db_utils import paginated_query
 
 
 # ============================== StarPointRecord CRUD ==============================
@@ -44,25 +45,14 @@ async def get_starpoint_records(
     Returns:
         (星点记录列表, 总数) 元组
     """
-    # 计数
-    count_stmt = select(func.count()).select_from(StarPointRecord).where(
-        StarPointRecord.engineer_id == engineer_id
+    return await paginated_query(
+        session=session,
+        model=StarPointRecord,
+        skip=skip,
+        limit=limit,
+        conditions=[StarPointRecord.engineer_id == engineer_id],
+        order_by=StarPointRecord.created_at.desc(),
     )
-    result = await session.execute(count_stmt)
-    count = result.scalar_one()
-
-    # 查询
-    stmt = (
-        select(StarPointRecord)
-        .where(StarPointRecord.engineer_id == engineer_id)
-        .order_by(StarPointRecord.created_at.desc())
-        .offset(skip)
-        .limit(limit)
-    )
-    result = await session.execute(stmt)
-    records = list(result.scalars().all())
-
-    return records, count
 
 
 async def create_starpoint_record(

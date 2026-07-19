@@ -22,7 +22,7 @@ from app.core.errors import BusinessException
 
 from app.domains.dashboard import repository
 from app.domains.salary import repository as salary_repo
-from app.domains.salary.calculation import calculate_user_salary
+from app.domains.salary.service import calculate_all_salaries, calculate_user_salary
 from app.domains.salary.schemas import EngineerSalaryDetail, PMSalaryDetail
 
 
@@ -101,27 +101,14 @@ async def read_admin_dashboard(
 
     权限：管理员（需 dashboard:admin 权限）
     """
-    # 获取所有工程师和 PM 用户列表（先获取总数，避免硬编码截断）
+    # 计算每个用户的工资（使用 service 层统计算法）
     users, count = await salary_repo.get_all_salaries(session=session, skip=0, limit=0)
     if count > 0:
         users, _ = await salary_repo.get_all_salaries(session=session, skip=0, limit=count)
 
-    # 计算每个用户的工资（使用完整工资计算）
-    engineer_cost = 0.0
-    pm_cost = 0.0
-
-    for user in users:
-        try:
-            salary_data = await calculate_user_salary(session=session, user=user)
-            amount = _get_salary_preview(salary_data)
-            if user.role == UserRoleType.ENGINEER:
-                engineer_cost += amount
-            else:
-                pm_cost += amount
-        except BusinessException:
-            continue
-
-    total_salary = engineer_cost + pm_cost
+    _, total_salary, engineer_cost, pm_cost = await calculate_all_salaries(
+        session=session, users=users,
+    )
 
     return await repository.get_admin_dashboard(
         session=session,

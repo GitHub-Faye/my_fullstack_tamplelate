@@ -36,7 +36,7 @@ from app.domains.salary.schemas import (
     SalarySummaryList,
     SalaryExportRequest,
 )
-from app.domains.salary.calculation import calculate_user_salary
+from app.domains.salary.service import calculate_all_salaries, calculate_user_salary
 
 
 router = APIRouter()
@@ -51,23 +51,10 @@ async def _calculate_salaries(
     """
     批量计算用户工资，返回 SalarySummary 列表
 
-    遍历用户调用 calculate_user_salary，捕获 BusinessException 异常。
+    使用 service 层 calculate_all_salaries 实现，仅取 summary 部分。
     """
-    result = []
-    for user in users:
-        try:
-            calculated = await calculate_user_salary(session=session, user=user)
-            salary = calculated.salary_final if isinstance(calculated, EngineerSalaryDetail) else calculated.salary_total
-        except BusinessException:
-            salary = 0.0
-
-        result.append(SalarySummary(
-            user_id=user.id,
-            full_name=user.full_name,
-            role=user.role.value,
-            salary=salary,
-        ))
-    return result
+    summaries, _, _, _ = await calculate_all_salaries(session=session, users=users)
+    return summaries
 
 
 # ==================== 工程师/PM 端点：工资试算 ====================

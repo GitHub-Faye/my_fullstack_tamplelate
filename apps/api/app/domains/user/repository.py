@@ -1,5 +1,6 @@
 from typing import Any, Tuple
 import uuid
+from datetime import datetime
 
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,7 +8,8 @@ from sqlmodel import select
 
 from app.core.security import get_password_hash, verify_password
 from app.domains.user.schemas import UserCreate, UserUpdate, UserUpdateMe, UpdatePassword
-from app.core.models import User, Item, AuditLog, Role, UserRole, UserRoleType
+from app.core.models import User, Item, AuditLog, Role, UserRole, UserRoleType, Task, TaskStatus
+from app.core.db_utils import paginated_query
 
 # ============================== 用户 CRUD 操作 ==============================
 async def get_user(*, session: AsyncSession, user_id: uuid.UUID) -> User | None:
@@ -35,29 +37,22 @@ async def get_users(
     Returns:
         tuple: (用户列表, 总记录数)
     """
-    # 获取用户总数
-    count_statement = select(func.count()).select_from(User)
-    result = await session.execute(count_statement)
-    count = result.scalar_one()
-
-    # 获取分页的用户列表
-    statement = select(User)
-    
-    # 添加排序
+    # 构建排序表达式
     if hasattr(User, sort_field):
         if sort_order.lower() == "desc":
-            statement = statement.order_by(getattr(User, sort_field).desc())
+            order_by = getattr(User, sort_field).desc()
         else:
-            statement = statement.order_by(getattr(User, sort_field).asc())
+            order_by = getattr(User, sort_field).asc()
     else:
-        # 默认按创建时间倒序排列
-        statement = statement.order_by(User.created_at.desc())
-    
-    statement = statement.offset(skip).limit(limit)
-    result = await session.execute(statement)
-    users = result.scalars().all()
+        order_by = User.created_at.desc()
 
-    return users, count
+    return await paginated_query(
+        session=session,
+        model=User,
+        skip=skip,
+        limit=limit,
+        order_by=order_by,
+    )
 
 
 async def create_user(*, session: AsyncSession, user_create: UserCreate) -> User:
@@ -288,14 +283,16 @@ async def get_audit_logs(
     count = result.scalar_one()
 
     # 获取分页数据
-    stmt = select(AuditLog).order_by(AuditLog.created_at.desc())
-    if conditions:
-        stmt = stmt.where(and_(*conditions))
-    stmt = stmt.offset(skip).limit(limit)
-    result = await session.execute(stmt)
-    logs = result.scalars().all()
-
-    return list(logs), count
+    from sqlalchemy import and_
+    logs, count = await paginated_query(
+        session=session,
+        model=AuditLog,
+        skip=skip,
+        limit=limit,
+        conditions=conditions if conditions else None,
+        order_by=AuditLog.created_at.desc(),
+    )
+    return logs, count
 
 
 # ============================== 管理员用户操作 ==============================
@@ -488,3 +485,57 @@ async def get_user_detail(
         用户对象或 None
     """
     return await session.get(User, user_id)
+
+
+async def get_engineer_loads(
+    *,
+    session: AsyncSession,
+    month_start: datetime,
+) -> list[dict]:
+    """
+    获取所有工程师的负载数据（进行中任务数、本月工时、准确率）。
+
+    Args:
+        session: 数据库会话
+        month_start: 月度起始时间
+
+    Returns:
+        工程师负载数据列表，每项包含 id, full_name, T_monthly_plan,
+        ongoing_tasks, T_actual_monthly, T_actual_for_accuracy,
+        T_reported_for_accuracy
+    """
+    from sqlalchemy import and_
+    stmt = (
+        select(
+            User.id,
+            User.full_name,
+            User.T_monthly_plan,
+            func.count(Task.id).filter(Task.status == TaskStatus.IN_PROGRESS).label("ongoing_tasks"),
+            func.coalesce(func.sum(Task.T_actual).filter(
+                and_(
+                    Task.status == TaskStatus.COMPLETED,
+                    Task.updated_at >= month_start,
+                )
+            ), 0).label("T_actual_monthly"),
+            func.coalesce(func.sum(Task.T_actual).filter(
+                and_(
+                    Task.status == TaskStatus.COMPLETED,
+                    Task.updated_at >= month_start,
+                    Task.T_reported > 0,
+                )
+            ), 0).label("T_actual_for_accuracy"),
+            func.coalesce(func.sum(Task.T_reported).filter(
+                and_(
+                    Task.status == TaskStatus.COMPLETED,
+                    Task.updated_at >= month_start,
+                    Task.T_reported > 0,
+                )
+            ), 0).label("T_reported_for_accuracy"),
+        )
+        .select_from(User)
+        .outerjoin(Task, Task.engineer_id == User.id)
+        .where(User.role == UserRoleType.ENGINEER)
+        .group_by(User.id, User.full_name, User.T_monthly_plan)
+    )
+    result = await session.execute(stmt)
+    return result.all()
