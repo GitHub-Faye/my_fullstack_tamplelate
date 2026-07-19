@@ -73,6 +73,7 @@ class ErrorCode(str, Enum):
     SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR"
     SYSTEM_VALIDATION_ERROR = "SYSTEM_VALIDATION_ERROR"
     SYSTEM_RATE_LIMIT = "SYSTEM_RATE_LIMIT"
+    SYSTEM_RULE_NOT_FOUND = "SYSTEM_RULE_NOT_FOUND"
 
 
 # ==================== HTTP 状态码映射 ====================
@@ -124,6 +125,9 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     # 429 Too Many Requests
     ErrorCode.SYSTEM_RATE_LIMIT: status.HTTP_429_TOO_MANY_REQUESTS,
 
+    # 404 Not Found (system rules)
+    ErrorCode.SYSTEM_RULE_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+
     # 500 Internal Server Error
     ErrorCode.SYSTEM_INTERNAL_ERROR: status.HTTP_500_INTERNAL_SERVER_ERROR,
 }
@@ -174,6 +178,7 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.SYSTEM_INTERNAL_ERROR: "Internal server error",
     ErrorCode.SYSTEM_VALIDATION_ERROR: "Validation error",
     ErrorCode.SYSTEM_RATE_LIMIT: "Too many requests",
+    ErrorCode.SYSTEM_RULE_NOT_FOUND: "System rule not found",
 }
 
 

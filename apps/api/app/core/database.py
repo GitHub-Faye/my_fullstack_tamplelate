@@ -133,3 +133,6 @@ async def init_db():
     async with AsyncSessionLocal() as session:
         await init_roles_and_scopes(session)
         await init_default_admin(session)
+        # 预置默认规则
+        from app.domains.system_rule.repository import seed_default_rules
+        await seed_default_rules(session=session)

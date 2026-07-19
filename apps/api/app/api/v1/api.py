@@ -12,6 +12,7 @@ from app.domains.daily_report.router import router as daily_report_router
 from app.domains.starpoint.router import router as starpoint_router
 from app.domains.salary.router import router as salary_router
 from app.domains.dashboard.router import router as dashboard_router
+from app.domains.system_rule.router import router as system_rule_router
 
 router = APIRouter()
 
@@ -46,3 +47,6 @@ router.include_router(salary_router, prefix="/salaries", tags=["salaries"])
 
 # Dashboard 相关路由
 router.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
+
+# 规则配置相关路由
+router.include_router(system_rule_router, prefix="/system-rules", tags=["system-rules"])
