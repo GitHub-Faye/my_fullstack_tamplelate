@@ -18,15 +18,15 @@ class SalaryParamsUpdate(SQLModel):
     """管理员设置工资参数请求"""
     # 工程师字段
     S0: Optional[float] = Field(default=None, ge=0, description="月度工资基数")
-    H0: Optional[float] = Field(default=None, ge=0, description="基准时薪")
-    T_monthly_plan: Optional[float] = Field(default=None, ge=0, description="月度计划工时")
+    H0: Optional[float] = Field(default=None, ge=0, description="H0（基准时薪）")
+    T_monthly_plan: Optional[float] = Field(default=None, ge=0, description="T月计划")
 
     # PM 字段
-    S_base: Optional[float] = Field(default=None, ge=0, description="底薪")
-    S_assess: Optional[float] = Field(default=None, ge=0, description="考核部分")
-    R_base: Optional[float] = Field(default=None, ge=0, le=1, description="底薪比例")
-    R_assess: Optional[float] = Field(default=None, ge=0, le=1, description="考核比例")
-    baseline_client_count: Optional[int] = Field(default=None, ge=0, description="基准客资数")
+    S_base: Optional[float] = Field(default=None, ge=0, description="S底（底薪）")
+    S_assess: Optional[float] = Field(default=None, ge=0, description="S考（考核部分）")
+    R_base: Optional[float] = Field(default=None, ge=0, le=1, description="R底（底薪比例）")
+    R_assess: Optional[float] = Field(default=None, ge=0, le=1, description="R考（考核比例）")
+    baseline_client_count: Optional[int] = Field(default=None, ge=0, description="L基（基准客资数）")
 
 
 # ==================== API 响应模型 ====================
@@ -39,8 +39,8 @@ class EngineerSalaryDetail(SQLModel):
 
     # 工资参数
     S0: float = Field(description="月度工资基数")
-    H0: Optional[float] = Field(default=None, description="基准时薪")
-    T_monthly_plan: Optional[float] = Field(default=None, description="月度计划工时")
+    H0: Optional[float] = Field(default=None, description="H0（基准时薪）")
+    T_monthly_plan: Optional[float] = Field(default=None, description="T月计划")
 
     # 计算字段
     T_actual_monthly: float = Field(default=0.0, description="本月实际工时")
@@ -60,10 +60,10 @@ class PMSalaryDetail(SQLModel):
     role: str = "pm"
 
     # 工资参数
-    S_base: float = Field(description="底薪")
-    S_assess: float = Field(description="考核部分")
-    R_base: Optional[float] = Field(default=None, description="底薪比例")
-    R_assess: Optional[float] = Field(default=None, description="考核比例")
+    S_base: float = Field(description="S底（底薪）")
+    S_assess: float = Field(description="S考（考核部分）")
+    R_base: Optional[float] = Field(default=None, description="R底（底薪比例）")
+    R_assess: Optional[float] = Field(default=None, description="R考（考核比例）")
 
     # 最终工资
     salary_total: float = Field(description="总工资 S总 = S底 + S考")

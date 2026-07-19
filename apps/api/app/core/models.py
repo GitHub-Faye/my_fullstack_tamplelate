@@ -31,7 +31,7 @@ class TaskStatus(str, Enum):
     PENDING_START = "pending_start"                  # 待开工
     IN_PROGRESS = "in_progress"                      # 进行中
     PAUSE_REQUESTED = "pause_requested"              # 暂停待审批（工程师申请，待管理员审批）
-    PAUSED = "paused"                                # 已暂停（管理员审批通过）
+    PAUSED = "paused"                                # 暂停中（管理员审批通过）
     COMPLETED = "completed"                          # 已完成
 
 
@@ -39,7 +39,7 @@ class TaskType(str, Enum):
     """
     任务类型枚举
 
-    - normal: 普通任务，按标准竞价流程
+    - normal: 正常任务，按标准竞价流程
     - urgent: 紧急任务，优先竞价
     - convenient: 便捷任务，不参与竞价，按需执行
     """
@@ -55,7 +55,7 @@ class ReportStage(str, Enum):
     - developing: 开发中
     - testing: 测试中
     - completed: 已完成
-    - paused: 已暂停
+    - paused: 暂停中
     """
     DEVELOPING = "developing"
     TESTING = "testing"
@@ -259,8 +259,8 @@ class TaskBase(SQLModel):
     progress: Optional[str] = Field(default=None, max_length=5000, description="工程师日报进度描述（与 description 分离，不污染 PM 原始描述）")
     task_type: TaskType = Field(default=TaskType.NORMAL)
     status: TaskStatus = Field(default=TaskStatus.UNCONFIRMED)
-    T_reported: Optional[float] = Field(default=None, ge=0, description="工程师填报工时")
-    T_actual: Optional[float] = Field(default=None, ge=0, description="实际结算工时")
+    T_reported: Optional[float] = Field(default=None, ge=0, description="T报（工程师填报工时）")
+    T_actual: Optional[float] = Field(default=None, ge=0, description="T实（实际结算工时）")
 
 
 class Task(TaskBase, table=True):

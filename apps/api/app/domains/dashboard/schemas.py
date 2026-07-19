@@ -21,8 +21,8 @@ class EngineerDashboard(SQLModel):
     current_starpoint: int = Field(description="当前星点总数")
 
     # 工时指标
-    T_monthly_plan: float = Field(description="月度计划工时")
-    T_actual_monthly: float = Field(description="本月实际工时")
+    T_monthly_plan: float = Field(description="T月计划")
+    T_actual_monthly: float = Field(description="T实（本月实际工时）")
     T_remaining: float = Field(description="本月剩余工时")
 
     # 收入指标
@@ -54,7 +54,7 @@ class EngineerLoad(SQLModel):
     user_id: uuid.UUID
     full_name: Optional[str] = None
     current_tasks: int = Field(description="当前进行中任务数")
-    T_actual_monthly: float = Field(description="本月实际工时")
+    T_actual_monthly: float = Field(description="T实（本月实际工时）")
     T_remaining: float = Field(description="本月剩余工时")
     accuracy_rate: float = Field(description="T报准确率（%）")
 
