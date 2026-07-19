@@ -3,6 +3,67 @@
 import * as z from 'zod';
 
 /**
+ * AdminPasswordReset
+ */
+export const zAdminPasswordReset = z.object({
+    new_password: z.string().min(8).max(128)
+});
+
+/**
+ * AuditLogList
+ */
+export const zAuditLogList = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
+});
+
+/**
+ * BidCreate
+ *
+ * 创建竞价报价请求
+ */
+export const zBidCreate = z.object({
+    T_reported: z.number().gte(0)
+});
+
+/**
+ * BidPublic
+ *
+ * 返回给客户端的竞价报价信息
+ */
+export const zBidPublic = z.object({
+    id: z.uuid(),
+    task_id: z.uuid(),
+    engineer_id: z.uuid(),
+    T_reported: z.number(),
+    amount: z.number(),
+    created_at: z.iso.datetime().nullish(),
+    updated_at: z.iso.datetime().nullish()
+});
+
+/**
+ * BidUpdate
+ *
+ * 修改竞价报价请求
+ */
+export const zBidUpdate = z.object({
+    T_reported: z.number().gte(0)
+});
+
+/**
+ * BidsPublic
+ *
+ * 竞价报价列表响应
+ */
+export const zBidsPublic = z.object({
+    data: z.array(zBidPublic),
+    count: z.int()
+});
+
+/**
  * Body_login_access_token_v1_login_access_token_post
  */
 export const zBodyLoginAccessTokenV1LoginAccessTokenPost = z.object({
@@ -15,36 +76,59 @@ export const zBodyLoginAccessTokenV1LoginAccessTokenPost = z.object({
 });
 
 /**
- * ItemCreate
+ * ClientResourceCreate
+ *
+ * 录入客资请求
  */
-export const zItemCreate = z.object({
-    title: z.string().min(1).max(255),
-    description: z.string().max(255).nullish()
+export const zClientResourceCreate = z.object({
+    actual_count: z.int().gte(0),
+    date: z.iso.datetime()
 });
 
 /**
- * ItemPublic
+ * ClientResourceParamsUpdate
+ *
+ * 管理员设置 PM 的基准客资数
  */
-export const zItemPublic = z.object({
-    title: z.string().min(1).max(255),
-    description: z.string().max(255).nullish(),
+export const zClientResourceParamsUpdate = z.object({
+    baseline_client_count: z.int().gte(0)
+});
+
+/**
+ * ClientResourcePublic
+ *
+ * 客资公开信息
+ */
+export const zClientResourcePublic = z.object({
     id: z.uuid(),
-    owner_id: z.uuid(),
+    pm_id: z.uuid(),
+    actual_count: z.int(),
+    baseline_count: z.int(),
+    date: z.iso.datetime(),
     created_at: z.iso.datetime().nullish()
 });
 
 /**
- * ItemUpdate
+ * ClientResourceSummary
+ *
+ * PM 客资汇总（管理员视角）
  */
-export const zItemUpdate = z.object({
-    title: z.string().min(1).max(255).nullish(),
-    description: z.string().max(255).nullish()
+export const zClientResourceSummary = z.object({
+    pm_id: z.uuid(),
+    pm_name: z.string(),
+    baseline_count: z.int().nullish(),
+    total_actual: z.int().optional().default(0),
+    avg_actual: z.number().optional().default(0),
+    record_count: z.int().optional().default(0),
+    performance_rate: z.number().nullish()
 });
 
 /**
- * ItemsPublic
+ * ClientResourcesPublic
+ *
+ * 客资列表
  */
-export const zItemsPublic = z.object({
+export const zClientResourcesPublic = z.object({
     data: z.array(z.unknown()),
     count: z.int(),
     page: z.int().nullish(),
@@ -53,12 +137,463 @@ export const zItemsPublic = z.object({
 });
 
 /**
+ * DailyReportsPublic
+ *
+ * 日报列表分页响应
+ */
+export const zDailyReportsPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
+});
+
+/**
+ * EngineerSalaryDetail
+ *
+ * 工程师工资试算详情
+ */
+export const zEngineerSalaryDetail = z.object({
+    user_id: z.uuid(),
+    full_name: z.string().nullish(),
+    role: z.string().optional().default('engineer'),
+    S0: z.number(),
+    H0: z.number().nullish(),
+    T_monthly_plan: z.number().nullish(),
+    T_actual_monthly: z.number().optional().default(0),
+    T_reported_monthly: z.number().optional().default(0),
+    T_effective: z.number().optional().default(0),
+    P_diff: z.number().optional().default(0),
+    current_starpoint: z.int().optional().default(0),
+    k_coefficient: z.number().optional().default(1),
+    salary_final: z.number()
+});
+
+/**
+ * JudgmentType
+ *
+ * 星点判定类型枚举
+ *
+ * - manual: 手动判定（管理员手动调整）
+ * - auto_ratio: 按比例自动判定
+ * - auto_threshold: 按阈值自动判定
+ */
+export const zJudgmentType = z.enum([
+    'manual',
+    'auto_ratio',
+    'auto_threshold'
+]);
+
+/**
  * Message
  *
  * 通用消息响应
  */
 export const zMessage = z.object({
     message: z.string()
+});
+
+/**
+ * PMSalaryDetail
+ *
+ * PM 工资试算详情
+ */
+export const zPmSalaryDetail = z.object({
+    user_id: z.uuid(),
+    full_name: z.string().nullish(),
+    role: z.string().optional().default('pm'),
+    S_base: z.number(),
+    S_assess: z.number(),
+    R_base: z.number().nullish(),
+    R_assess: z.number().nullish(),
+    L_actual: z.int().optional().default(0),
+    L_base: z.int().optional().default(0),
+    salary_total: z.number()
+});
+
+/**
+ * RemindResult
+ *
+ * 提醒未提交日报结果
+ */
+export const zRemindResult = z.object({
+    total_engineers: z.int(),
+    submitted_today: z.int(),
+    not_submitted: z.int(),
+    not_submitted_engineers: z.array(z.string()).optional()
+});
+
+/**
+ * ReportStage
+ *
+ * 日报阶段枚举
+ *
+ * - developing: 开发中
+ * - testing: 测试中
+ * - completed: 已完成
+ * - paused: 暂停中
+ */
+export const zReportStage = z.enum([
+    'developing',
+    'testing',
+    'completed',
+    'paused'
+]);
+
+/**
+ * DailyReportCreate
+ *
+ * 创建日报请求
+ */
+export const zDailyReportCreate = z.object({
+    today_hours: z.number().gte(0),
+    current_stage: zReportStage,
+    progress: z.string().max(500).nullish(),
+    completion_judgment: z.string().max(500).nullish(),
+    starpoint_change: z.int().nullish().default(0),
+    notes: z.string().max(1000).nullish(),
+    summary: z.string().max(1000).nullish(),
+    has_blocker: z.boolean().optional().default(false),
+    task_id: z.uuid(),
+    report_date: z.iso.date().nullish()
+});
+
+/**
+ * DailyReportPublic
+ *
+ * 返回给客户端的日报信息
+ */
+export const zDailyReportPublic = z.object({
+    today_hours: z.number().gte(0),
+    current_stage: zReportStage,
+    progress: z.string().max(500).nullish(),
+    completion_judgment: z.string().max(500).nullish(),
+    starpoint_change: z.int().nullish().default(0),
+    notes: z.string().max(1000).nullish(),
+    summary: z.string().max(1000).nullish(),
+    has_blocker: z.boolean().optional().default(false),
+    id: z.uuid(),
+    engineer_id: z.uuid(),
+    task_id: z.uuid(),
+    report_date: z.iso.datetime(),
+    created_at: z.iso.datetime().nullish()
+});
+
+/**
+ * DailyReportUpdate
+ *
+ * 更新日报请求
+ */
+export const zDailyReportUpdate = z.object({
+    today_hours: z.number().gte(0).nullish(),
+    current_stage: zReportStage.nullish(),
+    progress: z.string().max(500).nullish(),
+    completion_judgment: z.string().max(500).nullish(),
+    starpoint_change: z.int().nullish(),
+    notes: z.string().max(1000).nullish(),
+    summary: z.string().max(1000).nullish(),
+    has_blocker: z.boolean().nullish()
+});
+
+/**
+ * RuleCategory
+ *
+ * 规则分类枚举
+ *
+ * - starpoint_reward: 星点奖励规则
+ * - salary_formula: 工资计算公式
+ * - client_resource: 客资相关参数
+ * - completion_judgment: 完成判定规则
+ * - system_param: 系统参数
+ */
+export const zRuleCategory = z.enum([
+    'starpoint_reward',
+    'salary_formula',
+    'client_resource',
+    'completion_judgment',
+    'system_param'
+]);
+
+/**
+ * SalaryExportRequest
+ *
+ * 工资导出请求
+ */
+export const zSalaryExportRequest = z.object({
+    month: z.string().nullish()
+});
+
+/**
+ * SalaryParamsUpdate
+ *
+ * 管理员设置工资参数请求
+ */
+export const zSalaryParamsUpdate = z.object({
+    S0: z.number().gte(0).nullish(),
+    H0: z.number().gte(0).nullish(),
+    T_monthly_plan: z.number().gte(0).nullish(),
+    S_base: z.number().gte(0).nullish(),
+    S_assess: z.number().gte(0).nullish(),
+    R_base: z.number().gte(0).lte(1).nullish(),
+    R_assess: z.number().gte(0).lte(1).nullish(),
+    baseline_client_count: z.int().gte(0).nullish(),
+    manual_adjustment: z.number().nullish()
+});
+
+/**
+ * SalarySummaryList
+ *
+ * 工资汇总列表
+ */
+export const zSalarySummaryList = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
+});
+
+/**
+ * StarPointAdjustRequest
+ *
+ * 管理员手动调整星点请求
+ */
+export const zStarPointAdjustRequest = z.object({
+    engineer_id: z.uuid(),
+    change_amount: z.int(),
+    reason: z.string().max(500).nullish()
+});
+
+/**
+ * StarPointLeaderboardEntry
+ *
+ * 排行榜条目
+ */
+export const zStarPointLeaderboardEntry = z.object({
+    engineer_id: z.uuid(),
+    engineer_name: z.string().nullish(),
+    total_starpoints: z.int(),
+    rank: z.int(),
+    k_coefficient: z.number()
+});
+
+/**
+ * StarPointLeaderboard
+ *
+ * 排行榜响应
+ */
+export const zStarPointLeaderboard = z.object({
+    data: z.array(zStarPointLeaderboardEntry),
+    count: z.int()
+});
+
+/**
+ * StarPointRecordPublic
+ *
+ * 返回给客户端的星点记录
+ */
+export const zStarPointRecordPublic = z.object({
+    id: z.uuid(),
+    engineer_id: z.uuid(),
+    task_id: z.uuid().nullish(),
+    change_amount: z.int(),
+    reason: z.string().nullish(),
+    judgment_type: zJudgmentType,
+    T_reported: z.number().nullish(),
+    T_actual: z.number().nullish(),
+    created_at: z.iso.datetime().nullish()
+});
+
+/**
+ * StarPointRecordsPublic
+ *
+ * 星点记录分页响应
+ */
+export const zStarPointRecordsPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
+});
+
+/**
+ * StarPointSummary
+ *
+ * 星点汇总信息
+ */
+export const zStarPointSummary = z.object({
+    total_starpoints: z.int(),
+    current_month_earned: z.int(),
+    rank: z.int().nullish(),
+    k_coefficient: z.number().optional().default(1)
+});
+
+/**
+ * SystemRuleCreate
+ *
+ * 创建规则请求
+ */
+export const zSystemRuleCreate = z.object({
+    category: zRuleCategory,
+    name: z.string().max(100),
+    applies_to: z.string().max(50).nullish(),
+    value: z.string().max(500),
+    is_public: z.boolean().optional().default(false),
+    is_active: z.boolean().optional().default(true)
+});
+
+/**
+ * SystemRulePublic
+ *
+ * 规则公开信息
+ */
+export const zSystemRulePublic = z.object({
+    id: z.uuid(),
+    category: zRuleCategory,
+    name: z.string(),
+    applies_to: z.string().nullish(),
+    value: z.string(),
+    is_public: z.boolean(),
+    is_active: z.boolean(),
+    created_at: z.iso.datetime().nullish(),
+    updated_at: z.iso.datetime().nullish()
+});
+
+/**
+ * SystemRuleUpdate
+ *
+ * 更新规则请求
+ */
+export const zSystemRuleUpdate = z.object({
+    category: zRuleCategory.nullish(),
+    name: z.string().max(100).nullish(),
+    applies_to: z.string().max(50).nullish(),
+    value: z.string().max(500).nullish(),
+    is_public: z.boolean().nullish(),
+    is_active: z.boolean().nullish()
+});
+
+/**
+ * SystemRulesPublic
+ *
+ * 规则列表
+ */
+export const zSystemRulesPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
+});
+
+/**
+ * TaskCompleteRequest
+ *
+ * 完成任务请求
+ */
+export const zTaskCompleteRequest = z.object({
+    T_reported: z.number().gte(0)
+});
+
+/**
+ * TaskReassignRequest
+ *
+ * 改派任务请求
+ */
+export const zTaskReassignRequest = z.object({
+    new_engineer_id: z.uuid()
+});
+
+/**
+ * TaskStatus
+ *
+ * 任务状态枚举
+ *
+ * 状态流转：
+ * unconfirmed -> confirmed_unpublished -> bidding -> pending_start -> in_progress -> completed
+ * 中间状态：paused（可从 in_progress 暂停）
+ */
+export const zTaskStatus = z.enum([
+    'unconfirmed',
+    'confirmed_unpublished',
+    'bidding',
+    'pending_start',
+    'in_progress',
+    'pause_requested',
+    'paused',
+    'completed'
+]);
+
+/**
+ * TaskType
+ *
+ * 任务类型枚举
+ *
+ * - normal: 正常任务，按标准竞价流程
+ * - urgent: 紧急任务，优先竞价
+ * - convenient: 便捷任务，不参与竞价，按需执行
+ */
+export const zTaskType = z.enum([
+    'normal',
+    'urgent',
+    'convenient'
+]);
+
+/**
+ * TaskCreate
+ *
+ * 创建任务请求
+ */
+export const zTaskCreate = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().max(2000).nullish(),
+    task_type: zTaskType.optional().default('normal')
+});
+
+/**
+ * TaskPublic
+ *
+ * 返回给客户端的任务信息
+ */
+export const zTaskPublic = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().max(2000).nullish(),
+    task_type: zTaskType.optional().default('normal'),
+    id: z.uuid(),
+    pm_id: z.uuid(),
+    engineer_id: z.uuid().nullish(),
+    status: zTaskStatus,
+    bidding_deadline: z.iso.datetime().nullish(),
+    T_reported: z.number().nullish(),
+    T_actual: z.number().nullish(),
+    created_at: z.iso.datetime().nullish(),
+    updated_at: z.iso.datetime().nullish()
+});
+
+/**
+ * TaskUpdate
+ *
+ * 更新任务请求
+ */
+export const zTaskUpdate = z.object({
+    name: z.string().min(1).max(255).nullish(),
+    description: z.string().max(2000).nullish(),
+    task_type: zTaskType.nullish()
+});
+
+/**
+ * TasksPublic
+ *
+ * 任务列表分页响应
+ */
+export const zTasksPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
 });
 
 /**
@@ -89,6 +624,94 @@ export const zUserCreate = z.object({
 });
 
 /**
+ * UserRegister
+ */
+export const zUserRegister = z.object({
+    email: z.email().max(255),
+    password: z.string().min(8).max(128),
+    full_name: z.string().max(255).nullish()
+});
+
+/**
+ * UserRoleType
+ *
+ * 用户角色类型枚举
+ *
+ * 三种角色完全独立，不支持兼任：
+ * - engineer: 工程师，参与竞价报价、执行任务、填报日报
+ * - pm: 市场产品PM，发布任务需求、管理客资数据
+ * - admin: 管理员，审核任务、管理工资与规则
+ */
+export const zUserRoleType = z.enum([
+    'engineer',
+    'pm',
+    'admin'
+]);
+
+/**
+ * UserAdminCreate
+ *
+ * 管理员创建工程师/PM 账号
+ */
+export const zUserAdminCreate = z.object({
+    email: z.email().max(255),
+    password: z.string().min(8).max(128),
+    full_name: z.string().max(255).nullish(),
+    role: zUserRoleType.optional().default('engineer'),
+    is_active: z.boolean().optional().default(true),
+    S0: z.number().gte(0).nullish(),
+    H0: z.number().gte(0).nullish(),
+    T_monthly_plan: z.number().gte(0).nullish(),
+    S_base: z.number().gte(0).nullish(),
+    S_assess: z.number().gte(0).nullish(),
+    R_base: z.number().gte(0).lte(1).nullish(),
+    R_assess: z.number().gte(0).lte(1).nullish(),
+    baseline_client_count: z.int().gte(0).nullish()
+});
+
+/**
+ * UserAdminDetail
+ */
+export const zUserAdminDetail = z.object({
+    email: z.email().max(255),
+    is_active: z.boolean().optional().default(true),
+    is_superuser: z.boolean().optional().default(false),
+    full_name: z.string().max(255).nullish(),
+    id: z.uuid(),
+    role: zUserRoleType,
+    created_at: z.iso.datetime().nullish(),
+    S0: z.number().nullish(),
+    H0: z.number().nullish(),
+    T_monthly_plan: z.number().nullish(),
+    current_starpoint: z.int().optional().default(0),
+    S_base: z.number().nullish(),
+    S_assess: z.number().nullish(),
+    R_base: z.number().nullish(),
+    R_assess: z.number().nullish(),
+    baseline_client_count: z.int().nullish()
+});
+
+/**
+ * UserAdminUpdate
+ *
+ * 管理员更新用户信息
+ */
+export const zUserAdminUpdate = z.object({
+    email: z.email().max(255).nullish(),
+    full_name: z.string().max(255).nullish(),
+    is_active: z.boolean().nullish(),
+    role: zUserRoleType.nullish(),
+    S0: z.number().gte(0).nullish(),
+    H0: z.number().gte(0).nullish(),
+    T_monthly_plan: z.number().gte(0).nullish(),
+    S_base: z.number().gte(0).nullish(),
+    S_assess: z.number().gte(0).nullish(),
+    R_base: z.number().gte(0).lte(1).nullish(),
+    R_assess: z.number().gte(0).lte(1).nullish(),
+    baseline_client_count: z.int().gte(0).nullish()
+});
+
+/**
  * UserPublic
  */
 export const zUserPublic = z.object({
@@ -97,16 +720,15 @@ export const zUserPublic = z.object({
     is_superuser: z.boolean().optional().default(false),
     full_name: z.string().max(255).nullish(),
     id: z.uuid(),
+    role: zUserRoleType,
     created_at: z.iso.datetime().nullish()
 });
 
 /**
- * UserRegister
+ * UserToggleActive
  */
-export const zUserRegister = z.object({
-    email: z.email().max(255),
-    password: z.string().min(8).max(128),
-    full_name: z.string().max(255).nullish()
+export const zUserToggleActive = z.object({
+    is_active: z.boolean()
 });
 
 /**
@@ -129,6 +751,17 @@ export const zUserUpdateMe = z.object({
 });
 
 /**
+ * UsersAdminPublic
+ */
+export const zUsersAdminPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
+});
+
+/**
  * UsersPublic
  */
 export const zUsersPublic = z.object({
@@ -145,7 +778,9 @@ export const zUsersPublic = z.object({
 export const zValidationError = z.object({
     loc: z.array(z.union([z.string(), z.int()])),
     msg: z.string(),
-    type: z.string()
+    type: z.string(),
+    input: z.unknown().optional(),
+    ctx: z.record(z.string(), z.unknown()).optional()
 });
 
 /**
@@ -168,8 +803,8 @@ export const zLoginAccessTokenV1LoginAccessTokenPostResponse = zToken;
 export const zTestTokenV1LoginTestTokenPostResponse = zUserPublic;
 
 export const zReadUsersV1UsersGetQuery = z.object({
-    page: z.int().optional().default(1),
-    page_size: z.int().optional().default(20)
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
 });
 
 /**
@@ -251,48 +886,505 @@ export const zRegisterUserV1UsersSignupPostBody = zUserRegister;
  */
 export const zRegisterUserV1UsersSignupPostResponse = zUserPublic;
 
-export const zReadItemsV1ItemsGetQuery = z.object({
-    page: z.int().optional().default(1),
-    page_size: z.int().optional().default(20)
+export const zAdminReadUsersV1AdminUsersGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
 });
 
 /**
  * Successful Response
  */
-export const zReadItemsV1ItemsGetResponse = zItemsPublic;
+export const zAdminReadUsersV1AdminUsersGetResponse = zUsersAdminPublic;
 
-export const zCreateItemV1ItemsPostBody = zItemCreate;
+export const zAdminCreateUserV1AdminUsersPostBody = zUserAdminCreate;
 
 /**
  * Successful Response
  */
-export const zCreateItemV1ItemsPostResponse = zItemPublic;
+export const zAdminCreateUserV1AdminUsersPostResponse = zUserAdminDetail;
 
-export const zDeleteItemV1ItemsItemIdDeletePath = z.object({
-    item_id: z.uuid()
+export const zAdminReadUserV1AdminUsersUserIdGetPath = z.object({
+    user_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zDeleteItemV1ItemsItemIdDeleteResponse = zMessage;
+export const zAdminReadUserV1AdminUsersUserIdGetResponse = zUserAdminDetail;
 
-export const zReadItemV1ItemsItemIdGetPath = z.object({
-    item_id: z.uuid()
+export const zAdminUpdateUserV1AdminUsersUserIdPatchBody = zUserAdminUpdate;
+
+export const zAdminUpdateUserV1AdminUsersUserIdPatchPath = z.object({
+    user_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zReadItemV1ItemsItemIdGetResponse = zItemPublic;
+export const zAdminUpdateUserV1AdminUsersUserIdPatchResponse = zUserAdminDetail;
 
-export const zUpdateItemV1ItemsItemIdPutBody = zItemUpdate;
+export const zAdminToggleUserActiveV1AdminUsersUserIdToggleActivePostBody = zUserToggleActive;
 
-export const zUpdateItemV1ItemsItemIdPutPath = z.object({
-    item_id: z.uuid()
+export const zAdminToggleUserActiveV1AdminUsersUserIdToggleActivePostPath = z.object({
+    user_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zUpdateItemV1ItemsItemIdPutResponse = zItemPublic;
+export const zAdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponse = zUserAdminDetail;
+
+export const zAdminResetPasswordV1AdminUsersUserIdResetPasswordPostBody = zAdminPasswordReset;
+
+export const zAdminResetPasswordV1AdminUsersUserIdResetPasswordPostPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse = zMessage;
+
+export const zAdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutBody = zClientResourceParamsUpdate;
+
+export const zAdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse = zUserAdminDetail;
+
+export const zAdminReadAuditLogsV1AdminAuditLogsGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20),
+    target_type: z.string().nullish(),
+    user_id: z.uuid().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminReadAuditLogsV1AdminAuditLogsGetResponse = zAuditLogList;
+
+export const zReadTasksV1TasksGetQuery = z.object({
+    status: z.string().nullish(),
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadTasksV1TasksGetResponse = zTasksPublic;
+
+export const zCreateTaskV1TasksPostBody = zTaskCreate;
+
+/**
+ * Successful Response
+ */
+export const zCreateTaskV1TasksPostResponse = zTaskPublic;
+
+export const zDeleteTaskV1TasksTaskIdDeletePath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteTaskV1TasksTaskIdDeleteResponse = zMessage;
+
+export const zReadTaskV1TasksTaskIdGetPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zReadTaskV1TasksTaskIdGetResponse = zTaskPublic;
+
+export const zUpdateTaskV1TasksTaskIdPutBody = zTaskUpdate;
+
+export const zUpdateTaskV1TasksTaskIdPutPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateTaskV1TasksTaskIdPutResponse = zTaskPublic;
+
+export const zApproveTaskV1TasksTaskIdApprovePostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zApproveTaskV1TasksTaskIdApprovePostResponse = zTaskPublic;
+
+export const zRejectTaskV1TasksTaskIdRejectPostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zRejectTaskV1TasksTaskIdRejectPostResponse = zTaskPublic;
+
+export const zPublishTaskV1TasksTaskIdPublishPostPath = z.object({
+    task_id: z.uuid()
+});
+
+export const zPublishTaskV1TasksTaskIdPublishPostQuery = z.object({
+    bidding_days: z.int().optional().default(3)
+});
+
+/**
+ * Successful Response
+ */
+export const zPublishTaskV1TasksTaskIdPublishPostResponse = zTaskPublic;
+
+export const zConvertToUrgentV1TasksTaskIdConvertUrgentPostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zConvertToUrgentV1TasksTaskIdConvertUrgentPostResponse = zTaskPublic;
+
+export const zConvertToConvenientV1TasksTaskIdConvertConvenientPostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zConvertToConvenientV1TasksTaskIdConvertConvenientPostResponse = zTaskPublic;
+
+export const zPauseApproveTaskV1TasksTaskIdPauseApprovePostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zPauseApproveTaskV1TasksTaskIdPauseApprovePostResponse = zTaskPublic;
+
+export const zPauseRejectTaskV1TasksTaskIdPauseRejectPostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zPauseRejectTaskV1TasksTaskIdPauseRejectPostResponse = zTaskPublic;
+
+export const zReassignTaskV1TasksTaskIdReassignPostBody = zTaskReassignRequest;
+
+export const zReassignTaskV1TasksTaskIdReassignPostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zReassignTaskV1TasksTaskIdReassignPostResponse = zTaskPublic;
+
+export const zStartTaskV1TasksTaskIdStartPostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zStartTaskV1TasksTaskIdStartPostResponse = zTaskPublic;
+
+export const zDeclineTaskV1TasksTaskIdDeclinePostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeclineTaskV1TasksTaskIdDeclinePostResponse = zTaskPublic;
+
+export const zPauseRequestTaskV1TasksTaskIdPauseRequestPostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zPauseRequestTaskV1TasksTaskIdPauseRequestPostResponse = zTaskPublic;
+
+export const zResumeTaskV1TasksTaskIdResumePostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zResumeTaskV1TasksTaskIdResumePostResponse = zTaskPublic;
+
+export const zCompleteTaskV1TasksTaskIdCompletePostBody = zTaskCompleteRequest;
+
+export const zCompleteTaskV1TasksTaskIdCompletePostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCompleteTaskV1TasksTaskIdCompletePostResponse = zTaskPublic;
+
+export const zReadBidsByTaskV1TasksTaskIdBidsGetPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zReadBidsByTaskV1TasksTaskIdBidsGetResponse = zBidsPublic;
+
+export const zCreateBidV1TasksTaskIdBidsPostBody = zBidCreate;
+
+export const zCreateBidV1TasksTaskIdBidsPostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zCreateBidV1TasksTaskIdBidsPostResponse = zBidPublic;
+
+export const zUpdateBidV1TasksTaskIdBidsBidIdPutBody = zBidUpdate;
+
+export const zUpdateBidV1TasksTaskIdBidsBidIdPutPath = z.object({
+    task_id: z.uuid(),
+    bid_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateBidV1TasksTaskIdBidsBidIdPutResponse = zBidPublic;
+
+/**
+ * Successful Response
+ */
+export const zReadMyBidsV1BidsMyGetResponse = zBidsPublic;
+
+export const zManualSettleBiddingV1TasksTaskIdSettleBiddingPostPath = z.object({
+    task_id: z.uuid()
+});
+
+export const zReadDailyReportsV1DailyReportsGetQuery = z.object({
+    task_id: z.uuid().nullish(),
+    report_date: z.iso.date().nullish(),
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadDailyReportsV1DailyReportsGetResponse = zDailyReportsPublic;
+
+export const zCreateDailyReportV1DailyReportsPostBody = zDailyReportCreate;
+
+/**
+ * Successful Response
+ */
+export const zCreateDailyReportV1DailyReportsPostResponse = zDailyReportPublic;
+
+/**
+ * Successful Response
+ */
+export const zGetRemindReportV1DailyReportsRemindGetResponse = zRemindResult;
+
+export const zDeleteDailyReportV1DailyReportsReportIdDeletePath = z.object({
+    report_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteDailyReportV1DailyReportsReportIdDeleteResponse = zMessage;
+
+export const zReadDailyReportV1DailyReportsReportIdGetPath = z.object({
+    report_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zReadDailyReportV1DailyReportsReportIdGetResponse = zDailyReportPublic;
+
+export const zUpdateDailyReportV1DailyReportsReportIdPutBody = zDailyReportUpdate;
+
+export const zUpdateDailyReportV1DailyReportsReportIdPutPath = z.object({
+    report_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateDailyReportV1DailyReportsReportIdPutResponse = zDailyReportPublic;
+
+export const zReadMyStarpointsV1StarpointsMyGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadMyStarpointsV1StarpointsMyGetResponse = zStarPointRecordsPublic;
+
+/**
+ * Successful Response
+ */
+export const zReadMyStarpointSummaryV1StarpointsMySummaryGetResponse = zStarPointSummary;
+
+export const zReadStarpointLeaderboardV1StarpointsLeaderboardGetQuery = z.object({
+    limit: z.int().gte(1).lte(200).optional().default(100)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadStarpointLeaderboardV1StarpointsLeaderboardGetResponse = zStarPointLeaderboard;
+
+export const zAdjustStarpointV1StarpointsAdjustPostBody = zStarPointAdjustRequest;
+
+/**
+ * Successful Response
+ */
+export const zAdjustStarpointV1StarpointsAdjustPostResponse = zStarPointRecordPublic;
+
+/**
+ * Response Read My Salary V1 Salaries My Get
+ *
+ * Successful Response
+ */
+export const zReadMySalaryV1SalariesMyGetResponse = z.union([
+    zEngineerSalaryDetail,
+    zPmSalaryDetail
+]);
+
+export const zReadSalarySummaryV1SalariesGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadSalarySummaryV1SalariesGetResponse = zSalarySummaryList;
+
+export const zUpdateSalaryParamsV1SalariesUsersUserIdParamsPutBody = zSalaryParamsUpdate;
+
+export const zUpdateSalaryParamsV1SalariesUsersUserIdParamsPutPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponse = zMessage;
+
+export const zExportSalariesV1SalariesExportPostBody = zSalaryExportRequest;
+
+export const zReadRuleAuditLogsV1SystemRulesAuditLogsGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadRuleAuditLogsV1SystemRulesAuditLogsGetResponse = zAuditLogList;
+
+export const zReadRulesV1SystemRulesGetQuery = z.object({
+    category: z.string().nullish(),
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadRulesV1SystemRulesGetResponse = zSystemRulesPublic;
+
+export const zCreateRuleV1SystemRulesPostBody = zSystemRuleCreate;
+
+/**
+ * Successful Response
+ */
+export const zCreateRuleV1SystemRulesPostResponse = zSystemRulePublic;
+
+export const zDeleteRuleV1SystemRulesRuleIdDeletePath = z.object({
+    rule_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteRuleV1SystemRulesRuleIdDeleteResponse = zMessage;
+
+export const zReadRuleV1SystemRulesRuleIdGetPath = z.object({
+    rule_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zReadRuleV1SystemRulesRuleIdGetResponse = zSystemRulePublic;
+
+export const zUpdateRuleV1SystemRulesRuleIdPutBody = zSystemRuleUpdate;
+
+export const zUpdateRuleV1SystemRulesRuleIdPutPath = z.object({
+    rule_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateRuleV1SystemRulesRuleIdPutResponse = zSystemRulePublic;
+
+export const zReadMyClientResourcesV1ClientResourcesGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadMyClientResourcesV1ClientResourcesGetResponse = zClientResourcesPublic;
+
+export const zCreateClientResourceV1ClientResourcesPostBody = zClientResourceCreate;
+
+/**
+ * Successful Response
+ */
+export const zCreateClientResourceV1ClientResourcesPostResponse = zClientResourcePublic;
+
+/**
+ * Response Read Admin Client Resource Summary V1 Client Resources Admin Get
+ *
+ * Successful Response
+ */
+export const zReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse = z.array(zClientResourceSummary);
+
+export const zReadAllClientResourcesV1ClientResourcesAllGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadAllClientResourcesV1ClientResourcesAllGetResponse = zClientResourcesPublic;

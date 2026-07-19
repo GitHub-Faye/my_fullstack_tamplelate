@@ -54,6 +54,9 @@ export enum ErrorCode {
   // ==================== 工资相关错误 (SALARY) ====================
   SALARY_PARAM_NOT_SET = "SALARY_PARAM_NOT_SET",
 
+  // ==================== 规则配置相关错误 (RULE) ====================
+  RULE_NOT_FOUND = "RULE_NOT_FOUND",
+
   // ==================== 系统错误 (SYSTEM) ====================
   SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR",
   SYSTEM_VALIDATION_ERROR = "SYSTEM_VALIDATION_ERROR",
@@ -100,6 +103,7 @@ export const ERROR_STATUS_MAP: Record<ErrorCode, number> = {
   [ErrorCode.TASK_NOT_FOUND]: 404,
   [ErrorCode.BID_NOT_FOUND]: 404,
   [ErrorCode.REPORT_NOT_FOUND]: 404,
+  [ErrorCode.RULE_NOT_FOUND]: 404,
 
   // 409 Conflict
   [ErrorCode.USER_ALREADY_EXISTS]: 409,
@@ -159,6 +163,8 @@ export const DEFAULT_ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.STARPOINT_INSUFFICIENT]: "Insufficient starpoint balance",
 
   [ErrorCode.SALARY_PARAM_NOT_SET]: "Salary parameter not set",
+
+  [ErrorCode.RULE_NOT_FOUND]: "Rule not found",
 
   [ErrorCode.SYSTEM_INTERNAL_ERROR]: "Internal server error",
   [ErrorCode.SYSTEM_VALIDATION_ERROR]: "Validation error",
@@ -269,4 +275,11 @@ export function isReportError(code: ErrorCode): boolean {
  */
 export function isSystemError(code: ErrorCode): boolean {
   return code.startsWith("SYSTEM_");
+}
+
+/**
+ * 判断是否为规则配置错误
+ */
+export function isRuleError(code: ErrorCode): boolean {
+  return code.startsWith("RULE_");
 }

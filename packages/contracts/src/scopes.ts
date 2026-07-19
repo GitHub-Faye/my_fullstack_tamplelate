@@ -225,6 +225,20 @@ export const SystemScope = {
 export type SystemScopeType = typeof SystemScope[keyof typeof SystemScope];
 
 /**
+ * Dashboard 相关 Scope
+ */
+export const DashboardScope = {
+  /** 查看工程师仪表板 */
+  ENGINEER: "dashboard:engineer",
+  /** 查看 PM 仪表板 */
+  PM: "dashboard:pm",
+  /** 查看管理员仪表板 */
+  ADMIN: "dashboard:admin",
+} as const;
+
+export type DashboardScopeType = typeof DashboardScope[keyof typeof DashboardScope];
+
+/**
  * 所有 Scope 的联合类型
  */
 export type ScopeType =
@@ -237,7 +251,8 @@ export type ScopeType =
   | SalaryScopeType
   | ClientResourceScopeType
   | RuleScopeType
-  | SystemScopeType;
+  | SystemScopeType
+  | DashboardScopeType;
 
 /**
  * 所有 Scope 列表
@@ -253,6 +268,7 @@ export const ALL_SCOPES: ScopeType[] = [
   ...ALL_CLIENT_RESOURCE_SCOPES,
   ...ALL_RULE_SCOPES,
   ...Object.values(SystemScope),
+  ...Object.values(DashboardScope),
 ];
 
 /**
@@ -295,6 +311,7 @@ export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
     ReportScope.READ,
     StarPointScope.READ,
     SalaryScope.READ,
+    DashboardScope.ENGINEER,
   ],
 
   /** PM */
@@ -306,6 +323,7 @@ export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
     ClientResourceScope.READ,
     ClientResourceScope.CREATE,
     SalaryScope.READ,
+    DashboardScope.PM,
   ],
 
   /** 管理员角色 */
@@ -332,6 +350,7 @@ export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
     UserScope.DELETE,
     UserScope.ADMIN,
     RuleScope.ADMIN,
+    DashboardScope.ADMIN,
   ],
 
   /** 超级管理员 */

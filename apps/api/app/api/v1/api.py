@@ -19,8 +19,8 @@ router.include_router(login_router, tags=["login"])
 router.include_router(user_router, prefix="/users", tags=["users"])
 router.include_router(admin_router, prefix="/admin", tags=["admin-users"])
 
-# 物品相关路由
-router.include_router(item_router, prefix="/items", tags=["items"])
+# # 物品相关路由
+# router.include_router(item_router, prefix="/items", tags=["items"])
 
 # 任务相关路由
 router.include_router(task_router, prefix="/tasks", tags=["tasks"])

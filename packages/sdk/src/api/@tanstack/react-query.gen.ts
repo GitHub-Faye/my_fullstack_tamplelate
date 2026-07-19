@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { createItemV1ItemsPost, createUserV1UsersPost, deleteItemV1ItemsItemIdDelete, deleteUserMeV1UsersMeDelete, deleteUserV1UsersUserIdDelete, healthCheckV1UsersHealthCheckGet, loginAccessTokenV1LoginAccessTokenPost, type Options, readItemsV1ItemsGet, readItemV1ItemsItemIdGet, readUserByIdV1UsersUserIdGet, readUserMeV1UsersMeGet, readUsersV1UsersGet, registerUserV1UsersSignupPost, testTokenV1LoginTestTokenPost, updateItemV1ItemsItemIdPut, updatePasswordMeV1UsersMePasswordPatch, updateUserMeV1UsersMePatch, updateUserV1UsersUserIdPatch } from '../sdk.gen.js';
-import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostError, CreateItemV1ItemsPostResponse, CreateUserV1UsersPostData, CreateUserV1UsersPostError, CreateUserV1UsersPostResponse, DeleteItemV1ItemsItemIdDeleteData, DeleteItemV1ItemsItemIdDeleteError, DeleteItemV1ItemsItemIdDeleteResponse, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponse, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteError, DeleteUserV1UsersUserIdDeleteResponse, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponse, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostError, LoginAccessTokenV1LoginAccessTokenPostResponse, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetError, ReadItemsV1ItemsGetResponse, ReadItemV1ItemsItemIdGetData, ReadItemV1ItemsItemIdGetError, ReadItemV1ItemsItemIdGetResponse, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponse, ReadUsersV1UsersGetData, ReadUsersV1UsersGetError, ReadUsersV1UsersGetResponse, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostError, RegisterUserV1UsersSignupPostResponse, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponse, UpdateItemV1ItemsItemIdPutData, UpdateItemV1ItemsItemIdPutError, UpdateItemV1ItemsItemIdPutResponse, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchError, UpdatePasswordMeV1UsersMePasswordPatchResponse, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchError, UpdateUserMeV1UsersMePatchResponse, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchError, UpdateUserV1UsersUserIdPatchResponse } from '../types.gen.js';
+import { adjustStarpointV1StarpointsAdjustPost, adminCreateUserV1AdminUsersPost, adminReadAuditLogsV1AdminAuditLogsGet, adminReadUsersV1AdminUsersGet, adminReadUserV1AdminUsersUserIdGet, adminResetPasswordV1AdminUsersUserIdResetPasswordPost, adminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPut, adminToggleUserActiveV1AdminUsersUserIdToggleActivePost, adminUpdateUserV1AdminUsersUserIdPatch, approveTaskV1TasksTaskIdApprovePost, completeTaskV1TasksTaskIdCompletePost, convertToConvenientV1TasksTaskIdConvertConvenientPost, convertToUrgentV1TasksTaskIdConvertUrgentPost, createBidV1TasksTaskIdBidsPost, createClientResourceV1ClientResourcesPost, createDailyReportV1DailyReportsPost, createRuleV1SystemRulesPost, createTaskV1TasksPost, createUserV1UsersPost, declineTaskV1TasksTaskIdDeclinePost, deleteDailyReportV1DailyReportsReportIdDelete, deleteRuleV1SystemRulesRuleIdDelete, deleteTaskV1TasksTaskIdDelete, deleteUserMeV1UsersMeDelete, deleteUserV1UsersUserIdDelete, exportSalariesV1SalariesExportPost, getRemindReportV1DailyReportsRemindGet, healthCheckV1UsersHealthCheckGet, loginAccessTokenV1LoginAccessTokenPost, manualSettleBiddingV1TasksTaskIdSettleBiddingPost, type Options, pauseApproveTaskV1TasksTaskIdPauseApprovePost, pauseRejectTaskV1TasksTaskIdPauseRejectPost, pauseRequestTaskV1TasksTaskIdPauseRequestPost, publishTaskV1TasksTaskIdPublishPost, readAdminClientResourceSummaryV1ClientResourcesAdminGet, readAdminDashboardV1DashboardAdminGet, readAllClientResourcesV1ClientResourcesAllGet, readBidsByTaskV1TasksTaskIdBidsGet, readDailyReportsV1DailyReportsGet, readDailyReportV1DailyReportsReportIdGet, readEngineerDashboardV1DashboardEngineerGet, readMyBidsV1BidsMyGet, readMyClientResourcesV1ClientResourcesGet, readMySalaryV1SalariesMyGet, readMyStarpointSummaryV1StarpointsMySummaryGet, readMyStarpointsV1StarpointsMyGet, readPmDashboardV1DashboardPmGet, readRuleAuditLogsV1SystemRulesAuditLogsGet, readRulesV1SystemRulesGet, readRuleV1SystemRulesRuleIdGet, readSalarySummaryV1SalariesGet, readStarpointLeaderboardV1StarpointsLeaderboardGet, readTasksV1TasksGet, readTaskV1TasksTaskIdGet, readUserByIdV1UsersUserIdGet, readUserMeV1UsersMeGet, readUsersV1UsersGet, reassignTaskV1TasksTaskIdReassignPost, registerUserV1UsersSignupPost, rejectTaskV1TasksTaskIdRejectPost, resumeTaskV1TasksTaskIdResumePost, startTaskV1TasksTaskIdStartPost, testTokenV1LoginTestTokenPost, updateBidV1TasksTaskIdBidsBidIdPut, updateDailyReportV1DailyReportsReportIdPut, updatePasswordMeV1UsersMePasswordPatch, updateRuleV1SystemRulesRuleIdPut, updateSalaryParamsV1SalariesUsersUserIdParamsPut, updateTaskV1TasksTaskIdPut, updateUserMeV1UsersMePatch, updateUserV1UsersUserIdPatch } from '../sdk.gen.js';
+import type { AdjustStarpointV1StarpointsAdjustPostData, AdjustStarpointV1StarpointsAdjustPostError, AdjustStarpointV1StarpointsAdjustPostResponse, AdminCreateUserV1AdminUsersPostData, AdminCreateUserV1AdminUsersPostError, AdminCreateUserV1AdminUsersPostResponse, AdminReadAuditLogsV1AdminAuditLogsGetData, AdminReadAuditLogsV1AdminAuditLogsGetError, AdminReadAuditLogsV1AdminAuditLogsGetResponse, AdminReadUsersV1AdminUsersGetData, AdminReadUsersV1AdminUsersGetError, AdminReadUsersV1AdminUsersGetResponse, AdminReadUserV1AdminUsersUserIdGetData, AdminReadUserV1AdminUsersUserIdGetError, AdminReadUserV1AdminUsersUserIdGetResponse, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostError, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutError, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostData, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostError, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponse, AdminUpdateUserV1AdminUsersUserIdPatchData, AdminUpdateUserV1AdminUsersUserIdPatchError, AdminUpdateUserV1AdminUsersUserIdPatchResponse, ApproveTaskV1TasksTaskIdApprovePostData, ApproveTaskV1TasksTaskIdApprovePostError, ApproveTaskV1TasksTaskIdApprovePostResponse, CompleteTaskV1TasksTaskIdCompletePostData, CompleteTaskV1TasksTaskIdCompletePostError, CompleteTaskV1TasksTaskIdCompletePostResponse, ConvertToConvenientV1TasksTaskIdConvertConvenientPostData, ConvertToConvenientV1TasksTaskIdConvertConvenientPostError, ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponse, ConvertToUrgentV1TasksTaskIdConvertUrgentPostData, ConvertToUrgentV1TasksTaskIdConvertUrgentPostError, ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponse, CreateBidV1TasksTaskIdBidsPostData, CreateBidV1TasksTaskIdBidsPostError, CreateBidV1TasksTaskIdBidsPostResponse, CreateClientResourceV1ClientResourcesPostData, CreateClientResourceV1ClientResourcesPostError, CreateClientResourceV1ClientResourcesPostResponse, CreateDailyReportV1DailyReportsPostData, CreateDailyReportV1DailyReportsPostError, CreateDailyReportV1DailyReportsPostResponse, CreateRuleV1SystemRulesPostData, CreateRuleV1SystemRulesPostError, CreateRuleV1SystemRulesPostResponse, CreateTaskV1TasksPostData, CreateTaskV1TasksPostError, CreateTaskV1TasksPostResponse, CreateUserV1UsersPostData, CreateUserV1UsersPostError, CreateUserV1UsersPostResponse, DeclineTaskV1TasksTaskIdDeclinePostData, DeclineTaskV1TasksTaskIdDeclinePostError, DeclineTaskV1TasksTaskIdDeclinePostResponse, DeleteDailyReportV1DailyReportsReportIdDeleteData, DeleteDailyReportV1DailyReportsReportIdDeleteError, DeleteDailyReportV1DailyReportsReportIdDeleteResponse, DeleteRuleV1SystemRulesRuleIdDeleteData, DeleteRuleV1SystemRulesRuleIdDeleteError, DeleteRuleV1SystemRulesRuleIdDeleteResponse, DeleteTaskV1TasksTaskIdDeleteData, DeleteTaskV1TasksTaskIdDeleteError, DeleteTaskV1TasksTaskIdDeleteResponse, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponse, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteError, DeleteUserV1UsersUserIdDeleteResponse, ExportSalariesV1SalariesExportPostData, ExportSalariesV1SalariesExportPostError, GetRemindReportV1DailyReportsRemindGetData, GetRemindReportV1DailyReportsRemindGetResponse, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponse, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostError, LoginAccessTokenV1LoginAccessTokenPostResponse, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostData, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostError, PauseApproveTaskV1TasksTaskIdPauseApprovePostData, PauseApproveTaskV1TasksTaskIdPauseApprovePostError, PauseApproveTaskV1TasksTaskIdPauseApprovePostResponse, PauseRejectTaskV1TasksTaskIdPauseRejectPostData, PauseRejectTaskV1TasksTaskIdPauseRejectPostError, PauseRejectTaskV1TasksTaskIdPauseRejectPostResponse, PauseRequestTaskV1TasksTaskIdPauseRequestPostData, PauseRequestTaskV1TasksTaskIdPauseRequestPostError, PauseRequestTaskV1TasksTaskIdPauseRequestPostResponse, PublishTaskV1TasksTaskIdPublishPostData, PublishTaskV1TasksTaskIdPublishPostError, PublishTaskV1TasksTaskIdPublishPostResponse, ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData, ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse, ReadAdminDashboardV1DashboardAdminGetData, ReadAllClientResourcesV1ClientResourcesAllGetData, ReadAllClientResourcesV1ClientResourcesAllGetError, ReadAllClientResourcesV1ClientResourcesAllGetResponse, ReadBidsByTaskV1TasksTaskIdBidsGetData, ReadBidsByTaskV1TasksTaskIdBidsGetError, ReadBidsByTaskV1TasksTaskIdBidsGetResponse, ReadDailyReportsV1DailyReportsGetData, ReadDailyReportsV1DailyReportsGetError, ReadDailyReportsV1DailyReportsGetResponse, ReadDailyReportV1DailyReportsReportIdGetData, ReadDailyReportV1DailyReportsReportIdGetError, ReadDailyReportV1DailyReportsReportIdGetResponse, ReadEngineerDashboardV1DashboardEngineerGetData, ReadMyBidsV1BidsMyGetData, ReadMyBidsV1BidsMyGetResponse, ReadMyClientResourcesV1ClientResourcesGetData, ReadMyClientResourcesV1ClientResourcesGetError, ReadMyClientResourcesV1ClientResourcesGetResponse, ReadMySalaryV1SalariesMyGetData, ReadMySalaryV1SalariesMyGetResponse, ReadMyStarpointSummaryV1StarpointsMySummaryGetData, ReadMyStarpointSummaryV1StarpointsMySummaryGetResponse, ReadMyStarpointsV1StarpointsMyGetData, ReadMyStarpointsV1StarpointsMyGetError, ReadMyStarpointsV1StarpointsMyGetResponse, ReadPmDashboardV1DashboardPmGetData, ReadRuleAuditLogsV1SystemRulesAuditLogsGetData, ReadRuleAuditLogsV1SystemRulesAuditLogsGetError, ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponse, ReadRulesV1SystemRulesGetData, ReadRulesV1SystemRulesGetError, ReadRulesV1SystemRulesGetResponse, ReadRuleV1SystemRulesRuleIdGetData, ReadRuleV1SystemRulesRuleIdGetError, ReadRuleV1SystemRulesRuleIdGetResponse, ReadSalarySummaryV1SalariesGetData, ReadSalarySummaryV1SalariesGetError, ReadSalarySummaryV1SalariesGetResponse, ReadStarpointLeaderboardV1StarpointsLeaderboardGetData, ReadStarpointLeaderboardV1StarpointsLeaderboardGetError, ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponse, ReadTasksV1TasksGetData, ReadTasksV1TasksGetError, ReadTasksV1TasksGetResponse, ReadTaskV1TasksTaskIdGetData, ReadTaskV1TasksTaskIdGetError, ReadTaskV1TasksTaskIdGetResponse, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponse, ReadUsersV1UsersGetData, ReadUsersV1UsersGetError, ReadUsersV1UsersGetResponse, ReassignTaskV1TasksTaskIdReassignPostData, ReassignTaskV1TasksTaskIdReassignPostError, ReassignTaskV1TasksTaskIdReassignPostResponse, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostError, RegisterUserV1UsersSignupPostResponse, RejectTaskV1TasksTaskIdRejectPostData, RejectTaskV1TasksTaskIdRejectPostError, RejectTaskV1TasksTaskIdRejectPostResponse, ResumeTaskV1TasksTaskIdResumePostData, ResumeTaskV1TasksTaskIdResumePostError, ResumeTaskV1TasksTaskIdResumePostResponse, StartTaskV1TasksTaskIdStartPostData, StartTaskV1TasksTaskIdStartPostError, StartTaskV1TasksTaskIdStartPostResponse, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponse, UpdateBidV1TasksTaskIdBidsBidIdPutData, UpdateBidV1TasksTaskIdBidsBidIdPutError, UpdateBidV1TasksTaskIdBidsBidIdPutResponse, UpdateDailyReportV1DailyReportsReportIdPutData, UpdateDailyReportV1DailyReportsReportIdPutError, UpdateDailyReportV1DailyReportsReportIdPutResponse, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchError, UpdatePasswordMeV1UsersMePasswordPatchResponse, UpdateRuleV1SystemRulesRuleIdPutData, UpdateRuleV1SystemRulesRuleIdPutError, UpdateRuleV1SystemRulesRuleIdPutResponse, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutData, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutError, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponse, UpdateTaskV1TasksTaskIdPutData, UpdateTaskV1TasksTaskIdPutError, UpdateTaskV1TasksTaskIdPutResponse, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchError, UpdateUserMeV1UsersMePatchResponse, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchError, UpdateUserV1UsersUserIdPatchResponse } from '../types.gen.js';
 
 /**
  * Login Access Token
@@ -543,19 +543,16 @@ export const registerUserV1UsersSignupPostMutation = (options?: Partial<Options<
     return mutationOptions;
 };
 
-export const readItemsV1ItemsGetQueryKey = (options?: Options<ReadItemsV1ItemsGetData>) => createQueryKey('readItemsV1ItemsGet', options);
+export const adminReadUsersV1AdminUsersGetQueryKey = (options?: Options<AdminReadUsersV1AdminUsersGetData>) => createQueryKey('adminReadUsersV1AdminUsersGet', options);
 
 /**
- * Read Items
+ * 获取用户列表（管理员）
  *
- * Retrieve items.
- *
- * - Regular users can only view their own items
- * - Users with item:admin permission can view all items
+ * 管理员获取所有用户列表，包含工资字段详情
  */
-export const readItemsV1ItemsGetOptions = (options?: Options<ReadItemsV1ItemsGetData>) => queryOptions<ReadItemsV1ItemsGetResponse, ReadItemsV1ItemsGetError, ReadItemsV1ItemsGetResponse, ReturnType<typeof readItemsV1ItemsGetQueryKey>>({
+export const adminReadUsersV1AdminUsersGetOptions = (options?: Options<AdminReadUsersV1AdminUsersGetData>) => queryOptions<AdminReadUsersV1AdminUsersGetResponse, AdminReadUsersV1AdminUsersGetError, AdminReadUsersV1AdminUsersGetResponse, ReturnType<typeof adminReadUsersV1AdminUsersGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readItemsV1ItemsGet({
+        const { data } = await adminReadUsersV1AdminUsersGet({
             ...options,
             ...queryKey[0],
             signal,
@@ -563,31 +560,28 @@ export const readItemsV1ItemsGetOptions = (options?: Options<ReadItemsV1ItemsGet
         });
         return data;
     },
-    queryKey: readItemsV1ItemsGetQueryKey(options)
+    queryKey: adminReadUsersV1AdminUsersGetQueryKey(options)
 });
 
-export const readItemsV1ItemsGetInfiniteQueryKey = (options?: Options<ReadItemsV1ItemsGetData>): QueryKey<Options<ReadItemsV1ItemsGetData>> => createQueryKey('readItemsV1ItemsGet', options, true);
+export const adminReadUsersV1AdminUsersGetInfiniteQueryKey = (options?: Options<AdminReadUsersV1AdminUsersGetData>): QueryKey<Options<AdminReadUsersV1AdminUsersGetData>> => createQueryKey('adminReadUsersV1AdminUsersGet', options, true);
 
 /**
- * Read Items
+ * 获取用户列表（管理员）
  *
- * Retrieve items.
- *
- * - Regular users can only view their own items
- * - Users with item:admin permission can view all items
+ * 管理员获取所有用户列表，包含工资字段详情
  */
-export const readItemsV1ItemsGetInfiniteOptions = (options?: Options<ReadItemsV1ItemsGetData>) => infiniteQueryOptions<ReadItemsV1ItemsGetResponse, ReadItemsV1ItemsGetError, InfiniteData<ReadItemsV1ItemsGetResponse>, QueryKey<Options<ReadItemsV1ItemsGetData>>, number | Pick<QueryKey<Options<ReadItemsV1ItemsGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const adminReadUsersV1AdminUsersGetInfiniteOptions = (options?: Options<AdminReadUsersV1AdminUsersGetData>) => infiniteQueryOptions<AdminReadUsersV1AdminUsersGetResponse, AdminReadUsersV1AdminUsersGetError, InfiniteData<AdminReadUsersV1AdminUsersGetResponse>, QueryKey<Options<AdminReadUsersV1AdminUsersGetData>>, number | Pick<QueryKey<Options<AdminReadUsersV1AdminUsersGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<ReadItemsV1ItemsGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<AdminReadUsersV1AdminUsersGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await readItemsV1ItemsGet({
+        const { data } = await adminReadUsersV1AdminUsersGet({
             ...options,
             ...params,
             signal,
@@ -595,20 +589,18 @@ export const readItemsV1ItemsGetInfiniteOptions = (options?: Options<ReadItemsV1
         });
         return data;
     },
-    queryKey: readItemsV1ItemsGetInfiniteQueryKey(options)
+    queryKey: adminReadUsersV1AdminUsersGetInfiniteQueryKey(options)
 });
 
 /**
- * Create Item
+ * 创建用户（管理员）
  *
- * Create new item.
- *
- * Requires item:create permission.
+ * 管理员创建工程师或 PM 账号，支持设置角色和工资字段
  */
-export const createItemV1ItemsPostMutation = (options?: Partial<Options<CreateItemV1ItemsPostData>>): UseMutationOptions<CreateItemV1ItemsPostResponse, CreateItemV1ItemsPostError, Options<CreateItemV1ItemsPostData>> => {
-    const mutationOptions: UseMutationOptions<CreateItemV1ItemsPostResponse, CreateItemV1ItemsPostError, Options<CreateItemV1ItemsPostData>> = {
+export const adminCreateUserV1AdminUsersPostMutation = (options?: Partial<Options<AdminCreateUserV1AdminUsersPostData>>): UseMutationOptions<AdminCreateUserV1AdminUsersPostResponse, AdminCreateUserV1AdminUsersPostError, Options<AdminCreateUserV1AdminUsersPostData>> => {
+    const mutationOptions: UseMutationOptions<AdminCreateUserV1AdminUsersPostResponse, AdminCreateUserV1AdminUsersPostError, Options<AdminCreateUserV1AdminUsersPostData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await createItemV1ItemsPost({
+            const { data } = await adminCreateUserV1AdminUsersPost({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -619,41 +611,16 @@ export const createItemV1ItemsPostMutation = (options?: Partial<Options<CreateIt
     return mutationOptions;
 };
 
-/**
- * Delete Item
- *
- * Delete an item.
- *
- * - Regular users can only delete their own items (requires item:delete permission)
- * - Users with item:admin permission can delete any item
- */
-export const deleteItemV1ItemsItemIdDeleteMutation = (options?: Partial<Options<DeleteItemV1ItemsItemIdDeleteData>>): UseMutationOptions<DeleteItemV1ItemsItemIdDeleteResponse, DeleteItemV1ItemsItemIdDeleteError, Options<DeleteItemV1ItemsItemIdDeleteData>> => {
-    const mutationOptions: UseMutationOptions<DeleteItemV1ItemsItemIdDeleteResponse, DeleteItemV1ItemsItemIdDeleteError, Options<DeleteItemV1ItemsItemIdDeleteData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await deleteItemV1ItemsItemIdDelete({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const readItemV1ItemsItemIdGetQueryKey = (options: Options<ReadItemV1ItemsItemIdGetData>) => createQueryKey('readItemV1ItemsItemIdGet', options);
+export const adminReadUserV1AdminUsersUserIdGetQueryKey = (options: Options<AdminReadUserV1AdminUsersUserIdGetData>) => createQueryKey('adminReadUserV1AdminUsersUserIdGet', options);
 
 /**
- * Read Item
+ * 获取用户详情（管理员）
  *
- * Get item by ID.
- *
- * - Regular users can only view their own items
- * - Users with item:admin permission can view any item
+ * 管理员获取指定用户的详细信息，包含工资字段
  */
-export const readItemV1ItemsItemIdGetOptions = (options: Options<ReadItemV1ItemsItemIdGetData>) => queryOptions<ReadItemV1ItemsItemIdGetResponse, ReadItemV1ItemsItemIdGetError, ReadItemV1ItemsItemIdGetResponse, ReturnType<typeof readItemV1ItemsItemIdGetQueryKey>>({
+export const adminReadUserV1AdminUsersUserIdGetOptions = (options: Options<AdminReadUserV1AdminUsersUserIdGetData>) => queryOptions<AdminReadUserV1AdminUsersUserIdGetResponse, AdminReadUserV1AdminUsersUserIdGetError, AdminReadUserV1AdminUsersUserIdGetResponse, ReturnType<typeof adminReadUserV1AdminUsersUserIdGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readItemV1ItemsItemIdGet({
+        const { data } = await adminReadUserV1AdminUsersUserIdGet({
             ...options,
             ...queryKey[0],
             signal,
@@ -661,21 +628,18 @@ export const readItemV1ItemsItemIdGetOptions = (options: Options<ReadItemV1Items
         });
         return data;
     },
-    queryKey: readItemV1ItemsItemIdGetQueryKey(options)
+    queryKey: adminReadUserV1AdminUsersUserIdGetQueryKey(options)
 });
 
 /**
- * Update Item
+ * 更新用户信息（管理员）
  *
- * Update an item.
- *
- * - Regular users can only update their own items (requires item:update permission)
- * - Users with item:admin permission can update any item
+ * 管理员更新用户信息，包括角色、工资字段等
  */
-export const updateItemV1ItemsItemIdPutMutation = (options?: Partial<Options<UpdateItemV1ItemsItemIdPutData>>): UseMutationOptions<UpdateItemV1ItemsItemIdPutResponse, UpdateItemV1ItemsItemIdPutError, Options<UpdateItemV1ItemsItemIdPutData>> => {
-    const mutationOptions: UseMutationOptions<UpdateItemV1ItemsItemIdPutResponse, UpdateItemV1ItemsItemIdPutError, Options<UpdateItemV1ItemsItemIdPutData>> = {
+export const adminUpdateUserV1AdminUsersUserIdPatchMutation = (options?: Partial<Options<AdminUpdateUserV1AdminUsersUserIdPatchData>>): UseMutationOptions<AdminUpdateUserV1AdminUsersUserIdPatchResponse, AdminUpdateUserV1AdminUsersUserIdPatchError, Options<AdminUpdateUserV1AdminUsersUserIdPatchData>> => {
+    const mutationOptions: UseMutationOptions<AdminUpdateUserV1AdminUsersUserIdPatchResponse, AdminUpdateUserV1AdminUsersUserIdPatchError, Options<AdminUpdateUserV1AdminUsersUserIdPatchData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await updateItemV1ItemsItemIdPut({
+            const { data } = await adminUpdateUserV1AdminUsersUserIdPatch({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -685,3 +649,1312 @@ export const updateItemV1ItemsItemIdPutMutation = (options?: Partial<Options<Upd
     };
     return mutationOptions;
 };
+
+/**
+ * 启用/禁用用户（管理员）
+ *
+ * 管理员启用或禁用指定用户账号
+ */
+export const adminToggleUserActiveV1AdminUsersUserIdToggleActivePostMutation = (options?: Partial<Options<AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostData>>): UseMutationOptions<AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponse, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostError, Options<AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostData>> => {
+    const mutationOptions: UseMutationOptions<AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponse, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostError, Options<AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await adminToggleUserActiveV1AdminUsersUserIdToggleActivePost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 重置用户密码（管理员）
+ *
+ * 管理员重置指定用户的密码
+ */
+export const adminResetPasswordV1AdminUsersUserIdResetPasswordPostMutation = (options?: Partial<Options<AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData>>): UseMutationOptions<AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostError, Options<AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData>> => {
+    const mutationOptions: UseMutationOptions<AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostError, Options<AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await adminResetPasswordV1AdminUsersUserIdResetPasswordPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 设置 PM 客资参数（管理员）
+ *
+ * 管理员设置 PM 的基准客资数（baseline_client_count）
+ */
+export const adminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutMutation = (options?: Partial<Options<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData>>): UseMutationOptions<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutError, Options<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData>> => {
+    const mutationOptions: UseMutationOptions<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutError, Options<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await adminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPut({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const adminReadAuditLogsV1AdminAuditLogsGetQueryKey = (options?: Options<AdminReadAuditLogsV1AdminAuditLogsGetData>) => createQueryKey('adminReadAuditLogsV1AdminAuditLogsGet', options);
+
+/**
+ * 查看操作日志（管理员）
+ *
+ * 管理员查看系统操作审计日志
+ */
+export const adminReadAuditLogsV1AdminAuditLogsGetOptions = (options?: Options<AdminReadAuditLogsV1AdminAuditLogsGetData>) => queryOptions<AdminReadAuditLogsV1AdminAuditLogsGetResponse, AdminReadAuditLogsV1AdminAuditLogsGetError, AdminReadAuditLogsV1AdminAuditLogsGetResponse, ReturnType<typeof adminReadAuditLogsV1AdminAuditLogsGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await adminReadAuditLogsV1AdminAuditLogsGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: adminReadAuditLogsV1AdminAuditLogsGetQueryKey(options)
+});
+
+export const adminReadAuditLogsV1AdminAuditLogsGetInfiniteQueryKey = (options?: Options<AdminReadAuditLogsV1AdminAuditLogsGetData>): QueryKey<Options<AdminReadAuditLogsV1AdminAuditLogsGetData>> => createQueryKey('adminReadAuditLogsV1AdminAuditLogsGet', options, true);
+
+/**
+ * 查看操作日志（管理员）
+ *
+ * 管理员查看系统操作审计日志
+ */
+export const adminReadAuditLogsV1AdminAuditLogsGetInfiniteOptions = (options?: Options<AdminReadAuditLogsV1AdminAuditLogsGetData>) => infiniteQueryOptions<AdminReadAuditLogsV1AdminAuditLogsGetResponse, AdminReadAuditLogsV1AdminAuditLogsGetError, InfiniteData<AdminReadAuditLogsV1AdminAuditLogsGetResponse>, QueryKey<Options<AdminReadAuditLogsV1AdminAuditLogsGetData>>, number | Pick<QueryKey<Options<AdminReadAuditLogsV1AdminAuditLogsGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<AdminReadAuditLogsV1AdminAuditLogsGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await adminReadAuditLogsV1AdminAuditLogsGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: adminReadAuditLogsV1AdminAuditLogsGetInfiniteQueryKey(options)
+});
+
+export const readTasksV1TasksGetQueryKey = (options?: Options<ReadTasksV1TasksGetData>) => createQueryKey('readTasksV1TasksGet', options);
+
+/**
+ * 查看任务列表
+ *
+ * PM 查看自己的任务列表，管理员可查看所有任务
+ */
+export const readTasksV1TasksGetOptions = (options?: Options<ReadTasksV1TasksGetData>) => queryOptions<ReadTasksV1TasksGetResponse, ReadTasksV1TasksGetError, ReadTasksV1TasksGetResponse, ReturnType<typeof readTasksV1TasksGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readTasksV1TasksGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readTasksV1TasksGetQueryKey(options)
+});
+
+export const readTasksV1TasksGetInfiniteQueryKey = (options?: Options<ReadTasksV1TasksGetData>): QueryKey<Options<ReadTasksV1TasksGetData>> => createQueryKey('readTasksV1TasksGet', options, true);
+
+/**
+ * 查看任务列表
+ *
+ * PM 查看自己的任务列表，管理员可查看所有任务
+ */
+export const readTasksV1TasksGetInfiniteOptions = (options?: Options<ReadTasksV1TasksGetData>) => infiniteQueryOptions<ReadTasksV1TasksGetResponse, ReadTasksV1TasksGetError, InfiniteData<ReadTasksV1TasksGetResponse>, QueryKey<Options<ReadTasksV1TasksGetData>>, number | Pick<QueryKey<Options<ReadTasksV1TasksGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ReadTasksV1TasksGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await readTasksV1TasksGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readTasksV1TasksGetInfiniteQueryKey(options)
+});
+
+/**
+ * 创建任务（PM）
+ *
+ * PM 创建新任务，初始状态为 'unconfirmed'，等待管理员审核
+ */
+export const createTaskV1TasksPostMutation = (options?: Partial<Options<CreateTaskV1TasksPostData>>): UseMutationOptions<CreateTaskV1TasksPostResponse, CreateTaskV1TasksPostError, Options<CreateTaskV1TasksPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateTaskV1TasksPostResponse, CreateTaskV1TasksPostError, Options<CreateTaskV1TasksPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createTaskV1TasksPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 删除任务
+ *
+ * 删除任务（仅管理员或超管）
+ */
+export const deleteTaskV1TasksTaskIdDeleteMutation = (options?: Partial<Options<DeleteTaskV1TasksTaskIdDeleteData>>): UseMutationOptions<DeleteTaskV1TasksTaskIdDeleteResponse, DeleteTaskV1TasksTaskIdDeleteError, Options<DeleteTaskV1TasksTaskIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteTaskV1TasksTaskIdDeleteResponse, DeleteTaskV1TasksTaskIdDeleteError, Options<DeleteTaskV1TasksTaskIdDeleteData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteTaskV1TasksTaskIdDelete({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readTaskV1TasksTaskIdGetQueryKey = (options: Options<ReadTaskV1TasksTaskIdGetData>) => createQueryKey('readTaskV1TasksTaskIdGet', options);
+
+/**
+ * 查看任务详情
+ *
+ * 查看指定任务的详细信息
+ */
+export const readTaskV1TasksTaskIdGetOptions = (options: Options<ReadTaskV1TasksTaskIdGetData>) => queryOptions<ReadTaskV1TasksTaskIdGetResponse, ReadTaskV1TasksTaskIdGetError, ReadTaskV1TasksTaskIdGetResponse, ReturnType<typeof readTaskV1TasksTaskIdGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readTaskV1TasksTaskIdGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readTaskV1TasksTaskIdGetQueryKey(options)
+});
+
+/**
+ * 更新任务（PM）
+ *
+ * PM 更新任务信息，仅 'unconfirmed' 状态可编辑
+ */
+export const updateTaskV1TasksTaskIdPutMutation = (options?: Partial<Options<UpdateTaskV1TasksTaskIdPutData>>): UseMutationOptions<UpdateTaskV1TasksTaskIdPutResponse, UpdateTaskV1TasksTaskIdPutError, Options<UpdateTaskV1TasksTaskIdPutData>> => {
+    const mutationOptions: UseMutationOptions<UpdateTaskV1TasksTaskIdPutResponse, UpdateTaskV1TasksTaskIdPutError, Options<UpdateTaskV1TasksTaskIdPutData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateTaskV1TasksTaskIdPut({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 审核通过任务（管理员）
+ *
+ * 管理员审核通过任务，状态变为 'confirmed_unpublished'
+ */
+export const approveTaskV1TasksTaskIdApprovePostMutation = (options?: Partial<Options<ApproveTaskV1TasksTaskIdApprovePostData>>): UseMutationOptions<ApproveTaskV1TasksTaskIdApprovePostResponse, ApproveTaskV1TasksTaskIdApprovePostError, Options<ApproveTaskV1TasksTaskIdApprovePostData>> => {
+    const mutationOptions: UseMutationOptions<ApproveTaskV1TasksTaskIdApprovePostResponse, ApproveTaskV1TasksTaskIdApprovePostError, Options<ApproveTaskV1TasksTaskIdApprovePostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await approveTaskV1TasksTaskIdApprovePost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 驳回任务（管理员）
+ *
+ * 管理员驳回任务，状态保持 'unconfirmed'
+ */
+export const rejectTaskV1TasksTaskIdRejectPostMutation = (options?: Partial<Options<RejectTaskV1TasksTaskIdRejectPostData>>): UseMutationOptions<RejectTaskV1TasksTaskIdRejectPostResponse, RejectTaskV1TasksTaskIdRejectPostError, Options<RejectTaskV1TasksTaskIdRejectPostData>> => {
+    const mutationOptions: UseMutationOptions<RejectTaskV1TasksTaskIdRejectPostResponse, RejectTaskV1TasksTaskIdRejectPostError, Options<RejectTaskV1TasksTaskIdRejectPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await rejectTaskV1TasksTaskIdRejectPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 发布任务到竞价池（管理员）
+ *
+ * 管理员发布任务到竞价池，状态变为 'bidding'
+ */
+export const publishTaskV1TasksTaskIdPublishPostMutation = (options?: Partial<Options<PublishTaskV1TasksTaskIdPublishPostData>>): UseMutationOptions<PublishTaskV1TasksTaskIdPublishPostResponse, PublishTaskV1TasksTaskIdPublishPostError, Options<PublishTaskV1TasksTaskIdPublishPostData>> => {
+    const mutationOptions: UseMutationOptions<PublishTaskV1TasksTaskIdPublishPostResponse, PublishTaskV1TasksTaskIdPublishPostError, Options<PublishTaskV1TasksTaskIdPublishPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await publishTaskV1TasksTaskIdPublishPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 转换为紧急任务（管理员）
+ *
+ * 管理员将任务类型转换为 'urgent'
+ */
+export const convertToUrgentV1TasksTaskIdConvertUrgentPostMutation = (options?: Partial<Options<ConvertToUrgentV1TasksTaskIdConvertUrgentPostData>>): UseMutationOptions<ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponse, ConvertToUrgentV1TasksTaskIdConvertUrgentPostError, Options<ConvertToUrgentV1TasksTaskIdConvertUrgentPostData>> => {
+    const mutationOptions: UseMutationOptions<ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponse, ConvertToUrgentV1TasksTaskIdConvertUrgentPostError, Options<ConvertToUrgentV1TasksTaskIdConvertUrgentPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await convertToUrgentV1TasksTaskIdConvertUrgentPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 转换为便捷任务（管理员）
+ *
+ * 管理员将任务类型转换为 'convenient'
+ */
+export const convertToConvenientV1TasksTaskIdConvertConvenientPostMutation = (options?: Partial<Options<ConvertToConvenientV1TasksTaskIdConvertConvenientPostData>>): UseMutationOptions<ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponse, ConvertToConvenientV1TasksTaskIdConvertConvenientPostError, Options<ConvertToConvenientV1TasksTaskIdConvertConvenientPostData>> => {
+    const mutationOptions: UseMutationOptions<ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponse, ConvertToConvenientV1TasksTaskIdConvertConvenientPostError, Options<ConvertToConvenientV1TasksTaskIdConvertConvenientPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await convertToConvenientV1TasksTaskIdConvertConvenientPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 审批暂停（管理员）
+ *
+ * 管理员审批确认任务暂停，状态从 PAUSE_REQUESTED 变为 PAUSED
+ */
+export const pauseApproveTaskV1TasksTaskIdPauseApprovePostMutation = (options?: Partial<Options<PauseApproveTaskV1TasksTaskIdPauseApprovePostData>>): UseMutationOptions<PauseApproveTaskV1TasksTaskIdPauseApprovePostResponse, PauseApproveTaskV1TasksTaskIdPauseApprovePostError, Options<PauseApproveTaskV1TasksTaskIdPauseApprovePostData>> => {
+    const mutationOptions: UseMutationOptions<PauseApproveTaskV1TasksTaskIdPauseApprovePostResponse, PauseApproveTaskV1TasksTaskIdPauseApprovePostError, Options<PauseApproveTaskV1TasksTaskIdPauseApprovePostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await pauseApproveTaskV1TasksTaskIdPauseApprovePost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 驳回暂停（管理员）
+ *
+ * 管理员驳回工程师的暂停申请，状态回到 IN_PROGRESS
+ */
+export const pauseRejectTaskV1TasksTaskIdPauseRejectPostMutation = (options?: Partial<Options<PauseRejectTaskV1TasksTaskIdPauseRejectPostData>>): UseMutationOptions<PauseRejectTaskV1TasksTaskIdPauseRejectPostResponse, PauseRejectTaskV1TasksTaskIdPauseRejectPostError, Options<PauseRejectTaskV1TasksTaskIdPauseRejectPostData>> => {
+    const mutationOptions: UseMutationOptions<PauseRejectTaskV1TasksTaskIdPauseRejectPostResponse, PauseRejectTaskV1TasksTaskIdPauseRejectPostError, Options<PauseRejectTaskV1TasksTaskIdPauseRejectPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await pauseRejectTaskV1TasksTaskIdPauseRejectPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 改派任务（管理员）
+ *
+ * 管理员将任务改派给其他工程师，状态变为待开工
+ */
+export const reassignTaskV1TasksTaskIdReassignPostMutation = (options?: Partial<Options<ReassignTaskV1TasksTaskIdReassignPostData>>): UseMutationOptions<ReassignTaskV1TasksTaskIdReassignPostResponse, ReassignTaskV1TasksTaskIdReassignPostError, Options<ReassignTaskV1TasksTaskIdReassignPostData>> => {
+    const mutationOptions: UseMutationOptions<ReassignTaskV1TasksTaskIdReassignPostResponse, ReassignTaskV1TasksTaskIdReassignPostError, Options<ReassignTaskV1TasksTaskIdReassignPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await reassignTaskV1TasksTaskIdReassignPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 启动任务
+ *
+ * 工程师启动待开工的任务，状态从 PENDING_START 变为 IN_PROGRESS
+ */
+export const startTaskV1TasksTaskIdStartPostMutation = (options?: Partial<Options<StartTaskV1TasksTaskIdStartPostData>>): UseMutationOptions<StartTaskV1TasksTaskIdStartPostResponse, StartTaskV1TasksTaskIdStartPostError, Options<StartTaskV1TasksTaskIdStartPostData>> => {
+    const mutationOptions: UseMutationOptions<StartTaskV1TasksTaskIdStartPostResponse, StartTaskV1TasksTaskIdStartPostError, Options<StartTaskV1TasksTaskIdStartPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await startTaskV1TasksTaskIdStartPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 拒绝任务
+ *
+ * 工程师拒绝待开工的任务，任务重新进入竞价
+ */
+export const declineTaskV1TasksTaskIdDeclinePostMutation = (options?: Partial<Options<DeclineTaskV1TasksTaskIdDeclinePostData>>): UseMutationOptions<DeclineTaskV1TasksTaskIdDeclinePostResponse, DeclineTaskV1TasksTaskIdDeclinePostError, Options<DeclineTaskV1TasksTaskIdDeclinePostData>> => {
+    const mutationOptions: UseMutationOptions<DeclineTaskV1TasksTaskIdDeclinePostResponse, DeclineTaskV1TasksTaskIdDeclinePostError, Options<DeclineTaskV1TasksTaskIdDeclinePostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await declineTaskV1TasksTaskIdDeclinePost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 申请暂停
+ *
+ * 工程师申请暂停正在进行的任务
+ */
+export const pauseRequestTaskV1TasksTaskIdPauseRequestPostMutation = (options?: Partial<Options<PauseRequestTaskV1TasksTaskIdPauseRequestPostData>>): UseMutationOptions<PauseRequestTaskV1TasksTaskIdPauseRequestPostResponse, PauseRequestTaskV1TasksTaskIdPauseRequestPostError, Options<PauseRequestTaskV1TasksTaskIdPauseRequestPostData>> => {
+    const mutationOptions: UseMutationOptions<PauseRequestTaskV1TasksTaskIdPauseRequestPostResponse, PauseRequestTaskV1TasksTaskIdPauseRequestPostError, Options<PauseRequestTaskV1TasksTaskIdPauseRequestPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await pauseRequestTaskV1TasksTaskIdPauseRequestPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 恢复任务
+ *
+ * 工程师恢复暂停的任务
+ */
+export const resumeTaskV1TasksTaskIdResumePostMutation = (options?: Partial<Options<ResumeTaskV1TasksTaskIdResumePostData>>): UseMutationOptions<ResumeTaskV1TasksTaskIdResumePostResponse, ResumeTaskV1TasksTaskIdResumePostError, Options<ResumeTaskV1TasksTaskIdResumePostData>> => {
+    const mutationOptions: UseMutationOptions<ResumeTaskV1TasksTaskIdResumePostResponse, ResumeTaskV1TasksTaskIdResumePostError, Options<ResumeTaskV1TasksTaskIdResumePostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await resumeTaskV1TasksTaskIdResumePost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 完成任务
+ *
+ * 工程师标记任务完成，填写实际工时
+ */
+export const completeTaskV1TasksTaskIdCompletePostMutation = (options?: Partial<Options<CompleteTaskV1TasksTaskIdCompletePostData>>): UseMutationOptions<CompleteTaskV1TasksTaskIdCompletePostResponse, CompleteTaskV1TasksTaskIdCompletePostError, Options<CompleteTaskV1TasksTaskIdCompletePostData>> => {
+    const mutationOptions: UseMutationOptions<CompleteTaskV1TasksTaskIdCompletePostResponse, CompleteTaskV1TasksTaskIdCompletePostError, Options<CompleteTaskV1TasksTaskIdCompletePostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await completeTaskV1TasksTaskIdCompletePost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readBidsByTaskV1TasksTaskIdBidsGetQueryKey = (options: Options<ReadBidsByTaskV1TasksTaskIdBidsGetData>) => createQueryKey('readBidsByTaskV1TasksTaskIdBidsGet', options);
+
+/**
+ * 查看任务的竞价报价列表
+ *
+ * 查看指定任务的所有竞价报价
+ */
+export const readBidsByTaskV1TasksTaskIdBidsGetOptions = (options: Options<ReadBidsByTaskV1TasksTaskIdBidsGetData>) => queryOptions<ReadBidsByTaskV1TasksTaskIdBidsGetResponse, ReadBidsByTaskV1TasksTaskIdBidsGetError, ReadBidsByTaskV1TasksTaskIdBidsGetResponse, ReturnType<typeof readBidsByTaskV1TasksTaskIdBidsGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readBidsByTaskV1TasksTaskIdBidsGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readBidsByTaskV1TasksTaskIdBidsGetQueryKey(options)
+});
+
+/**
+ * 提交竞价报价（工程师）
+ *
+ * 工程师对竞价中的任务提交报价
+ */
+export const createBidV1TasksTaskIdBidsPostMutation = (options?: Partial<Options<CreateBidV1TasksTaskIdBidsPostData>>): UseMutationOptions<CreateBidV1TasksTaskIdBidsPostResponse, CreateBidV1TasksTaskIdBidsPostError, Options<CreateBidV1TasksTaskIdBidsPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateBidV1TasksTaskIdBidsPostResponse, CreateBidV1TasksTaskIdBidsPostError, Options<CreateBidV1TasksTaskIdBidsPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createBidV1TasksTaskIdBidsPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 修改竞价报价（工程师）
+ *
+ * 工程师修改自己的报价
+ */
+export const updateBidV1TasksTaskIdBidsBidIdPutMutation = (options?: Partial<Options<UpdateBidV1TasksTaskIdBidsBidIdPutData>>): UseMutationOptions<UpdateBidV1TasksTaskIdBidsBidIdPutResponse, UpdateBidV1TasksTaskIdBidsBidIdPutError, Options<UpdateBidV1TasksTaskIdBidsBidIdPutData>> => {
+    const mutationOptions: UseMutationOptions<UpdateBidV1TasksTaskIdBidsBidIdPutResponse, UpdateBidV1TasksTaskIdBidsBidIdPutError, Options<UpdateBidV1TasksTaskIdBidsBidIdPutData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateBidV1TasksTaskIdBidsBidIdPut({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readMyBidsV1BidsMyGetQueryKey = (options?: Options<ReadMyBidsV1BidsMyGetData>) => createQueryKey('readMyBidsV1BidsMyGet', options);
+
+/**
+ * 查看我的竞价报价
+ *
+ * 工程师查看自己提交的所有竞价报价
+ */
+export const readMyBidsV1BidsMyGetOptions = (options?: Options<ReadMyBidsV1BidsMyGetData>) => queryOptions<ReadMyBidsV1BidsMyGetResponse, DefaultError, ReadMyBidsV1BidsMyGetResponse, ReturnType<typeof readMyBidsV1BidsMyGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readMyBidsV1BidsMyGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readMyBidsV1BidsMyGetQueryKey(options)
+});
+
+/**
+ * 手动触发竞价结算
+ *
+ * 管理员手动触发竞价结算
+ */
+export const manualSettleBiddingV1TasksTaskIdSettleBiddingPostMutation = (options?: Partial<Options<ManualSettleBiddingV1TasksTaskIdSettleBiddingPostData>>): UseMutationOptions<unknown, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostError, Options<ManualSettleBiddingV1TasksTaskIdSettleBiddingPostData>> => {
+    const mutationOptions: UseMutationOptions<unknown, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostError, Options<ManualSettleBiddingV1TasksTaskIdSettleBiddingPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await manualSettleBiddingV1TasksTaskIdSettleBiddingPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readDailyReportsV1DailyReportsGetQueryKey = (options?: Options<ReadDailyReportsV1DailyReportsGetData>) => createQueryKey('readDailyReportsV1DailyReportsGet', options);
+
+/**
+ * 查看日报列表
+ *
+ * 工程师查看自己的日报列表，PM/管理员查看所有日报
+ */
+export const readDailyReportsV1DailyReportsGetOptions = (options?: Options<ReadDailyReportsV1DailyReportsGetData>) => queryOptions<ReadDailyReportsV1DailyReportsGetResponse, ReadDailyReportsV1DailyReportsGetError, ReadDailyReportsV1DailyReportsGetResponse, ReturnType<typeof readDailyReportsV1DailyReportsGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readDailyReportsV1DailyReportsGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readDailyReportsV1DailyReportsGetQueryKey(options)
+});
+
+export const readDailyReportsV1DailyReportsGetInfiniteQueryKey = (options?: Options<ReadDailyReportsV1DailyReportsGetData>): QueryKey<Options<ReadDailyReportsV1DailyReportsGetData>> => createQueryKey('readDailyReportsV1DailyReportsGet', options, true);
+
+/**
+ * 查看日报列表
+ *
+ * 工程师查看自己的日报列表，PM/管理员查看所有日报
+ */
+export const readDailyReportsV1DailyReportsGetInfiniteOptions = (options?: Options<ReadDailyReportsV1DailyReportsGetData>) => infiniteQueryOptions<ReadDailyReportsV1DailyReportsGetResponse, ReadDailyReportsV1DailyReportsGetError, InfiniteData<ReadDailyReportsV1DailyReportsGetResponse>, QueryKey<Options<ReadDailyReportsV1DailyReportsGetData>>, number | Pick<QueryKey<Options<ReadDailyReportsV1DailyReportsGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ReadDailyReportsV1DailyReportsGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await readDailyReportsV1DailyReportsGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readDailyReportsV1DailyReportsGetInfiniteQueryKey(options)
+});
+
+/**
+ * 填写日报
+ *
+ * 工程师填写日报，记录今日工作时长、进度、阶段等信息
+ */
+export const createDailyReportV1DailyReportsPostMutation = (options?: Partial<Options<CreateDailyReportV1DailyReportsPostData>>): UseMutationOptions<CreateDailyReportV1DailyReportsPostResponse, CreateDailyReportV1DailyReportsPostError, Options<CreateDailyReportV1DailyReportsPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateDailyReportV1DailyReportsPostResponse, CreateDailyReportV1DailyReportsPostError, Options<CreateDailyReportV1DailyReportsPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createDailyReportV1DailyReportsPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getRemindReportV1DailyReportsRemindGetQueryKey = (options?: Options<GetRemindReportV1DailyReportsRemindGetData>) => createQueryKey('getRemindReportV1DailyReportsRemindGet', options);
+
+/**
+ * 查看未提交日报的工程师（管理员）
+ *
+ * 管理员查看今日未提交日报的工程师列表，用于提醒
+ */
+export const getRemindReportV1DailyReportsRemindGetOptions = (options?: Options<GetRemindReportV1DailyReportsRemindGetData>) => queryOptions<GetRemindReportV1DailyReportsRemindGetResponse, DefaultError, GetRemindReportV1DailyReportsRemindGetResponse, ReturnType<typeof getRemindReportV1DailyReportsRemindGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getRemindReportV1DailyReportsRemindGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getRemindReportV1DailyReportsRemindGetQueryKey(options)
+});
+
+/**
+ * 删除日报
+ *
+ * 删除日报（仅管理员或超管）
+ */
+export const deleteDailyReportV1DailyReportsReportIdDeleteMutation = (options?: Partial<Options<DeleteDailyReportV1DailyReportsReportIdDeleteData>>): UseMutationOptions<DeleteDailyReportV1DailyReportsReportIdDeleteResponse, DeleteDailyReportV1DailyReportsReportIdDeleteError, Options<DeleteDailyReportV1DailyReportsReportIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteDailyReportV1DailyReportsReportIdDeleteResponse, DeleteDailyReportV1DailyReportsReportIdDeleteError, Options<DeleteDailyReportV1DailyReportsReportIdDeleteData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteDailyReportV1DailyReportsReportIdDelete({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readDailyReportV1DailyReportsReportIdGetQueryKey = (options: Options<ReadDailyReportV1DailyReportsReportIdGetData>) => createQueryKey('readDailyReportV1DailyReportsReportIdGet', options);
+
+/**
+ * 查看日报详情
+ *
+ * 查看指定日报的详细信息
+ */
+export const readDailyReportV1DailyReportsReportIdGetOptions = (options: Options<ReadDailyReportV1DailyReportsReportIdGetData>) => queryOptions<ReadDailyReportV1DailyReportsReportIdGetResponse, ReadDailyReportV1DailyReportsReportIdGetError, ReadDailyReportV1DailyReportsReportIdGetResponse, ReturnType<typeof readDailyReportV1DailyReportsReportIdGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readDailyReportV1DailyReportsReportIdGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readDailyReportV1DailyReportsReportIdGetQueryKey(options)
+});
+
+/**
+ * 更新日报
+ *
+ * 工程师更新自己的日报
+ */
+export const updateDailyReportV1DailyReportsReportIdPutMutation = (options?: Partial<Options<UpdateDailyReportV1DailyReportsReportIdPutData>>): UseMutationOptions<UpdateDailyReportV1DailyReportsReportIdPutResponse, UpdateDailyReportV1DailyReportsReportIdPutError, Options<UpdateDailyReportV1DailyReportsReportIdPutData>> => {
+    const mutationOptions: UseMutationOptions<UpdateDailyReportV1DailyReportsReportIdPutResponse, UpdateDailyReportV1DailyReportsReportIdPutError, Options<UpdateDailyReportV1DailyReportsReportIdPutData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateDailyReportV1DailyReportsReportIdPut({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readMyStarpointsV1StarpointsMyGetQueryKey = (options?: Options<ReadMyStarpointsV1StarpointsMyGetData>) => createQueryKey('readMyStarpointsV1StarpointsMyGet', options);
+
+/**
+ * 查看我的星点记录
+ *
+ * 工程师查看自己的星点变化明细记录
+ */
+export const readMyStarpointsV1StarpointsMyGetOptions = (options?: Options<ReadMyStarpointsV1StarpointsMyGetData>) => queryOptions<ReadMyStarpointsV1StarpointsMyGetResponse, ReadMyStarpointsV1StarpointsMyGetError, ReadMyStarpointsV1StarpointsMyGetResponse, ReturnType<typeof readMyStarpointsV1StarpointsMyGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readMyStarpointsV1StarpointsMyGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readMyStarpointsV1StarpointsMyGetQueryKey(options)
+});
+
+export const readMyStarpointsV1StarpointsMyGetInfiniteQueryKey = (options?: Options<ReadMyStarpointsV1StarpointsMyGetData>): QueryKey<Options<ReadMyStarpointsV1StarpointsMyGetData>> => createQueryKey('readMyStarpointsV1StarpointsMyGet', options, true);
+
+/**
+ * 查看我的星点记录
+ *
+ * 工程师查看自己的星点变化明细记录
+ */
+export const readMyStarpointsV1StarpointsMyGetInfiniteOptions = (options?: Options<ReadMyStarpointsV1StarpointsMyGetData>) => infiniteQueryOptions<ReadMyStarpointsV1StarpointsMyGetResponse, ReadMyStarpointsV1StarpointsMyGetError, InfiniteData<ReadMyStarpointsV1StarpointsMyGetResponse>, QueryKey<Options<ReadMyStarpointsV1StarpointsMyGetData>>, number | Pick<QueryKey<Options<ReadMyStarpointsV1StarpointsMyGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ReadMyStarpointsV1StarpointsMyGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await readMyStarpointsV1StarpointsMyGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readMyStarpointsV1StarpointsMyGetInfiniteQueryKey(options)
+});
+
+export const readMyStarpointSummaryV1StarpointsMySummaryGetQueryKey = (options?: Options<ReadMyStarpointSummaryV1StarpointsMySummaryGetData>) => createQueryKey('readMyStarpointSummaryV1StarpointsMySummaryGet', options);
+
+/**
+ * 查看我的星点汇总
+ *
+ * 工程师查看自己的星点汇总信息（总数、排名、K系数）
+ */
+export const readMyStarpointSummaryV1StarpointsMySummaryGetOptions = (options?: Options<ReadMyStarpointSummaryV1StarpointsMySummaryGetData>) => queryOptions<ReadMyStarpointSummaryV1StarpointsMySummaryGetResponse, DefaultError, ReadMyStarpointSummaryV1StarpointsMySummaryGetResponse, ReturnType<typeof readMyStarpointSummaryV1StarpointsMySummaryGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readMyStarpointSummaryV1StarpointsMySummaryGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readMyStarpointSummaryV1StarpointsMySummaryGetQueryKey(options)
+});
+
+export const readStarpointLeaderboardV1StarpointsLeaderboardGetQueryKey = (options?: Options<ReadStarpointLeaderboardV1StarpointsLeaderboardGetData>) => createQueryKey('readStarpointLeaderboardV1StarpointsLeaderboardGet', options);
+
+/**
+ * 星点排行榜
+ *
+ * 查看所有工程师的星点排行榜（需 starpoint:admin 权限）
+ */
+export const readStarpointLeaderboardV1StarpointsLeaderboardGetOptions = (options?: Options<ReadStarpointLeaderboardV1StarpointsLeaderboardGetData>) => queryOptions<ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponse, ReadStarpointLeaderboardV1StarpointsLeaderboardGetError, ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponse, ReturnType<typeof readStarpointLeaderboardV1StarpointsLeaderboardGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readStarpointLeaderboardV1StarpointsLeaderboardGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readStarpointLeaderboardV1StarpointsLeaderboardGetQueryKey(options)
+});
+
+/**
+ * 手动调整星点（管理员）
+ *
+ * 管理员手动调整工程师的星点
+ */
+export const adjustStarpointV1StarpointsAdjustPostMutation = (options?: Partial<Options<AdjustStarpointV1StarpointsAdjustPostData>>): UseMutationOptions<AdjustStarpointV1StarpointsAdjustPostResponse, AdjustStarpointV1StarpointsAdjustPostError, Options<AdjustStarpointV1StarpointsAdjustPostData>> => {
+    const mutationOptions: UseMutationOptions<AdjustStarpointV1StarpointsAdjustPostResponse, AdjustStarpointV1StarpointsAdjustPostError, Options<AdjustStarpointV1StarpointsAdjustPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await adjustStarpointV1StarpointsAdjustPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readMySalaryV1SalariesMyGetQueryKey = (options?: Options<ReadMySalaryV1SalariesMyGetData>) => createQueryKey('readMySalaryV1SalariesMyGet', options);
+
+/**
+ * 查看我的工资试算
+ *
+ * 工程师或 PM 查看自己的工资试算结果
+ */
+export const readMySalaryV1SalariesMyGetOptions = (options?: Options<ReadMySalaryV1SalariesMyGetData>) => queryOptions<ReadMySalaryV1SalariesMyGetResponse, DefaultError, ReadMySalaryV1SalariesMyGetResponse, ReturnType<typeof readMySalaryV1SalariesMyGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readMySalaryV1SalariesMyGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readMySalaryV1SalariesMyGetQueryKey(options)
+});
+
+export const readSalarySummaryV1SalariesGetQueryKey = (options?: Options<ReadSalarySummaryV1SalariesGetData>) => createQueryKey('readSalarySummaryV1SalariesGet', options);
+
+/**
+ * 查看工资汇总（管理员）
+ *
+ * 管理员查看所有工程师和 PM 的工资汇总
+ */
+export const readSalarySummaryV1SalariesGetOptions = (options?: Options<ReadSalarySummaryV1SalariesGetData>) => queryOptions<ReadSalarySummaryV1SalariesGetResponse, ReadSalarySummaryV1SalariesGetError, ReadSalarySummaryV1SalariesGetResponse, ReturnType<typeof readSalarySummaryV1SalariesGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readSalarySummaryV1SalariesGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readSalarySummaryV1SalariesGetQueryKey(options)
+});
+
+export const readSalarySummaryV1SalariesGetInfiniteQueryKey = (options?: Options<ReadSalarySummaryV1SalariesGetData>): QueryKey<Options<ReadSalarySummaryV1SalariesGetData>> => createQueryKey('readSalarySummaryV1SalariesGet', options, true);
+
+/**
+ * 查看工资汇总（管理员）
+ *
+ * 管理员查看所有工程师和 PM 的工资汇总
+ */
+export const readSalarySummaryV1SalariesGetInfiniteOptions = (options?: Options<ReadSalarySummaryV1SalariesGetData>) => infiniteQueryOptions<ReadSalarySummaryV1SalariesGetResponse, ReadSalarySummaryV1SalariesGetError, InfiniteData<ReadSalarySummaryV1SalariesGetResponse>, QueryKey<Options<ReadSalarySummaryV1SalariesGetData>>, number | Pick<QueryKey<Options<ReadSalarySummaryV1SalariesGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ReadSalarySummaryV1SalariesGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await readSalarySummaryV1SalariesGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readSalarySummaryV1SalariesGetInfiniteQueryKey(options)
+});
+
+/**
+ * 设置工资参数（管理员）
+ *
+ * 管理员设置工程师或 PM 的工资参数
+ */
+export const updateSalaryParamsV1SalariesUsersUserIdParamsPutMutation = (options?: Partial<Options<UpdateSalaryParamsV1SalariesUsersUserIdParamsPutData>>): UseMutationOptions<UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponse, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutError, Options<UpdateSalaryParamsV1SalariesUsersUserIdParamsPutData>> => {
+    const mutationOptions: UseMutationOptions<UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponse, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutError, Options<UpdateSalaryParamsV1SalariesUsersUserIdParamsPutData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateSalaryParamsV1SalariesUsersUserIdParamsPut({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 导出工资表（管理员）
+ *
+ * 管理员导出全员工资汇总表为 CSV 文件流
+ */
+export const exportSalariesV1SalariesExportPostMutation = (options?: Partial<Options<ExportSalariesV1SalariesExportPostData>>): UseMutationOptions<unknown, ExportSalariesV1SalariesExportPostError, Options<ExportSalariesV1SalariesExportPostData>> => {
+    const mutationOptions: UseMutationOptions<unknown, ExportSalariesV1SalariesExportPostError, Options<ExportSalariesV1SalariesExportPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await exportSalariesV1SalariesExportPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readEngineerDashboardV1DashboardEngineerGetQueryKey = (options?: Options<ReadEngineerDashboardV1DashboardEngineerGetData>) => createQueryKey('readEngineerDashboardV1DashboardEngineerGet', options);
+
+/**
+ * 工程师工作台首页
+ *
+ * 工程师查看自己的工作指标：当前星点、本月剩余工时、收入试算、T报准确率
+ */
+export const readEngineerDashboardV1DashboardEngineerGetOptions = (options?: Options<ReadEngineerDashboardV1DashboardEngineerGetData>) => queryOptions<unknown, DefaultError, unknown, ReturnType<typeof readEngineerDashboardV1DashboardEngineerGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readEngineerDashboardV1DashboardEngineerGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readEngineerDashboardV1DashboardEngineerGetQueryKey(options)
+});
+
+export const readPmDashboardV1DashboardPmGetQueryKey = (options?: Options<ReadPmDashboardV1DashboardPmGetData>) => createQueryKey('readPmDashboardV1DashboardPmGet', options);
+
+/**
+ * PM 工作台首页
+ *
+ * PM 查看自己的工作指标：今日新增客资、本月新增客资、收入试算
+ */
+export const readPmDashboardV1DashboardPmGetOptions = (options?: Options<ReadPmDashboardV1DashboardPmGetData>) => queryOptions<unknown, DefaultError, unknown, ReturnType<typeof readPmDashboardV1DashboardPmGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readPmDashboardV1DashboardPmGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readPmDashboardV1DashboardPmGetQueryKey(options)
+});
+
+export const readAdminDashboardV1DashboardAdminGetQueryKey = (options?: Options<ReadAdminDashboardV1DashboardAdminGetData>) => createQueryKey('readAdminDashboardV1DashboardAdminGet', options);
+
+/**
+ * 管理端数据概览
+ *
+ * 管理员查看全系统数据概览：客资、日志、任务、工程师负载、星点排行榜、收入统计
+ */
+export const readAdminDashboardV1DashboardAdminGetOptions = (options?: Options<ReadAdminDashboardV1DashboardAdminGetData>) => queryOptions<unknown, DefaultError, unknown, ReturnType<typeof readAdminDashboardV1DashboardAdminGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readAdminDashboardV1DashboardAdminGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readAdminDashboardV1DashboardAdminGetQueryKey(options)
+});
+
+export const readRuleAuditLogsV1SystemRulesAuditLogsGetQueryKey = (options?: Options<ReadRuleAuditLogsV1SystemRulesAuditLogsGetData>) => createQueryKey('readRuleAuditLogsV1SystemRulesAuditLogsGet', options);
+
+/**
+ * 查看规则修改历史
+ *
+ * 管理员查看规则配置的修改历史记录
+ */
+export const readRuleAuditLogsV1SystemRulesAuditLogsGetOptions = (options?: Options<ReadRuleAuditLogsV1SystemRulesAuditLogsGetData>) => queryOptions<ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponse, ReadRuleAuditLogsV1SystemRulesAuditLogsGetError, ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponse, ReturnType<typeof readRuleAuditLogsV1SystemRulesAuditLogsGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readRuleAuditLogsV1SystemRulesAuditLogsGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readRuleAuditLogsV1SystemRulesAuditLogsGetQueryKey(options)
+});
+
+export const readRuleAuditLogsV1SystemRulesAuditLogsGetInfiniteQueryKey = (options?: Options<ReadRuleAuditLogsV1SystemRulesAuditLogsGetData>): QueryKey<Options<ReadRuleAuditLogsV1SystemRulesAuditLogsGetData>> => createQueryKey('readRuleAuditLogsV1SystemRulesAuditLogsGet', options, true);
+
+/**
+ * 查看规则修改历史
+ *
+ * 管理员查看规则配置的修改历史记录
+ */
+export const readRuleAuditLogsV1SystemRulesAuditLogsGetInfiniteOptions = (options?: Options<ReadRuleAuditLogsV1SystemRulesAuditLogsGetData>) => infiniteQueryOptions<ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponse, ReadRuleAuditLogsV1SystemRulesAuditLogsGetError, InfiniteData<ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponse>, QueryKey<Options<ReadRuleAuditLogsV1SystemRulesAuditLogsGetData>>, number | Pick<QueryKey<Options<ReadRuleAuditLogsV1SystemRulesAuditLogsGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ReadRuleAuditLogsV1SystemRulesAuditLogsGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await readRuleAuditLogsV1SystemRulesAuditLogsGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readRuleAuditLogsV1SystemRulesAuditLogsGetInfiniteQueryKey(options)
+});
+
+export const readRulesV1SystemRulesGetQueryKey = (options?: Options<ReadRulesV1SystemRulesGetData>) => createQueryKey('readRulesV1SystemRulesGet', options);
+
+/**
+ * 查看规则列表
+ *
+ * 管理员查看所有规则配置，支持按分类过滤
+ */
+export const readRulesV1SystemRulesGetOptions = (options?: Options<ReadRulesV1SystemRulesGetData>) => queryOptions<ReadRulesV1SystemRulesGetResponse, ReadRulesV1SystemRulesGetError, ReadRulesV1SystemRulesGetResponse, ReturnType<typeof readRulesV1SystemRulesGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readRulesV1SystemRulesGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readRulesV1SystemRulesGetQueryKey(options)
+});
+
+export const readRulesV1SystemRulesGetInfiniteQueryKey = (options?: Options<ReadRulesV1SystemRulesGetData>): QueryKey<Options<ReadRulesV1SystemRulesGetData>> => createQueryKey('readRulesV1SystemRulesGet', options, true);
+
+/**
+ * 查看规则列表
+ *
+ * 管理员查看所有规则配置，支持按分类过滤
+ */
+export const readRulesV1SystemRulesGetInfiniteOptions = (options?: Options<ReadRulesV1SystemRulesGetData>) => infiniteQueryOptions<ReadRulesV1SystemRulesGetResponse, ReadRulesV1SystemRulesGetError, InfiniteData<ReadRulesV1SystemRulesGetResponse>, QueryKey<Options<ReadRulesV1SystemRulesGetData>>, number | Pick<QueryKey<Options<ReadRulesV1SystemRulesGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ReadRulesV1SystemRulesGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await readRulesV1SystemRulesGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readRulesV1SystemRulesGetInfiniteQueryKey(options)
+});
+
+/**
+ * 创建规则
+ *
+ * 管理员创建新规则配置
+ */
+export const createRuleV1SystemRulesPostMutation = (options?: Partial<Options<CreateRuleV1SystemRulesPostData>>): UseMutationOptions<CreateRuleV1SystemRulesPostResponse, CreateRuleV1SystemRulesPostError, Options<CreateRuleV1SystemRulesPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateRuleV1SystemRulesPostResponse, CreateRuleV1SystemRulesPostError, Options<CreateRuleV1SystemRulesPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createRuleV1SystemRulesPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * 删除规则
+ *
+ * 管理员删除规则配置
+ */
+export const deleteRuleV1SystemRulesRuleIdDeleteMutation = (options?: Partial<Options<DeleteRuleV1SystemRulesRuleIdDeleteData>>): UseMutationOptions<DeleteRuleV1SystemRulesRuleIdDeleteResponse, DeleteRuleV1SystemRulesRuleIdDeleteError, Options<DeleteRuleV1SystemRulesRuleIdDeleteData>> => {
+    const mutationOptions: UseMutationOptions<DeleteRuleV1SystemRulesRuleIdDeleteResponse, DeleteRuleV1SystemRulesRuleIdDeleteError, Options<DeleteRuleV1SystemRulesRuleIdDeleteData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await deleteRuleV1SystemRulesRuleIdDelete({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readRuleV1SystemRulesRuleIdGetQueryKey = (options: Options<ReadRuleV1SystemRulesRuleIdGetData>) => createQueryKey('readRuleV1SystemRulesRuleIdGet', options);
+
+/**
+ * 查看规则详情
+ *
+ * 管理员查看指定规则的详细信息
+ */
+export const readRuleV1SystemRulesRuleIdGetOptions = (options: Options<ReadRuleV1SystemRulesRuleIdGetData>) => queryOptions<ReadRuleV1SystemRulesRuleIdGetResponse, ReadRuleV1SystemRulesRuleIdGetError, ReadRuleV1SystemRulesRuleIdGetResponse, ReturnType<typeof readRuleV1SystemRulesRuleIdGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readRuleV1SystemRulesRuleIdGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readRuleV1SystemRulesRuleIdGetQueryKey(options)
+});
+
+/**
+ * 更新规则
+ *
+ * 管理员更新规则配置
+ */
+export const updateRuleV1SystemRulesRuleIdPutMutation = (options?: Partial<Options<UpdateRuleV1SystemRulesRuleIdPutData>>): UseMutationOptions<UpdateRuleV1SystemRulesRuleIdPutResponse, UpdateRuleV1SystemRulesRuleIdPutError, Options<UpdateRuleV1SystemRulesRuleIdPutData>> => {
+    const mutationOptions: UseMutationOptions<UpdateRuleV1SystemRulesRuleIdPutResponse, UpdateRuleV1SystemRulesRuleIdPutError, Options<UpdateRuleV1SystemRulesRuleIdPutData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await updateRuleV1SystemRulesRuleIdPut({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readMyClientResourcesV1ClientResourcesGetQueryKey = (options?: Options<ReadMyClientResourcesV1ClientResourcesGetData>) => createQueryKey('readMyClientResourcesV1ClientResourcesGet', options);
+
+/**
+ * 查看客资历史
+ *
+ * PM 查看自己的客资录入历史
+ */
+export const readMyClientResourcesV1ClientResourcesGetOptions = (options?: Options<ReadMyClientResourcesV1ClientResourcesGetData>) => queryOptions<ReadMyClientResourcesV1ClientResourcesGetResponse, ReadMyClientResourcesV1ClientResourcesGetError, ReadMyClientResourcesV1ClientResourcesGetResponse, ReturnType<typeof readMyClientResourcesV1ClientResourcesGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readMyClientResourcesV1ClientResourcesGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readMyClientResourcesV1ClientResourcesGetQueryKey(options)
+});
+
+export const readMyClientResourcesV1ClientResourcesGetInfiniteQueryKey = (options?: Options<ReadMyClientResourcesV1ClientResourcesGetData>): QueryKey<Options<ReadMyClientResourcesV1ClientResourcesGetData>> => createQueryKey('readMyClientResourcesV1ClientResourcesGet', options, true);
+
+/**
+ * 查看客资历史
+ *
+ * PM 查看自己的客资录入历史
+ */
+export const readMyClientResourcesV1ClientResourcesGetInfiniteOptions = (options?: Options<ReadMyClientResourcesV1ClientResourcesGetData>) => infiniteQueryOptions<ReadMyClientResourcesV1ClientResourcesGetResponse, ReadMyClientResourcesV1ClientResourcesGetError, InfiniteData<ReadMyClientResourcesV1ClientResourcesGetResponse>, QueryKey<Options<ReadMyClientResourcesV1ClientResourcesGetData>>, number | Pick<QueryKey<Options<ReadMyClientResourcesV1ClientResourcesGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ReadMyClientResourcesV1ClientResourcesGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await readMyClientResourcesV1ClientResourcesGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readMyClientResourcesV1ClientResourcesGetInfiniteQueryKey(options)
+});
+
+/**
+ * 录入客资
+ *
+ * PM 录入自己的客资数据
+ */
+export const createClientResourceV1ClientResourcesPostMutation = (options?: Partial<Options<CreateClientResourceV1ClientResourcesPostData>>): UseMutationOptions<CreateClientResourceV1ClientResourcesPostResponse, CreateClientResourceV1ClientResourcesPostError, Options<CreateClientResourceV1ClientResourcesPostData>> => {
+    const mutationOptions: UseMutationOptions<CreateClientResourceV1ClientResourcesPostResponse, CreateClientResourceV1ClientResourcesPostError, Options<CreateClientResourceV1ClientResourcesPostData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await createClientResourceV1ClientResourcesPost({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const readAdminClientResourceSummaryV1ClientResourcesAdminGetQueryKey = (options?: Options<ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData>) => createQueryKey('readAdminClientResourceSummaryV1ClientResourcesAdminGet', options);
+
+/**
+ * 管理员查看客资汇总
+ *
+ * 管理员查看所有 PM 的客资数据汇总
+ */
+export const readAdminClientResourceSummaryV1ClientResourcesAdminGetOptions = (options?: Options<ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData>) => queryOptions<ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse, DefaultError, ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse, ReturnType<typeof readAdminClientResourceSummaryV1ClientResourcesAdminGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readAdminClientResourceSummaryV1ClientResourcesAdminGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readAdminClientResourceSummaryV1ClientResourcesAdminGetQueryKey(options)
+});
+
+export const readAllClientResourcesV1ClientResourcesAllGetQueryKey = (options?: Options<ReadAllClientResourcesV1ClientResourcesAllGetData>) => createQueryKey('readAllClientResourcesV1ClientResourcesAllGet', options);
+
+/**
+ * 管理员查看所有客资
+ *
+ * 管理员查看所有 PM 的客资明细记录
+ */
+export const readAllClientResourcesV1ClientResourcesAllGetOptions = (options?: Options<ReadAllClientResourcesV1ClientResourcesAllGetData>) => queryOptions<ReadAllClientResourcesV1ClientResourcesAllGetResponse, ReadAllClientResourcesV1ClientResourcesAllGetError, ReadAllClientResourcesV1ClientResourcesAllGetResponse, ReturnType<typeof readAllClientResourcesV1ClientResourcesAllGetQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await readAllClientResourcesV1ClientResourcesAllGet({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readAllClientResourcesV1ClientResourcesAllGetQueryKey(options)
+});
+
+export const readAllClientResourcesV1ClientResourcesAllGetInfiniteQueryKey = (options?: Options<ReadAllClientResourcesV1ClientResourcesAllGetData>): QueryKey<Options<ReadAllClientResourcesV1ClientResourcesAllGetData>> => createQueryKey('readAllClientResourcesV1ClientResourcesAllGet', options, true);
+
+/**
+ * 管理员查看所有客资
+ *
+ * 管理员查看所有 PM 的客资明细记录
+ */
+export const readAllClientResourcesV1ClientResourcesAllGetInfiniteOptions = (options?: Options<ReadAllClientResourcesV1ClientResourcesAllGetData>) => infiniteQueryOptions<ReadAllClientResourcesV1ClientResourcesAllGetResponse, ReadAllClientResourcesV1ClientResourcesAllGetError, InfiniteData<ReadAllClientResourcesV1ClientResourcesAllGetResponse>, QueryKey<Options<ReadAllClientResourcesV1ClientResourcesAllGetData>>, number | Pick<QueryKey<Options<ReadAllClientResourcesV1ClientResourcesAllGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<ReadAllClientResourcesV1ClientResourcesAllGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await readAllClientResourcesV1ClientResourcesAllGet({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: readAllClientResourcesV1ClientResourcesAllGetInfiniteQueryKey(options)
+});

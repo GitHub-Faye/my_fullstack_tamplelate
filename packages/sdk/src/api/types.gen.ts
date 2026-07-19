@@ -5,6 +5,122 @@ export type ClientOptions = {
 };
 
 /**
+ * AdminPasswordReset
+ */
+export type AdminPasswordReset = {
+    /**
+     * New Password
+     */
+    new_password: string;
+};
+
+/**
+ * AuditLogList
+ */
+export type AuditLogList = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
+};
+
+/**
+ * BidCreate
+ *
+ * 创建竞价报价请求
+ */
+export type BidCreate = {
+    /**
+     * T Reported
+     *
+     * 工程师报价工时
+     */
+    T_reported: number;
+};
+
+/**
+ * BidPublic
+ *
+ * 返回给客户端的竞价报价信息
+ */
+export type BidPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Task Id
+     */
+    task_id: string;
+    /**
+     * Engineer Id
+     */
+    engineer_id: string;
+    /**
+     * T Reported
+     */
+    T_reported: number;
+    /**
+     * Amount
+     */
+    amount: number;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+};
+
+/**
+ * BidUpdate
+ *
+ * 修改竞价报价请求
+ */
+export type BidUpdate = {
+    /**
+     * T Reported
+     *
+     * 工程师报价工时
+     */
+    T_reported: number;
+};
+
+/**
+ * BidsPublic
+ *
+ * 竞价报价列表响应
+ */
+export type BidsPublic = {
+    /**
+     * Data
+     */
+    data: Array<BidPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * Body_login_access_token_v1_login_access_token_post
  */
 export type BodyLoginAccessTokenV1LoginAccessTokenPost = {
@@ -35,49 +151,65 @@ export type BodyLoginAccessTokenV1LoginAccessTokenPost = {
 };
 
 /**
- * HTTPValidationError
+ * ClientResourceCreate
+ *
+ * 录入客资请求
  */
-export type HttpValidationError = {
+export type ClientResourceCreate = {
     /**
-     * Detail
+     * Actual Count
+     *
+     * 实际客资数
      */
-    detail?: Array<ValidationError>;
+    actual_count: number;
+    /**
+     * Date
+     *
+     * 记录日期
+     */
+    date: string;
 };
 
 /**
- * ItemCreate
+ * ClientResourceParamsUpdate
+ *
+ * 管理员设置 PM 的基准客资数
  */
-export type ItemCreate = {
+export type ClientResourceParamsUpdate = {
     /**
-     * Title
+     * Baseline Client Count
+     *
+     * 基准客资数（L基）
      */
-    title: string;
-    /**
-     * Description
-     */
-    description?: string | null;
+    baseline_client_count: number;
 };
 
 /**
- * ItemPublic
+ * ClientResourcePublic
+ *
+ * 客资公开信息
  */
-export type ItemPublic = {
-    /**
-     * Title
-     */
-    title: string;
-    /**
-     * Description
-     */
-    description?: string | null;
+export type ClientResourcePublic = {
     /**
      * Id
      */
     id: string;
     /**
-     * Owner Id
+     * Pm Id
      */
-    owner_id: string;
+    pm_id: string;
+    /**
+     * Actual Count
+     */
+    actual_count: number;
+    /**
+     * Baseline Count
+     */
+    baseline_count: number;
+    /**
+     * Date
+     */
+    date: string;
     /**
      * Created At
      */
@@ -85,23 +217,47 @@ export type ItemPublic = {
 };
 
 /**
- * ItemUpdate
+ * ClientResourceSummary
+ *
+ * PM 客资汇总（管理员视角）
  */
-export type ItemUpdate = {
+export type ClientResourceSummary = {
     /**
-     * Title
+     * Pm Id
      */
-    title?: string | null;
+    pm_id: string;
     /**
-     * Description
+     * Pm Name
      */
-    description?: string | null;
+    pm_name: string;
+    /**
+     * Baseline Count
+     */
+    baseline_count?: number | null;
+    /**
+     * Total Actual
+     */
+    total_actual?: number;
+    /**
+     * Avg Actual
+     */
+    avg_actual?: number;
+    /**
+     * Record Count
+     */
+    record_count?: number;
+    /**
+     * Performance Rate
+     */
+    performance_rate?: number | null;
 };
 
 /**
- * ItemsPublic
+ * ClientResourcesPublic
+ *
+ * 客资列表
  */
-export type ItemsPublic = {
+export type ClientResourcesPublic = {
     /**
      * Data
      */
@@ -125,6 +281,329 @@ export type ItemsPublic = {
 };
 
 /**
+ * DailyReportCreate
+ *
+ * 创建日报请求
+ */
+export type DailyReportCreate = {
+    /**
+     * Today Hours
+     *
+     * 今日工作时长（小时）
+     */
+    today_hours: number;
+    /**
+     * 当前阶段
+     */
+    current_stage: ReportStage;
+    /**
+     * Progress
+     *
+     * 进度描述
+     */
+    progress?: string | null;
+    /**
+     * Completion Judgment
+     *
+     * 完成判定说明
+     */
+    completion_judgment?: string | null;
+    /**
+     * Starpoint Change
+     *
+     * 星点变化量
+     */
+    starpoint_change?: number | null;
+    /**
+     * Notes
+     *
+     * 备注说明
+     */
+    notes?: string | null;
+    /**
+     * Summary
+     *
+     * 工作总结
+     */
+    summary?: string | null;
+    /**
+     * Has Blocker
+     *
+     * 是否有阻塞问题
+     */
+    has_blocker?: boolean;
+    /**
+     * Task Id
+     *
+     * 关联任务ID
+     */
+    task_id: string;
+    /**
+     * Report Date
+     *
+     * 报告日期（默认今天）
+     */
+    report_date?: string | null;
+};
+
+/**
+ * DailyReportPublic
+ *
+ * 返回给客户端的日报信息
+ */
+export type DailyReportPublic = {
+    /**
+     * Today Hours
+     *
+     * 今日工作时长（小时）
+     */
+    today_hours: number;
+    /**
+     * 当前阶段
+     */
+    current_stage: ReportStage;
+    /**
+     * Progress
+     *
+     * 进度描述
+     */
+    progress?: string | null;
+    /**
+     * Completion Judgment
+     *
+     * 完成判定说明
+     */
+    completion_judgment?: string | null;
+    /**
+     * Starpoint Change
+     *
+     * 星点变化量
+     */
+    starpoint_change?: number | null;
+    /**
+     * Notes
+     *
+     * 备注说明
+     */
+    notes?: string | null;
+    /**
+     * Summary
+     *
+     * 工作总结
+     */
+    summary?: string | null;
+    /**
+     * Has Blocker
+     *
+     * 是否有阻塞问题
+     */
+    has_blocker?: boolean;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Engineer Id
+     */
+    engineer_id: string;
+    /**
+     * Task Id
+     */
+    task_id: string;
+    /**
+     * Report Date
+     */
+    report_date: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * DailyReportUpdate
+ *
+ * 更新日报请求
+ */
+export type DailyReportUpdate = {
+    /**
+     * Today Hours
+     *
+     * 今日工作时长（小时）
+     */
+    today_hours?: number | null;
+    /**
+     * 当前阶段
+     */
+    current_stage?: ReportStage | null;
+    /**
+     * Progress
+     *
+     * 进度描述
+     */
+    progress?: string | null;
+    /**
+     * Completion Judgment
+     *
+     * 完成判定说明
+     */
+    completion_judgment?: string | null;
+    /**
+     * Starpoint Change
+     *
+     * 星点变化量
+     */
+    starpoint_change?: number | null;
+    /**
+     * Notes
+     *
+     * 备注说明
+     */
+    notes?: string | null;
+    /**
+     * Summary
+     *
+     * 工作总结
+     */
+    summary?: string | null;
+    /**
+     * Has Blocker
+     *
+     * 是否有阻塞问题
+     */
+    has_blocker?: boolean | null;
+};
+
+/**
+ * DailyReportsPublic
+ *
+ * 日报列表分页响应
+ */
+export type DailyReportsPublic = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
+};
+
+/**
+ * EngineerSalaryDetail
+ *
+ * 工程师工资试算详情
+ */
+export type EngineerSalaryDetail = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Role
+     */
+    role?: string;
+    /**
+     * S0
+     *
+     * 月度工资基数
+     */
+    S0: number;
+    /**
+     * H0
+     *
+     * H0（基准时薪）
+     */
+    H0?: number | null;
+    /**
+     * T Monthly Plan
+     *
+     * T月计划
+     */
+    T_monthly_plan?: number | null;
+    /**
+     * T Actual Monthly
+     *
+     * 本月实际工时
+     */
+    T_actual_monthly?: number;
+    /**
+     * T Reported Monthly
+     *
+     * 本月报价工时
+     */
+    T_reported_monthly?: number;
+    /**
+     * T Effective
+     *
+     * T有效（有效工时，已完成任务的 T实）
+     */
+    T_effective?: number;
+    /**
+     * P Diff
+     *
+     * 工时差额（T实际 - T报价）
+     */
+    P_diff?: number;
+    /**
+     * Current Starpoint
+     *
+     * 当前星点总数
+     */
+    current_starpoint?: number;
+    /**
+     * K Coefficient
+     *
+     * K系数
+     */
+    k_coefficient?: number;
+    /**
+     * Salary Final
+     *
+     * 最终工资 S下 = (S0 - P差额) × K
+     */
+    salary_final: number;
+};
+
+/**
+ * HTTPValidationError
+ */
+export type HttpValidationError = {
+    /**
+     * Detail
+     */
+    detail?: Array<ValidationError>;
+};
+
+/**
+ * JudgmentType
+ *
+ * 星点判定类型枚举
+ *
+ * - manual: 手动判定（管理员手动调整）
+ * - auto_ratio: 按比例自动判定
+ * - auto_threshold: 按阈值自动判定
+ */
+export type JudgmentType = 'manual' | 'auto_ratio' | 'auto_threshold';
+
+/**
  * Message
  *
  * 通用消息响应
@@ -134,6 +613,736 @@ export type Message = {
      * Message
      */
     message: string;
+};
+
+/**
+ * PMSalaryDetail
+ *
+ * PM 工资试算详情
+ */
+export type PmSalaryDetail = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Role
+     */
+    role?: string;
+    /**
+     * S Base
+     *
+     * S底（底薪）
+     */
+    S_base: number;
+    /**
+     * S Assess
+     *
+     * S考（考核部分）
+     */
+    S_assess: number;
+    /**
+     * R Base
+     *
+     * R底（底薪比例）
+     */
+    R_base?: number | null;
+    /**
+     * R Assess
+     *
+     * R考（考核比例）
+     */
+    R_assess?: number | null;
+    /**
+     * L Actual
+     *
+     * L实（本月实际客资数）
+     */
+    L_actual?: number;
+    /**
+     * L Base
+     *
+     * L基（基准客资数）
+     */
+    L_base?: number;
+    /**
+     * Salary Total
+     *
+     * 总工资 S总 = S底 + S考
+     */
+    salary_total: number;
+};
+
+/**
+ * RemindResult
+ *
+ * 提醒未提交日报结果
+ */
+export type RemindResult = {
+    /**
+     * Total Engineers
+     *
+     * 工程师总数
+     */
+    total_engineers: number;
+    /**
+     * Submitted Today
+     *
+     * 今日已提交日报人数
+     */
+    submitted_today: number;
+    /**
+     * Not Submitted
+     *
+     * 未提交人数
+     */
+    not_submitted: number;
+    /**
+     * Not Submitted Engineers
+     *
+     * 未提交日报的工程师姓名列表
+     */
+    not_submitted_engineers?: Array<string>;
+};
+
+/**
+ * ReportStage
+ *
+ * 日报阶段枚举
+ *
+ * - developing: 开发中
+ * - testing: 测试中
+ * - completed: 已完成
+ * - paused: 暂停中
+ */
+export type ReportStage = 'developing' | 'testing' | 'completed' | 'paused';
+
+/**
+ * RuleCategory
+ *
+ * 规则分类枚举
+ *
+ * - starpoint_reward: 星点奖励规则
+ * - salary_formula: 工资计算公式
+ * - client_resource: 客资相关参数
+ * - completion_judgment: 完成判定规则
+ * - system_param: 系统参数
+ */
+export type RuleCategory = 'starpoint_reward' | 'salary_formula' | 'client_resource' | 'completion_judgment' | 'system_param';
+
+/**
+ * SalaryExportRequest
+ *
+ * 工资导出请求
+ */
+export type SalaryExportRequest = {
+    /**
+     * Month
+     *
+     * 导出月份（YYYY-MM），默认当前月
+     */
+    month?: string | null;
+};
+
+/**
+ * SalaryParamsUpdate
+ *
+ * 管理员设置工资参数请求
+ */
+export type SalaryParamsUpdate = {
+    /**
+     * S0
+     *
+     * 月度工资基数
+     */
+    S0?: number | null;
+    /**
+     * H0
+     *
+     * H0（基准时薪）
+     */
+    H0?: number | null;
+    /**
+     * T Monthly Plan
+     *
+     * T月计划
+     */
+    T_monthly_plan?: number | null;
+    /**
+     * S Base
+     *
+     * S底（底薪）
+     */
+    S_base?: number | null;
+    /**
+     * S Assess
+     *
+     * S考（考核部分）
+     */
+    S_assess?: number | null;
+    /**
+     * R Base
+     *
+     * R底（底薪比例）
+     */
+    R_base?: number | null;
+    /**
+     * R Assess
+     *
+     * R考（考核比例）
+     */
+    R_assess?: number | null;
+    /**
+     * Baseline Client Count
+     *
+     * L基（基准客资数）
+     */
+    baseline_client_count?: number | null;
+    /**
+     * Manual Adjustment
+     *
+     * 手动工资调整（正数=奖励，负数=扣减）
+     */
+    manual_adjustment?: number | null;
+};
+
+/**
+ * SalarySummaryList
+ *
+ * 工资汇总列表
+ */
+export type SalarySummaryList = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
+};
+
+/**
+ * StarPointAdjustRequest
+ *
+ * 管理员手动调整星点请求
+ */
+export type StarPointAdjustRequest = {
+    /**
+     * Engineer Id
+     *
+     * 目标工程师ID
+     */
+    engineer_id: string;
+    /**
+     * Change Amount
+     *
+     * 星点变化量（可正可负）
+     */
+    change_amount: number;
+    /**
+     * Reason
+     *
+     * 调整原因
+     */
+    reason?: string | null;
+};
+
+/**
+ * StarPointLeaderboard
+ *
+ * 排行榜响应
+ */
+export type StarPointLeaderboard = {
+    /**
+     * Data
+     */
+    data: Array<StarPointLeaderboardEntry>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * StarPointLeaderboardEntry
+ *
+ * 排行榜条目
+ */
+export type StarPointLeaderboardEntry = {
+    /**
+     * Engineer Id
+     */
+    engineer_id: string;
+    /**
+     * Engineer Name
+     */
+    engineer_name?: string | null;
+    /**
+     * Total Starpoints
+     */
+    total_starpoints: number;
+    /**
+     * Rank
+     */
+    rank: number;
+    /**
+     * K Coefficient
+     */
+    k_coefficient: number;
+};
+
+/**
+ * StarPointRecordPublic
+ *
+ * 返回给客户端的星点记录
+ */
+export type StarPointRecordPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Engineer Id
+     */
+    engineer_id: string;
+    /**
+     * Task Id
+     */
+    task_id?: string | null;
+    /**
+     * Change Amount
+     */
+    change_amount: number;
+    /**
+     * Reason
+     */
+    reason?: string | null;
+    judgment_type: JudgmentType;
+    /**
+     * T Reported
+     */
+    T_reported?: number | null;
+    /**
+     * T Actual
+     */
+    T_actual?: number | null;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * StarPointRecordsPublic
+ *
+ * 星点记录分页响应
+ */
+export type StarPointRecordsPublic = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
+};
+
+/**
+ * StarPointSummary
+ *
+ * 星点汇总信息
+ */
+export type StarPointSummary = {
+    /**
+     * Total Starpoints
+     *
+     * 星点总数
+     */
+    total_starpoints: number;
+    /**
+     * Current Month Earned
+     *
+     * 本月获得星点
+     */
+    current_month_earned: number;
+    /**
+     * Rank
+     *
+     * 当前排名
+     */
+    rank?: number | null;
+    /**
+     * K Coefficient
+     *
+     * K系数
+     */
+    k_coefficient?: number;
+};
+
+/**
+ * SystemRuleCreate
+ *
+ * 创建规则请求
+ */
+export type SystemRuleCreate = {
+    /**
+     * 规则分类
+     */
+    category: RuleCategory;
+    /**
+     * Name
+     *
+     * 规则名称
+     */
+    name: string;
+    /**
+     * Applies To
+     *
+     * 适用对象（如角色类型）
+     */
+    applies_to?: string | null;
+    /**
+     * Value
+     *
+     * 规则值（JSON 或数值）
+     */
+    value: string;
+    /**
+     * Is Public
+     *
+     * 是否对员工公开
+     */
+    is_public?: boolean;
+    /**
+     * Is Active
+     *
+     * 是否启用
+     */
+    is_active?: boolean;
+};
+
+/**
+ * SystemRulePublic
+ *
+ * 规则公开信息
+ */
+export type SystemRulePublic = {
+    /**
+     * Id
+     */
+    id: string;
+    category: RuleCategory;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Applies To
+     */
+    applies_to?: string | null;
+    /**
+     * Value
+     */
+    value: string;
+    /**
+     * Is Public
+     */
+    is_public: boolean;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+};
+
+/**
+ * SystemRuleUpdate
+ *
+ * 更新规则请求
+ */
+export type SystemRuleUpdate = {
+    /**
+     * 规则分类
+     */
+    category?: RuleCategory | null;
+    /**
+     * Name
+     *
+     * 规则名称
+     */
+    name?: string | null;
+    /**
+     * Applies To
+     *
+     * 适用对象
+     */
+    applies_to?: string | null;
+    /**
+     * Value
+     *
+     * 规则值
+     */
+    value?: string | null;
+    /**
+     * Is Public
+     *
+     * 是否对员工公开
+     */
+    is_public?: boolean | null;
+    /**
+     * Is Active
+     *
+     * 是否启用
+     */
+    is_active?: boolean | null;
+};
+
+/**
+ * SystemRulesPublic
+ *
+ * 规则列表
+ */
+export type SystemRulesPublic = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
+};
+
+/**
+ * TaskCompleteRequest
+ *
+ * 完成任务请求
+ */
+export type TaskCompleteRequest = {
+    /**
+     * T Reported
+     *
+     * 工程师填报工时（小时）
+     */
+    T_reported: number;
+};
+
+/**
+ * TaskCreate
+ *
+ * 创建任务请求
+ */
+export type TaskCreate = {
+    /**
+     * Name
+     *
+     * 任务名称
+     */
+    name: string;
+    /**
+     * Description
+     *
+     * 任务描述
+     */
+    description?: string | null;
+    /**
+     * 任务类型
+     */
+    task_type?: TaskType;
+};
+
+/**
+ * TaskPublic
+ *
+ * 返回给客户端的任务信息
+ */
+export type TaskPublic = {
+    /**
+     * Name
+     *
+     * 任务名称
+     */
+    name: string;
+    /**
+     * Description
+     *
+     * 任务描述
+     */
+    description?: string | null;
+    /**
+     * 任务类型
+     */
+    task_type?: TaskType;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Pm Id
+     */
+    pm_id: string;
+    /**
+     * Engineer Id
+     */
+    engineer_id?: string | null;
+    status: TaskStatus;
+    /**
+     * Bidding Deadline
+     */
+    bidding_deadline?: string | null;
+    /**
+     * T Reported
+     */
+    T_reported?: number | null;
+    /**
+     * T Actual
+     */
+    T_actual?: number | null;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+};
+
+/**
+ * TaskReassignRequest
+ *
+ * 改派任务请求
+ */
+export type TaskReassignRequest = {
+    /**
+     * New Engineer Id
+     *
+     * 新工程师ID
+     */
+    new_engineer_id: string;
+};
+
+/**
+ * TaskStatus
+ *
+ * 任务状态枚举
+ *
+ * 状态流转：
+ * unconfirmed -> confirmed_unpublished -> bidding -> pending_start -> in_progress -> completed
+ * 中间状态：paused（可从 in_progress 暂停）
+ */
+export type TaskStatus = 'unconfirmed' | 'confirmed_unpublished' | 'bidding' | 'pending_start' | 'in_progress' | 'pause_requested' | 'paused' | 'completed';
+
+/**
+ * TaskType
+ *
+ * 任务类型枚举
+ *
+ * - normal: 正常任务，按标准竞价流程
+ * - urgent: 紧急任务，优先竞价
+ * - convenient: 便捷任务，不参与竞价，按需执行
+ */
+export type TaskType = 'normal' | 'urgent' | 'convenient';
+
+/**
+ * TaskUpdate
+ *
+ * 更新任务请求
+ */
+export type TaskUpdate = {
+    /**
+     * Name
+     *
+     * 任务名称
+     */
+    name?: string | null;
+    /**
+     * Description
+     *
+     * 任务描述
+     */
+    description?: string | null;
+    /**
+     * 任务类型
+     */
+    task_type?: TaskType | null;
+};
+
+/**
+ * TasksPublic
+ *
+ * 任务列表分页响应
+ */
+export type TasksPublic = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
 };
 
 /**
@@ -162,6 +1371,186 @@ export type UpdatePassword = {
      * New Password
      */
     new_password: string;
+};
+
+/**
+ * UserAdminCreate
+ *
+ * 管理员创建工程师/PM 账号
+ */
+export type UserAdminCreate = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Password
+     */
+    password: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * 用户角色
+     */
+    role?: UserRoleType;
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+    /**
+     * S0
+     */
+    S0?: number | null;
+    /**
+     * H0
+     */
+    H0?: number | null;
+    /**
+     * T Monthly Plan
+     */
+    T_monthly_plan?: number | null;
+    /**
+     * S Base
+     */
+    S_base?: number | null;
+    /**
+     * S Assess
+     */
+    S_assess?: number | null;
+    /**
+     * R Base
+     */
+    R_base?: number | null;
+    /**
+     * R Assess
+     */
+    R_assess?: number | null;
+    /**
+     * Baseline Client Count
+     */
+    baseline_client_count?: number | null;
+};
+
+/**
+ * UserAdminDetail
+ */
+export type UserAdminDetail = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+    /**
+     * Is Superuser
+     */
+    is_superuser?: boolean;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    role: UserRoleType;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * S0
+     */
+    S0?: number | null;
+    /**
+     * H0
+     */
+    H0?: number | null;
+    /**
+     * T Monthly Plan
+     */
+    T_monthly_plan?: number | null;
+    /**
+     * Current Starpoint
+     */
+    current_starpoint?: number;
+    /**
+     * S Base
+     */
+    S_base?: number | null;
+    /**
+     * S Assess
+     */
+    S_assess?: number | null;
+    /**
+     * R Base
+     */
+    R_base?: number | null;
+    /**
+     * R Assess
+     */
+    R_assess?: number | null;
+    /**
+     * Baseline Client Count
+     */
+    baseline_client_count?: number | null;
+};
+
+/**
+ * UserAdminUpdate
+ *
+ * 管理员更新用户信息
+ */
+export type UserAdminUpdate = {
+    /**
+     * Email
+     */
+    email?: string | null;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Is Active
+     */
+    is_active?: boolean | null;
+    role?: UserRoleType | null;
+    /**
+     * S0
+     */
+    S0?: number | null;
+    /**
+     * H0
+     */
+    H0?: number | null;
+    /**
+     * T Monthly Plan
+     */
+    T_monthly_plan?: number | null;
+    /**
+     * S Base
+     */
+    S_base?: number | null;
+    /**
+     * S Assess
+     */
+    S_assess?: number | null;
+    /**
+     * R Base
+     */
+    R_base?: number | null;
+    /**
+     * R Assess
+     */
+    R_assess?: number | null;
+    /**
+     * Baseline Client Count
+     */
+    baseline_client_count?: number | null;
 };
 
 /**
@@ -214,6 +1603,7 @@ export type UserPublic = {
      * Id
      */
     id: string;
+    role: UserRoleType;
     /**
      * Created At
      */
@@ -236,6 +1626,28 @@ export type UserRegister = {
      * Full Name
      */
     full_name?: string | null;
+};
+
+/**
+ * UserRoleType
+ *
+ * 用户角色类型枚举
+ *
+ * 三种角色完全独立，不支持兼任：
+ * - engineer: 工程师，参与竞价报价、执行任务、填报日报
+ * - pm: 市场产品PM，发布任务需求、管理客资数据
+ * - admin: 管理员，审核任务、管理工资与规则
+ */
+export type UserRoleType = 'engineer' | 'pm' | 'admin';
+
+/**
+ * UserToggleActive
+ */
+export type UserToggleActive = {
+    /**
+     * Is Active
+     */
+    is_active: boolean;
 };
 
 /**
@@ -276,6 +1688,32 @@ export type UserUpdateMe = {
      * Email
      */
     email?: string | null;
+};
+
+/**
+ * UsersAdminPublic
+ */
+export type UsersAdminPublic = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
 };
 
 /**
@@ -320,6 +1758,16 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
+    /**
+     * Input
+     */
+    input?: unknown;
+    /**
+     * Context
+     */
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 export type LoginAccessTokenV1LoginAccessTokenPostData = {
@@ -637,151 +2085,1726 @@ export type RegisterUserV1UsersSignupPostResponses = {
 
 export type RegisterUserV1UsersSignupPostResponse = RegisterUserV1UsersSignupPostResponses[keyof RegisterUserV1UsersSignupPostResponses];
 
-export type ReadItemsV1ItemsGetData = {
+export type AdminReadUsersV1AdminUsersGetData = {
     body?: never;
     path?: never;
     query?: {
         /**
          * Page
+         *
+         * 页码，从1开始
          */
         page?: number;
         /**
          * Page Size
+         *
+         * 每页数量
          */
         page_size?: number;
     };
-    url: '/v1/items/';
+    url: '/v1/admin/users';
 };
 
-export type ReadItemsV1ItemsGetErrors = {
+export type AdminReadUsersV1AdminUsersGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadItemsV1ItemsGetError = ReadItemsV1ItemsGetErrors[keyof ReadItemsV1ItemsGetErrors];
+export type AdminReadUsersV1AdminUsersGetError = AdminReadUsersV1AdminUsersGetErrors[keyof AdminReadUsersV1AdminUsersGetErrors];
 
-export type ReadItemsV1ItemsGetResponses = {
+export type AdminReadUsersV1AdminUsersGetResponses = {
     /**
      * Successful Response
      */
-    200: ItemsPublic;
+    200: UsersAdminPublic;
 };
 
-export type ReadItemsV1ItemsGetResponse = ReadItemsV1ItemsGetResponses[keyof ReadItemsV1ItemsGetResponses];
+export type AdminReadUsersV1AdminUsersGetResponse = AdminReadUsersV1AdminUsersGetResponses[keyof AdminReadUsersV1AdminUsersGetResponses];
 
-export type CreateItemV1ItemsPostData = {
-    body: ItemCreate;
+export type AdminCreateUserV1AdminUsersPostData = {
+    body: UserAdminCreate;
     path?: never;
     query?: never;
-    url: '/v1/items/';
+    url: '/v1/admin/users';
 };
 
-export type CreateItemV1ItemsPostErrors = {
+export type AdminCreateUserV1AdminUsersPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateItemV1ItemsPostError = CreateItemV1ItemsPostErrors[keyof CreateItemV1ItemsPostErrors];
+export type AdminCreateUserV1AdminUsersPostError = AdminCreateUserV1AdminUsersPostErrors[keyof AdminCreateUserV1AdminUsersPostErrors];
 
-export type CreateItemV1ItemsPostResponses = {
+export type AdminCreateUserV1AdminUsersPostResponses = {
     /**
      * Successful Response
      */
-    200: ItemPublic;
+    200: UserAdminDetail;
 };
 
-export type CreateItemV1ItemsPostResponse = CreateItemV1ItemsPostResponses[keyof CreateItemV1ItemsPostResponses];
+export type AdminCreateUserV1AdminUsersPostResponse = AdminCreateUserV1AdminUsersPostResponses[keyof AdminCreateUserV1AdminUsersPostResponses];
 
-export type DeleteItemV1ItemsItemIdDeleteData = {
+export type AdminReadUserV1AdminUsersUserIdGetData = {
     body?: never;
     path: {
         /**
-         * Item Id
+         * User Id
          */
-        item_id: string;
+        user_id: string;
     };
     query?: never;
-    url: '/v1/items/{item_id}';
+    url: '/v1/admin/users/{user_id}';
 };
 
-export type DeleteItemV1ItemsItemIdDeleteErrors = {
+export type AdminReadUserV1AdminUsersUserIdGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteItemV1ItemsItemIdDeleteError = DeleteItemV1ItemsItemIdDeleteErrors[keyof DeleteItemV1ItemsItemIdDeleteErrors];
+export type AdminReadUserV1AdminUsersUserIdGetError = AdminReadUserV1AdminUsersUserIdGetErrors[keyof AdminReadUserV1AdminUsersUserIdGetErrors];
 
-export type DeleteItemV1ItemsItemIdDeleteResponses = {
+export type AdminReadUserV1AdminUsersUserIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserAdminDetail;
+};
+
+export type AdminReadUserV1AdminUsersUserIdGetResponse = AdminReadUserV1AdminUsersUserIdGetResponses[keyof AdminReadUserV1AdminUsersUserIdGetResponses];
+
+export type AdminUpdateUserV1AdminUsersUserIdPatchData = {
+    body: UserAdminUpdate;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/v1/admin/users/{user_id}';
+};
+
+export type AdminUpdateUserV1AdminUsersUserIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminUpdateUserV1AdminUsersUserIdPatchError = AdminUpdateUserV1AdminUsersUserIdPatchErrors[keyof AdminUpdateUserV1AdminUsersUserIdPatchErrors];
+
+export type AdminUpdateUserV1AdminUsersUserIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserAdminDetail;
+};
+
+export type AdminUpdateUserV1AdminUsersUserIdPatchResponse = AdminUpdateUserV1AdminUsersUserIdPatchResponses[keyof AdminUpdateUserV1AdminUsersUserIdPatchResponses];
+
+export type AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostData = {
+    body: UserToggleActive;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/v1/admin/users/{user_id}/toggle-active';
+};
+
+export type AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostError = AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostErrors[keyof AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostErrors];
+
+export type AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserAdminDetail;
+};
+
+export type AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponse = AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponses[keyof AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponses];
+
+export type AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData = {
+    body: AdminPasswordReset;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/v1/admin/users/{user_id}/reset-password';
+};
+
+export type AdminResetPasswordV1AdminUsersUserIdResetPasswordPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminResetPasswordV1AdminUsersUserIdResetPasswordPostError = AdminResetPasswordV1AdminUsersUserIdResetPasswordPostErrors[keyof AdminResetPasswordV1AdminUsersUserIdResetPasswordPostErrors];
+
+export type AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponses = {
     /**
      * Successful Response
      */
     200: Message;
 };
 
-export type DeleteItemV1ItemsItemIdDeleteResponse = DeleteItemV1ItemsItemIdDeleteResponses[keyof DeleteItemV1ItemsItemIdDeleteResponses];
+export type AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse = AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponses[keyof AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponses];
 
-export type ReadItemV1ItemsItemIdGetData = {
+export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData = {
+    body: ClientResourceParamsUpdate;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/v1/admin/users/{user_id}/client-resource-params';
+};
+
+export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutError = AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutErrors[keyof AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutErrors];
+
+export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserAdminDetail;
+};
+
+export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse = AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponses[keyof AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponses];
+
+export type AdminReadAuditLogsV1AdminAuditLogsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量
+         */
+        page_size?: number;
+        /**
+         * Target Type
+         *
+         * 按目标类型筛选
+         */
+        target_type?: string | null;
+        /**
+         * User Id
+         *
+         * 按操作人筛选
+         */
+        user_id?: string | null;
+    };
+    url: '/v1/admin/audit-logs';
+};
+
+export type AdminReadAuditLogsV1AdminAuditLogsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminReadAuditLogsV1AdminAuditLogsGetError = AdminReadAuditLogsV1AdminAuditLogsGetErrors[keyof AdminReadAuditLogsV1AdminAuditLogsGetErrors];
+
+export type AdminReadAuditLogsV1AdminAuditLogsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AuditLogList;
+};
+
+export type AdminReadAuditLogsV1AdminAuditLogsGetResponse = AdminReadAuditLogsV1AdminAuditLogsGetResponses[keyof AdminReadAuditLogsV1AdminAuditLogsGetResponses];
+
+export type ReadTasksV1TasksGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Status
+         *
+         * 按状态过滤
+         */
+        status?: string | null;
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量，默认20，最大100
+         */
+        page_size?: number;
+    };
+    url: '/v1/tasks/';
+};
+
+export type ReadTasksV1TasksGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadTasksV1TasksGetError = ReadTasksV1TasksGetErrors[keyof ReadTasksV1TasksGetErrors];
+
+export type ReadTasksV1TasksGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: TasksPublic;
+};
+
+export type ReadTasksV1TasksGetResponse = ReadTasksV1TasksGetResponses[keyof ReadTasksV1TasksGetResponses];
+
+export type CreateTaskV1TasksPostData = {
+    body: TaskCreate;
+    path?: never;
+    query?: never;
+    url: '/v1/tasks/';
+};
+
+export type CreateTaskV1TasksPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateTaskV1TasksPostError = CreateTaskV1TasksPostErrors[keyof CreateTaskV1TasksPostErrors];
+
+export type CreateTaskV1TasksPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type CreateTaskV1TasksPostResponse = CreateTaskV1TasksPostResponses[keyof CreateTaskV1TasksPostResponses];
+
+export type DeleteTaskV1TasksTaskIdDeleteData = {
     body?: never;
     path: {
         /**
-         * Item Id
+         * Task Id
          */
-        item_id: string;
+        task_id: string;
     };
     query?: never;
-    url: '/v1/items/{item_id}';
+    url: '/v1/tasks/{task_id}';
 };
 
-export type ReadItemV1ItemsItemIdGetErrors = {
+export type DeleteTaskV1TasksTaskIdDeleteErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadItemV1ItemsItemIdGetError = ReadItemV1ItemsItemIdGetErrors[keyof ReadItemV1ItemsItemIdGetErrors];
+export type DeleteTaskV1TasksTaskIdDeleteError = DeleteTaskV1TasksTaskIdDeleteErrors[keyof DeleteTaskV1TasksTaskIdDeleteErrors];
 
-export type ReadItemV1ItemsItemIdGetResponses = {
+export type DeleteTaskV1TasksTaskIdDeleteResponses = {
     /**
      * Successful Response
      */
-    200: ItemPublic;
+    200: Message;
 };
 
-export type ReadItemV1ItemsItemIdGetResponse = ReadItemV1ItemsItemIdGetResponses[keyof ReadItemV1ItemsItemIdGetResponses];
+export type DeleteTaskV1TasksTaskIdDeleteResponse = DeleteTaskV1TasksTaskIdDeleteResponses[keyof DeleteTaskV1TasksTaskIdDeleteResponses];
 
-export type UpdateItemV1ItemsItemIdPutData = {
-    body: ItemUpdate;
+export type ReadTaskV1TasksTaskIdGetData = {
+    body?: never;
     path: {
         /**
-         * Item Id
+         * Task Id
          */
-        item_id: string;
+        task_id: string;
     };
     query?: never;
-    url: '/v1/items/{item_id}';
+    url: '/v1/tasks/{task_id}';
 };
 
-export type UpdateItemV1ItemsItemIdPutErrors = {
+export type ReadTaskV1TasksTaskIdGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateItemV1ItemsItemIdPutError = UpdateItemV1ItemsItemIdPutErrors[keyof UpdateItemV1ItemsItemIdPutErrors];
+export type ReadTaskV1TasksTaskIdGetError = ReadTaskV1TasksTaskIdGetErrors[keyof ReadTaskV1TasksTaskIdGetErrors];
 
-export type UpdateItemV1ItemsItemIdPutResponses = {
+export type ReadTaskV1TasksTaskIdGetResponses = {
     /**
      * Successful Response
      */
-    200: ItemPublic;
+    200: TaskPublic;
 };
 
-export type UpdateItemV1ItemsItemIdPutResponse = UpdateItemV1ItemsItemIdPutResponses[keyof UpdateItemV1ItemsItemIdPutResponses];
+export type ReadTaskV1TasksTaskIdGetResponse = ReadTaskV1TasksTaskIdGetResponses[keyof ReadTaskV1TasksTaskIdGetResponses];
+
+export type UpdateTaskV1TasksTaskIdPutData = {
+    body: TaskUpdate;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}';
+};
+
+export type UpdateTaskV1TasksTaskIdPutErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateTaskV1TasksTaskIdPutError = UpdateTaskV1TasksTaskIdPutErrors[keyof UpdateTaskV1TasksTaskIdPutErrors];
+
+export type UpdateTaskV1TasksTaskIdPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type UpdateTaskV1TasksTaskIdPutResponse = UpdateTaskV1TasksTaskIdPutResponses[keyof UpdateTaskV1TasksTaskIdPutResponses];
+
+export type ApproveTaskV1TasksTaskIdApprovePostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/approve';
+};
+
+export type ApproveTaskV1TasksTaskIdApprovePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ApproveTaskV1TasksTaskIdApprovePostError = ApproveTaskV1TasksTaskIdApprovePostErrors[keyof ApproveTaskV1TasksTaskIdApprovePostErrors];
+
+export type ApproveTaskV1TasksTaskIdApprovePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type ApproveTaskV1TasksTaskIdApprovePostResponse = ApproveTaskV1TasksTaskIdApprovePostResponses[keyof ApproveTaskV1TasksTaskIdApprovePostResponses];
+
+export type RejectTaskV1TasksTaskIdRejectPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/reject';
+};
+
+export type RejectTaskV1TasksTaskIdRejectPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RejectTaskV1TasksTaskIdRejectPostError = RejectTaskV1TasksTaskIdRejectPostErrors[keyof RejectTaskV1TasksTaskIdRejectPostErrors];
+
+export type RejectTaskV1TasksTaskIdRejectPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type RejectTaskV1TasksTaskIdRejectPostResponse = RejectTaskV1TasksTaskIdRejectPostResponses[keyof RejectTaskV1TasksTaskIdRejectPostResponses];
+
+export type PublishTaskV1TasksTaskIdPublishPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: {
+        /**
+         * Bidding Days
+         */
+        bidding_days?: number;
+    };
+    url: '/v1/tasks/{task_id}/publish';
+};
+
+export type PublishTaskV1TasksTaskIdPublishPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PublishTaskV1TasksTaskIdPublishPostError = PublishTaskV1TasksTaskIdPublishPostErrors[keyof PublishTaskV1TasksTaskIdPublishPostErrors];
+
+export type PublishTaskV1TasksTaskIdPublishPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type PublishTaskV1TasksTaskIdPublishPostResponse = PublishTaskV1TasksTaskIdPublishPostResponses[keyof PublishTaskV1TasksTaskIdPublishPostResponses];
+
+export type ConvertToUrgentV1TasksTaskIdConvertUrgentPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/convert-urgent';
+};
+
+export type ConvertToUrgentV1TasksTaskIdConvertUrgentPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConvertToUrgentV1TasksTaskIdConvertUrgentPostError = ConvertToUrgentV1TasksTaskIdConvertUrgentPostErrors[keyof ConvertToUrgentV1TasksTaskIdConvertUrgentPostErrors];
+
+export type ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponse = ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponses[keyof ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponses];
+
+export type ConvertToConvenientV1TasksTaskIdConvertConvenientPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/convert-convenient';
+};
+
+export type ConvertToConvenientV1TasksTaskIdConvertConvenientPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ConvertToConvenientV1TasksTaskIdConvertConvenientPostError = ConvertToConvenientV1TasksTaskIdConvertConvenientPostErrors[keyof ConvertToConvenientV1TasksTaskIdConvertConvenientPostErrors];
+
+export type ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponse = ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponses[keyof ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponses];
+
+export type PauseApproveTaskV1TasksTaskIdPauseApprovePostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/pause-approve';
+};
+
+export type PauseApproveTaskV1TasksTaskIdPauseApprovePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PauseApproveTaskV1TasksTaskIdPauseApprovePostError = PauseApproveTaskV1TasksTaskIdPauseApprovePostErrors[keyof PauseApproveTaskV1TasksTaskIdPauseApprovePostErrors];
+
+export type PauseApproveTaskV1TasksTaskIdPauseApprovePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type PauseApproveTaskV1TasksTaskIdPauseApprovePostResponse = PauseApproveTaskV1TasksTaskIdPauseApprovePostResponses[keyof PauseApproveTaskV1TasksTaskIdPauseApprovePostResponses];
+
+export type PauseRejectTaskV1TasksTaskIdPauseRejectPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/pause-reject';
+};
+
+export type PauseRejectTaskV1TasksTaskIdPauseRejectPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PauseRejectTaskV1TasksTaskIdPauseRejectPostError = PauseRejectTaskV1TasksTaskIdPauseRejectPostErrors[keyof PauseRejectTaskV1TasksTaskIdPauseRejectPostErrors];
+
+export type PauseRejectTaskV1TasksTaskIdPauseRejectPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type PauseRejectTaskV1TasksTaskIdPauseRejectPostResponse = PauseRejectTaskV1TasksTaskIdPauseRejectPostResponses[keyof PauseRejectTaskV1TasksTaskIdPauseRejectPostResponses];
+
+export type ReassignTaskV1TasksTaskIdReassignPostData = {
+    body: TaskReassignRequest;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/reassign';
+};
+
+export type ReassignTaskV1TasksTaskIdReassignPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReassignTaskV1TasksTaskIdReassignPostError = ReassignTaskV1TasksTaskIdReassignPostErrors[keyof ReassignTaskV1TasksTaskIdReassignPostErrors];
+
+export type ReassignTaskV1TasksTaskIdReassignPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type ReassignTaskV1TasksTaskIdReassignPostResponse = ReassignTaskV1TasksTaskIdReassignPostResponses[keyof ReassignTaskV1TasksTaskIdReassignPostResponses];
+
+export type StartTaskV1TasksTaskIdStartPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/start';
+};
+
+export type StartTaskV1TasksTaskIdStartPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type StartTaskV1TasksTaskIdStartPostError = StartTaskV1TasksTaskIdStartPostErrors[keyof StartTaskV1TasksTaskIdStartPostErrors];
+
+export type StartTaskV1TasksTaskIdStartPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type StartTaskV1TasksTaskIdStartPostResponse = StartTaskV1TasksTaskIdStartPostResponses[keyof StartTaskV1TasksTaskIdStartPostResponses];
+
+export type DeclineTaskV1TasksTaskIdDeclinePostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/decline';
+};
+
+export type DeclineTaskV1TasksTaskIdDeclinePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeclineTaskV1TasksTaskIdDeclinePostError = DeclineTaskV1TasksTaskIdDeclinePostErrors[keyof DeclineTaskV1TasksTaskIdDeclinePostErrors];
+
+export type DeclineTaskV1TasksTaskIdDeclinePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type DeclineTaskV1TasksTaskIdDeclinePostResponse = DeclineTaskV1TasksTaskIdDeclinePostResponses[keyof DeclineTaskV1TasksTaskIdDeclinePostResponses];
+
+export type PauseRequestTaskV1TasksTaskIdPauseRequestPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/pause-request';
+};
+
+export type PauseRequestTaskV1TasksTaskIdPauseRequestPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PauseRequestTaskV1TasksTaskIdPauseRequestPostError = PauseRequestTaskV1TasksTaskIdPauseRequestPostErrors[keyof PauseRequestTaskV1TasksTaskIdPauseRequestPostErrors];
+
+export type PauseRequestTaskV1TasksTaskIdPauseRequestPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type PauseRequestTaskV1TasksTaskIdPauseRequestPostResponse = PauseRequestTaskV1TasksTaskIdPauseRequestPostResponses[keyof PauseRequestTaskV1TasksTaskIdPauseRequestPostResponses];
+
+export type ResumeTaskV1TasksTaskIdResumePostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/resume';
+};
+
+export type ResumeTaskV1TasksTaskIdResumePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ResumeTaskV1TasksTaskIdResumePostError = ResumeTaskV1TasksTaskIdResumePostErrors[keyof ResumeTaskV1TasksTaskIdResumePostErrors];
+
+export type ResumeTaskV1TasksTaskIdResumePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type ResumeTaskV1TasksTaskIdResumePostResponse = ResumeTaskV1TasksTaskIdResumePostResponses[keyof ResumeTaskV1TasksTaskIdResumePostResponses];
+
+export type CompleteTaskV1TasksTaskIdCompletePostData = {
+    body: TaskCompleteRequest;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/complete';
+};
+
+export type CompleteTaskV1TasksTaskIdCompletePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CompleteTaskV1TasksTaskIdCompletePostError = CompleteTaskV1TasksTaskIdCompletePostErrors[keyof CompleteTaskV1TasksTaskIdCompletePostErrors];
+
+export type CompleteTaskV1TasksTaskIdCompletePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type CompleteTaskV1TasksTaskIdCompletePostResponse = CompleteTaskV1TasksTaskIdCompletePostResponses[keyof CompleteTaskV1TasksTaskIdCompletePostResponses];
+
+export type ReadBidsByTaskV1TasksTaskIdBidsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/bids';
+};
+
+export type ReadBidsByTaskV1TasksTaskIdBidsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadBidsByTaskV1TasksTaskIdBidsGetError = ReadBidsByTaskV1TasksTaskIdBidsGetErrors[keyof ReadBidsByTaskV1TasksTaskIdBidsGetErrors];
+
+export type ReadBidsByTaskV1TasksTaskIdBidsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: BidsPublic;
+};
+
+export type ReadBidsByTaskV1TasksTaskIdBidsGetResponse = ReadBidsByTaskV1TasksTaskIdBidsGetResponses[keyof ReadBidsByTaskV1TasksTaskIdBidsGetResponses];
+
+export type CreateBidV1TasksTaskIdBidsPostData = {
+    body: BidCreate;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/bids';
+};
+
+export type CreateBidV1TasksTaskIdBidsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateBidV1TasksTaskIdBidsPostError = CreateBidV1TasksTaskIdBidsPostErrors[keyof CreateBidV1TasksTaskIdBidsPostErrors];
+
+export type CreateBidV1TasksTaskIdBidsPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: BidPublic;
+};
+
+export type CreateBidV1TasksTaskIdBidsPostResponse = CreateBidV1TasksTaskIdBidsPostResponses[keyof CreateBidV1TasksTaskIdBidsPostResponses];
+
+export type UpdateBidV1TasksTaskIdBidsBidIdPutData = {
+    body: BidUpdate;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+        /**
+         * Bid Id
+         */
+        bid_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/bids/{bid_id}';
+};
+
+export type UpdateBidV1TasksTaskIdBidsBidIdPutErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateBidV1TasksTaskIdBidsBidIdPutError = UpdateBidV1TasksTaskIdBidsBidIdPutErrors[keyof UpdateBidV1TasksTaskIdBidsBidIdPutErrors];
+
+export type UpdateBidV1TasksTaskIdBidsBidIdPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: BidPublic;
+};
+
+export type UpdateBidV1TasksTaskIdBidsBidIdPutResponse = UpdateBidV1TasksTaskIdBidsBidIdPutResponses[keyof UpdateBidV1TasksTaskIdBidsBidIdPutResponses];
+
+export type ReadMyBidsV1BidsMyGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/bids/my';
+};
+
+export type ReadMyBidsV1BidsMyGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: BidsPublic;
+};
+
+export type ReadMyBidsV1BidsMyGetResponse = ReadMyBidsV1BidsMyGetResponses[keyof ReadMyBidsV1BidsMyGetResponses];
+
+export type ManualSettleBiddingV1TasksTaskIdSettleBiddingPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/settle-bidding';
+};
+
+export type ManualSettleBiddingV1TasksTaskIdSettleBiddingPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ManualSettleBiddingV1TasksTaskIdSettleBiddingPostError = ManualSettleBiddingV1TasksTaskIdSettleBiddingPostErrors[keyof ManualSettleBiddingV1TasksTaskIdSettleBiddingPostErrors];
+
+export type ManualSettleBiddingV1TasksTaskIdSettleBiddingPostResponses = {
+    /**
+     * Response Manual Settle Bidding V1 Tasks  Task Id  Settle Bidding Post
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ReadDailyReportsV1DailyReportsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Task Id
+         *
+         * 按任务过滤
+         */
+        task_id?: string | null;
+        /**
+         * Report Date
+         *
+         * 按日期过滤
+         */
+        report_date?: string | null;
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量，默认20，最大100
+         */
+        page_size?: number;
+    };
+    url: '/v1/daily-reports/';
+};
+
+export type ReadDailyReportsV1DailyReportsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadDailyReportsV1DailyReportsGetError = ReadDailyReportsV1DailyReportsGetErrors[keyof ReadDailyReportsV1DailyReportsGetErrors];
+
+export type ReadDailyReportsV1DailyReportsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DailyReportsPublic;
+};
+
+export type ReadDailyReportsV1DailyReportsGetResponse = ReadDailyReportsV1DailyReportsGetResponses[keyof ReadDailyReportsV1DailyReportsGetResponses];
+
+export type CreateDailyReportV1DailyReportsPostData = {
+    body: DailyReportCreate;
+    path?: never;
+    query?: never;
+    url: '/v1/daily-reports/';
+};
+
+export type CreateDailyReportV1DailyReportsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateDailyReportV1DailyReportsPostError = CreateDailyReportV1DailyReportsPostErrors[keyof CreateDailyReportV1DailyReportsPostErrors];
+
+export type CreateDailyReportV1DailyReportsPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: DailyReportPublic;
+};
+
+export type CreateDailyReportV1DailyReportsPostResponse = CreateDailyReportV1DailyReportsPostResponses[keyof CreateDailyReportV1DailyReportsPostResponses];
+
+export type GetRemindReportV1DailyReportsRemindGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/daily-reports/remind';
+};
+
+export type GetRemindReportV1DailyReportsRemindGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: RemindResult;
+};
+
+export type GetRemindReportV1DailyReportsRemindGetResponse = GetRemindReportV1DailyReportsRemindGetResponses[keyof GetRemindReportV1DailyReportsRemindGetResponses];
+
+export type DeleteDailyReportV1DailyReportsReportIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Report Id
+         */
+        report_id: string;
+    };
+    query?: never;
+    url: '/v1/daily-reports/{report_id}';
+};
+
+export type DeleteDailyReportV1DailyReportsReportIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteDailyReportV1DailyReportsReportIdDeleteError = DeleteDailyReportV1DailyReportsReportIdDeleteErrors[keyof DeleteDailyReportV1DailyReportsReportIdDeleteErrors];
+
+export type DeleteDailyReportV1DailyReportsReportIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeleteDailyReportV1DailyReportsReportIdDeleteResponse = DeleteDailyReportV1DailyReportsReportIdDeleteResponses[keyof DeleteDailyReportV1DailyReportsReportIdDeleteResponses];
+
+export type ReadDailyReportV1DailyReportsReportIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Report Id
+         */
+        report_id: string;
+    };
+    query?: never;
+    url: '/v1/daily-reports/{report_id}';
+};
+
+export type ReadDailyReportV1DailyReportsReportIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadDailyReportV1DailyReportsReportIdGetError = ReadDailyReportV1DailyReportsReportIdGetErrors[keyof ReadDailyReportV1DailyReportsReportIdGetErrors];
+
+export type ReadDailyReportV1DailyReportsReportIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: DailyReportPublic;
+};
+
+export type ReadDailyReportV1DailyReportsReportIdGetResponse = ReadDailyReportV1DailyReportsReportIdGetResponses[keyof ReadDailyReportV1DailyReportsReportIdGetResponses];
+
+export type UpdateDailyReportV1DailyReportsReportIdPutData = {
+    body: DailyReportUpdate;
+    path: {
+        /**
+         * Report Id
+         */
+        report_id: string;
+    };
+    query?: never;
+    url: '/v1/daily-reports/{report_id}';
+};
+
+export type UpdateDailyReportV1DailyReportsReportIdPutErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateDailyReportV1DailyReportsReportIdPutError = UpdateDailyReportV1DailyReportsReportIdPutErrors[keyof UpdateDailyReportV1DailyReportsReportIdPutErrors];
+
+export type UpdateDailyReportV1DailyReportsReportIdPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: DailyReportPublic;
+};
+
+export type UpdateDailyReportV1DailyReportsReportIdPutResponse = UpdateDailyReportV1DailyReportsReportIdPutResponses[keyof UpdateDailyReportV1DailyReportsReportIdPutResponses];
+
+export type ReadMyStarpointsV1StarpointsMyGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量，默认20，最大100
+         */
+        page_size?: number;
+    };
+    url: '/v1/starpoints/my';
+};
+
+export type ReadMyStarpointsV1StarpointsMyGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadMyStarpointsV1StarpointsMyGetError = ReadMyStarpointsV1StarpointsMyGetErrors[keyof ReadMyStarpointsV1StarpointsMyGetErrors];
+
+export type ReadMyStarpointsV1StarpointsMyGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: StarPointRecordsPublic;
+};
+
+export type ReadMyStarpointsV1StarpointsMyGetResponse = ReadMyStarpointsV1StarpointsMyGetResponses[keyof ReadMyStarpointsV1StarpointsMyGetResponses];
+
+export type ReadMyStarpointSummaryV1StarpointsMySummaryGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/starpoints/my/summary';
+};
+
+export type ReadMyStarpointSummaryV1StarpointsMySummaryGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: StarPointSummary;
+};
+
+export type ReadMyStarpointSummaryV1StarpointsMySummaryGetResponse = ReadMyStarpointSummaryV1StarpointsMySummaryGetResponses[keyof ReadMyStarpointSummaryV1StarpointsMySummaryGetResponses];
+
+export type ReadStarpointLeaderboardV1StarpointsLeaderboardGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         *
+         * 返回工程师数量，默认100
+         */
+        limit?: number;
+    };
+    url: '/v1/starpoints/leaderboard';
+};
+
+export type ReadStarpointLeaderboardV1StarpointsLeaderboardGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadStarpointLeaderboardV1StarpointsLeaderboardGetError = ReadStarpointLeaderboardV1StarpointsLeaderboardGetErrors[keyof ReadStarpointLeaderboardV1StarpointsLeaderboardGetErrors];
+
+export type ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: StarPointLeaderboard;
+};
+
+export type ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponse = ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponses[keyof ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponses];
+
+export type AdjustStarpointV1StarpointsAdjustPostData = {
+    body: StarPointAdjustRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/starpoints/adjust';
+};
+
+export type AdjustStarpointV1StarpointsAdjustPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdjustStarpointV1StarpointsAdjustPostError = AdjustStarpointV1StarpointsAdjustPostErrors[keyof AdjustStarpointV1StarpointsAdjustPostErrors];
+
+export type AdjustStarpointV1StarpointsAdjustPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: StarPointRecordPublic;
+};
+
+export type AdjustStarpointV1StarpointsAdjustPostResponse = AdjustStarpointV1StarpointsAdjustPostResponses[keyof AdjustStarpointV1StarpointsAdjustPostResponses];
+
+export type ReadMySalaryV1SalariesMyGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/salaries/my';
+};
+
+export type ReadMySalaryV1SalariesMyGetResponses = {
+    /**
+     * Response Read My Salary V1 Salaries My Get
+     *
+     * Successful Response
+     */
+    200: EngineerSalaryDetail | PmSalaryDetail;
+};
+
+export type ReadMySalaryV1SalariesMyGetResponse = ReadMySalaryV1SalariesMyGetResponses[keyof ReadMySalaryV1SalariesMyGetResponses];
+
+export type ReadSalarySummaryV1SalariesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量，默认20
+         */
+        page_size?: number;
+    };
+    url: '/v1/salaries';
+};
+
+export type ReadSalarySummaryV1SalariesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadSalarySummaryV1SalariesGetError = ReadSalarySummaryV1SalariesGetErrors[keyof ReadSalarySummaryV1SalariesGetErrors];
+
+export type ReadSalarySummaryV1SalariesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SalarySummaryList;
+};
+
+export type ReadSalarySummaryV1SalariesGetResponse = ReadSalarySummaryV1SalariesGetResponses[keyof ReadSalarySummaryV1SalariesGetResponses];
+
+export type UpdateSalaryParamsV1SalariesUsersUserIdParamsPutData = {
+    body: SalaryParamsUpdate;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/v1/salaries/users/{user_id}/params';
+};
+
+export type UpdateSalaryParamsV1SalariesUsersUserIdParamsPutErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateSalaryParamsV1SalariesUsersUserIdParamsPutError = UpdateSalaryParamsV1SalariesUsersUserIdParamsPutErrors[keyof UpdateSalaryParamsV1SalariesUsersUserIdParamsPutErrors];
+
+export type UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponse = UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponses[keyof UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponses];
+
+export type ExportSalariesV1SalariesExportPostData = {
+    body: SalaryExportRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/salaries/export';
+};
+
+export type ExportSalariesV1SalariesExportPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ExportSalariesV1SalariesExportPostError = ExportSalariesV1SalariesExportPostErrors[keyof ExportSalariesV1SalariesExportPostErrors];
+
+export type ExportSalariesV1SalariesExportPostResponses = {
+    /**
+     * Response Export Salaries V1 Salaries Export Post
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ReadEngineerDashboardV1DashboardEngineerGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/dashboard/engineer';
+};
+
+export type ReadEngineerDashboardV1DashboardEngineerGetResponses = {
+    /**
+     * Response Read Engineer Dashboard V1 Dashboard Engineer Get
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ReadPmDashboardV1DashboardPmGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/dashboard/pm';
+};
+
+export type ReadPmDashboardV1DashboardPmGetResponses = {
+    /**
+     * Response Read Pm Dashboard V1 Dashboard Pm Get
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ReadAdminDashboardV1DashboardAdminGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/dashboard/admin';
+};
+
+export type ReadAdminDashboardV1DashboardAdminGetResponses = {
+    /**
+     * Response Read Admin Dashboard V1 Dashboard Admin Get
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type ReadRuleAuditLogsV1SystemRulesAuditLogsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量，默认20
+         */
+        page_size?: number;
+    };
+    url: '/v1/system-rules/audit-logs';
+};
+
+export type ReadRuleAuditLogsV1SystemRulesAuditLogsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadRuleAuditLogsV1SystemRulesAuditLogsGetError = ReadRuleAuditLogsV1SystemRulesAuditLogsGetErrors[keyof ReadRuleAuditLogsV1SystemRulesAuditLogsGetErrors];
+
+export type ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AuditLogList;
+};
+
+export type ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponse = ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponses[keyof ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponses];
+
+export type ReadRulesV1SystemRulesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Category
+         *
+         * 按分类过滤（starpoint_reward, completion_judgment, salary_formula, system_param）
+         */
+        category?: string | null;
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量，默认20
+         */
+        page_size?: number;
+    };
+    url: '/v1/system-rules';
+};
+
+export type ReadRulesV1SystemRulesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadRulesV1SystemRulesGetError = ReadRulesV1SystemRulesGetErrors[keyof ReadRulesV1SystemRulesGetErrors];
+
+export type ReadRulesV1SystemRulesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SystemRulesPublic;
+};
+
+export type ReadRulesV1SystemRulesGetResponse = ReadRulesV1SystemRulesGetResponses[keyof ReadRulesV1SystemRulesGetResponses];
+
+export type CreateRuleV1SystemRulesPostData = {
+    body: SystemRuleCreate;
+    path?: never;
+    query?: never;
+    url: '/v1/system-rules';
+};
+
+export type CreateRuleV1SystemRulesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateRuleV1SystemRulesPostError = CreateRuleV1SystemRulesPostErrors[keyof CreateRuleV1SystemRulesPostErrors];
+
+export type CreateRuleV1SystemRulesPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: SystemRulePublic;
+};
+
+export type CreateRuleV1SystemRulesPostResponse = CreateRuleV1SystemRulesPostResponses[keyof CreateRuleV1SystemRulesPostResponses];
+
+export type DeleteRuleV1SystemRulesRuleIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Rule Id
+         */
+        rule_id: string;
+    };
+    query?: never;
+    url: '/v1/system-rules/{rule_id}';
+};
+
+export type DeleteRuleV1SystemRulesRuleIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteRuleV1SystemRulesRuleIdDeleteError = DeleteRuleV1SystemRulesRuleIdDeleteErrors[keyof DeleteRuleV1SystemRulesRuleIdDeleteErrors];
+
+export type DeleteRuleV1SystemRulesRuleIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeleteRuleV1SystemRulesRuleIdDeleteResponse = DeleteRuleV1SystemRulesRuleIdDeleteResponses[keyof DeleteRuleV1SystemRulesRuleIdDeleteResponses];
+
+export type ReadRuleV1SystemRulesRuleIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Rule Id
+         */
+        rule_id: string;
+    };
+    query?: never;
+    url: '/v1/system-rules/{rule_id}';
+};
+
+export type ReadRuleV1SystemRulesRuleIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadRuleV1SystemRulesRuleIdGetError = ReadRuleV1SystemRulesRuleIdGetErrors[keyof ReadRuleV1SystemRulesRuleIdGetErrors];
+
+export type ReadRuleV1SystemRulesRuleIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: SystemRulePublic;
+};
+
+export type ReadRuleV1SystemRulesRuleIdGetResponse = ReadRuleV1SystemRulesRuleIdGetResponses[keyof ReadRuleV1SystemRulesRuleIdGetResponses];
+
+export type UpdateRuleV1SystemRulesRuleIdPutData = {
+    body: SystemRuleUpdate;
+    path: {
+        /**
+         * Rule Id
+         */
+        rule_id: string;
+    };
+    query?: never;
+    url: '/v1/system-rules/{rule_id}';
+};
+
+export type UpdateRuleV1SystemRulesRuleIdPutErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateRuleV1SystemRulesRuleIdPutError = UpdateRuleV1SystemRulesRuleIdPutErrors[keyof UpdateRuleV1SystemRulesRuleIdPutErrors];
+
+export type UpdateRuleV1SystemRulesRuleIdPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: SystemRulePublic;
+};
+
+export type UpdateRuleV1SystemRulesRuleIdPutResponse = UpdateRuleV1SystemRulesRuleIdPutResponses[keyof UpdateRuleV1SystemRulesRuleIdPutResponses];
+
+export type ReadMyClientResourcesV1ClientResourcesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量，默认20
+         */
+        page_size?: number;
+    };
+    url: '/v1/client-resources';
+};
+
+export type ReadMyClientResourcesV1ClientResourcesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadMyClientResourcesV1ClientResourcesGetError = ReadMyClientResourcesV1ClientResourcesGetErrors[keyof ReadMyClientResourcesV1ClientResourcesGetErrors];
+
+export type ReadMyClientResourcesV1ClientResourcesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ClientResourcesPublic;
+};
+
+export type ReadMyClientResourcesV1ClientResourcesGetResponse = ReadMyClientResourcesV1ClientResourcesGetResponses[keyof ReadMyClientResourcesV1ClientResourcesGetResponses];
+
+export type CreateClientResourceV1ClientResourcesPostData = {
+    body: ClientResourceCreate;
+    path?: never;
+    query?: never;
+    url: '/v1/client-resources';
+};
+
+export type CreateClientResourceV1ClientResourcesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateClientResourceV1ClientResourcesPostError = CreateClientResourceV1ClientResourcesPostErrors[keyof CreateClientResourceV1ClientResourcesPostErrors];
+
+export type CreateClientResourceV1ClientResourcesPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: ClientResourcePublic;
+};
+
+export type CreateClientResourceV1ClientResourcesPostResponse = CreateClientResourceV1ClientResourcesPostResponses[keyof CreateClientResourceV1ClientResourcesPostResponses];
+
+export type ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/client-resources/admin';
+};
+
+export type ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponses = {
+    /**
+     * Response Read Admin Client Resource Summary V1 Client Resources Admin Get
+     *
+     * Successful Response
+     */
+    200: Array<ClientResourceSummary>;
+};
+
+export type ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse = ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponses[keyof ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponses];
+
+export type ReadAllClientResourcesV1ClientResourcesAllGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量，默认20
+         */
+        page_size?: number;
+    };
+    url: '/v1/client-resources/all';
+};
+
+export type ReadAllClientResourcesV1ClientResourcesAllGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadAllClientResourcesV1ClientResourcesAllGetError = ReadAllClientResourcesV1ClientResourcesAllGetErrors[keyof ReadAllClientResourcesV1ClientResourcesAllGetErrors];
+
+export type ReadAllClientResourcesV1ClientResourcesAllGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: ClientResourcesPublic;
+};
+
+export type ReadAllClientResourcesV1ClientResourcesAllGetResponse = ReadAllClientResourcesV1ClientResourcesAllGetResponses[keyof ReadAllClientResourcesV1ClientResourcesAllGetResponses];

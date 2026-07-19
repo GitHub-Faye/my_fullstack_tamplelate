@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client/index.js';
-import type { CreateItemV1ItemsPostData, CreateItemV1ItemsPostErrors, CreateItemV1ItemsPostResponses, CreateUserV1UsersPostData, CreateUserV1UsersPostErrors, CreateUserV1UsersPostResponses, DeleteItemV1ItemsItemIdDeleteData, DeleteItemV1ItemsItemIdDeleteErrors, DeleteItemV1ItemsItemIdDeleteResponses, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponses, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteErrors, DeleteUserV1UsersUserIdDeleteResponses, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponses, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostErrors, LoginAccessTokenV1LoginAccessTokenPostResponses, ReadItemsV1ItemsGetData, ReadItemsV1ItemsGetErrors, ReadItemsV1ItemsGetResponses, ReadItemV1ItemsItemIdGetData, ReadItemV1ItemsItemIdGetErrors, ReadItemV1ItemsItemIdGetResponses, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetErrors, ReadUserByIdV1UsersUserIdGetResponses, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponses, ReadUsersV1UsersGetData, ReadUsersV1UsersGetErrors, ReadUsersV1UsersGetResponses, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostErrors, RegisterUserV1UsersSignupPostResponses, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponses, UpdateItemV1ItemsItemIdPutData, UpdateItemV1ItemsItemIdPutErrors, UpdateItemV1ItemsItemIdPutResponses, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchErrors, UpdatePasswordMeV1UsersMePasswordPatchResponses, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchErrors, UpdateUserMeV1UsersMePatchResponses, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchErrors, UpdateUserV1UsersUserIdPatchResponses } from './types.gen.js';
+import type { AdjustStarpointV1StarpointsAdjustPostData, AdjustStarpointV1StarpointsAdjustPostErrors, AdjustStarpointV1StarpointsAdjustPostResponses, AdminCreateUserV1AdminUsersPostData, AdminCreateUserV1AdminUsersPostErrors, AdminCreateUserV1AdminUsersPostResponses, AdminReadAuditLogsV1AdminAuditLogsGetData, AdminReadAuditLogsV1AdminAuditLogsGetErrors, AdminReadAuditLogsV1AdminAuditLogsGetResponses, AdminReadUsersV1AdminUsersGetData, AdminReadUsersV1AdminUsersGetErrors, AdminReadUsersV1AdminUsersGetResponses, AdminReadUserV1AdminUsersUserIdGetData, AdminReadUserV1AdminUsersUserIdGetErrors, AdminReadUserV1AdminUsersUserIdGetResponses, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostErrors, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponses, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutErrors, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponses, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostData, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostErrors, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponses, AdminUpdateUserV1AdminUsersUserIdPatchData, AdminUpdateUserV1AdminUsersUserIdPatchErrors, AdminUpdateUserV1AdminUsersUserIdPatchResponses, ApproveTaskV1TasksTaskIdApprovePostData, ApproveTaskV1TasksTaskIdApprovePostErrors, ApproveTaskV1TasksTaskIdApprovePostResponses, CompleteTaskV1TasksTaskIdCompletePostData, CompleteTaskV1TasksTaskIdCompletePostErrors, CompleteTaskV1TasksTaskIdCompletePostResponses, ConvertToConvenientV1TasksTaskIdConvertConvenientPostData, ConvertToConvenientV1TasksTaskIdConvertConvenientPostErrors, ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponses, ConvertToUrgentV1TasksTaskIdConvertUrgentPostData, ConvertToUrgentV1TasksTaskIdConvertUrgentPostErrors, ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponses, CreateBidV1TasksTaskIdBidsPostData, CreateBidV1TasksTaskIdBidsPostErrors, CreateBidV1TasksTaskIdBidsPostResponses, CreateClientResourceV1ClientResourcesPostData, CreateClientResourceV1ClientResourcesPostErrors, CreateClientResourceV1ClientResourcesPostResponses, CreateDailyReportV1DailyReportsPostData, CreateDailyReportV1DailyReportsPostErrors, CreateDailyReportV1DailyReportsPostResponses, CreateRuleV1SystemRulesPostData, CreateRuleV1SystemRulesPostErrors, CreateRuleV1SystemRulesPostResponses, CreateTaskV1TasksPostData, CreateTaskV1TasksPostErrors, CreateTaskV1TasksPostResponses, CreateUserV1UsersPostData, CreateUserV1UsersPostErrors, CreateUserV1UsersPostResponses, DeclineTaskV1TasksTaskIdDeclinePostData, DeclineTaskV1TasksTaskIdDeclinePostErrors, DeclineTaskV1TasksTaskIdDeclinePostResponses, DeleteDailyReportV1DailyReportsReportIdDeleteData, DeleteDailyReportV1DailyReportsReportIdDeleteErrors, DeleteDailyReportV1DailyReportsReportIdDeleteResponses, DeleteRuleV1SystemRulesRuleIdDeleteData, DeleteRuleV1SystemRulesRuleIdDeleteErrors, DeleteRuleV1SystemRulesRuleIdDeleteResponses, DeleteTaskV1TasksTaskIdDeleteData, DeleteTaskV1TasksTaskIdDeleteErrors, DeleteTaskV1TasksTaskIdDeleteResponses, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponses, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteErrors, DeleteUserV1UsersUserIdDeleteResponses, ExportSalariesV1SalariesExportPostData, ExportSalariesV1SalariesExportPostErrors, ExportSalariesV1SalariesExportPostResponses, GetRemindReportV1DailyReportsRemindGetData, GetRemindReportV1DailyReportsRemindGetResponses, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponses, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostErrors, LoginAccessTokenV1LoginAccessTokenPostResponses, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostData, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostErrors, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostResponses, PauseApproveTaskV1TasksTaskIdPauseApprovePostData, PauseApproveTaskV1TasksTaskIdPauseApprovePostErrors, PauseApproveTaskV1TasksTaskIdPauseApprovePostResponses, PauseRejectTaskV1TasksTaskIdPauseRejectPostData, PauseRejectTaskV1TasksTaskIdPauseRejectPostErrors, PauseRejectTaskV1TasksTaskIdPauseRejectPostResponses, PauseRequestTaskV1TasksTaskIdPauseRequestPostData, PauseRequestTaskV1TasksTaskIdPauseRequestPostErrors, PauseRequestTaskV1TasksTaskIdPauseRequestPostResponses, PublishTaskV1TasksTaskIdPublishPostData, PublishTaskV1TasksTaskIdPublishPostErrors, PublishTaskV1TasksTaskIdPublishPostResponses, ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData, ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponses, ReadAdminDashboardV1DashboardAdminGetData, ReadAdminDashboardV1DashboardAdminGetResponses, ReadAllClientResourcesV1ClientResourcesAllGetData, ReadAllClientResourcesV1ClientResourcesAllGetErrors, ReadAllClientResourcesV1ClientResourcesAllGetResponses, ReadBidsByTaskV1TasksTaskIdBidsGetData, ReadBidsByTaskV1TasksTaskIdBidsGetErrors, ReadBidsByTaskV1TasksTaskIdBidsGetResponses, ReadDailyReportsV1DailyReportsGetData, ReadDailyReportsV1DailyReportsGetErrors, ReadDailyReportsV1DailyReportsGetResponses, ReadDailyReportV1DailyReportsReportIdGetData, ReadDailyReportV1DailyReportsReportIdGetErrors, ReadDailyReportV1DailyReportsReportIdGetResponses, ReadEngineerDashboardV1DashboardEngineerGetData, ReadEngineerDashboardV1DashboardEngineerGetResponses, ReadMyBidsV1BidsMyGetData, ReadMyBidsV1BidsMyGetResponses, ReadMyClientResourcesV1ClientResourcesGetData, ReadMyClientResourcesV1ClientResourcesGetErrors, ReadMyClientResourcesV1ClientResourcesGetResponses, ReadMySalaryV1SalariesMyGetData, ReadMySalaryV1SalariesMyGetResponses, ReadMyStarpointSummaryV1StarpointsMySummaryGetData, ReadMyStarpointSummaryV1StarpointsMySummaryGetResponses, ReadMyStarpointsV1StarpointsMyGetData, ReadMyStarpointsV1StarpointsMyGetErrors, ReadMyStarpointsV1StarpointsMyGetResponses, ReadPmDashboardV1DashboardPmGetData, ReadPmDashboardV1DashboardPmGetResponses, ReadRuleAuditLogsV1SystemRulesAuditLogsGetData, ReadRuleAuditLogsV1SystemRulesAuditLogsGetErrors, ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponses, ReadRulesV1SystemRulesGetData, ReadRulesV1SystemRulesGetErrors, ReadRulesV1SystemRulesGetResponses, ReadRuleV1SystemRulesRuleIdGetData, ReadRuleV1SystemRulesRuleIdGetErrors, ReadRuleV1SystemRulesRuleIdGetResponses, ReadSalarySummaryV1SalariesGetData, ReadSalarySummaryV1SalariesGetErrors, ReadSalarySummaryV1SalariesGetResponses, ReadStarpointLeaderboardV1StarpointsLeaderboardGetData, ReadStarpointLeaderboardV1StarpointsLeaderboardGetErrors, ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponses, ReadTasksV1TasksGetData, ReadTasksV1TasksGetErrors, ReadTasksV1TasksGetResponses, ReadTaskV1TasksTaskIdGetData, ReadTaskV1TasksTaskIdGetErrors, ReadTaskV1TasksTaskIdGetResponses, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetErrors, ReadUserByIdV1UsersUserIdGetResponses, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponses, ReadUsersV1UsersGetData, ReadUsersV1UsersGetErrors, ReadUsersV1UsersGetResponses, ReassignTaskV1TasksTaskIdReassignPostData, ReassignTaskV1TasksTaskIdReassignPostErrors, ReassignTaskV1TasksTaskIdReassignPostResponses, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostErrors, RegisterUserV1UsersSignupPostResponses, RejectTaskV1TasksTaskIdRejectPostData, RejectTaskV1TasksTaskIdRejectPostErrors, RejectTaskV1TasksTaskIdRejectPostResponses, ResumeTaskV1TasksTaskIdResumePostData, ResumeTaskV1TasksTaskIdResumePostErrors, ResumeTaskV1TasksTaskIdResumePostResponses, StartTaskV1TasksTaskIdStartPostData, StartTaskV1TasksTaskIdStartPostErrors, StartTaskV1TasksTaskIdStartPostResponses, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponses, UpdateBidV1TasksTaskIdBidsBidIdPutData, UpdateBidV1TasksTaskIdBidsBidIdPutErrors, UpdateBidV1TasksTaskIdBidsBidIdPutResponses, UpdateDailyReportV1DailyReportsReportIdPutData, UpdateDailyReportV1DailyReportsReportIdPutErrors, UpdateDailyReportV1DailyReportsReportIdPutResponses, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchErrors, UpdatePasswordMeV1UsersMePasswordPatchResponses, UpdateRuleV1SystemRulesRuleIdPutData, UpdateRuleV1SystemRulesRuleIdPutErrors, UpdateRuleV1SystemRulesRuleIdPutResponses, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutData, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutErrors, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponses, UpdateTaskV1TasksTaskIdPutData, UpdateTaskV1TasksTaskIdPutErrors, UpdateTaskV1TasksTaskIdPutResponses, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchErrors, UpdateUserMeV1UsersMePatchResponses, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchErrors, UpdateUserV1UsersUserIdPatchResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -362,29 +362,24 @@ export const registerUserV1UsersSignupPost = <ThrowOnError extends boolean = fal
 });
 
 /**
- * Read Items
+ * 获取用户列表（管理员）
  *
- * Retrieve items.
- *
- * - Regular users can only view their own items
- * - Users with item:admin permission can view all items
+ * 管理员获取所有用户列表，包含工资字段详情
  */
-export const readItemsV1ItemsGet = <ThrowOnError extends boolean = false>(options?: Options<ReadItemsV1ItemsGetData, ThrowOnError>) => (options?.client ?? client).get<ReadItemsV1ItemsGetResponses, ReadItemsV1ItemsGetErrors, ThrowOnError>({
+export const adminReadUsersV1AdminUsersGet = <ThrowOnError extends boolean = false>(options?: Options<AdminReadUsersV1AdminUsersGetData, ThrowOnError>) => (options?.client ?? client).get<AdminReadUsersV1AdminUsersGetResponses, AdminReadUsersV1AdminUsersGetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/items/',
+    url: '/v1/admin/users',
     ...options
 });
 
 /**
- * Create Item
+ * 创建用户（管理员）
  *
- * Create new item.
- *
- * Requires item:create permission.
+ * 管理员创建工程师或 PM 账号，支持设置角色和工资字段
  */
-export const createItemV1ItemsPost = <ThrowOnError extends boolean = false>(options: Options<CreateItemV1ItemsPostData, ThrowOnError>) => (options.client ?? client).post<CreateItemV1ItemsPostResponses, CreateItemV1ItemsPostErrors, ThrowOnError>({
+export const adminCreateUserV1AdminUsersPost = <ThrowOnError extends boolean = false>(options: Options<AdminCreateUserV1AdminUsersPostData, ThrowOnError>) => (options.client ?? client).post<AdminCreateUserV1AdminUsersPostResponses, AdminCreateUserV1AdminUsersPostErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/items/',
+    url: '/v1/admin/users',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -393,47 +388,689 @@ export const createItemV1ItemsPost = <ThrowOnError extends boolean = false>(opti
 });
 
 /**
- * Delete Item
+ * 获取用户详情（管理员）
  *
- * Delete an item.
- *
- * - Regular users can only delete their own items (requires item:delete permission)
- * - Users with item:admin permission can delete any item
+ * 管理员获取指定用户的详细信息，包含工资字段
  */
-export const deleteItemV1ItemsItemIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteItemV1ItemsItemIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteItemV1ItemsItemIdDeleteResponses, DeleteItemV1ItemsItemIdDeleteErrors, ThrowOnError>({
+export const adminReadUserV1AdminUsersUserIdGet = <ThrowOnError extends boolean = false>(options: Options<AdminReadUserV1AdminUsersUserIdGetData, ThrowOnError>) => (options.client ?? client).get<AdminReadUserV1AdminUsersUserIdGetResponses, AdminReadUserV1AdminUsersUserIdGetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/items/{item_id}',
+    url: '/v1/admin/users/{user_id}',
     ...options
 });
 
 /**
- * Read Item
+ * 更新用户信息（管理员）
  *
- * Get item by ID.
- *
- * - Regular users can only view their own items
- * - Users with item:admin permission can view any item
+ * 管理员更新用户信息，包括角色、工资字段等
  */
-export const readItemV1ItemsItemIdGet = <ThrowOnError extends boolean = false>(options: Options<ReadItemV1ItemsItemIdGetData, ThrowOnError>) => (options.client ?? client).get<ReadItemV1ItemsItemIdGetResponses, ReadItemV1ItemsItemIdGetErrors, ThrowOnError>({
+export const adminUpdateUserV1AdminUsersUserIdPatch = <ThrowOnError extends boolean = false>(options: Options<AdminUpdateUserV1AdminUsersUserIdPatchData, ThrowOnError>) => (options.client ?? client).patch<AdminUpdateUserV1AdminUsersUserIdPatchResponses, AdminUpdateUserV1AdminUsersUserIdPatchErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/items/{item_id}',
-    ...options
-});
-
-/**
- * Update Item
- *
- * Update an item.
- *
- * - Regular users can only update their own items (requires item:update permission)
- * - Users with item:admin permission can update any item
- */
-export const updateItemV1ItemsItemIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateItemV1ItemsItemIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateItemV1ItemsItemIdPutResponses, UpdateItemV1ItemsItemIdPutErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/v1/items/{item_id}',
+    url: '/v1/admin/users/{user_id}',
     ...options,
     headers: {
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * 启用/禁用用户（管理员）
+ *
+ * 管理员启用或禁用指定用户账号
+ */
+export const adminToggleUserActiveV1AdminUsersUserIdToggleActivePost = <ThrowOnError extends boolean = false>(options: Options<AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostData, ThrowOnError>) => (options.client ?? client).post<AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponses, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/admin/users/{user_id}/toggle-active',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 重置用户密码（管理员）
+ *
+ * 管理员重置指定用户的密码
+ */
+export const adminResetPasswordV1AdminUsersUserIdResetPasswordPost = <ThrowOnError extends boolean = false>(options: Options<AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData, ThrowOnError>) => (options.client ?? client).post<AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponses, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/admin/users/{user_id}/reset-password',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 设置 PM 客资参数（管理员）
+ *
+ * 管理员设置 PM 的基准客资数（baseline_client_count）
+ */
+export const adminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPut = <ThrowOnError extends boolean = false>(options: Options<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData, ThrowOnError>) => (options.client ?? client).put<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponses, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/admin/users/{user_id}/client-resource-params',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查看操作日志（管理员）
+ *
+ * 管理员查看系统操作审计日志
+ */
+export const adminReadAuditLogsV1AdminAuditLogsGet = <ThrowOnError extends boolean = false>(options?: Options<AdminReadAuditLogsV1AdminAuditLogsGetData, ThrowOnError>) => (options?.client ?? client).get<AdminReadAuditLogsV1AdminAuditLogsGetResponses, AdminReadAuditLogsV1AdminAuditLogsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/admin/audit-logs',
+    ...options
+});
+
+/**
+ * 查看任务列表
+ *
+ * PM 查看自己的任务列表，管理员可查看所有任务
+ */
+export const readTasksV1TasksGet = <ThrowOnError extends boolean = false>(options?: Options<ReadTasksV1TasksGetData, ThrowOnError>) => (options?.client ?? client).get<ReadTasksV1TasksGetResponses, ReadTasksV1TasksGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/',
+    ...options
+});
+
+/**
+ * 创建任务（PM）
+ *
+ * PM 创建新任务，初始状态为 'unconfirmed'，等待管理员审核
+ */
+export const createTaskV1TasksPost = <ThrowOnError extends boolean = false>(options: Options<CreateTaskV1TasksPostData, ThrowOnError>) => (options.client ?? client).post<CreateTaskV1TasksPostResponses, CreateTaskV1TasksPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 删除任务
+ *
+ * 删除任务（仅管理员或超管）
+ */
+export const deleteTaskV1TasksTaskIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteTaskV1TasksTaskIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteTaskV1TasksTaskIdDeleteResponses, DeleteTaskV1TasksTaskIdDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}',
+    ...options
+});
+
+/**
+ * 查看任务详情
+ *
+ * 查看指定任务的详细信息
+ */
+export const readTaskV1TasksTaskIdGet = <ThrowOnError extends boolean = false>(options: Options<ReadTaskV1TasksTaskIdGetData, ThrowOnError>) => (options.client ?? client).get<ReadTaskV1TasksTaskIdGetResponses, ReadTaskV1TasksTaskIdGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}',
+    ...options
+});
+
+/**
+ * 更新任务（PM）
+ *
+ * PM 更新任务信息，仅 'unconfirmed' 状态可编辑
+ */
+export const updateTaskV1TasksTaskIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateTaskV1TasksTaskIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateTaskV1TasksTaskIdPutResponses, UpdateTaskV1TasksTaskIdPutErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 审核通过任务（管理员）
+ *
+ * 管理员审核通过任务，状态变为 'confirmed_unpublished'
+ */
+export const approveTaskV1TasksTaskIdApprovePost = <ThrowOnError extends boolean = false>(options: Options<ApproveTaskV1TasksTaskIdApprovePostData, ThrowOnError>) => (options.client ?? client).post<ApproveTaskV1TasksTaskIdApprovePostResponses, ApproveTaskV1TasksTaskIdApprovePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/approve',
+    ...options
+});
+
+/**
+ * 驳回任务（管理员）
+ *
+ * 管理员驳回任务，状态保持 'unconfirmed'
+ */
+export const rejectTaskV1TasksTaskIdRejectPost = <ThrowOnError extends boolean = false>(options: Options<RejectTaskV1TasksTaskIdRejectPostData, ThrowOnError>) => (options.client ?? client).post<RejectTaskV1TasksTaskIdRejectPostResponses, RejectTaskV1TasksTaskIdRejectPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/reject',
+    ...options
+});
+
+/**
+ * 发布任务到竞价池（管理员）
+ *
+ * 管理员发布任务到竞价池，状态变为 'bidding'
+ */
+export const publishTaskV1TasksTaskIdPublishPost = <ThrowOnError extends boolean = false>(options: Options<PublishTaskV1TasksTaskIdPublishPostData, ThrowOnError>) => (options.client ?? client).post<PublishTaskV1TasksTaskIdPublishPostResponses, PublishTaskV1TasksTaskIdPublishPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/publish',
+    ...options
+});
+
+/**
+ * 转换为紧急任务（管理员）
+ *
+ * 管理员将任务类型转换为 'urgent'
+ */
+export const convertToUrgentV1TasksTaskIdConvertUrgentPost = <ThrowOnError extends boolean = false>(options: Options<ConvertToUrgentV1TasksTaskIdConvertUrgentPostData, ThrowOnError>) => (options.client ?? client).post<ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponses, ConvertToUrgentV1TasksTaskIdConvertUrgentPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/convert-urgent',
+    ...options
+});
+
+/**
+ * 转换为便捷任务（管理员）
+ *
+ * 管理员将任务类型转换为 'convenient'
+ */
+export const convertToConvenientV1TasksTaskIdConvertConvenientPost = <ThrowOnError extends boolean = false>(options: Options<ConvertToConvenientV1TasksTaskIdConvertConvenientPostData, ThrowOnError>) => (options.client ?? client).post<ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponses, ConvertToConvenientV1TasksTaskIdConvertConvenientPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/convert-convenient',
+    ...options
+});
+
+/**
+ * 审批暂停（管理员）
+ *
+ * 管理员审批确认任务暂停，状态从 PAUSE_REQUESTED 变为 PAUSED
+ */
+export const pauseApproveTaskV1TasksTaskIdPauseApprovePost = <ThrowOnError extends boolean = false>(options: Options<PauseApproveTaskV1TasksTaskIdPauseApprovePostData, ThrowOnError>) => (options.client ?? client).post<PauseApproveTaskV1TasksTaskIdPauseApprovePostResponses, PauseApproveTaskV1TasksTaskIdPauseApprovePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/pause-approve',
+    ...options
+});
+
+/**
+ * 驳回暂停（管理员）
+ *
+ * 管理员驳回工程师的暂停申请，状态回到 IN_PROGRESS
+ */
+export const pauseRejectTaskV1TasksTaskIdPauseRejectPost = <ThrowOnError extends boolean = false>(options: Options<PauseRejectTaskV1TasksTaskIdPauseRejectPostData, ThrowOnError>) => (options.client ?? client).post<PauseRejectTaskV1TasksTaskIdPauseRejectPostResponses, PauseRejectTaskV1TasksTaskIdPauseRejectPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/pause-reject',
+    ...options
+});
+
+/**
+ * 改派任务（管理员）
+ *
+ * 管理员将任务改派给其他工程师，状态变为待开工
+ */
+export const reassignTaskV1TasksTaskIdReassignPost = <ThrowOnError extends boolean = false>(options: Options<ReassignTaskV1TasksTaskIdReassignPostData, ThrowOnError>) => (options.client ?? client).post<ReassignTaskV1TasksTaskIdReassignPostResponses, ReassignTaskV1TasksTaskIdReassignPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/reassign',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 启动任务
+ *
+ * 工程师启动待开工的任务，状态从 PENDING_START 变为 IN_PROGRESS
+ */
+export const startTaskV1TasksTaskIdStartPost = <ThrowOnError extends boolean = false>(options: Options<StartTaskV1TasksTaskIdStartPostData, ThrowOnError>) => (options.client ?? client).post<StartTaskV1TasksTaskIdStartPostResponses, StartTaskV1TasksTaskIdStartPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/start',
+    ...options
+});
+
+/**
+ * 拒绝任务
+ *
+ * 工程师拒绝待开工的任务，任务重新进入竞价
+ */
+export const declineTaskV1TasksTaskIdDeclinePost = <ThrowOnError extends boolean = false>(options: Options<DeclineTaskV1TasksTaskIdDeclinePostData, ThrowOnError>) => (options.client ?? client).post<DeclineTaskV1TasksTaskIdDeclinePostResponses, DeclineTaskV1TasksTaskIdDeclinePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/decline',
+    ...options
+});
+
+/**
+ * 申请暂停
+ *
+ * 工程师申请暂停正在进行的任务
+ */
+export const pauseRequestTaskV1TasksTaskIdPauseRequestPost = <ThrowOnError extends boolean = false>(options: Options<PauseRequestTaskV1TasksTaskIdPauseRequestPostData, ThrowOnError>) => (options.client ?? client).post<PauseRequestTaskV1TasksTaskIdPauseRequestPostResponses, PauseRequestTaskV1TasksTaskIdPauseRequestPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/pause-request',
+    ...options
+});
+
+/**
+ * 恢复任务
+ *
+ * 工程师恢复暂停的任务
+ */
+export const resumeTaskV1TasksTaskIdResumePost = <ThrowOnError extends boolean = false>(options: Options<ResumeTaskV1TasksTaskIdResumePostData, ThrowOnError>) => (options.client ?? client).post<ResumeTaskV1TasksTaskIdResumePostResponses, ResumeTaskV1TasksTaskIdResumePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/resume',
+    ...options
+});
+
+/**
+ * 完成任务
+ *
+ * 工程师标记任务完成，填写实际工时
+ */
+export const completeTaskV1TasksTaskIdCompletePost = <ThrowOnError extends boolean = false>(options: Options<CompleteTaskV1TasksTaskIdCompletePostData, ThrowOnError>) => (options.client ?? client).post<CompleteTaskV1TasksTaskIdCompletePostResponses, CompleteTaskV1TasksTaskIdCompletePostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/complete',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查看任务的竞价报价列表
+ *
+ * 查看指定任务的所有竞价报价
+ */
+export const readBidsByTaskV1TasksTaskIdBidsGet = <ThrowOnError extends boolean = false>(options: Options<ReadBidsByTaskV1TasksTaskIdBidsGetData, ThrowOnError>) => (options.client ?? client).get<ReadBidsByTaskV1TasksTaskIdBidsGetResponses, ReadBidsByTaskV1TasksTaskIdBidsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/bids',
+    ...options
+});
+
+/**
+ * 提交竞价报价（工程师）
+ *
+ * 工程师对竞价中的任务提交报价
+ */
+export const createBidV1TasksTaskIdBidsPost = <ThrowOnError extends boolean = false>(options: Options<CreateBidV1TasksTaskIdBidsPostData, ThrowOnError>) => (options.client ?? client).post<CreateBidV1TasksTaskIdBidsPostResponses, CreateBidV1TasksTaskIdBidsPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/bids',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 修改竞价报价（工程师）
+ *
+ * 工程师修改自己的报价
+ */
+export const updateBidV1TasksTaskIdBidsBidIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateBidV1TasksTaskIdBidsBidIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateBidV1TasksTaskIdBidsBidIdPutResponses, UpdateBidV1TasksTaskIdBidsBidIdPutErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/bids/{bid_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查看我的竞价报价
+ *
+ * 工程师查看自己提交的所有竞价报价
+ */
+export const readMyBidsV1BidsMyGet = <ThrowOnError extends boolean = false>(options?: Options<ReadMyBidsV1BidsMyGetData, ThrowOnError>) => (options?.client ?? client).get<ReadMyBidsV1BidsMyGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/bids/my',
+    ...options
+});
+
+/**
+ * 手动触发竞价结算
+ *
+ * 管理员手动触发竞价结算
+ */
+export const manualSettleBiddingV1TasksTaskIdSettleBiddingPost = <ThrowOnError extends boolean = false>(options: Options<ManualSettleBiddingV1TasksTaskIdSettleBiddingPostData, ThrowOnError>) => (options.client ?? client).post<ManualSettleBiddingV1TasksTaskIdSettleBiddingPostResponses, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/tasks/{task_id}/settle-bidding',
+    ...options
+});
+
+/**
+ * 查看日报列表
+ *
+ * 工程师查看自己的日报列表，PM/管理员查看所有日报
+ */
+export const readDailyReportsV1DailyReportsGet = <ThrowOnError extends boolean = false>(options?: Options<ReadDailyReportsV1DailyReportsGetData, ThrowOnError>) => (options?.client ?? client).get<ReadDailyReportsV1DailyReportsGetResponses, ReadDailyReportsV1DailyReportsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/daily-reports/',
+    ...options
+});
+
+/**
+ * 填写日报
+ *
+ * 工程师填写日报，记录今日工作时长、进度、阶段等信息
+ */
+export const createDailyReportV1DailyReportsPost = <ThrowOnError extends boolean = false>(options: Options<CreateDailyReportV1DailyReportsPostData, ThrowOnError>) => (options.client ?? client).post<CreateDailyReportV1DailyReportsPostResponses, CreateDailyReportV1DailyReportsPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/daily-reports/',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查看未提交日报的工程师（管理员）
+ *
+ * 管理员查看今日未提交日报的工程师列表，用于提醒
+ */
+export const getRemindReportV1DailyReportsRemindGet = <ThrowOnError extends boolean = false>(options?: Options<GetRemindReportV1DailyReportsRemindGetData, ThrowOnError>) => (options?.client ?? client).get<GetRemindReportV1DailyReportsRemindGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/daily-reports/remind',
+    ...options
+});
+
+/**
+ * 删除日报
+ *
+ * 删除日报（仅管理员或超管）
+ */
+export const deleteDailyReportV1DailyReportsReportIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteDailyReportV1DailyReportsReportIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteDailyReportV1DailyReportsReportIdDeleteResponses, DeleteDailyReportV1DailyReportsReportIdDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/daily-reports/{report_id}',
+    ...options
+});
+
+/**
+ * 查看日报详情
+ *
+ * 查看指定日报的详细信息
+ */
+export const readDailyReportV1DailyReportsReportIdGet = <ThrowOnError extends boolean = false>(options: Options<ReadDailyReportV1DailyReportsReportIdGetData, ThrowOnError>) => (options.client ?? client).get<ReadDailyReportV1DailyReportsReportIdGetResponses, ReadDailyReportV1DailyReportsReportIdGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/daily-reports/{report_id}',
+    ...options
+});
+
+/**
+ * 更新日报
+ *
+ * 工程师更新自己的日报
+ */
+export const updateDailyReportV1DailyReportsReportIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateDailyReportV1DailyReportsReportIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateDailyReportV1DailyReportsReportIdPutResponses, UpdateDailyReportV1DailyReportsReportIdPutErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/daily-reports/{report_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查看我的星点记录
+ *
+ * 工程师查看自己的星点变化明细记录
+ */
+export const readMyStarpointsV1StarpointsMyGet = <ThrowOnError extends boolean = false>(options?: Options<ReadMyStarpointsV1StarpointsMyGetData, ThrowOnError>) => (options?.client ?? client).get<ReadMyStarpointsV1StarpointsMyGetResponses, ReadMyStarpointsV1StarpointsMyGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/starpoints/my',
+    ...options
+});
+
+/**
+ * 查看我的星点汇总
+ *
+ * 工程师查看自己的星点汇总信息（总数、排名、K系数）
+ */
+export const readMyStarpointSummaryV1StarpointsMySummaryGet = <ThrowOnError extends boolean = false>(options?: Options<ReadMyStarpointSummaryV1StarpointsMySummaryGetData, ThrowOnError>) => (options?.client ?? client).get<ReadMyStarpointSummaryV1StarpointsMySummaryGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/starpoints/my/summary',
+    ...options
+});
+
+/**
+ * 星点排行榜
+ *
+ * 查看所有工程师的星点排行榜（需 starpoint:admin 权限）
+ */
+export const readStarpointLeaderboardV1StarpointsLeaderboardGet = <ThrowOnError extends boolean = false>(options?: Options<ReadStarpointLeaderboardV1StarpointsLeaderboardGetData, ThrowOnError>) => (options?.client ?? client).get<ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponses, ReadStarpointLeaderboardV1StarpointsLeaderboardGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/starpoints/leaderboard',
+    ...options
+});
+
+/**
+ * 手动调整星点（管理员）
+ *
+ * 管理员手动调整工程师的星点
+ */
+export const adjustStarpointV1StarpointsAdjustPost = <ThrowOnError extends boolean = false>(options: Options<AdjustStarpointV1StarpointsAdjustPostData, ThrowOnError>) => (options.client ?? client).post<AdjustStarpointV1StarpointsAdjustPostResponses, AdjustStarpointV1StarpointsAdjustPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/starpoints/adjust',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查看我的工资试算
+ *
+ * 工程师或 PM 查看自己的工资试算结果
+ */
+export const readMySalaryV1SalariesMyGet = <ThrowOnError extends boolean = false>(options?: Options<ReadMySalaryV1SalariesMyGetData, ThrowOnError>) => (options?.client ?? client).get<ReadMySalaryV1SalariesMyGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/salaries/my',
+    ...options
+});
+
+/**
+ * 查看工资汇总（管理员）
+ *
+ * 管理员查看所有工程师和 PM 的工资汇总
+ */
+export const readSalarySummaryV1SalariesGet = <ThrowOnError extends boolean = false>(options?: Options<ReadSalarySummaryV1SalariesGetData, ThrowOnError>) => (options?.client ?? client).get<ReadSalarySummaryV1SalariesGetResponses, ReadSalarySummaryV1SalariesGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/salaries',
+    ...options
+});
+
+/**
+ * 设置工资参数（管理员）
+ *
+ * 管理员设置工程师或 PM 的工资参数
+ */
+export const updateSalaryParamsV1SalariesUsersUserIdParamsPut = <ThrowOnError extends boolean = false>(options: Options<UpdateSalaryParamsV1SalariesUsersUserIdParamsPutData, ThrowOnError>) => (options.client ?? client).put<UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponses, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/salaries/users/{user_id}/params',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 导出工资表（管理员）
+ *
+ * 管理员导出全员工资汇总表为 CSV 文件流
+ */
+export const exportSalariesV1SalariesExportPost = <ThrowOnError extends boolean = false>(options: Options<ExportSalariesV1SalariesExportPostData, ThrowOnError>) => (options.client ?? client).post<ExportSalariesV1SalariesExportPostResponses, ExportSalariesV1SalariesExportPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/salaries/export',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 工程师工作台首页
+ *
+ * 工程师查看自己的工作指标：当前星点、本月剩余工时、收入试算、T报准确率
+ */
+export const readEngineerDashboardV1DashboardEngineerGet = <ThrowOnError extends boolean = false>(options?: Options<ReadEngineerDashboardV1DashboardEngineerGetData, ThrowOnError>) => (options?.client ?? client).get<ReadEngineerDashboardV1DashboardEngineerGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/dashboard/engineer',
+    ...options
+});
+
+/**
+ * PM 工作台首页
+ *
+ * PM 查看自己的工作指标：今日新增客资、本月新增客资、收入试算
+ */
+export const readPmDashboardV1DashboardPmGet = <ThrowOnError extends boolean = false>(options?: Options<ReadPmDashboardV1DashboardPmGetData, ThrowOnError>) => (options?.client ?? client).get<ReadPmDashboardV1DashboardPmGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/dashboard/pm',
+    ...options
+});
+
+/**
+ * 管理端数据概览
+ *
+ * 管理员查看全系统数据概览：客资、日志、任务、工程师负载、星点排行榜、收入统计
+ */
+export const readAdminDashboardV1DashboardAdminGet = <ThrowOnError extends boolean = false>(options?: Options<ReadAdminDashboardV1DashboardAdminGetData, ThrowOnError>) => (options?.client ?? client).get<ReadAdminDashboardV1DashboardAdminGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/dashboard/admin',
+    ...options
+});
+
+/**
+ * 查看规则修改历史
+ *
+ * 管理员查看规则配置的修改历史记录
+ */
+export const readRuleAuditLogsV1SystemRulesAuditLogsGet = <ThrowOnError extends boolean = false>(options?: Options<ReadRuleAuditLogsV1SystemRulesAuditLogsGetData, ThrowOnError>) => (options?.client ?? client).get<ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponses, ReadRuleAuditLogsV1SystemRulesAuditLogsGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/system-rules/audit-logs',
+    ...options
+});
+
+/**
+ * 查看规则列表
+ *
+ * 管理员查看所有规则配置，支持按分类过滤
+ */
+export const readRulesV1SystemRulesGet = <ThrowOnError extends boolean = false>(options?: Options<ReadRulesV1SystemRulesGetData, ThrowOnError>) => (options?.client ?? client).get<ReadRulesV1SystemRulesGetResponses, ReadRulesV1SystemRulesGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/system-rules',
+    ...options
+});
+
+/**
+ * 创建规则
+ *
+ * 管理员创建新规则配置
+ */
+export const createRuleV1SystemRulesPost = <ThrowOnError extends boolean = false>(options: Options<CreateRuleV1SystemRulesPostData, ThrowOnError>) => (options.client ?? client).post<CreateRuleV1SystemRulesPostResponses, CreateRuleV1SystemRulesPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/system-rules',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 删除规则
+ *
+ * 管理员删除规则配置
+ */
+export const deleteRuleV1SystemRulesRuleIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteRuleV1SystemRulesRuleIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteRuleV1SystemRulesRuleIdDeleteResponses, DeleteRuleV1SystemRulesRuleIdDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/system-rules/{rule_id}',
+    ...options
+});
+
+/**
+ * 查看规则详情
+ *
+ * 管理员查看指定规则的详细信息
+ */
+export const readRuleV1SystemRulesRuleIdGet = <ThrowOnError extends boolean = false>(options: Options<ReadRuleV1SystemRulesRuleIdGetData, ThrowOnError>) => (options.client ?? client).get<ReadRuleV1SystemRulesRuleIdGetResponses, ReadRuleV1SystemRulesRuleIdGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/system-rules/{rule_id}',
+    ...options
+});
+
+/**
+ * 更新规则
+ *
+ * 管理员更新规则配置
+ */
+export const updateRuleV1SystemRulesRuleIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdateRuleV1SystemRulesRuleIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdateRuleV1SystemRulesRuleIdPutResponses, UpdateRuleV1SystemRulesRuleIdPutErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/system-rules/{rule_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 查看客资历史
+ *
+ * PM 查看自己的客资录入历史
+ */
+export const readMyClientResourcesV1ClientResourcesGet = <ThrowOnError extends boolean = false>(options?: Options<ReadMyClientResourcesV1ClientResourcesGetData, ThrowOnError>) => (options?.client ?? client).get<ReadMyClientResourcesV1ClientResourcesGetResponses, ReadMyClientResourcesV1ClientResourcesGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/client-resources',
+    ...options
+});
+
+/**
+ * 录入客资
+ *
+ * PM 录入自己的客资数据
+ */
+export const createClientResourceV1ClientResourcesPost = <ThrowOnError extends boolean = false>(options: Options<CreateClientResourceV1ClientResourcesPostData, ThrowOnError>) => (options.client ?? client).post<CreateClientResourceV1ClientResourcesPostResponses, CreateClientResourceV1ClientResourcesPostErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/client-resources',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * 管理员查看客资汇总
+ *
+ * 管理员查看所有 PM 的客资数据汇总
+ */
+export const readAdminClientResourceSummaryV1ClientResourcesAdminGet = <ThrowOnError extends boolean = false>(options?: Options<ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData, ThrowOnError>) => (options?.client ?? client).get<ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/client-resources/admin',
+    ...options
+});
+
+/**
+ * 管理员查看所有客资
+ *
+ * 管理员查看所有 PM 的客资明细记录
+ */
+export const readAllClientResourcesV1ClientResourcesAllGet = <ThrowOnError extends boolean = false>(options?: Options<ReadAllClientResourcesV1ClientResourcesAllGetData, ThrowOnError>) => (options?.client ?? client).get<ReadAllClientResourcesV1ClientResourcesAllGetResponses, ReadAllClientResourcesV1ClientResourcesAllGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/client-resources/all',
+    ...options
 });
