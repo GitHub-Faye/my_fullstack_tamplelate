@@ -1,9 +1,8 @@
 """
-Bidding 模块
+竞价模块
 
-竞价结算相关功能。
+提供竞价报价、结算和发布到竞价池的完整功能。
 """
+from app.domains.bidding.router import router
 
-from app.domains.bidding.router import router as bidding_router
-
-__all__ = ["bidding_router"]
+__all__ = ["router"]

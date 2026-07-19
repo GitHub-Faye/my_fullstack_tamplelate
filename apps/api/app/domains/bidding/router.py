@@ -1,78 +1,171 @@
 """
-竞价结算 API 端点模块
+竞价模块 — 路由层
 
-提供手动触发竞价结算的 API 接口。
+提供竞价报价、结算和手动触发的完整端点。
 """
-
 import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 
-from app.core.dependencies import CurrentUser, SessionDep
-from app.core.errors import BusinessException, ErrorCode, raise_task_not_found
-from app.core.schemas import Message
-from app.core.models import TaskStatus
+from app.core.dependencies import (
+    CurrentUser,
+    SessionDep,
+    require_scope,
+)
+from app.core.scopes import BidScope
+from app.core.errors import raise_task_not_found, raise_bid_not_found, BusinessException, ErrorCode
+from app.core.models import Task
+from app.core.utils import get_engineer_H0
+
+from app.domains.bidding import repository
+from app.domains.bidding.schemas import BidCreate, BidUpdate, BidPublic, BidsPublic
+from app.domains.bidding.dependencies import (
+    check_task_bidding,
+    check_bidding_deadline,
+    check_engineer_role,
+    check_bid_owner,
+)
 from app.domains.task.dependencies import check_task_owner_or_admin
-from app.tasks.bidding_tasks import settle_bidding_task_async
 
 router = APIRouter()
 
 
+# ========== 工程师：报价 ==========
+
+
+@router.post(
+    "/tasks/{task_id}/bids",
+    response_model=BidPublic,
+    summary="提交竞价报价（工程师）",
+    description="工程师对竞价中的任务提交报价",
+)
+async def create_bid(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    task_id: uuid.UUID,
+    bid_in: BidCreate,
+    _: Annotated[None, Depends(require_scope(BidScope.CREATE))],
+) -> Any:
+    check_engineer_role(user=current_user)
+    H0 = await get_engineer_H0(session, current_user.id)
+    task = await session.get(Task, task_id)
+    if not task:
+        raise_task_not_found()
+    check_task_bidding(task=task)
+    check_bidding_deadline(task=task)
+
+    existing_bid = await repository.get_bid_by_engineer_task(
+        session=session, task_id=task_id, engineer_id=current_user.id,
+    )
+    if existing_bid:
+        bid = await repository.update_bid(
+            session=session, db_bid=existing_bid, T_reported=bid_in.T_reported, H0=H0,
+        )
+    else:
+        bid = await repository.create_bid(
+            session=session, task_id=task_id, engineer_id=current_user.id, T_reported=bid_in.T_reported, H0=H0,
+        )
+    return bid
+
+
+@router.put(
+    "/tasks/{task_id}/bids/{bid_id}",
+    response_model=BidPublic,
+    summary="修改竞价报价（工程师）",
+    description="工程师修改自己的报价",
+)
+async def update_bid(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    task_id: uuid.UUID,
+    bid_id: uuid.UUID,
+    bid_in: BidUpdate,
+    _: Annotated[None, Depends(require_scope(BidScope.UPDATE))],
+) -> Any:
+    check_engineer_role(user=current_user)
+    H0 = await get_engineer_H0(session, current_user.id)
+    bid = await repository.get_bid(session=session, bid_id=bid_id)
+    if not bid:
+        raise_bid_not_found()
+    check_bid_owner(user_id=current_user.id, engineer_id=bid.engineer_id)
+    task = await session.get(Task, task_id)
+    if not task:
+        raise_task_not_found()
+    check_task_bidding(task=task)
+    check_bidding_deadline(task=task)
+    bid = await repository.update_bid(
+        session=session, db_bid=bid, T_reported=bid_in.T_reported, H0=H0,
+    )
+    return bid
+
+
+@router.get(
+    "/tasks/{task_id}/bids",
+    response_model=BidsPublic,
+    summary="查看任务的竞价报价列表",
+    description="查看指定任务的所有竞价报价",
+)
+async def read_bids_by_task(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    task_id: uuid.UUID,
+    _: Annotated[None, Depends(require_scope(BidScope.READ))],
+) -> Any:
+    task = await session.get(Task, task_id)
+    if not task:
+        raise_task_not_found()
+    bids = await repository.get_bids_by_task(session=session, task_id=task_id)
+    return BidsPublic(data=bids, count=len(bids))
+
+
+@router.get(
+    "/bids/my",
+    response_model=BidsPublic,
+    summary="查看我的竞价报价",
+    description="工程师查看自己提交的所有竞价报价",
+)
+async def read_my_bids(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    _: Annotated[None, Depends(require_scope(BidScope.READ))],
+) -> Any:
+    bids = await repository.get_bids_by_engineer(session=session, engineer_id=current_user.id)
+    return BidsPublic(data=bids, count=len(bids))
+
+
+# ========== 管理员：结算 ==========
+
+
 @router.post(
     "/tasks/{task_id}/settle-bidding",
-    response_model=Message,
+    response_model=Any,
     summary="手动触发竞价结算",
-    description="管理员手动触发竞价结算任务，计算中标人并更新任务状态"
+    description="管理员手动触发竞价结算",
 )
 async def manual_settle_bidding(
     session: SessionDep,
     current_user: CurrentUser,
     task_id: uuid.UUID,
 ) -> Any:
-    """
-    手动触发竞价结算
+    from app.core.schemas import Message
 
-    权限：管理员或超管
-
-    业务流程：
-    1. 检查任务是否存在
-    2. 检查权限（管理员）
-    3. 执行结算逻辑
-    4. 返回结算结果
-
-    异常：
-    - 404：任务不存在
-    - 403：权限不足
-    - 400：任务状态不符合要求
-    """
-    from app.domains.task import repository
-
-    # 1. 查询任务
-    task = await repository.get_task(session=session, task_id=task_id)
+    task = await session.get(Task, task_id)
     if not task:
         raise_task_not_found()
-
-    # 2. 检查权限（管理员）
     await check_task_owner_or_admin(session, current_user, task.pm_id)
 
-    # 3. 执行结算
-    result = await settle_bidding_task_async(session, str(task_id))
+    result = await repository.settle_bidding_task_async(session, str(task_id))
 
-    # 4. 根据结果返回消息
     if result["status"] == "success":
-        return Message(
-            message=f"Settlement completed. Winner: {result['winner_id']}, Amount: {result['winner_amount']}"
-        )
+        return Message(message=f"Settlement completed. Winner: {result['winner_id']}")
     elif result["status"] == "no_bids":
-        return Message(message="No bids received. Task reverted to unconfirmed status.")
+        return Message(message="No bids received. Task reverted.")
     elif result["status"] == "deadline_not_reached":
-        raise BusinessException(
-            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
-            detail="Bidding deadline has not been reached yet."
-        )
+        raise BusinessException(code=ErrorCode.TASK_INVALID_STATUS_TRANSITION, detail="Deadline not reached.")
     else:
-        raise BusinessException(
-            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
-            detail=f"Settlement failed: {result['status']}"
-        )
+        raise BusinessException(code=ErrorCode.TASK_INVALID_STATUS_TRANSITION, detail=f"Settlement failed: {result['status']}")

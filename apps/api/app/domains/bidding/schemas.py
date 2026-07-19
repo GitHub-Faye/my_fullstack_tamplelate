@@ -1,9 +1,8 @@
 """
-Bid 模块数据传输对象（DTO）定义
+竞价模块 — Schema 定义
 
-定义竞价报价相关的 API 请求和响应模型。
+提供竞价报价和结算相关的 DTO。
 """
-
 import uuid
 from datetime import datetime
 from typing import Optional

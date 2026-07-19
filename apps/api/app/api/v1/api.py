@@ -4,7 +4,6 @@ from app.domains.user.router import login_router, user_router, admin_router
 from app.domains.item.router import router as item_router
 from app.domains.task.router_pm import router as task_router
 from app.domains.task.router_ops import router as task_ops_router
-from app.domains.bid.router import router as bid_router
 from app.domains.bidding.router import router as bidding_router
 from app.domains.daily_report.router import router as daily_report_router
 from app.domains.starpoint.router import router as starpoint_router
@@ -27,11 +26,8 @@ router.include_router(item_router, prefix="/items", tags=["items"])
 router.include_router(task_router, prefix="/tasks", tags=["tasks"])
 router.include_router(task_ops_router, prefix="/tasks", tags=["tasks"])
 
-# 竞价相关路由
-router.include_router(bid_router, tags=["bids"])
-
-# 竞价结算相关路由
-router.include_router(bidding_router, prefix="/tasks", tags=["bidding-settlement"])
+# 竞价相关路由（报价 + 结算）
+router.include_router(bidding_router, tags=["bidding"])
 
 # 日报相关路由
 router.include_router(daily_report_router, prefix="/daily-reports", tags=["daily-reports"])
