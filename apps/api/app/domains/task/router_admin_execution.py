@@ -16,16 +16,20 @@ from fastapi import APIRouter, Depends
 from app.core.dependencies import (
     CurrentUser,
     SessionDep,
-    get_user_scopes,
+    require_scope,
 )
 from app.core.scopes import TaskScope
 from app.core.errors import BusinessException, ErrorCode, raise_task_not_found
 from app.core.schemas import Message
-from app.core.models import Task, TaskStatus, UserRoleType
+from app.core.models import Task, TaskStatus, UserRoleType, User
 
 from app.domains.task import repository
 from app.domains.task.schemas import TaskPublic
 from app.domains.task.schemas_execution import TaskReassignRequest
+from app.domains.task.dependencies import (
+    check_task_status,
+    check_admin_scope,
+)
 
 
 router = APIRouter()
@@ -63,19 +67,10 @@ async def pause_approve_task(
         raise_task_not_found()
 
     # 2. 检查权限（管理员）
-    user_scopes = await get_user_scopes(session, current_user)
-    if TaskScope.ADMIN.value not in user_scopes:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
-            detail="Only admin can perform this action"
-        )
+    await check_admin_scope(session, current_user)
 
     # 3. 检查状态（必须是 PAUSE_REQUESTED）
-    if task.status != TaskStatus.PAUSE_REQUESTED:
-        raise BusinessException(
-            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
-            detail=f"Task status must be 'pause_requested', current status is '{task.status.value}'"
-        )
+    await check_task_status(task, TaskStatus.PAUSE_REQUESTED)
 
     # 4. 确认暂停，状态变为 PAUSED
     task.status = TaskStatus.PAUSED
@@ -115,19 +110,10 @@ async def pause_reject_task(
         raise_task_not_found()
 
     # 2. 检查权限（管理员）
-    user_scopes = await get_user_scopes(session, current_user)
-    if TaskScope.ADMIN.value not in user_scopes:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
-            detail="Only admin can perform this action"
-        )
+    await check_admin_scope(session, current_user)
 
     # 3. 检查状态（必须是 PAUSE_REQUESTED）
-    if task.status != TaskStatus.PAUSE_REQUESTED:
-        raise BusinessException(
-            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
-            detail=f"Task status must be 'pause_requested', current status is '{task.status.value}'"
-        )
+    await check_task_status(task, TaskStatus.PAUSE_REQUESTED)
 
     # 4. 驳回申请，状态回到 IN_PROGRESS
     task.status = TaskStatus.IN_PROGRESS
@@ -168,15 +154,9 @@ async def reassign_task(
         raise_task_not_found()
 
     # 2. 检查权限（管理员）
-    user_scopes = await get_user_scopes(session, current_user)
-    if TaskScope.ADMIN.value not in user_scopes:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
-            detail="Only admin can perform this action"
-        )
+    await check_admin_scope(session, current_user)
 
     # 3. 检查新工程师是否存在
-    from app.core.models import User
     new_engineer = await session.get(User, request.new_engineer_id)
     if not new_engineer:
         raise BusinessException(

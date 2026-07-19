@@ -12,6 +12,7 @@ import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select
 
 from app.core.dependencies import (
     CurrentUser,
@@ -23,7 +24,7 @@ from app.core.dependencies import (
 from app.core.scopes import TaskScope
 from app.core.schemas import Message, PaginationParams
 from app.core.errors import raise_task_not_found
-from app.core.models import Task, TaskStatus
+from app.core.models import Task, TaskStatus, UserRoleType, User
 
 from app.domains.task import repository
 from app.domains.task.schemas import (
@@ -111,12 +112,7 @@ async def read_tasks(
     pm_id = None if is_admin else current_user.id
 
     # 工程师查看竞价任务列表时，不过滤 pm_id
-    from app.core.models import UserRoleType, User
-    from sqlalchemy import select
-    stmt = select(User).where(User.id == current_user.id)
-    result = await session.execute(stmt)
-    user_with_role = result.scalar_one_or_none()
-    if user_with_role and user_with_role.role == UserRoleType.ENGINEER:
+    if current_user.role == UserRoleType.ENGINEER:
         pm_id = None
 
     # 计算offset
