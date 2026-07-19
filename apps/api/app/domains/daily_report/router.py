@@ -261,8 +261,7 @@ async def get_remind_report(
     )
 
     # 查询所有工程师总数
-    from app.core.models import User as UserModel, UserRoleType as UserRoleEnum
-    stmt = select(UserModel).where(UserModel.role == UserRoleEnum.ENGINEER)
+    stmt = select(User).where(User.role == UserRoleType.ENGINEER)
     result = await session.execute(stmt)
     all_engineers = result.scalars().all()
     total_engineers = len(all_engineers)

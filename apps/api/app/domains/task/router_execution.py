@@ -10,7 +10,7 @@
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
@@ -118,8 +118,6 @@ async def decline_task(
     3. 检查状态（必须是 PENDING_START）
     4. 清空 engineer_id，重新进入竞价（bidding 状态），设置新的竞价截止时间
     """
-    from datetime import timedelta
-
     # 1. 查询任务
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
