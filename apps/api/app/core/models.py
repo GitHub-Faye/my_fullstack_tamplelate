@@ -533,6 +533,9 @@ class AuditLog(AuditLogBase, table=True):
         sa_type=DateTime(timezone=True),
     )
 
+    # 非持久化字段：操作人姓名（API 响应中使用）
+    operator_name: Optional[str] = Field(default=None, sa_column=None, description="操作人姓名（非持久化）")
+
     # 关系
     operator: Optional["User"] = Relationship()
 

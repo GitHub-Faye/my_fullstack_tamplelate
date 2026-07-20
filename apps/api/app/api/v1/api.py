@@ -11,6 +11,7 @@ from app.domains.salary.router import router as salary_router
 from app.domains.dashboard.router import router as dashboard_router
 from app.domains.system_rule.router import router as system_rule_router
 from app.domains.client_resource.router import router as client_resource_router
+from app.domains.audit.router import router as audit_router
 
 router = APIRouter()
 
@@ -46,3 +47,6 @@ router.include_router(system_rule_router, prefix="/system-rules", tags=["system-
 
 # 客资管理相关路由
 router.include_router(client_resource_router, prefix="/client-resources", tags=["client-resources"])
+
+# 审计日志相关路由
+router.include_router(audit_router, prefix="/audit-logs", tags=["audit-logs"])

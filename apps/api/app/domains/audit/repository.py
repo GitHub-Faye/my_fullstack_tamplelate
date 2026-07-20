@@ -4,12 +4,14 @@
 提供审计日志的创建和查询功能。
 """
 import uuid
-from typing import Tuple
+from datetime import datetime
+from typing import Optional, Tuple
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
-from app.core.models import AuditLog
+from app.core.models import AuditLog, User
 from app.core.db_utils import paginated_query
 
 
@@ -45,17 +47,24 @@ async def get_audit_logs(
     limit: int = 20,
     target_type: str | None = None,
     user_id: uuid.UUID | None = None,
+    action: str | None = None,
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
 ) -> Tuple[list[AuditLog], int]:
-    """获取操作审计日志列表（分页）"""
-    from sqlalchemy import and_
-
+    """获取操作审计日志列表（分页），支持多条件筛选和 user_name 填充"""
     conditions = []
     if target_type:
         conditions.append(AuditLog.target_type == target_type)
     if user_id:
         conditions.append(AuditLog.user_id == user_id)
+    if action:
+        conditions.append(AuditLog.action == action)
+    if start_time:
+        conditions.append(AuditLog.created_at >= start_time)
+    if end_time:
+        conditions.append(AuditLog.created_at <= end_time)
 
-    return await paginated_query(
+    tasks, count = await paginated_query(
         session=session,
         model=AuditLog,
         skip=skip,
@@ -63,3 +72,11 @@ async def get_audit_logs(
         conditions=conditions if conditions else None,
         order_by=AuditLog.created_at.desc(),
     )
+
+    # 填充操作人姓名
+    for log in tasks:
+        if log.user_id:
+            user = await session.get(User, log.user_id)
+            log.operator_name = user.full_name if user and user.full_name else str(log.user_id)[:8]
+
+    return tasks, count
