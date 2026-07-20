@@ -31,15 +31,27 @@ import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
+  TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
 
+/** 审核管理关注的状态列表 */
+const REVIEW_FILTERS: { value: string; label: string }[] = [
+  { value: "all", label: "全部状态" },
+  { value: TaskStatusConst.UNCONFIRMED, label: "未确认" },
+  { value: TaskStatusConst.CONFIRMED_UNPUBLISHED, label: "已确认未发布" },
+  { value: TaskStatusConst.BIDDING, label: "竞价中" },
+  { value: TaskStatusConst.PENDING_START, label: "待启动" },
+  { value: TaskStatusConst.IN_PROGRESS, label: "进行中" },
+  { value: TaskStatusConst.COMPLETED, label: "已完成" },
+];
+
 /**
  * 管理端任务列表组件
  *
- * 展示所有未确认和已确认未发布的任务，支持审核操作入口
+ * 展示所有任务，支持状态筛选和审核操作入口
  */
 export function AdminTaskTable() {
   const router = useRouter();
@@ -74,13 +86,9 @@ export function AdminTaskTable() {
               <SelectValue placeholder="任务状态" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">全部状态</SelectItem>
-              <SelectItem value="unconfirmed">未确认</SelectItem>
-              <SelectItem value="confirmed_unpublished">已确认未发布</SelectItem>
-              <SelectItem value="bidding">竞价中</SelectItem>
-              <SelectItem value="pending_start">待启动</SelectItem>
-              <SelectItem value="in_progress">进行中</SelectItem>
-              <SelectItem value="completed">已完成</SelectItem>
+              {REVIEW_FILTERS.map((f) => (
+                <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -117,7 +125,7 @@ export function AdminTaskTable() {
                     <Button
                       variant="link"
                       size="sm"
-                      onClick={() => router.push(`/admin/tasks/${task.id}`)}
+                      onClick={() => router.push(`/dashboard/admin/tasks/${task.id}`)}
                     >
                       审核
                     </Button>

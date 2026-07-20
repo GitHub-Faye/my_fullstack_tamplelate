@@ -10,6 +10,7 @@ import {
   useMutation,
   useQueryClient,
   type UseMutationOptions,
+  type UseMutationResult,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -19,9 +20,35 @@ import {
   publishTaskV1TasksTaskIdPublishPost,
   convertToUrgentV1TasksTaskIdConvertUrgentPost,
   convertToConvenientV1TasksTaskIdConvertConvenientPost,
-  // Types
   type TaskPublic,
 } from "@repo/sdk";
+
+// 管理端专用查询 key，避免与 PM 端交叉污染
+export const adminTaskKeys = {
+  all: ["admin-tasks"] as const,
+};
+
+// ==================== 工厂函数 ====================
+
+type MutationFn<T> = (taskId: string) => Promise<TaskPublic | undefined>;
+
+function makeAdminMutation<T>(
+  mutationFn: MutationFn<T>,
+  successMsg: string,
+  errorMsg: string,
+): UseMutationResult<TaskPublic | undefined, Error, string> {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: adminTaskKeys.all });
+      toast.success(successMsg);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || errorMsg);
+    },
+  }) as UseMutationResult<TaskPublic | undefined, Error, string>;
+}
 
 // ==================== Mutations ====================
 
@@ -29,48 +56,34 @@ import {
  * 审核通过任务（管理员）
  */
 export function useApproveTask() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (taskId: string) => {
+  return makeAdminMutation(
+    async (taskId: string) => {
       const response = await approveTaskV1TasksTaskIdApprovePost({
         path: { task_id: taskId },
         throwOnError: true,
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      toast.success("任务审核通过");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "审核失败");
-    },
-  });
+    "任务审核通过",
+    "审核失败",
+  );
 }
 
 /**
  * 驳回任务（管理员）
  */
 export function useRejectTask() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (taskId: string) => {
+  return makeAdminMutation(
+    async (taskId: string) => {
       const response = await rejectTaskV1TasksTaskIdRejectPost({
         path: { task_id: taskId },
         throwOnError: true,
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      toast.success("任务已驳回");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "驳回失败");
-    },
-  });
+    "任务已驳回",
+    "驳回失败",
+  );
 }
 
 /**
@@ -78,14 +91,13 @@ export function useRejectTask() {
  */
 export function usePublishTask() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({
       taskId,
-      biddingDays = 3,
+      biddingDays,
     }: {
       taskId: string;
-      biddingDays?: number;
+      biddingDays: number;
     }) => {
       const response = await publishTaskV1TasksTaskIdPublishPost({
         path: { task_id: taskId },
@@ -95,7 +107,7 @@ export function usePublishTask() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: adminTaskKeys.all });
       toast.success("任务已发布到竞价池");
     },
     onError: (error: Error) => {
@@ -108,46 +120,32 @@ export function usePublishTask() {
  * 转换为紧急任务（管理员）
  */
 export function useConvertToUrgent() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (taskId: string) => {
+  return makeAdminMutation(
+    async (taskId: string) => {
       const response = await convertToUrgentV1TasksTaskIdConvertUrgentPost({
         path: { task_id: taskId },
         throwOnError: true,
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      toast.success("已转换为紧急任务");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "转换失败");
-    },
-  });
+    "已转换为紧急任务",
+    "转换失败",
+  );
 }
 
 /**
  * 转换为便捷任务（管理员）
  */
 export function useConvertToConvenient() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (taskId: string) => {
+  return makeAdminMutation(
+    async (taskId: string) => {
       const response = await convertToConvenientV1TasksTaskIdConvertConvenientPost({
         path: { task_id: taskId },
         throwOnError: true,
       });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      toast.success("已转换为便捷任务");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "转换失败");
-    },
-  });
+    "已转换为便捷任务",
+    "转换失败",
+  );
 }

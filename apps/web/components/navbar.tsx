@@ -26,7 +26,7 @@ const navigation = [
 ];
 
 const adminNavigation = [
-  { name: "任务审核", href: "/admin/tasks", icon: FileCheck },
+  { name: "任务审核", href: "/dashboard/admin/tasks", icon: FileCheck },
   { name: "用户管理", href: "/dashboard/admin", icon: Users },
 ];
 
