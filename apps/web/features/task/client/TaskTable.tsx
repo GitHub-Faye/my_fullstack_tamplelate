@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -21,27 +20,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus, Search } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import Link from "next/link";
 import { useTasks } from "../api";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
+import {
+  TASK_STATUS_LABELS,
+  TASK_TYPE_LABELS,
+  PM_EDITABLE_STATUSES,
+} from "@repo/contracts";
 
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  unconfirmed: "未确认",
-  confirmed_unpublished: "已确认未发布",
-  bidding: "竞价中",
-  pending_start: "待启动",
-  in_progress: "进行中",
-  pause_requested: "暂停待审批",
-  paused: "暂停中",
-  completed: "已完成",
-};
+const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 
-const TYPE_LABELS: Record<TaskType, string> = {
-  normal: "正常任务",
-  urgent: "紧急任务",
-  convenient: "便捷任务",
-};
+const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
 
 /**
  * 任务列表表格组件（PM 视图）
@@ -50,7 +41,6 @@ export function TaskTable() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("all");
-  const [search, setSearch] = useState("");
 
   const { data: tasks, isLoading } = useTasks({
     page,
@@ -74,7 +64,7 @@ export function TaskTable() {
         <div className="flex items-center justify-between">
           <CardTitle>任务管理</CardTitle>
           <Button asChild>
-            <Link href="/dashboard/pm/tasks/new">
+            <Link href="/pm/tasks/new">
               <Plus className="mr-2 h-4 w-4" />
               发布任务
             </Link>
@@ -83,8 +73,7 @@ export function TaskTable() {
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-4 mb-4">
-          <div className="flex items-center gap-2">
-            <Select value={status} onValueChange={setStatus}>
+            <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="任务状态" />
               </SelectTrigger>
@@ -98,17 +87,6 @@ export function TaskTable() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2 flex-1 max-w-sm">
-            <Input
-              placeholder="搜索任务名称"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <Button variant="outline" size="icon">
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
 
         <div className="rounded-md border">
           <Table>
@@ -142,15 +120,15 @@ export function TaskTable() {
                     <Button
                       variant="link"
                       size="sm"
-                      onClick={() => router.push(`/dashboard/pm/tasks/${task.id}`)}
+                      onClick={() => router.push(`/pm/tasks/${task.id}`)}
                     >
                       详情
                     </Button>
-                    {task.status === "unconfirmed" && (
+                    {PM_EDITABLE_STATUSES.includes(task.status as any) && (
                       <Button
                         variant="link"
                         size="sm"
-                        onClick={() => router.push(`/dashboard/pm/tasks/${task.id}/edit`)}
+                        onClick={() => router.push(`/pm/tasks/${task.id}/edit`)}
                       >
                         编辑
                       </Button>

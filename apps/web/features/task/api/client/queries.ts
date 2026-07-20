@@ -148,26 +148,4 @@ export function useUpdateTask() {
   });
 }
 
-/**
- * 删除任务
- */
-export function useDeleteTask() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (taskId: string) => {
-      const response = await deleteTaskV1TasksTaskIdDelete({
-        path: { task_id: taskId },
-        throwOnError: true,
-      });
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
-      toast.success("任务已删除");
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "删除任务失败");
-    },
-  });
-}
+// 删除任务 (Spec: 工单未要求删除功能，保留备用)

@@ -17,7 +17,7 @@ import { LayoutDashboard, Users, Settings, LogOut, User, ClipboardList } from "l
 import { cn } from "@/lib/utils";
 
 const pmNavigation = [
-  { name: "任务管理", href: "/dashboard/pm/tasks", icon: ClipboardList },
+  { name: "任务管理", href: "/pm/tasks", icon: ClipboardList },
 ];
 
 const navigation = [
@@ -46,8 +46,11 @@ export function Navbar() {
     return name.slice(0, 2).toUpperCase();
   };
 
-  const allNavigation = isSuperuser
-    ? [...navigation, ...adminNavigation, ...pmNavigation]
+  const isPm = user?.role === "pm";
+  const showPmNav = isSuperuser || isPm;
+
+  const allNavigation = showPmNav
+    ? [...navigation, ...pmNavigation, ...(isSuperuser ? adminNavigation : [])]
     : navigation;
 
   return (

@@ -33,7 +33,6 @@ import {
 
 import { taskUpdateSchema, type TaskUpdateFormData } from "../schemas";
 import { useUpdateTask, useTask } from "../api";
-import type { TaskUpdate as TaskUpdateSDK } from "@repo/sdk";
 import type { TaskUpdate } from "@repo/sdk";
 
 interface TaskEditFormProps {
@@ -77,13 +76,13 @@ export function TaskEditForm({ taskId }: TaskEditFormProps) {
 
   async function onSubmit(data: TaskUpdateFormData) {
     try {
-      const payload: TaskUpdateSDK = {
+      const payload: TaskUpdate = {
         name: data.name ?? undefined,
         description: data.description ?? undefined,
         task_type: data.task_type ?? undefined,
       };
       await updateTask.mutateAsync({ taskId, data: payload });
-      router.push(`/dashboard/pm/tasks/${taskId}`);
+      router.push(`/pm/tasks/${taskId}`);
     } catch {
       // Error is handled by mutation
     }

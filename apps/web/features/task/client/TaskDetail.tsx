@@ -15,17 +15,13 @@ import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useTask } from "../api";
 import type { TaskStatus, TaskType } from "@repo/sdk";
+import {
+  TASK_STATUS_LABELS,
+  TASK_TYPE_LABELS,
+  PM_EDITABLE_STATUSES,
+} from "@repo/contracts";
 
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  unconfirmed: "未确认",
-  confirmed_unpublished: "已确认未发布",
-  bidding: "竞价中",
-  pending_start: "待启动",
-  in_progress: "进行中",
-  pause_requested: "暂停待审批",
-  paused: "暂停中",
-  completed: "已完成",
-};
+const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
   unconfirmed: "secondary",
@@ -38,11 +34,7 @@ const STATUS_COLORS: Record<TaskStatus, string> = {
   completed: "default",
 } as const;
 
-const TYPE_LABELS: Record<TaskType, string> = {
-  normal: "正常任务",
-  urgent: "紧急任务",
-  convenient: "便捷任务",
-};
+const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
 
 interface TaskDetailProps {
   taskId: string;
@@ -82,7 +74,7 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
     );
   }
 
-  const isEditable = task.status === "unconfirmed";
+  const isEditable = PM_EDITABLE_STATUSES.includes(task.status as any);
 
   return (
     <div className="space-y-6">
