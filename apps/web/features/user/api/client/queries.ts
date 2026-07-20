@@ -52,6 +52,7 @@ import {
   type UserUpdate,
 } from "@repo/sdk";
 import { useAuthStore } from "../../stores/auth";
+import { useMemo } from "react";
 
 // Query Keys
 export const userKeys = {
@@ -358,4 +359,23 @@ export function useDeleteUser() {
       toast.error(error.message || "删除用户失败");
     },
   });
+}
+
+/**
+ * 用户 ID → 姓名 映射 hook
+ *
+ * 获取所有用户列表，缓存为 { [id]: fullName } 的映射，
+ * 用于在前端将 pm_id / engineer_id 映射为用户姓名显示。
+ */
+export function useUserMap(): Record<string, string> {
+  const { data: users } = useUsers({ page: 1, page_size: 1000 });
+
+  return useMemo(() => {
+    if (!users?.data) return {};
+    const map: Record<string, string> = {};
+    for (const u of users.data as Array<{ id: string; full_name?: string | null }>) {
+      map[u.id] = u.full_name ?? u.id.slice(0, 8);
+    }
+    return map;
+  }, [users]);
 }

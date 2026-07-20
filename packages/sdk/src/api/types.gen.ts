@@ -1248,6 +1248,18 @@ export type TaskPublic = {
      */
     T_actual?: number | null;
     /**
+     * Progress
+     */
+    progress?: string | null;
+    /**
+     * Expected Online Time
+     */
+    expected_online_time?: string | null;
+    /**
+     * T Reported Complete Time
+     */
+    T_reported_complete_time?: string | null;
+    /**
      * Created At
      */
     created_at?: string | null;

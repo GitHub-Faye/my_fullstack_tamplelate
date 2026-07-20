@@ -84,19 +84,7 @@ export const readUsersV1UsersGetQueryKey = (options?: Options<ReadUsersV1UsersGe
  *
  * 获取所有用户列表（分页）。
  *
- * 权限：超管-only（通过 dependencies 依赖注入强制）
- *
- * 参数：
- * - session：数据库会话（依赖注入）
- * - pagination：分页参数（page, page_size）
- *
- * 返回值：
- * - UsersPublic：包含 data（用户列表）、count（总数）、page（当前页）、page_size（每页大小）、total_pages（总页数）
- *
- * 查询语句：
- * 1. 使用 func.count() 获取用户总数
- * 2. 使用 order_by(col(User.created_at).desc()) 按创建时间降序排列
- * 3. 使用 offset/limit 分页
+ * 权限：登录用户即可查看（用于前端获取用户姓名映射）
  */
 export const readUsersV1UsersGetOptions = (options?: Options<ReadUsersV1UsersGetData>) => queryOptions<ReadUsersV1UsersGetResponse, ReadUsersV1UsersGetError, ReadUsersV1UsersGetResponse, ReturnType<typeof readUsersV1UsersGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -147,19 +135,7 @@ export const readUsersV1UsersGetInfiniteQueryKey = (options?: Options<ReadUsersV
  *
  * 获取所有用户列表（分页）。
  *
- * 权限：超管-only（通过 dependencies 依赖注入强制）
- *
- * 参数：
- * - session：数据库会话（依赖注入）
- * - pagination：分页参数（page, page_size）
- *
- * 返回值：
- * - UsersPublic：包含 data（用户列表）、count（总数）、page（当前页）、page_size（每页大小）、total_pages（总页数）
- *
- * 查询语句：
- * 1. 使用 func.count() 获取用户总数
- * 2. 使用 order_by(col(User.created_at).desc()) 按创建时间降序排列
- * 3. 使用 offset/limit 分页
+ * 权限：登录用户即可查看（用于前端获取用户姓名映射）
  */
 export const readUsersV1UsersGetInfiniteOptions = (options?: Options<ReadUsersV1UsersGetData>) => infiniteQueryOptions<ReadUsersV1UsersGetResponse, ReadUsersV1UsersGetError, InfiniteData<ReadUsersV1UsersGetResponse>, QueryKey<Options<ReadUsersV1UsersGetData>>, number | Pick<QueryKey<Options<ReadUsersV1UsersGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore

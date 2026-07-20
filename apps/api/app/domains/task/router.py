@@ -24,7 +24,7 @@ from app.core.dependencies import (
 from app.core.scopes import TaskScope
 from app.core.schemas import Message, PaginationParams
 from app.core.errors import raise_task_not_found
-from app.core.models import Task, TaskStatus, UserRoleType, User
+from app.core.models import Task, TaskStatus, TaskType, UserRoleType, User
 
 from app.domains.task import repository
 from app.domains.task.schemas import (

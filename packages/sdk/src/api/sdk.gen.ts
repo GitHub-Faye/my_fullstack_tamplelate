@@ -49,19 +49,7 @@ export const testTokenV1LoginTestTokenPost = <ThrowOnError extends boolean = fal
  *
  * 获取所有用户列表（分页）。
  *
- * 权限：超管-only（通过 dependencies 依赖注入强制）
- *
- * 参数：
- * - session：数据库会话（依赖注入）
- * - pagination：分页参数（page, page_size）
- *
- * 返回值：
- * - UsersPublic：包含 data（用户列表）、count（总数）、page（当前页）、page_size（每页大小）、total_pages（总页数）
- *
- * 查询语句：
- * 1. 使用 func.count() 获取用户总数
- * 2. 使用 order_by(col(User.created_at).desc()) 按创建时间降序排列
- * 3. 使用 offset/limit 分页
+ * 权限：登录用户即可查看（用于前端获取用户姓名映射）
  */
 export const readUsersV1UsersGet = <ThrowOnError extends boolean = false>(options?: Options<ReadUsersV1UsersGetData, ThrowOnError>) => (options?.client ?? client).get<ReadUsersV1UsersGetResponses, ReadUsersV1UsersGetErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

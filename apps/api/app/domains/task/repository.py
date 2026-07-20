@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, Tuple
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import Task, TaskStatus, TaskType, User
@@ -29,10 +29,7 @@ async def get_task(*, session: AsyncSession, task_id: uuid.UUID) -> Task | None:
     Returns:
         Task 对象或 None
     """
-    task = await session.get(Task, task_id)
-    if task:
-        await _fill_user_names(session, task)
-    return task
+    return await session.get(Task, task_id)
 
 
 async def get_tasks(
@@ -83,10 +80,6 @@ async def get_tasks(
         conditions=conditions if conditions else None,
         order_by=Task.created_at.desc(),
     )
-
-    # 填充用户姓名
-    for task in tasks:
-        await _fill_user_names(session, task)
 
     return tasks, count
 

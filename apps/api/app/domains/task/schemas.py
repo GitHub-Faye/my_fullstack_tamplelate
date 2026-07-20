@@ -51,8 +51,6 @@ class TaskPublic(TaskBase):
     progress: Optional[str] = None
     expected_online_time: Optional[datetime] = None
     T_reported_complete_time: Optional[datetime] = None
-    pm_name: Optional[str] = None
-    engineer_name: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

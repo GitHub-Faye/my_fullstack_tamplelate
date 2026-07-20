@@ -34,7 +34,7 @@ async def create_test_pm(session: AsyncSession) -> User:
     await session.commit()
 
     # 创建 PM 角色并关联 scopes
-    role = Role(name="pm")
+    role = Role(name=f"pm_{uuid.uuid4()}")
     session.add(role)
     await session.commit()
 
@@ -72,7 +72,7 @@ async def create_test_admin(session: AsyncSession) -> User:
     await session.commit()
 
     # 创建管理员角色并关联 scopes
-    role = Role(name="admin_role")
+    role = Role(name=f"admin_role_{uuid.uuid4()}")
     session.add(role)
     await session.commit()
 
@@ -115,7 +115,7 @@ async def create_test_engineer(session: AsyncSession) -> User:
     await session.commit()
 
     # 创建工程师角色并关联 scopes
-    role = Role(name="engineer")
+    role = Role(name=f"engineer_{uuid.uuid4()}")
     session.add(role)
     await session.commit()
 
@@ -397,3 +397,150 @@ async def test_delete_task(client: AsyncClient, db_session: AsyncSession) -> Non
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+# ==================== 筛选参数测试 ====================
+
+
+@pytest.mark.asyncio
+async def test_read_tasks_filter_by_status(client: AsyncClient, db_session: AsyncSession) -> None:
+    """测试按状态筛选任务列表"""
+    admin = await create_test_admin(db_session)
+
+    # 创建两个不同状态的任务
+    pm = await create_test_pm(db_session)
+    task1 = Task(name="未确认任务", status=TaskStatus.UNCONFIRMED, pm_id=pm.id, task_type=TaskType.NORMAL)
+    task2 = Task(name="进行中任务", status=TaskStatus.IN_PROGRESS, pm_id=pm.id, task_type=TaskType.NORMAL, engineer_id=pm.id)
+    db_session.add_all([task1, task2])
+    await db_session.commit()
+
+    from app.core.security import create_access_token
+    from datetime import timedelta
+    token = create_access_token(subject=str(admin.id), expires_delta=timedelta(minutes=30))
+
+    # 筛选 unconfirmed
+    response = await client.get("/v1/tasks/?status=unconfirmed", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 1
+    assert data["data"][0]["status"] == "unconfirmed"
+
+    # 不筛选 — 返回全部
+    response = await client.get("/v1/tasks/", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] >= 2
+
+
+@pytest.mark.asyncio
+async def test_read_tasks_filter_by_task_type(client: AsyncClient, db_session: AsyncSession) -> None:
+    """测试按任务类型筛选"""
+    admin = await create_test_admin(db_session)
+    pm = await create_test_pm(db_session)
+
+    task1 = Task(name="正常任务", task_type=TaskType.NORMAL, status=TaskStatus.UNCONFIRMED, pm_id=pm.id)
+    task2 = Task(name="紧急任务", task_type=TaskType.URGENT, status=TaskStatus.UNCONFIRMED, pm_id=pm.id)
+    task3 = Task(name="便捷任务", task_type=TaskType.CONVENIENT, status=TaskStatus.UNCONFIRMED, pm_id=pm.id)
+    db_session.add_all([task1, task2, task3])
+    await db_session.commit()
+
+    from app.core.security import create_access_token
+    from datetime import timedelta
+    token = create_access_token(subject=str(admin.id), expires_delta=timedelta(minutes=30))
+
+    response = await client.get("/v1/tasks/?task_type=urgent", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 1
+    assert data["data"][0]["task_type"] == "urgent"
+
+    response = await client.get("/v1/tasks/?task_type=convenient", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 1
+    assert data["data"][0]["task_type"] == "convenient"
+
+
+@pytest.mark.asyncio
+async def test_read_tasks_filter_by_engineer(client: AsyncClient, db_session: AsyncSession) -> None:
+    """测试按工程师 ID 筛选"""
+    admin = await create_test_admin(db_session)
+    pm = await create_test_pm(db_session)
+    engineer = await create_test_engineer(db_session)
+
+    task1 = Task(name="工程师的任务", status=TaskStatus.IN_PROGRESS, pm_id=pm.id, engineer_id=engineer.id, task_type=TaskType.NORMAL)
+    task2 = Task(name="未分配的任务", status=TaskStatus.UNCONFIRMED, pm_id=pm.id, task_type=TaskType.NORMAL)
+    db_session.add_all([task1, task2])
+    await db_session.commit()
+
+    from app.core.security import create_access_token
+    from datetime import timedelta
+    token = create_access_token(subject=str(admin.id), expires_delta=timedelta(minutes=30))
+
+    response = await client.get(f"/v1/tasks/?engineer_id={engineer.id}", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 1
+    assert data["data"][0]["engineer_id"] == str(engineer.id)
+
+
+@pytest.mark.asyncio
+async def test_read_tasks_filter_by_pm_and_exclude(client: AsyncClient, db_session: AsyncSession) -> None:
+    """测试按 PM 筛选以及排除指定 PM"""
+    admin = await create_test_admin(db_session)
+    pm1 = await create_test_pm(db_session)
+    pm2 = await create_test_pm(db_session)
+
+    task1 = Task(name="PM1的任务", status=TaskStatus.UNCONFIRMED, pm_id=pm1.id, task_type=TaskType.NORMAL)
+    task2 = Task(name="PM2的任务", status=TaskStatus.UNCONFIRMED, pm_id=pm2.id, task_type=TaskType.NORMAL)
+    db_session.add_all([task1, task2])
+    await db_session.commit()
+
+    from app.core.security import create_access_token
+    from datetime import timedelta
+    token = create_access_token(subject=str(admin.id), expires_delta=timedelta(minutes=30))
+
+    # 筛选 pm1 的任务
+    response = await client.get(f"/v1/tasks/?pm_id={pm1.id}", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 1
+    assert data["data"][0]["pm_id"] == str(pm1.id)
+
+    # 排除 pm1（看其他PM的任务）
+    response = await client.get(f"/v1/tasks/?pm_id={pm1.id}&exclude_pm_id=true", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] >= 1
+    for t in data["data"]:
+        assert t["pm_id"] != str(pm1.id)
+
+
+# ==================== 多条件组合筛选 ====================
+
+
+@pytest.mark.asyncio
+async def test_read_tasks_combined_filters(client: AsyncClient, db_session: AsyncSession) -> None:
+    """测试多条件组合筛选"""
+    admin = await create_test_admin(db_session)
+    pm = await create_test_pm(db_session)
+    engineer = await create_test_engineer(db_session)
+
+    task1 = Task(name="匹配", status=TaskStatus.IN_PROGRESS, task_type=TaskType.URGENT, pm_id=pm.id, engineer_id=engineer.id)
+    task2 = Task(name="不匹配-状态", status=TaskStatus.UNCONFIRMED, task_type=TaskType.URGENT, pm_id=pm.id, engineer_id=engineer.id)
+    task3 = Task(name="不匹配-类型", status=TaskStatus.IN_PROGRESS, task_type=TaskType.NORMAL, pm_id=pm.id, engineer_id=engineer.id)
+    db_session.add_all([task1, task2, task3])
+    await db_session.commit()
+
+    from app.core.security import create_access_token
+    from datetime import timedelta
+    token = create_access_token(subject=str(admin.id), expires_delta=timedelta(minutes=30))
+
+    response = await client.get(
+        f"/v1/tasks/?status=in_progress&task_type=urgent&engineer_id={engineer.id}&pm_id={pm.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] == 1
+    assert data["data"][0]["name"] == "匹配"

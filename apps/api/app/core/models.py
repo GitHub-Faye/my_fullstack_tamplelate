@@ -299,10 +299,6 @@ class Task(TaskBase, table=True):
         sa_column_kwargs={"onupdate": get_datetime_utc}
     )
 
-    # 非持久化字段：用于 API 响应中展示关联用户姓名
-    pm_name: Optional[str] = Field(default=None, sa_column=None, description="发布人姓名（非持久化）")
-    engineer_name: Optional[str] = Field(default=None, sa_column=None, description="工程师姓名（非持久化）")
-
     # 关系
     pm: Optional["User"] = Relationship(
         sa_relationship_kwargs={"foreign_keys": "[Task.pm_id]"}

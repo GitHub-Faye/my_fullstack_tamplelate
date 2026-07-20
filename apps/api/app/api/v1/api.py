@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.domains.user.router import login_router, user_router, admin_router
 from app.domains.item.router import router as item_router
-from app.domains.task.router_pm import router as task_router
+from app.domains.task.router import router as task_router
 from app.domains.task.router_ops import router as task_ops_router
 from app.domains.bidding.router import router as bidding_router
 from app.domains.daily_report.router import router as daily_report_router

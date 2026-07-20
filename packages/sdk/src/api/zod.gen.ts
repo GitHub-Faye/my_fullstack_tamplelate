@@ -568,6 +568,9 @@ export const zTaskPublic = z.object({
     bidding_deadline: z.iso.datetime().nullish(),
     T_reported: z.number().nullish(),
     T_actual: z.number().nullish(),
+    progress: z.string().nullish(),
+    expected_online_time: z.iso.datetime().nullish(),
+    T_reported_complete_time: z.iso.datetime().nullish(),
     created_at: z.iso.datetime().nullish(),
     updated_at: z.iso.datetime().nullish()
 });
