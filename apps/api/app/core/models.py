@@ -261,6 +261,8 @@ class TaskBase(SQLModel):
     status: TaskStatus = Field(default=TaskStatus.UNCONFIRMED)
     T_reported: Optional[float] = Field(default=None, ge=0, description="T报（工程师填报工时）")
     T_actual: Optional[float] = Field(default=None, ge=0, description="T实（实际结算工时）")
+    expected_online_time: Optional[datetime] = Field(default=None, sa_type=DateTime(timezone=True), description="预期上线时间")
+    T_reported_complete_time: Optional[datetime] = Field(default=None, sa_type=DateTime(timezone=True), description="T报完成上报时间")
 
 
 class Task(TaskBase, table=True):
@@ -296,6 +298,10 @@ class Task(TaskBase, table=True):
         sa_type=DateTime(timezone=True),
         sa_column_kwargs={"onupdate": get_datetime_utc}
     )
+
+    # 非持久化字段：用于 API 响应中展示关联用户姓名
+    pm_name: Optional[str] = Field(default=None, sa_column=None, description="发布人姓名（非持久化）")
+    engineer_name: Optional[str] = Field(default=None, sa_column=None, description="工程师姓名（非持久化）")
 
     # 关系
     pm: Optional["User"] = Relationship(

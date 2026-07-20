@@ -11,7 +11,7 @@ from typing import Optional, Tuple
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import Task, TaskStatus
+from app.core.models import Task, TaskStatus, TaskType, User
 from app.domains.task.schemas import TaskCreate, TaskUpdate
 from app.core.db_utils import paginated_query
 
@@ -29,7 +29,10 @@ async def get_task(*, session: AsyncSession, task_id: uuid.UUID) -> Task | None:
     Returns:
         Task 对象或 None
     """
-    return await session.get(Task, task_id)
+    task = await session.get(Task, task_id)
+    if task:
+        await _fill_user_names(session, task)
+    return task
 
 
 async def get_tasks(
@@ -37,16 +40,20 @@ async def get_tasks(
     session: AsyncSession,
     pm_id: Optional[uuid.UUID] = None,
     status: Optional[TaskStatus] = None,
+    task_type: Optional[TaskType] = None,
+    engineer_id: Optional[uuid.UUID] = None,
     skip: int = 0,
     limit: int = 100,
 ) -> Tuple[list[Task], int]:
     """
-    获取任务列表（分页），支持按 PM 和状态过滤
+    获取任务列表（分页），支持按 PM、状态、类型和工程师过滤
 
     Args:
         session: 数据库会话
         pm_id: PM ID 过滤（None 表示不过滤）
         status: 任务状态过滤（None 表示不过滤）
+        task_type: 任务类型过滤（None 表示不过滤）
+        engineer_id: 工程师 ID 过滤（None 表示不过滤）
         skip: 跳过记录数
         limit: 返回记录数上限
 
@@ -59,8 +66,12 @@ async def get_tasks(
         conditions.append(Task.pm_id == pm_id)
     if status:
         conditions.append(Task.status == status)
+    if task_type:
+        conditions.append(Task.task_type == task_type)
+    if engineer_id:
+        conditions.append(Task.engineer_id == engineer_id)
 
-    return await paginated_query(
+    tasks, count = await paginated_query(
         session=session,
         model=Task,
         skip=skip,
@@ -68,6 +79,28 @@ async def get_tasks(
         conditions=conditions if conditions else None,
         order_by=Task.created_at.desc(),
     )
+
+    # 填充用户姓名
+    for task in tasks:
+        await _fill_user_names(session, task)
+
+    return tasks, count
+
+
+async def _fill_user_names(session: AsyncSession, task: Task) -> None:
+    """
+    从关联 User 表填充 pm_name 和 engineer_name
+
+    Args:
+        session: 数据库会话
+        task: 任务对象（原地修改）
+    """
+    if task.pm_id:
+        pm = await session.get(User, task.pm_id)
+        task.pm_name = pm.full_name if pm and pm.full_name else str(task.pm_id)[:8]
+    if task.engineer_id:
+        engineer = await session.get(User, task.engineer_id)
+        task.engineer_name = engineer.full_name if engineer and engineer.full_name else str(task.engineer_id)[:8]
 
 
 async def create_task(

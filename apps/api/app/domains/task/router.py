@@ -86,6 +86,8 @@ async def read_tasks(
     current_user: CurrentUser,
     _: Annotated[None, Depends(require_any_scope(TaskScope.READ, TaskScope.ADMIN))],
     status: Annotated[str | None, Query(description="按状态过滤")] = None,
+    task_type: Annotated[str | None, Query(description="按任务类型过滤")] = None,
+    engineer_id: Annotated[str | None, Query(description="按工程师ID过滤")] = None,
     page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
     page_size: Annotated[int, Query(ge=1, le=100, description="每页数量，默认20，最大100")] = 20,
 ) -> Any:
@@ -108,6 +110,22 @@ async def read_tasks(
         except ValueError:
             pass
 
+    # 解析任务类型过滤
+    type_filter = None
+    if task_type:
+        try:
+            type_filter = TaskType(task_type)
+        except ValueError:
+            pass
+
+    # 解析工程师ID过滤
+    engineer_uuid = None
+    if engineer_id:
+        try:
+            engineer_uuid = uuid.UUID(engineer_id)
+        except ValueError:
+            pass
+
     # PM 只能查看自己的任务
     pm_id = None if is_admin else current_user.id
 
@@ -122,6 +140,8 @@ async def read_tasks(
         session=session,
         pm_id=pm_id,
         status=status_filter,
+        task_type=type_filter,
+        engineer_id=engineer_uuid,
         skip=offset,
         limit=page_size,
     )
