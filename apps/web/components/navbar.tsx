@@ -13,12 +13,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LayoutDashboard, Users, Settings, LogOut, User, Package } from "lucide-react";
+import { LayoutDashboard, Users, Settings, LogOut, User, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const pmNavigation = [
+  { name: "任务管理", href: "/dashboard/pm/tasks", icon: ClipboardList },
+];
 
 const navigation = [
   { name: "仪表盘", href: "/dashboard", icon: LayoutDashboard },
-  { name: "物品管理", href: "/dashboard/items", icon: Package },
   { name: "设置", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -44,7 +47,7 @@ export function Navbar() {
   };
 
   const allNavigation = isSuperuser
-    ? [...navigation, ...adminNavigation]
+    ? [...navigation, ...adminNavigation, ...pmNavigation]
     : navigation;
 
   return (

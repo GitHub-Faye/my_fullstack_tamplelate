@@ -16,7 +16,7 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().default(false),
 });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
+export type LoginFormData = z.input<typeof loginSchema>;
 
 /**
  * Signup form validation schema

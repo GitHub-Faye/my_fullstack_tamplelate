@@ -23,3 +23,6 @@ export * from './pagination.js';
 
 // 业务常量
 export * from './constants.js';
+
+// 任务契约
+export * from './task.js';

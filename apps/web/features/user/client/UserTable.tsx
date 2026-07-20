@@ -41,6 +41,7 @@ import {
 import { useUsers, useDeleteUser, userKeys } from "../api/client/queries";
 import { formatDate, formatUserRole, formatUserStatus } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import type { UserPublic } from "@repo/sdk";
 
 interface UserTableProps {
   currentUserId?: string;
@@ -56,7 +57,7 @@ export function UserTable({ currentUserId }: UserTableProps) {
   const { data, isLoading } = useUsers({ page, page_size: pageSize });
   const deleteMutation = useDeleteUser();
 
-  const users = data?.data || [];
+  const users = (data?.data || []) as UserPublic[];
   const totalCount = data?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
 
