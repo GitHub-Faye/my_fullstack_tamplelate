@@ -88,16 +88,18 @@ async def read_tasks(
     status: Annotated[str | None, Query(description="按状态过滤")] = None,
     task_type: Annotated[str | None, Query(description="按任务类型过滤")] = None,
     engineer_id: Annotated[str | None, Query(description="按工程师ID过滤")] = None,
+    pm_id: Annotated[str | None, Query(description="按发布人(PM)ID过滤")] = None,
+    exclude_pm_id: Annotated[bool | None, Query(description="排除当前用户的任务，与 pm_id 配合使用")] = None,
     page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
     page_size: Annotated[int, Query(ge=1, le=100, description="每页数量，默认20，最大100")] = 20,
 ) -> Any:
     """
     获取任务列表
 
-    - PM 只能看自己的任务
-    - 管理员可看所有任务
+    - PM 可查看全部任务，通过 pm_id 过滤控制显示范围
+    - 管理员可看所有任务，可按 pm_id / engineer_id / task_type 过滤
     - 工程师可查看竞价中的任务（用于报价）
-    - 支持按状态过滤
+    - 支持按状态、类型、工程师、PM 过滤
     """
     user_scopes = await get_user_scopes(session, current_user)
     is_admin = TaskScope.ADMIN.value in user_scopes
@@ -126,19 +128,29 @@ async def read_tasks(
         except ValueError:
             pass
 
-    # PM 只能查看自己的任务
-    pm_id = None if is_admin else current_user.id
-
-    # 工程师查看竞价任务列表时，不过滤 pm_id
+    # 解析 pm_id 和 exclude_pm_id
+    # - PM 可查看全部任务，前端通过 pm_id 控制筛选范围
+    # - 管理员可查看全部任务，前端通过 pm_id 控制筛选范围
+    # - 工程师查看竞价任务列表，不过滤 pm_id
+    pm_uuid = None
+    exclude_pm = False
     if current_user.role == UserRoleType.ENGINEER:
-        pm_id = None
+        pm_uuid = None
+    else:
+        if pm_id:
+            try:
+                pm_uuid = uuid.UUID(pm_id)
+            except ValueError:
+                pass
+        exclude_pm = exclude_pm_id or False
 
     # 计算offset
     offset = (page - 1) * page_size
 
     tasks, count = await repository.get_tasks(
         session=session,
-        pm_id=pm_id,
+        pm_id=pm_uuid,
+        exclude_pm_id=exclude_pm,
         status=status_filter,
         task_type=type_filter,
         engineer_id=engineer_uuid,

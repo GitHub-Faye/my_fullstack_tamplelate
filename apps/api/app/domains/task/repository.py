@@ -39,6 +39,7 @@ async def get_tasks(
     *,
     session: AsyncSession,
     pm_id: Optional[uuid.UUID] = None,
+    exclude_pm_id: bool = False,
     status: Optional[TaskStatus] = None,
     task_type: Optional[TaskType] = None,
     engineer_id: Optional[uuid.UUID] = None,
@@ -51,6 +52,7 @@ async def get_tasks(
     Args:
         session: 数据库会话
         pm_id: PM ID 过滤（None 表示不过滤）
+        exclude_pm_id: 是否排除 pm_id 指定的用户（用于「其他PM」筛选）
         status: 任务状态过滤（None 表示不过滤）
         task_type: 任务类型过滤（None 表示不过滤）
         engineer_id: 工程师 ID 过滤（None 表示不过滤）
@@ -62,7 +64,9 @@ async def get_tasks(
     """
     # 构建条件列表
     conditions = []
-    if pm_id:
+    if pm_id and exclude_pm_id:
+        conditions.append(Task.pm_id != pm_id)
+    elif pm_id:
         conditions.append(Task.pm_id == pm_id)
     if status:
         conditions.append(Task.status == status)
