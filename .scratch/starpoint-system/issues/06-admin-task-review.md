@@ -4,13 +4,13 @@
 
 **Blocked by:** 05 — 核心流程: PM 任务管理（创建/编辑/查看）
 
-**Status:** in-progress
+**Status:** completed
 
 - [x] 后端：实现审核 API（POST /tasks/{id}/approve, POST /tasks/{id}/reject, POST /tasks/{id}/publish）
 - [x] 后端：权限控制（仅管理员角色可操作）
 - [x] 后端：任务类型转换 API（POST /tasks/{id}/convert-urgent, POST /tasks/{id}/convert-convenient）
-- [ ] 前端：管理端任务管理页面（/admin/tasks）
-- [ ] 前端：未确认任务审核弹窗
-- [ ] 前端：任务发布确认
-- [ ] 前端：任务类型转换操作
+- [x] 前端：管理端任务管理页面（/admin/tasks）
+- [x] 前端：未确认任务审核弹窗
+- [x] 前端：任务发布确认
+- [x] 前端：任务类型转换操作
 - [x] 测试：API 集成测试

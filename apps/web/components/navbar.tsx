@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LayoutDashboard, Users, Settings, LogOut, User, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Users, Settings, LogOut, User, ClipboardList, FileCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const pmNavigation = [
@@ -26,6 +26,7 @@ const navigation = [
 ];
 
 const adminNavigation = [
+  { name: "任务审核", href: "/admin/tasks", icon: FileCheck },
   { name: "用户管理", href: "/dashboard/admin", icon: Users },
 ];
 
