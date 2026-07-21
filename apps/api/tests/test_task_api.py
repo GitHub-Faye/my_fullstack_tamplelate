@@ -5,7 +5,7 @@ Task API 集成测试
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone, timedelta as dt_timedelta
 
 import pytest
 from httpx import AsyncClient
@@ -319,17 +319,18 @@ async def test_update_task_as_owner(client: AsyncClient, db_session: AsyncSessio
 
 @pytest.mark.asyncio
 async def test_update_task_with_wrong_status_fails(client: AsyncClient, db_session: AsyncSession) -> None:
-    """测试无法更新非 unconfirmed 状态的任务"""
+    """测试无法更新非 unconfirmed 或非 bidding 状态的任务"""
     # 创建 PM 用户
     pm = await create_test_pm(db_session)
 
-    # 创建已发布的任务
+    # 创建进行中的任务（不可编辑状态）
     task = Task(
-        name="已发布任务",
+        name="进行中任务",
         description="测试任务",
         task_type=TaskType.NORMAL,
-        status=TaskStatus.BIDDING,
+        status=TaskStatus.IN_PROGRESS,
         pm_id=pm.id,
+        engineer_id=pm.id,
     )
     db_session.add(task)
     await db_session.commit()
@@ -350,8 +351,47 @@ async def test_update_task_with_wrong_status_fails(client: AsyncClient, db_sessi
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    # 应该失败，因为任务状态不是 unconfirmed
+    # 应该失败，因为任务状态既不是 unconfirmed 也不是 bidding
     assert response.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_update_bidding_task_succeeds(client: AsyncClient, db_session: AsyncSession) -> None:
+    """测试可以更新 bidding 状态的任务"""
+    # 创建 PM 用户
+    pm = await create_test_pm(db_session)
+
+    # 创建竞价中的任务（可编辑状态）
+    task = Task(
+        name="竞价中任务",
+        description="测试任务",
+        task_type=TaskType.NORMAL,
+        status=TaskStatus.BIDDING,
+        pm_id=pm.id,
+    )
+    db_session.add(task)
+    await db_session.commit()
+    await db_session.refresh(task)
+
+    # 生成 token
+    from app.core.security import create_access_token
+    from datetime import timedelta
+    token = create_access_token(
+        subject=str(pm.id),
+        expires_delta=timedelta(minutes=30),
+    )
+
+    # 尝试更新任务
+    response = await client.put(
+        f"/v1/tasks/{task.id}",
+        json={"name": "更新竞价中任务"},
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    # 应该成功，因为 bidding 状态也可编辑
+    assert response.status_code == 200
+    data = response.json()
+    assert data["name"] == "更新竞价中任务"
 
 
 @pytest.mark.asyncio
@@ -397,6 +437,74 @@ async def test_delete_task(client: AsyncClient, db_session: AsyncSession) -> Non
         headers={"Authorization": f"Bearer {token}"},
     )
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_withdraw_bidding_task(client: AsyncClient, db_session: AsyncSession) -> None:
+    """测试 PM 撤回竞价中的任务"""
+    pm = await create_test_pm(db_session)
+
+    # 创建竞价中的任务
+    task = Task(
+        name="竞价中任务",
+        description="测试撤回",
+        task_type=TaskType.NORMAL,
+        status=TaskStatus.BIDDING,
+        pm_id=pm.id,
+        bidding_deadline=datetime.now(timezone.utc) + dt_timedelta(days=3),
+    )
+    db_session.add(task)
+    await db_session.commit()
+    await db_session.refresh(task)
+
+    from app.core.security import create_access_token
+    from datetime import timedelta
+    token = create_access_token(
+        subject=str(pm.id),
+        expires_delta=timedelta(minutes=30),
+    )
+
+    # 撤回任务
+    response = await client.post(
+        f"/v1/tasks/{task.id}/withdraw",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "unconfirmed"
+    assert data["bidding_deadline"] is None
+
+
+@pytest.mark.asyncio
+async def test_withdraw_non_bidding_task_fails(client: AsyncClient, db_session: AsyncSession) -> None:
+    """测试无法撤回非 bidding 状态的任务"""
+    pm = await create_test_pm(db_session)
+
+    task = Task(
+        name="未确认任务",
+        description="测试",
+        task_type=TaskType.NORMAL,
+        status=TaskStatus.UNCONFIRMED,
+        pm_id=pm.id,
+    )
+    db_session.add(task)
+    await db_session.commit()
+    await db_session.refresh(task)
+
+    from app.core.security import create_access_token
+    from datetime import timedelta
+    token = create_access_token(
+        subject=str(pm.id),
+        expires_delta=timedelta(minutes=30),
+    )
+
+    response = await client.post(
+        f"/v1/tasks/{task.id}/withdraw",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 400
 
 
 # ==================== 筛选参数测试 ====================

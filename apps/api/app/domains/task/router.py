@@ -22,8 +22,8 @@ from app.core.dependencies import (
     get_user_scopes,
 )
 from app.core.scopes import TaskScope
-from app.core.schemas import Message, PaginationParams
-from app.core.errors import raise_task_not_found
+from app.core.schemas import Message
+from app.core.errors import BusinessException, ErrorCode, raise_task_not_found
 from app.core.models import Task, TaskStatus, TaskType, UserRoleType, User
 
 from app.domains.task import repository
@@ -205,7 +205,7 @@ async def read_task(
     "/{task_id}",
     response_model=TaskPublic,
     summary="更新任务（PM）",
-    description="PM 更新任务信息，仅 'unconfirmed' 状态可编辑",
+    description="PM 更新任务信息，仅 'unconfirmed' 和 'bidding' 状态可编辑",
 )
 async def update_task(
     *,
@@ -219,7 +219,7 @@ async def update_task(
     更新任务
 
     - PM 只能更新自己的任务
-    - 只有 'unconfirmed' 状态的任务可编辑
+    - 'unconfirmed' 和 'bidding' 状态可编辑（PM 在竞价结束前可修改资料）
     """
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
@@ -228,8 +228,12 @@ async def update_task(
     # 检查权限（所有者或管理员）
     await check_task_owner_or_admin(session, current_user, task.pm_id)
 
-    # 检查状态是否可编辑
-    await check_task_status_editable(session, current_user, task)
+    # 检查状态是否可编辑（unconfirmed 或 bidding 状态允许编辑）
+    if task.status not in (TaskStatus.UNCONFIRMED, TaskStatus.BIDDING):
+        raise BusinessException(
+            code=ErrorCode.SYSTEM_VALIDATION_ERROR,
+            detail=f"Task status '{task.status.value}' cannot be edited. Only 'unconfirmed' or 'bidding' tasks can be modified."
+        )
 
     # 更新任务
     task = await repository.update_task(
@@ -244,19 +248,18 @@ async def update_task(
     "/{task_id}",
     response_model=Message,
     summary="删除任务",
-    description="删除任务（仅管理员或超管）",
+    description="删除未确认状态的任务（PM 所有者或管理员可操作）",
 )
 async def delete_task(
     session: SessionDep,
     current_user: CurrentUser,
     task_id: uuid.UUID,
-    _: Annotated[None, Depends(require_any_scope(TaskScope.DELETE, TaskScope.ADMIN))],
 ) -> Message:
     """
     删除任务
 
-    - 需要 task:delete 权限
-    - 通常仅管理员可操作
+    - PM 可删除自己发布的未确认任务
+    - 管理员可删除任意未确认任务
     """
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
@@ -265,5 +268,66 @@ async def delete_task(
     # 检查权限（所有者或管理员）
     await check_task_owner_or_admin(session, current_user, task.pm_id)
 
+    # 仅 'unconfirmed' 状态可删除
+    if task.status != TaskStatus.UNCONFIRMED:
+        raise BusinessException(
+            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
+            detail=f"Task status '{task.status.value}' cannot be deleted. Only 'unconfirmed' tasks can be deleted."
+        )
+
     await repository.delete_task(session=session, db_task=task)
     return Message(message="Task deleted successfully")
+
+
+@router.post(
+    "/{task_id}/withdraw",
+    response_model=TaskPublic,
+    summary="撤回任务（PM）",
+    description="PM 撤回竞价中的任务，状态从 'bidding' 回到 'unconfirmed'",
+)
+async def withdraw_task(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    task_id: uuid.UUID,
+    _: Annotated[None, Depends(require_scope(TaskScope.UPDATE))],
+) -> Any:
+    """
+    撤回任务
+
+    - PM 撤回自己的竞价中任务
+    - 状态从 'bidding' 回到 'unconfirmed'
+    - 清除竞价截止时间
+    """
+    task = await repository.get_task(session=session, task_id=task_id)
+    if not task:
+        raise_task_not_found()
+
+    # 检查权限（所有者）
+    if task.pm_id != current_user.id:
+        raise BusinessException(
+            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
+            detail="Only the task owner can withdraw the task"
+        )
+
+    # 仅 'bidding' 状态可撤回
+    if task.status != TaskStatus.BIDDING:
+        raise BusinessException(
+            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
+            detail=f"Task status '{task.status.value}' cannot be withdrawn. Only 'bidding' tasks can be withdrawn."
+        )
+
+    # 状态回退到未确认，清除竞价截止时间
+    task.status = TaskStatus.UNCONFIRMED
+    task.bidding_deadline = None
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="task.withdraw",
+        target_type="task", target_id=str(task_id),
+        details=f"Task withdrawn from bidding, status back to unconfirmed",
+        ip_address=None,
+    )
+    return task

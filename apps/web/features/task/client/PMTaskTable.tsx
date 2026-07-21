@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -12,6 +12,16 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -27,18 +37,33 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus, Search, RotateCcw, X, Eye, FileText, Edit, Trash2, History, AlertTriangle, Archive } from "lucide-react";
+import { Loader2, Plus, Search, RotateCcw, X, Eye, FileText, Edit, Trash2, History, AlertTriangle, Archive, ReceiptText, ListTodo, NotebookText } from "lucide-react";
 import Link from "next/link";
 import { useTasks } from "../api";
 import { useUserMap, useCurrentUser } from "@/features/user";
-import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
+import {
+  withdrawTaskV1TasksTaskIdWithdrawPost,
+  deleteTaskV1TasksTaskIdDelete,
+  readBidsByTaskV1TasksTaskIdBidsGet,
+  readDailyReportsV1DailyReportsGet,
+  readAuditLogsV1AuditLogsGet,
+  type TaskPublic,
+  type TaskStatus,
+  type TaskType,
+  type BidPublic,
+} from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
   PM_EDITABLE_STATUSES,
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
+import { toast } from "sonner";
 import { Pagination } from "@/components/ui/pagination";
+
+// 操作类型列表 — 用于日志展示
+const LOG_ACTIONS = ["bidLog", "viewLog", "workLog", "pauseLog", "archiveLog"] as const;
+type LogAction = (typeof LOG_ACTIONS)[number];
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -76,17 +101,21 @@ function formatDate(dateStr: string | null | undefined): string {
 }
 
 /** 任务状态 → PM 操作按钮映射 */
-function getPmActions(task: TaskPublic, onAction: (action: string, task: TaskPublic) => void) {
+function getPmActions(task: TaskPublic, currentUserId: string | undefined, onAction: (action: string, task: TaskPublic) => void) {
   const status = task.status as string;
+  const isOwner = currentUserId != null && task.pm_id === currentUserId;
   const actions: { label: string; icon: React.ReactNode; action: string; variant?: "default" | "outline" | "destructive" }[] = [];
 
-  // 详情 — 所有状态都有
+  // 详情 — 所有任务都有
   actions.push({
     label: "详情",
     icon: <Eye className="h-3.5 w-3.5" />,
     action: "detail",
     variant: "outline",
   });
+
+  // 非自己发布的任务，只有详情按钮
+  if (!isOwner) return actions;
 
   switch (status) {
     case TaskStatusConst.UNCONFIRMED:
@@ -185,7 +214,7 @@ function TaskDetailDialog({
   const isStarted = ["pending_start", "in_progress", "paused", "completed"].includes(task.status);
   const statusText = STATUS_LABELS[task.status] || task.status;
   const typeText = task.task_type ? TYPE_LABELS[task.task_type] ?? task.task_type : "-";
-  const actions = getPmActions(task, () => {});
+  const actions = getPmActions(task, undefined, () => {});
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -325,6 +354,199 @@ function TaskDetailDialog({
 }
 
 /**
+ * 报价记录弹窗
+ */
+function BidLogDialog({
+  task,
+  open,
+  onOpenChange,
+}: {
+  task: TaskPublic;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [bids, setBids] = useState<any[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open && task) {
+      setLoading(true);
+      readBidsByTaskV1TasksTaskIdBidsGet({ path: { task_id: task.id } })
+        .then((res) => setBids(res.data?.data ?? []))
+        .catch(() => setBids([]))
+        .finally(() => setLoading(false));
+    }
+  }, [open, task]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>报价记录 - {task.name}</DialogTitle>
+          <DialogDescription>查看该任务的工程师报价列表</DialogDescription>
+        </DialogHeader>
+        {loading ? (
+          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : bids && bids.length > 0 ? (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-muted-foreground">
+                <th className="text-left px-3 py-2 font-medium">工程师</th>
+                <th className="text-left px-3 py-2 font-medium">报价工时(T报)</th>
+                <th className="text-left px-3 py-2 font-medium">报价金额</th>
+                <th className="text-left px-3 py-2 font-medium">报价时间</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bids.map((bid: any) => (
+                <tr key={bid.id} className="border-b last:border-0">
+                  <td className="px-3 py-2">{bid.engineer_id?.slice(0, 8) ?? "-"}</td>
+                  <td className="px-3 py-2">{bid.T_reported ?? "-"}h</td>
+                  <td className="px-3 py-2">¥{bid.amount?.toLocaleString() ?? "-"}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{formatDateTime(bid.created_at)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-center py-8 text-muted-foreground">暂无报价记录</p>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * 审计日志弹窗（查看日志 / 暂停记录 / 归档日志）
+ */
+function AuditLogDialog({
+  task,
+  open,
+  onOpenChange,
+}: {
+  task: TaskPublic;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [logs, setLogs] = useState<any[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open && task) {
+      setLoading(true);
+      readAuditLogsV1AuditLogsGet({
+        query: { target_type: "task", target_id: task.id, page: 1, page_size: 50 },
+      })
+        .then((res) => setLogs(res.data?.data ?? []))
+        .catch(() => setLogs([]))
+        .finally(() => setLoading(false));
+    }
+  }, [open, task]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>任务日志 - {task.name}</DialogTitle>
+          <DialogDescription>查看该任务的操作记录</DialogDescription>
+        </DialogHeader>
+        {loading ? (
+          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : logs && logs.length > 0 ? (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-muted-foreground">
+                <th className="text-left px-3 py-2 font-medium">时间</th>
+                <th className="text-left px-3 py-2 font-medium">操作</th>
+                <th className="text-left px-3 py-2 font-medium">详情</th>
+              </tr>
+            </thead>
+            <tbody>
+              {logs.map((log: any, i: number) => (
+                <tr key={i} className="border-b last:border-0">
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{formatDateTime(log.created_at)}</td>
+                  <td className="px-3 py-2">{log.action ?? "-"}</td>
+                  <td className="px-3 py-2 text-muted-foreground">{log.details ?? "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-center py-8 text-muted-foreground">暂无日志记录</p>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * 工作日志弹窗（日报）
+ */
+function WorkLogDialog({
+  task,
+  open,
+  onOpenChange,
+}: {
+  task: TaskPublic;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [reports, setReports] = useState<any[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open && task) {
+      setLoading(true);
+      readDailyReportsV1DailyReportsGet({
+        query: { task_id: task.id, page: 1, page_size: 50 },
+      })
+        .then((res) => setReports(res.data?.data ?? []))
+        .catch(() => setReports([]))
+        .finally(() => setLoading(false));
+    }
+  }, [open, task]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>工作日志 - {task.name}</DialogTitle>
+          <DialogDescription>查看该任务的工程师日报记录</DialogDescription>
+        </DialogHeader>
+        {loading ? (
+          <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin" /></div>
+        ) : reports && reports.length > 0 ? (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-muted-foreground">
+                <th className="text-left px-3 py-2 font-medium">日期</th>
+                <th className="text-left px-3 py-2 font-medium">投入</th>
+                <th className="text-left px-3 py-2 font-medium">阶段</th>
+                <th className="text-left px-3 py-2 font-medium">进度</th>
+                <th className="text-left px-3 py-2 font-medium">说明</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reports.map((rpt: any, i: number) => (
+                <tr key={i} className="border-b last:border-0">
+                  <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">{formatDate(rpt.report_date ?? rpt.created_at)}</td>
+                  <td className="px-3 py-2">{rpt.today_hours ?? "-"}h</td>
+                  <td className="px-3 py-2">{rpt.current_stage ?? "-"}</td>
+                  <td className="px-3 py-2">{rpt.progress ?? "-"}</td>
+                  <td className="px-3 py-2 text-muted-foreground max-w-[200px] truncate">{rpt.notes ?? "-"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-center py-8 text-muted-foreground">暂无工作日志</p>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
  * PM 任务列表表格组件
  *
  * 独立组件，不继承共享 TaskTable。
@@ -344,6 +566,12 @@ export function PMTaskTable() {
 
   // 详情弹窗
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
+  // 报价记录弹窗
+  const [bidLogTask, setBidLogTask] = useState<TaskPublic | null>(null);
+  // 审计日志弹窗（查看日志 / 暂停记录 / 归档日志）
+  const [logTask, setLogTask] = useState<TaskPublic | null>(null);
+  // 工作日志弹窗
+  const [workLogTask, setWorkLogTask] = useState<TaskPublic | null>(null);
 
   // 搜索和重置
   const handleSearch = useCallback(() => {
@@ -371,9 +599,9 @@ export function PMTaskTable() {
     queryParams.exclude_pm_id = true;
   }
 
-  const { data: tasks, isLoading } = useTasks(queryParams as any);
+  const { data: tasks, isLoading, refetch } = useTasks(queryParams as any);
 
-  const handleAction = useCallback((action: string, task: TaskPublic) => {
+  const handleAction = useCallback(async (action: string, task: TaskPublic) => {
     switch (action) {
       case "detail":
         setDetailTask(task);
@@ -382,16 +610,42 @@ export function PMTaskTable() {
         router.push(`/pm/tasks/${task.id}/edit`);
         break;
       case "delete":
-        // 删除确认弹窗由后续工单实现
+        if (confirm("确认删除此任务？此操作不可撤销。")) {
+          try {
+            await deleteTaskV1TasksTaskIdDelete({ path: { task_id: task.id } });
+            toast.success("任务已删除");
+            refetch();
+          } catch (e: any) {
+            toast.error(e.message || "删除失败");
+          }
+        }
         break;
       case "withdraw":
-        // 撤回操作由后续工单实现
+        if (confirm("确认撤回此任务？撤回后任务将回到「未确认」状态。")) {
+          try {
+            await withdrawTaskV1TasksTaskIdWithdrawPost({ path: { task_id: task.id } });
+            toast.success("任务已撤回");
+            refetch();
+          } catch (e: any) {
+            toast.error(e.message || "撤回失败");
+          }
+        }
+        break;
+      case "bidLog":
+        setBidLogTask(task);
+        break;
+      case "viewLog":
+      case "pauseLog":
+      case "archiveLog":
+        setLogTask(task);
+        break;
+      case "workLog":
+        setWorkLogTask(task);
         break;
       default:
-        // 日志类操作暂时提示
         break;
     }
-  }, [router]);
+  }, [router, refetch]);
 
   if (isLoading) {
     return (
@@ -558,7 +812,7 @@ export function PMTaskTable() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap">
-                      {getPmActions(task, handleAction).map((act) => (
+                      {getPmActions(task, user?.id, handleAction).map((act) => (
                         <Button
                           key={act.action}
                           variant={act.variant || "link"}
@@ -601,6 +855,39 @@ export function PMTaskTable() {
           open={!!detailTask}
           onOpenChange={(open) => {
             if (!open) setDetailTask(null);
+          }}
+        />
+      )}
+
+      {/* 报价记录弹窗 */}
+      {bidLogTask && (
+        <BidLogDialog
+          task={bidLogTask}
+          open={!!bidLogTask}
+          onOpenChange={(open) => {
+            if (!open) setBidLogTask(null);
+          }}
+        />
+      )}
+
+      {/* 审计日志弹窗（查看日志 / 暂停记录 / 归档日志） */}
+      {logTask && (
+        <AuditLogDialog
+          task={logTask}
+          open={!!logTask}
+          onOpenChange={(open) => {
+            if (!open) setLogTask(null);
+          }}
+        />
+      )}
+
+      {/* 工作日志弹窗 */}
+      {workLogTask && (
+        <WorkLogDialog
+          task={workLogTask}
+          open={!!workLogTask}
+          onOpenChange={(open) => {
+            if (!open) setWorkLogTask(null);
           }}
         />
       )}

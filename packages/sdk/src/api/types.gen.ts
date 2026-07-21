@@ -2807,6 +2807,36 @@ export type UpdateTaskV1TasksTaskIdPutResponses = {
 
 export type UpdateTaskV1TasksTaskIdPutResponse = UpdateTaskV1TasksTaskIdPutResponses[keyof UpdateTaskV1TasksTaskIdPutResponses];
 
+export type WithdrawTaskV1TasksTaskIdWithdrawPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/withdraw';
+};
+
+export type WithdrawTaskV1TasksTaskIdWithdrawPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type WithdrawTaskV1TasksTaskIdWithdrawPostError = WithdrawTaskV1TasksTaskIdWithdrawPostErrors[keyof WithdrawTaskV1TasksTaskIdWithdrawPostErrors];
+
+export type WithdrawTaskV1TasksTaskIdWithdrawPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type WithdrawTaskV1TasksTaskIdWithdrawPostResponse = WithdrawTaskV1TasksTaskIdWithdrawPostResponses[keyof WithdrawTaskV1TasksTaskIdWithdrawPostResponses];
+
 export type ApproveTaskV1TasksTaskIdApprovePostData = {
     body?: never;
     path: {
