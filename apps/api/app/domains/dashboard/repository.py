@@ -153,7 +153,7 @@ async def get_pm_dashboard(
     last_month_new_clients = result.scalar_one() or 0
 
     # 我发布的任务总数 + 分状态计数
-    from sqlalchemy import case, cast, Integer
+    from sqlalchemy import case
 
     task_status_cols = [
         func.count(case((Task.status == TaskStatus.UNCONFIRMED, 1), else_=None)).label("unconfirmed"),

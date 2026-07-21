@@ -7,7 +7,7 @@
 - GET /dashboard/admin - 管理端数据概览
 """
 
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
@@ -21,6 +21,11 @@ from app.core.models import UserRoleType
 from app.core.errors import BusinessException
 
 from app.domains.dashboard import repository
+from app.domains.dashboard.schemas import (
+    PMDashboard,
+    EngineerDashboard,
+    AdminDashboard,
+)
 from app.domains.salary import repository as salary_repo
 from app.domains.salary.service import calculate_all_salaries, calculate_user_salary
 from app.domains.salary.schemas import EngineerSalaryDetail, PMSalaryDetail
@@ -39,13 +44,14 @@ def _get_salary_preview(salary_data: EngineerSalaryDetail | PMSalaryDetail) -> f
 @router.get(
     "/engineer",
     summary="工程师工作台首页",
-    description="工程师查看自己的工作指标：当前星点、本月剩余工时、收入试算、T报准确率"
+    description="工程师查看自己的工作指标：当前星点、本月剩余工时、收入试算、T报准确率",
+    response_model=EngineerDashboard,
 )
 async def read_engineer_dashboard(
     session: SessionDep,
     current_user: CurrentUser,
     _: Annotated[None, Depends(require_scope(DashboardScope.ENGINEER))] = None,
-) -> Any:
+) -> EngineerDashboard:
     """
     获取工程师仪表板数据
 
@@ -64,13 +70,14 @@ async def read_engineer_dashboard(
 @router.get(
     "/pm",
     summary="PM 工作台首页",
-    description="PM 查看自己的工作指标：今日新增客资、本月新增客资、收入试算"
+    description="PM 查看自己的工作指标：今日新增客资、本月新增客资、收入试算",
+    response_model=PMDashboard,
 )
 async def read_pm_dashboard(
     session: SessionDep,
     current_user: CurrentUser,
     _: Annotated[None, Depends(require_scope(DashboardScope.PM))] = None,
-) -> Any:
+) -> PMDashboard:
     """
     获取 PM 仪表板数据
 
@@ -89,13 +96,14 @@ async def read_pm_dashboard(
 @router.get(
     "/admin",
     summary="管理端数据概览",
-    description="管理员查看全系统数据概览：客资、日志、任务、工程师负载、星点排行榜、收入统计"
+    description="管理员查看全系统数据概览：客资、日志、任务、工程师负载、星点排行榜、收入统计",
+    response_model=AdminDashboard,
 )
 async def read_admin_dashboard(
     session: SessionDep,
     current_user: CurrentUser,
     _: Annotated[None, Depends(require_scope(DashboardScope.ADMIN))] = None,
-) -> Any:
+) -> AdminDashboard:
     """
     获取管理员仪表板数据
 
