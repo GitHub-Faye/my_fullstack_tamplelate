@@ -27,6 +27,7 @@ import {
 
 import { loginSchema, type LoginFormData } from "../schemas";
 import { useLogin } from "../api/client/queries";
+import { useAuthStore } from "../stores/auth";
 
 export function LoginForm() {
   const router = useRouter();
@@ -48,7 +49,15 @@ export function LoginForm() {
         username: data.email,
         password: data.password,
       });
-      router.push("/dashboard");
+      // 登录成功后从 store 获取用户角色并跳转
+      const user = useAuthStore.getState().user;
+      if (user?.role === "pm") {
+        router.push("/pm");
+      } else if (user?.role === "engineer") {
+        router.push("/engineer");
+      } else {
+        router.push("/dashboard");
+      }
     } catch {
       // Error is handled by the mutation
     }
