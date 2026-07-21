@@ -13,12 +13,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LayoutDashboard, Users, Settings, LogOut, User, FileCheck, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Users, Settings, LogOut, User, FileCheck, ClipboardList, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const pmNavigation = [
   { name: "PM工作台", href: "/pm", icon: LayoutDashboard },
   { name: "操作日志", href: "/pm/logs", icon: FileCheck },
+];
+
+const engineerNavigation = [
+  { name: "工程师工作台", href: "/engineer", icon: Wrench },
+  { name: "操作日志", href: "/engineer/logs", icon: FileCheck },
 ];
 
 const navigation = [
@@ -49,11 +54,20 @@ export function Navbar() {
   };
 
   const isPm = user?.role === "pm";
+  const isEngineer = user?.role === "engineer";
   const showPmNav = isSuperuser || isPm;
+  const showEngineerNav = isSuperuser || isEngineer;
 
-  const allNavigation = showPmNav
-    ? [...navigation, ...pmNavigation, ...(isSuperuser ? adminNavigation : [])]
-    : navigation;
+  let allNavigation = [...navigation];
+  if (showPmNav) {
+    allNavigation = [...allNavigation, ...pmNavigation];
+  }
+  if (showEngineerNav) {
+    allNavigation = [...allNavigation, ...engineerNavigation];
+  }
+  if (isSuperuser) {
+    allNavigation = [...allNavigation, ...adminNavigation];
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
