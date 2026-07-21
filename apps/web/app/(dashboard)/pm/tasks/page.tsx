@@ -1,4 +1,4 @@
-import { TaskTable } from "@/features/task";
+import { PMTaskTable } from "@/features/task";
 
 export const metadata = {
   title: "PM任务管理",
@@ -16,7 +16,7 @@ export default function PMTasksPage() {
         <p className="text-muted-foreground">管理您发布的所有任务</p>
       </div>
 
-      <TaskTable />
+      <PMTaskTable />
     </div>
   );
 }

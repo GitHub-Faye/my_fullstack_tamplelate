@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePmDashboard } from "@/features/dashboard";
-import { TaskTable } from "@/features/task";
+import { PMTaskTable } from "@/features/task";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
@@ -76,7 +76,7 @@ export default function PMWorkspacePage() {
       </div>
 
       {/* 任务管理表格 */}
-      <TaskTable />
+      <PMTaskTable />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 export { TaskCreateForm } from "./TaskCreateForm";
-export { TaskTable } from "./TaskTable";
+export { PMTaskTable } from "./PMTaskTable";
 export { EngineerTaskTable } from "./EngineerTaskTable";
 export { TaskDetail } from "./TaskDetail";
 export { TaskEditForm } from "./TaskEditForm";
