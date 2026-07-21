@@ -973,6 +973,10 @@ export const zAdminReadAuditLogsV1AdminAuditLogsGetResponse = zAuditLogList;
 
 export const zReadTasksV1TasksGetQuery = z.object({
     status: z.string().nullish(),
+    task_type: z.string().nullish(),
+    engineer_id: z.string().nullish(),
+    pm_id: z.string().nullish(),
+    exclude_pm_id: z.boolean().nullish(),
     page: z.int().gte(1).optional().default(1),
     page_size: z.int().gte(1).lte(100).optional().default(20)
 });
@@ -1391,3 +1395,18 @@ export const zReadAllClientResourcesV1ClientResourcesAllGetQuery = z.object({
  * Successful Response
  */
 export const zReadAllClientResourcesV1ClientResourcesAllGetResponse = zClientResourcesPublic;
+
+export const zReadAuditLogsV1AuditLogsGetQuery = z.object({
+    target_type: z.string().nullish(),
+    action: z.string().nullish(),
+    user_id: z.uuid().nullish(),
+    start_time: z.string().nullish(),
+    end_time: z.string().nullish(),
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zReadAuditLogsV1AuditLogsGetResponse = zAuditLogList;

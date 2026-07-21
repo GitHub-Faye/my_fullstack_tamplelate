@@ -102,7 +102,7 @@ async def reject_task(
     await create_audit_log(
         session=session, user_id=current_user.id, action="task.reject",
         target_type="task", target_id=str(task_id),
-        details=f"Task rejected by admin", ip_address=None,
+        details=f"Task rejected by administrator", ip_address=None,
     )
     return task
 
@@ -234,7 +234,7 @@ async def pause_approve_task(
     await create_audit_log(
         session=session, user_id=current_user.id, action="task.pause_approve",
         target_type="task", target_id=str(task_id),
-        details=f"Task pause approved by admin", ip_address=None,
+        details=f"Task pause approved by administrator", ip_address=None,
     )
     return task
 
@@ -264,7 +264,7 @@ async def pause_reject_task(
     await create_audit_log(
         session=session, user_id=current_user.id, action="task.pause_reject",
         target_type="task", target_id=str(task_id),
-        details=f"Task pause rejected by admin", ip_address=None,
+        details=f"Task pause rejected by administrator", ip_address=None,
     )
     return task
 

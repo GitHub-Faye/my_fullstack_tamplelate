@@ -46,6 +46,7 @@ async def get_audit_logs(
     skip: int = 0,
     limit: int = 20,
     target_type: str | None = None,
+    target_id: str | None = None,
     user_id: uuid.UUID | None = None,
     action: str | None = None,
     start_time: datetime | None = None,
@@ -55,6 +56,8 @@ async def get_audit_logs(
     conditions = []
     if target_type:
         conditions.append(AuditLog.target_type == target_type)
+    if target_id:
+        conditions.append(AuditLog.target_id == target_id)
     if user_id:
         conditions.append(AuditLog.user_id == user_id)
     if action:

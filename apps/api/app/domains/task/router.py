@@ -38,6 +38,7 @@ from app.domains.task.dependencies import (
     check_task_status_editable,
     check_pm_role,
 )
+from app.domains.audit.service import create_audit_log
 
 router = APIRouter()
 
@@ -71,6 +72,11 @@ async def create_task(
         session=session,
         task_in=task_in,
         pm_id=current_user.id,
+    )
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="task.create",
+        target_type="task", target_id=str(task.id),
+        details=f"Task '{task.name}' created", ip_address=None,
     )
     return task
 

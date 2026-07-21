@@ -2371,6 +2371,30 @@ export type ReadTasksV1TasksGetData = {
          */
         status?: string | null;
         /**
+         * Task Type
+         *
+         * 按任务类型过滤
+         */
+        task_type?: string | null;
+        /**
+         * Engineer Id
+         *
+         * 按工程师ID过滤
+         */
+        engineer_id?: string | null;
+        /**
+         * Pm Id
+         *
+         * 按发布人(PM)ID过滤
+         */
+        pm_id?: string | null;
+        /**
+         * Exclude Pm Id
+         *
+         * 排除当前用户的任务，与 pm_id 配合使用
+         */
+        exclude_pm_id?: boolean | null;
+        /**
          * Page
          *
          * 页码，从1开始
@@ -3820,3 +3844,71 @@ export type ReadAllClientResourcesV1ClientResourcesAllGetResponses = {
 };
 
 export type ReadAllClientResourcesV1ClientResourcesAllGetResponse = ReadAllClientResourcesV1ClientResourcesAllGetResponses[keyof ReadAllClientResourcesV1ClientResourcesAllGetResponses];
+
+export type ReadAuditLogsV1AuditLogsGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Target Type
+         *
+         * 按目标类型过滤（如 task, user, system_rule）
+         */
+        target_type?: string | null;
+        /**
+         * Action
+         *
+         * 按操作类型过滤（如 task.create, user.toggle_active）
+         */
+        action?: string | null;
+        /**
+         * User Id
+         *
+         * 按操作人 ID 过滤（仅管理员可用）
+         */
+        user_id?: string | null;
+        /**
+         * Start Time
+         *
+         * 开始时间（ISO 格式）
+         */
+        start_time?: string | null;
+        /**
+         * End Time
+         *
+         * 结束时间（ISO 格式）
+         */
+        end_time?: string | null;
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量，默认20，最大100
+         */
+        page_size?: number;
+    };
+    url: '/v1/audit-logs/';
+};
+
+export type ReadAuditLogsV1AuditLogsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadAuditLogsV1AuditLogsGetError = ReadAuditLogsV1AuditLogsGetErrors[keyof ReadAuditLogsV1AuditLogsGetErrors];
+
+export type ReadAuditLogsV1AuditLogsGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: AuditLogList;
+};
+
+export type ReadAuditLogsV1AuditLogsGetResponse = ReadAuditLogsV1AuditLogsGetResponses[keyof ReadAuditLogsV1AuditLogsGetResponses];
