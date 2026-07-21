@@ -17,7 +17,7 @@ from app.core.dependencies import (
     SessionDep,
 )
 from app.core.models import UserRoleType
-from app.domains.audit.schemas import AuditLogList
+from app.domains.audit.schemas import AuditLogList, AuditLogPublic
 from app.domains.audit import repository
 
 router = APIRouter()
@@ -89,8 +89,25 @@ async def read_audit_logs(
         end_time=end_dt,
     )
 
+    # 将 AuditLog ORM 对象转换为 AuditLogPublic schema
+    # operator_name 是 @property，需要手动提取
+    data = []
+    for log in logs:
+        log_dict = {
+            "id": log.id,
+            "user_id": log.user_id,
+            "action": log.action,
+            "target_type": log.target_type,
+            "target_id": log.target_id,
+            "details": log.details,
+            "ip_address": log.ip_address,
+            "created_at": log.created_at,
+            "operator_name": log.operator_name,
+        }
+        data.append(AuditLogPublic(**log_dict))
+
     return AuditLogList(
-        data=logs,
+        data=data,
         count=count,
         page=page,
         page_size=page_size,

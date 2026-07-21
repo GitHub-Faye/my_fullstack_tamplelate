@@ -533,11 +533,15 @@ class AuditLog(AuditLogBase, table=True):
         sa_type=DateTime(timezone=True),
     )
 
-    # 非持久化字段：操作人姓名（API 响应中使用）
-    operator_name: Optional[str] = Field(default=None, sa_column=None, description="操作人姓名（非持久化）")
-
     # 关系
     operator: Optional["User"] = Relationship()
+
+    # hybrid_property：操作人姓名，从 operator 关系派生，非数据库列
+    @property
+    def operator_name(self) -> str | None:
+        if self.operator:
+            return self.operator.full_name or str(self.user_id)
+        return str(self.user_id) if self.user_id else None
 
 
 class SystemRule(SystemRuleBase, table=True):
