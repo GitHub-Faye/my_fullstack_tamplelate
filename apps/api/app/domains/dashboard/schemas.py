@@ -43,6 +43,9 @@ class PMDashboard(SQLModel):
     today_new_clients: int = Field(description="今日新增客资数")
     monthly_new_clients: int = Field(description="本月新增客资数")
 
+    # 任务指标
+    pm_task_count: int = Field(description="我发布的任务总数")
+
     # 收入指标
     salary_preview: float = Field(description="收入试算（元）")
 

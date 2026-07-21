@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LayoutDashboard, Users, Settings, LogOut, User, FileCheck, ClipboardList, Activity } from "lucide-react";
+import { LayoutDashboard, Users, Settings, LogOut, User, FileCheck, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const pmNavigation = [

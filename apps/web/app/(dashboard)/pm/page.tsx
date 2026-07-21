@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { usePmDashboard } from "@/features/dashboard";
 import { TaskTable } from "@/features/task";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2 } from "lucide-react";
+
+const colorClasses: Record<string, string> = {
+  cyan: "border-l-4 border-l-cyan-500",
+  blue: "border-l-4 border-l-blue-500",
+  green: "border-l-4 border-l-green-500",
+  orange: "border-l-4 border-l-orange-500",
+};
 
 /**
  * PM 工作台首页
@@ -37,8 +42,8 @@ export default function PMWorkspacePage() {
     },
     {
       label: "我发布的任务",
-      value: "-",
-      desc: "查看全部任务",
+      value: dashboard?.pm_task_count != null ? `${dashboard.pm_task_count}` : "-",
+      desc: dashboard?.pm_task_count != null ? `发布的任务数量` : "查看全部任务",
       color: "orange",
     },
   ];
@@ -48,7 +53,7 @@ export default function PMWorkspacePage() {
       {/* 指标卡 */}
       <div className="grid grid-cols-4 gap-4">
         {metrics.map((metric) => (
-          <Card key={metric.label}>
+          <Card key={metric.label} className={colorClasses[metric.color] || ""}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {metric.label}

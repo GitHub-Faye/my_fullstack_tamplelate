@@ -12,6 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
+/**
+ * Mirrors the backend AuditLog schema (domains/audit/models.py).
+ * TODO: Once the SDK generates proper audit-log item types, replace this with the generated type.
+ */
 export interface AuditLogItem {
   id: string;
   created_at: string;

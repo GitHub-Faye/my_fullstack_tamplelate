@@ -22,6 +22,7 @@ export type PMDashboardData = {
   today_new_clients: number;
   monthly_new_clients: number;
   salary_preview: number;
+  pm_task_count: number;
 };
 
 export type EngineerDashboardData = {

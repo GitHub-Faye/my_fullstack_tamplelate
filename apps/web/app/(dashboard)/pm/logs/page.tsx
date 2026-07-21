@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useCurrentUser } from "@/features/user";
 import { useAuditLogs } from "@/features/audit-log/api";
 import { AuditLogTable, type AuditLogItem } from "@/features/audit-log/client";
 import { Button } from "@/components/ui/button";
@@ -13,13 +12,11 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
  * 调用 GET /v1/audit-logs 查看当前用户的操作日志
  */
 export default function PMLogsPage() {
-  const user = useCurrentUser();
   const [page, setPage] = useState(1);
 
   const { data, isLoading } = useAuditLogs({
     page,
     page_size: 20,
-    // PM 只能查看自己的日志，API 会强制设置 user_id = current_user.id
   });
 
   const logs = (data?.data || []) as AuditLogItem[];

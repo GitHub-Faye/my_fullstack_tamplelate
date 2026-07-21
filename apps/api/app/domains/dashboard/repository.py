@@ -124,11 +124,19 @@ async def get_pm_dashboard(
     result = await session.execute(monthly_stmt)
     monthly_new_clients = result.scalar_one() or 0
 
+    # 我发布的任务总数
+    task_count_stmt = select(func.count()).select_from(Task).where(
+        Task.pm_id == pm.id,
+    )
+    result = await session.execute(task_count_stmt)
+    pm_task_count = result.scalar_one() or 0
+
     return PMDashboard(
         user_id=pm.id,
         full_name=pm.full_name,
         today_new_clients=today_new_clients,
         monthly_new_clients=monthly_new_clients,
+        pm_task_count=pm_task_count,
         salary_preview=salary_preview,
     )
 

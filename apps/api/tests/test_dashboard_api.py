@@ -213,6 +213,7 @@ async def test_pm_dashboard(client: AsyncClient, db_session: AsyncSession):
     assert data["user_id"] == str(pm.id)
     assert data["today_new_clients"] >= 1
     assert data["monthly_new_clients"] >= 1
+    assert data["pm_task_count"] >= 0
     assert data["salary_preview"] == 10000.0
 
 
