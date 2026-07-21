@@ -62,7 +62,14 @@ export function Navbar() {
   const showPmNav = isSuperuser || isPm;
   const showEngineerNav = isSuperuser || isEngineer;
 
-  let allNavigation = [...navigation];
+  // 数据概览：仅 superuser 可见
+  // 设置：仅 superuser 可见
+  const showDashboardNav = isSuperuser;
+
+  let allNavigation: typeof navigation = [];
+  if (showDashboardNav) {
+    allNavigation = [...allNavigation, ...navigation];
+  }
   if (showPmNav) {
     allNavigation = [...allNavigation, ...pmNavigation];
   }
