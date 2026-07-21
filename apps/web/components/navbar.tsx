@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LayoutDashboard, Users, Settings, LogOut, User, FileCheck, ClipboardList, Wrench } from "lucide-react";
+import { LayoutDashboard, Users, Settings, LogOut, User, FileCheck, ClipboardList, Wrench, Banknote, Shield, ScrollText, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const pmNavigation = [
@@ -27,13 +27,17 @@ const engineerNavigation = [
 ];
 
 const navigation = [
-  { name: "仪表盘", href: "/dashboard", icon: LayoutDashboard },
+  { name: "数据概览", href: "/dashboard", icon: LayoutDashboard },
   { name: "设置", href: "/dashboard/settings", icon: Settings },
 ];
 
 const adminNavigation = [
-  { name: "任务审核", href: "/dashboard/admin/tasks", icon: FileCheck },
-  { name: "用户管理", href: "/dashboard/admin", icon: Users },
+  { name: "任务管理", href: "/dashboard/tasks", icon: ClipboardList },
+  { name: "工资管理", href: "/dashboard/salaries", icon: Banknote },
+  { name: "角色管理", href: "/dashboard/roles", icon: Shield },
+  { name: "账号管理", href: "/dashboard/users", icon: Users },
+  { name: "规则配置", href: "/dashboard/rules", icon: ScrollText },
+  { name: "操作日志", href: "/dashboard/logs", icon: FileText },
 ];
 
 export function Navbar() {
