@@ -3,20 +3,26 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useIsAuthenticated, useIsHydrated } from "@/features/user";
+import { useIsAuthenticated, useIsHydrated, useCurrentUser } from "@/features/user";
 import { Loader2 } from "lucide-react";
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const isAuthenticated = useIsAuthenticated();
   const isHydrated = useIsHydrated();
+  const user = useCurrentUser();
 
   useEffect(() => {
-    // Redirect to dashboard if already authenticated
     if (isHydrated && isAuthenticated) {
-      router.replace("/dashboard");
+      if (user?.role === "pm") {
+        router.replace("/pm");
+      } else if (user?.role === "engineer") {
+        router.replace("/engineer");
+      } else {
+        router.replace("/dashboard");
+      }
     }
-  }, [isHydrated, isAuthenticated, router]);
+  }, [isHydrated, isAuthenticated, user?.role, router]);
 
   // Show loading while store is hydrating
   if (!isHydrated) {
