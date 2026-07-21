@@ -4,7 +4,9 @@ import { useState } from "react";
 import { usePmDashboard } from "@/features/dashboard";
 import { PMTaskTable } from "@/features/task";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PmSalaryDetailDialog } from "@/features/dashboard/client/PmSalaryDetail";
 
 const colorClasses: Record<string, string> = {
   cyan: "border-l-4 border-l-cyan-500",
@@ -16,22 +18,36 @@ const colorClasses: Record<string, string> = {
 /**
  * PM 工作台首页
  *
- * 包含：4 个指标卡 + 任务管理表格
+ * 包含：4 个指标卡（含环比数据、分状态计数）+ 任务管理表格
  */
 export default function PMWorkspacePage() {
   const { data: dashboard, isLoading: dashLoading } = usePmDashboard();
+  const [salaryOpen, setSalaryOpen] = useState(false);
+
+  const taskStatusDesc = [
+    dashboard?.task_count_bidding != null && `竞价中 ${dashboard.task_count_bidding}`,
+    dashboard?.task_count_in_progress != null && `进行中 ${dashboard.task_count_in_progress}`,
+    dashboard?.task_count_unconfirmed != null && `未确认 ${dashboard.task_count_unconfirmed}`,
+    dashboard?.task_count_completed != null && `已完成 ${dashboard.task_count_completed}`,
+  ]
+    .filter(Boolean)
+    .join(" / ");
 
   const metrics = [
     {
       label: "本月新增客资",
       value: dashboard?.monthly_new_clients ?? "-",
-      desc: "本月客资累计",
+      desc: dashboard?.last_month_new_clients != null
+        ? `上月新增客资 ${dashboard.last_month_new_clients}`
+        : "本月客资累计",
       color: "cyan",
     },
     {
       label: "今日新增客资",
       value: dashboard?.today_new_clients ?? "-",
-      desc: "今日新增客户资源",
+      desc: dashboard?.yesterday_new_clients != null
+        ? `昨日新增客资 ${dashboard.yesterday_new_clients}`
+        : "今日新增客户资源",
       color: "blue",
     },
     {
@@ -39,11 +55,22 @@ export default function PMWorkspacePage() {
       value: dashboard?.salary_preview != null ? `¥${dashboard.salary_preview.toLocaleString()}` : "-",
       desc: "本月预估收入",
       color: "green",
+      action: (
+        <Button
+          variant="link"
+          size="sm"
+          className="h-auto p-0 text-xs"
+          onClick={() => setSalaryOpen(true)}
+        >
+          <Eye className="h-3 w-3 mr-1" />
+          查看明细
+        </Button>
+      ),
     },
     {
       label: "我发布的任务",
       value: dashboard?.pm_task_count != null ? `${dashboard.pm_task_count}` : "-",
-      desc: dashboard?.pm_task_count != null ? `发布的任务数量` : "查看全部任务",
+      desc: taskStatusDesc || "发布的任务数量",
       color: "orange",
     },
   ];
@@ -67,13 +94,17 @@ export default function PMWorkspacePage() {
                   metric.value
                 )}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                 {metric.desc}
+                {metric.action}
               </p>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {/* 收入试算明细弹窗 */}
+      <PmSalaryDetailDialog open={salaryOpen} onOpenChange={setSalaryOpen} />
 
       {/* 任务管理表格 */}
       <PMTaskTable />
