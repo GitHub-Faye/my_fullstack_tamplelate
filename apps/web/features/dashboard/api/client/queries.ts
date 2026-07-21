@@ -9,6 +9,7 @@ import {
   readEngineerDashboardV1DashboardEngineerGet,
   readAdminDashboardV1DashboardAdminGet,
 } from "@repo/sdk";
+import type { PmDashboard, EngineerDashboard, AdminDashboard } from "@repo/sdk";
 
 export const dashboardKeys = {
   pm: () => ["dashboard", "pm"] as const,
@@ -67,7 +68,7 @@ export type AdminDashboardData = {
 
 export function usePmDashboard(
   options?: Omit<
-    UseQueryOptions<PMDashboardData, Error, PMDashboardData>,
+    UseQueryOptions<PmDashboard, Error, PmDashboard>,
     "queryKey" | "queryFn"
   >
 ) {
@@ -77,7 +78,7 @@ export function usePmDashboard(
       const response = await readPmDashboardV1DashboardPmGet({
         throwOnError: true,
       });
-      return response.data as PMDashboardData;
+      return response.data!;
     },
     ...options,
   });
@@ -85,7 +86,7 @@ export function usePmDashboard(
 
 export function useEngineerDashboard(
   options?: Omit<
-    UseQueryOptions<EngineerDashboardData, Error, EngineerDashboardData>,
+    UseQueryOptions<EngineerDashboard, Error, EngineerDashboard>,
     "queryKey" | "queryFn"
   >
 ) {
@@ -95,7 +96,7 @@ export function useEngineerDashboard(
       const response = await readEngineerDashboardV1DashboardEngineerGet({
         throwOnError: true,
       });
-      return response.data as EngineerDashboardData;
+      return response.data!;
     },
     ...options,
   });
@@ -103,7 +104,7 @@ export function useEngineerDashboard(
 
 export function useAdminDashboard(
   options?: Omit<
-    UseQueryOptions<AdminDashboardData, Error, AdminDashboardData>,
+    UseQueryOptions<AdminDashboard, Error, AdminDashboard>,
     "queryKey" | "queryFn"
   >
 ) {
@@ -113,7 +114,7 @@ export function useAdminDashboard(
       const response = await readAdminDashboardV1DashboardAdminGet({
         throwOnError: true,
       });
-      return response.data as AdminDashboardData;
+      return response.data!;
     },
     ...options,
   });

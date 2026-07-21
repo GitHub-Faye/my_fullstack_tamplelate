@@ -150,6 +150,36 @@ export const zDailyReportsPublic = z.object({
 });
 
 /**
+ * EngineerDashboard
+ *
+ * 工程师工作台首页指标
+ */
+export const zEngineerDashboard = z.object({
+    user_id: z.uuid(),
+    full_name: z.string().nullish(),
+    current_starpoint: z.int(),
+    T_monthly_plan: z.number(),
+    T_actual_monthly: z.number(),
+    T_remaining: z.number(),
+    salary_preview: z.number(),
+    accuracy_rate: z.number()
+});
+
+/**
+ * EngineerLoad
+ *
+ * 工程师负载条目
+ */
+export const zEngineerLoad = z.object({
+    user_id: z.uuid(),
+    full_name: z.string().nullish(),
+    current_tasks: z.int(),
+    T_actual_monthly: z.number(),
+    T_remaining: z.number(),
+    accuracy_rate: z.number()
+});
+
+/**
  * EngineerSalaryDetail
  *
  * 工程师工资试算详情
@@ -192,6 +222,28 @@ export const zJudgmentType = z.enum([
  */
 export const zMessage = z.object({
     message: z.string()
+});
+
+/**
+ * PMDashboard
+ *
+ * PM 工作台首页指标
+ */
+export const zPmDashboard = z.object({
+    user_id: z.uuid(),
+    full_name: z.string().nullish(),
+    today_new_clients: z.int(),
+    monthly_new_clients: z.int(),
+    yesterday_new_clients: z.int(),
+    last_month_new_clients: z.int(),
+    pm_task_count: z.int(),
+    task_count_unconfirmed: z.int(),
+    task_count_bidding: z.int(),
+    task_count_in_progress: z.int(),
+    task_count_paused: z.int(),
+    task_count_completed: z.int(),
+    salary_preview: z.number(),
+    salary_detail_url: z.string().optional().default('')
 });
 
 /**
@@ -428,6 +480,34 @@ export const zStarPointSummary = z.object({
     current_month_earned: z.int(),
     rank: z.int().nullish(),
     k_coefficient: z.number().optional().default(1)
+});
+
+/**
+ * StarpointRank
+ *
+ * 星点排行榜条目
+ */
+export const zStarpointRank = z.object({
+    user_id: z.uuid(),
+    full_name: z.string().nullish(),
+    current_starpoint: z.int()
+});
+
+/**
+ * AdminDashboard
+ *
+ * 管理端数据概览
+ */
+export const zAdminDashboard = z.object({
+    today_new_clients: z.int(),
+    monthly_new_clients: z.int(),
+    today_submitted_reports: z.int(),
+    ongoing_tasks: z.int(),
+    engineer_loads: z.array(zEngineerLoad).optional(),
+    starpoint_ranks: z.array(zStarpointRank).optional(),
+    total_salary: z.number(),
+    engineer_salary_cost: z.number(),
+    pm_salary_cost: z.number()
 });
 
 /**
@@ -1304,6 +1384,21 @@ export const zUpdateSalaryParamsV1SalariesUsersUserIdParamsPutPath = z.object({
 export const zUpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponse = zMessage;
 
 export const zExportSalariesV1SalariesExportPostBody = zSalaryExportRequest;
+
+/**
+ * Successful Response
+ */
+export const zReadEngineerDashboardV1DashboardEngineerGetResponse = zEngineerDashboard;
+
+/**
+ * Successful Response
+ */
+export const zReadPmDashboardV1DashboardPmGetResponse = zPmDashboard;
+
+/**
+ * Successful Response
+ */
+export const zReadAdminDashboardV1DashboardAdminGetResponse = zAdminDashboard;
 
 export const zReadRuleAuditLogsV1SystemRulesAuditLogsGetQuery = z.object({
     page: z.int().gte(1).optional().default(1),

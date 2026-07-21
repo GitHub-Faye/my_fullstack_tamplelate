@@ -92,16 +92,16 @@ export default function DashboardPage() {
                 </thead>
                 <tbody>
                   {dashboard.engineer_loads.map((eng) => (
-                    <tr key={eng.engineer_id} className="border-b last:border-0">
-                      <td className="py-2">{eng.engineer_name}</td>
-                      <td className="py-2">{eng.ongoing_count + eng.pending_count}</td>
+                    <tr key={eng.user_id} className="border-b last:border-0">
+                      <td className="py-2">{eng.full_name}</td>
+                      <td className="py-2">{eng.current_tasks}</td>
                       <td className="py-2">{eng.T_remaining}h</td>
                       <td className="py-2">
-                        {eng.T_accuracy_rate != null ? `${(eng.T_accuracy_rate * 100).toFixed(0)}%` : "-"}
+                        {eng.accuracy_rate != null ? `${eng.accuracy_rate.toFixed(0)}%` : "-"}
                       </td>
                       <td className="py-2">
-                        <span className={`pill ${eng.risk_label === "正常" ? "green" : "orange"}`}>
-                          {eng.risk_label}
+                        <span className={`pill ${eng.accuracy_rate != null && eng.accuracy_rate >= 80 ? "green" : "orange"}`}>
+                          {eng.accuracy_rate != null && eng.accuracy_rate >= 80 ? "正常" : "关注"}
                         </span>
                       </td>
                     </tr>

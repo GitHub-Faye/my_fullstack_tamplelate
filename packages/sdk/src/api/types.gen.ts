@@ -5,6 +5,68 @@ export type ClientOptions = {
 };
 
 /**
+ * AdminDashboard
+ *
+ * 管理端数据概览
+ */
+export type AdminDashboard = {
+    /**
+     * Today New Clients
+     *
+     * 今日新增客资数
+     */
+    today_new_clients: number;
+    /**
+     * Monthly New Clients
+     *
+     * 本月新增客资数
+     */
+    monthly_new_clients: number;
+    /**
+     * Today Submitted Reports
+     *
+     * 今日提交日志量
+     */
+    today_submitted_reports: number;
+    /**
+     * Ongoing Tasks
+     *
+     * 进行中任务数
+     */
+    ongoing_tasks: number;
+    /**
+     * Engineer Loads
+     *
+     * 工程师负载列表
+     */
+    engineer_loads?: Array<EngineerLoad>;
+    /**
+     * Starpoint Ranks
+     *
+     * 星点排行榜（Top 10）
+     */
+    starpoint_ranks?: Array<StarpointRank>;
+    /**
+     * Total Salary
+     *
+     * 月度总收入（元）
+     */
+    total_salary: number;
+    /**
+     * Engineer Salary Cost
+     *
+     * 工程师总成本（元）
+     */
+    engineer_salary_cost: number;
+    /**
+     * Pm Salary Cost
+     *
+     * PM 总成本（元）
+     */
+    pm_salary_cost: number;
+};
+
+/**
  * AdminPasswordReset
  */
 export type AdminPasswordReset = {
@@ -503,6 +565,98 @@ export type DailyReportsPublic = {
 };
 
 /**
+ * EngineerDashboard
+ *
+ * 工程师工作台首页指标
+ */
+export type EngineerDashboard = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Current Starpoint
+     *
+     * 当前星点总数
+     */
+    current_starpoint: number;
+    /**
+     * T Monthly Plan
+     *
+     * T月计划
+     */
+    T_monthly_plan: number;
+    /**
+     * T Actual Monthly
+     *
+     * T实（本月实际工时）
+     */
+    T_actual_monthly: number;
+    /**
+     * T Remaining
+     *
+     * 本月剩余工时
+     */
+    T_remaining: number;
+    /**
+     * Salary Preview
+     *
+     * 收入试算（元）
+     */
+    salary_preview: number;
+    /**
+     * Accuracy Rate
+     *
+     * T报准确率（%）
+     */
+    accuracy_rate: number;
+};
+
+/**
+ * EngineerLoad
+ *
+ * 工程师负载条目
+ */
+export type EngineerLoad = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Current Tasks
+     *
+     * 当前进行中任务数
+     */
+    current_tasks: number;
+    /**
+     * T Actual Monthly
+     *
+     * T实（本月实际工时）
+     */
+    T_actual_monthly: number;
+    /**
+     * T Remaining
+     *
+     * 本月剩余工时
+     */
+    T_remaining: number;
+    /**
+     * Accuracy Rate
+     *
+     * T报准确率（%）
+     */
+    accuracy_rate: number;
+};
+
+/**
  * EngineerSalaryDetail
  *
  * 工程师工资试算详情
@@ -613,6 +767,94 @@ export type Message = {
      * Message
      */
     message: string;
+};
+
+/**
+ * PMDashboard
+ *
+ * PM 工作台首页指标
+ */
+export type PmDashboard = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Today New Clients
+     *
+     * 今日新增客资数
+     */
+    today_new_clients: number;
+    /**
+     * Monthly New Clients
+     *
+     * 本月新增客资数
+     */
+    monthly_new_clients: number;
+    /**
+     * Yesterday New Clients
+     *
+     * 昨日新增客资数（环比对照）
+     */
+    yesterday_new_clients: number;
+    /**
+     * Last Month New Clients
+     *
+     * 上月新增客资数（环比对照）
+     */
+    last_month_new_clients: number;
+    /**
+     * Pm Task Count
+     *
+     * 我发布的任务总数
+     */
+    pm_task_count: number;
+    /**
+     * Task Count Unconfirmed
+     *
+     * 未确认任务数
+     */
+    task_count_unconfirmed: number;
+    /**
+     * Task Count Bidding
+     *
+     * 竞价中任务数
+     */
+    task_count_bidding: number;
+    /**
+     * Task Count In Progress
+     *
+     * 进行中任务数
+     */
+    task_count_in_progress: number;
+    /**
+     * Task Count Paused
+     *
+     * 暂停中任务数
+     */
+    task_count_paused: number;
+    /**
+     * Task Count Completed
+     *
+     * 已完成任务数
+     */
+    task_count_completed: number;
+    /**
+     * Salary Preview
+     *
+     * 收入试算（元）
+     */
+    salary_preview: number;
+    /**
+     * Salary Detail Url
+     *
+     * 工资明细 URL（暂为空）
+     */
+    salary_detail_url?: string;
 };
 
 /**
@@ -1007,6 +1249,28 @@ export type StarPointSummary = {
      * K系数
      */
     k_coefficient?: number;
+};
+
+/**
+ * StarpointRank
+ *
+ * 星点排行榜条目
+ */
+export type StarpointRank = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Current Starpoint
+     *
+     * 当前星点总数
+     */
+    current_starpoint: number;
 };
 
 /**
@@ -3490,12 +3754,12 @@ export type ReadEngineerDashboardV1DashboardEngineerGetData = {
 
 export type ReadEngineerDashboardV1DashboardEngineerGetResponses = {
     /**
-     * Response Read Engineer Dashboard V1 Dashboard Engineer Get
-     *
      * Successful Response
      */
-    200: unknown;
+    200: EngineerDashboard;
 };
+
+export type ReadEngineerDashboardV1DashboardEngineerGetResponse = ReadEngineerDashboardV1DashboardEngineerGetResponses[keyof ReadEngineerDashboardV1DashboardEngineerGetResponses];
 
 export type ReadPmDashboardV1DashboardPmGetData = {
     body?: never;
@@ -3506,12 +3770,12 @@ export type ReadPmDashboardV1DashboardPmGetData = {
 
 export type ReadPmDashboardV1DashboardPmGetResponses = {
     /**
-     * Response Read Pm Dashboard V1 Dashboard Pm Get
-     *
      * Successful Response
      */
-    200: unknown;
+    200: PmDashboard;
 };
+
+export type ReadPmDashboardV1DashboardPmGetResponse = ReadPmDashboardV1DashboardPmGetResponses[keyof ReadPmDashboardV1DashboardPmGetResponses];
 
 export type ReadAdminDashboardV1DashboardAdminGetData = {
     body?: never;
@@ -3522,12 +3786,12 @@ export type ReadAdminDashboardV1DashboardAdminGetData = {
 
 export type ReadAdminDashboardV1DashboardAdminGetResponses = {
     /**
-     * Response Read Admin Dashboard V1 Dashboard Admin Get
-     *
      * Successful Response
      */
-    200: unknown;
+    200: AdminDashboard;
 };
+
+export type ReadAdminDashboardV1DashboardAdminGetResponse = ReadAdminDashboardV1DashboardAdminGetResponses[keyof ReadAdminDashboardV1DashboardAdminGetResponses];
 
 export type ReadRuleAuditLogsV1SystemRulesAuditLogsGetData = {
     body?: never;
