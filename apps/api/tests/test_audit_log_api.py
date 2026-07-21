@@ -14,87 +14,60 @@ from app.core.models import AuditLog, Task, TaskStatus, TaskType, User, UserRole
 from app.core.security import get_password_hash, create_access_token
 
 
-async def _create_admin(session: AsyncSession) -> User:
-    """创建测试管理员"""
+async def _create_user_with_role(
+    session: AsyncSession,
+    role_type: UserRoleType,
+    full_name: str,
+    scopes: list,
+) -> User:
+    """创建指定角色的测试用户"""
     from app.core.models import Role, RoleScope, UserRole
     from app.core.scopes import TaskScope, UserScope
 
     user = User(
-        email=f"admin_{uuid.uuid4()}@test.com",
+        email=f"{role_type.value}_{uuid.uuid4()}@test.com",
         hashed_password=get_password_hash("test"),
-        full_name="测试管理员",
-        role=UserRoleType.ADMIN,
+        full_name=full_name,
+        role=role_type,
         is_active=True,
     )
     session.add(user)
     await session.commit()
 
-    role = Role(name=f"admin_role_{uuid.uuid4()}")
+    role = Role(name=f"role_{role_type.value}_{uuid.uuid4()}")
     session.add(role)
     await session.commit()
 
     session.add(UserRole(user_id=user.id, role_id=role.id))
-    for scope in [TaskScope.ADMIN, UserScope.READ]:
+    for scope in scopes:
         session.add(RoleScope(scope=scope.value, role_id=role.id))
     await session.commit()
     return user
 
 
-async def _create_pm(session: AsyncSession) -> User:
-    """创建测试 PM"""
-    from app.core.models import Role, RoleScope, UserRole
+async def create_admin(session: AsyncSession) -> User:
+    """创建测试管理员"""
+    from app.core.scopes import TaskScope, UserScope
+    return await _create_user_with_role(session, UserRoleType.ADMIN, "测试管理员", [TaskScope.ADMIN, UserScope.READ])
+
+
+async def create_pm(session: AsyncSession) -> User:
+    """创建测试市场产品PM"""
     from app.core.scopes import TaskScope
-
-    user = User(
-        email=f"pm_{uuid.uuid4()}@test.com",
-        hashed_password=get_password_hash("test"),
-        full_name="测试PM",
-        role=UserRoleType.PM,
-        is_active=True,
-    )
-    session.add(user)
-    await session.commit()
-
-    role = Role(name=f"pm_role_{uuid.uuid4()}")
-    session.add(role)
-    await session.commit()
-
-    session.add(UserRole(user_id=user.id, role_id=role.id))
-    session.add(RoleScope(scope=TaskScope.READ.value, role_id=role.id))
-    await session.commit()
-    return user
+    return await _create_user_with_role(session, UserRoleType.PM, "测试PM", [TaskScope.READ])
 
 
-async def _create_engineer(session: AsyncSession) -> User:
+async def create_engineer(session: AsyncSession) -> User:
     """创建测试工程师"""
-    from app.core.models import Role, RoleScope, UserRole
     from app.core.scopes import TaskScope
-
-    user = User(
-        email=f"eng_{uuid.uuid4()}@test.com",
-        hashed_password=get_password_hash("test"),
-        full_name="测试工程师",
-        role=UserRoleType.ENGINEER,
-        is_active=True,
-    )
-    session.add(user)
-    await session.commit()
-
-    role = Role(name=f"eng_role_{uuid.uuid4()}")
-    session.add(role)
-    await session.commit()
-
-    session.add(UserRole(user_id=user.id, role_id=role.id))
-    session.add(RoleScope(scope=TaskScope.READ.value, role_id=role.id))
-    await session.commit()
-    return user
+    return await _create_user_with_role(session, UserRoleType.ENGINEER, "测试工程师", [TaskScope.READ])
 
 
 @pytest.mark.asyncio
 async def test_audit_logs_admin_can_read_all(client: AsyncClient, db_session: AsyncSession):
     """测试管理员可查看所有审计日志"""
-    admin = await _create_admin(db_session)
-    pm = await _create_pm(db_session)
+    admin = await create_admin(db_session)
+    pm = await create_pm(db_session)
 
     # 创建两个不同用户的日志
     for user_id in [admin.id, pm.id]:
@@ -111,10 +84,31 @@ async def test_audit_logs_admin_can_read_all(client: AsyncClient, db_session: As
 
 
 @pytest.mark.asyncio
+async def test_audit_logs_admin_filter_by_user_id(client: AsyncClient, db_session: AsyncSession):
+    """测试管理员可按指定 user_id 筛选"""
+    admin = await create_admin(db_session)
+    pm = await create_pm(db_session)
+
+    db_session.add(AuditLog(user_id=admin.id, action="admin.action", target_type="user", target_id=str(uuid.uuid4())))
+    db_session.add(AuditLog(user_id=pm.id, action="pm.action", target_type="task", target_id=str(uuid.uuid4())))
+    await db_session.commit()
+
+    token = create_access_token(subject=str(admin.id), expires_delta=timedelta(minutes=30))
+
+    # 管理员按 pm 的 user_id 筛选
+    response = await client.get(f"/v1/audit-logs/?user_id={pm.id}", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["count"] >= 1
+    for log in data["data"]:
+        assert log["user_id"] == str(pm.id)
+
+
+@pytest.mark.asyncio
 async def test_audit_logs_pm_can_only_read_own(client: AsyncClient, db_session: AsyncSession):
-    """测试 PM 只能查看自己的操作日志"""
-    admin = await _create_admin(db_session)
-    pm = await _create_pm(db_session)
+    """测试市场产品PM 只能查看自己的操作日志"""
+    admin = await create_admin(db_session)
+    pm = await create_pm(db_session)
 
     # 创建 admin 和 pm 的日志
     db_session.add(AuditLog(user_id=admin.id, action="admin.action", target_type="user", target_id=str(uuid.uuid4())))
@@ -134,8 +128,8 @@ async def test_audit_logs_pm_can_only_read_own(client: AsyncClient, db_session: 
 @pytest.mark.asyncio
 async def test_audit_logs_engineer_can_only_read_own(client: AsyncClient, db_session: AsyncSession):
     """测试工程师只能查看自己的操作日志"""
-    admin = await _create_admin(db_session)
-    eng = await _create_engineer(db_session)
+    admin = await create_admin(db_session)
+    eng = await create_engineer(db_session)
 
     db_session.add(AuditLog(user_id=eng.id, action="eng.action", target_type="task", target_id=str(uuid.uuid4())))
     db_session.add(AuditLog(user_id=admin.id, action="admin.action", target_type="user", target_id=str(uuid.uuid4())))
@@ -153,7 +147,7 @@ async def test_audit_logs_engineer_can_only_read_own(client: AsyncClient, db_ses
 @pytest.mark.asyncio
 async def test_audit_logs_filter_by_action(client: AsyncClient, db_session: AsyncSession):
     """测试按操作类型筛选"""
-    admin = await _create_admin(db_session)
+    admin = await create_admin(db_session)
 
     db_session.add(AuditLog(user_id=admin.id, action="task.create", target_type="task", target_id=str(uuid.uuid4())))
     db_session.add(AuditLog(user_id=admin.id, action="user.create", target_type="user", target_id=str(uuid.uuid4())))
@@ -172,7 +166,7 @@ async def test_audit_logs_filter_by_action(client: AsyncClient, db_session: Asyn
 @pytest.mark.asyncio
 async def test_audit_logs_filter_by_target_type(client: AsyncClient, db_session: AsyncSession):
     """测试按目标类型筛选"""
-    admin = await _create_admin(db_session)
+    admin = await create_admin(db_session)
 
     db_session.add(AuditLog(user_id=admin.id, action="test", target_type="task", target_id=str(uuid.uuid4())))
     db_session.add(AuditLog(user_id=admin.id, action="test", target_type="user", target_id=str(uuid.uuid4())))
@@ -190,7 +184,7 @@ async def test_audit_logs_filter_by_target_type(client: AsyncClient, db_session:
 @pytest.mark.asyncio
 async def test_audit_logs_pagination(client: AsyncClient, db_session: AsyncSession):
     """测试分页功能"""
-    admin = await _create_admin(db_session)
+    admin = await create_admin(db_session)
 
     for i in range(5):
         db_session.add(AuditLog(user_id=admin.id, action=f"test.{i}", target_type="user", target_id=str(uuid.uuid4())))
@@ -215,7 +209,7 @@ async def test_audit_logs_pagination(client: AsyncClient, db_session: AsyncSessi
 @pytest.mark.asyncio
 async def test_audit_logs_operator_name_filled(client: AsyncClient, db_session: AsyncSession):
     """测试 user_name 字段正确填充"""
-    admin = await _create_admin(db_session)
+    admin = await create_admin(db_session)
 
     log = AuditLog(user_id=admin.id, action="test", target_type="user", target_id=str(uuid.uuid4()))
     db_session.add(log)

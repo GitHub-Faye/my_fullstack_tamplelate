@@ -4,10 +4,11 @@
 提供跨仓库共享的数据库操作辅助工具。
 """
 
-from typing import Any, Tuple, TypeVar
+from typing import Any, Tuple, TypeVar, Optional
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlmodel import SQLModel
 
 M = TypeVar("M", bound=SQLModel)
@@ -21,6 +22,7 @@ async def paginated_query(
     limit: int,
     conditions: list[Any] | None = None,
     order_by: Any | None = None,
+    eager_load_relations: Optional[list] = None,
 ) -> Tuple[list[M], int]:
     """
     通用分页查询辅助函数。
@@ -34,6 +36,7 @@ async def paginated_query(
         limit: 返回记录数上限
         conditions: 过滤条件列表（可选）
         order_by: 排序表达式（可选，默认按 created_at 降序）
+        eager_load_relations: 预加载的关系列表（可选，用于避免 N+1 查询）
 
     Returns:
         (结果列表, 总数) 元组
@@ -49,6 +52,8 @@ async def paginated_query(
 
     # 查询
     stmt = select(model)
+    if eager_load_relations:
+        stmt = stmt.options(selectinload(*eager_load_relations))
     if conditions:
         stmt = stmt.where(and_(*conditions))
     if order_by is not None:

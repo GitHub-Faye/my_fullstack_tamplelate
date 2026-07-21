@@ -9,9 +9,9 @@ from typing import Optional, Tuple
 
 from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import selectinload
 
-from app.core.models import AuditLog, User
+from app.core.models import AuditLog
 from app.core.db_utils import paginated_query
 
 
@@ -71,12 +71,14 @@ async def get_audit_logs(
         limit=limit,
         conditions=conditions if conditions else None,
         order_by=AuditLog.created_at.desc(),
+        eager_load_relations=[AuditLog.operator],
     )
 
-    # 填充操作人姓名
+    # 填充操作人姓名（从已加载的关系中获取，无需额外查询）
     for log in tasks:
-        if log.user_id:
-            user = await session.get(User, log.user_id)
-            log.operator_name = user.full_name if user and user.full_name else str(log.user_id)[:8]
+        if log.operator:
+            log.operator_name = log.operator.full_name or str(log.user_id)[:8]
+        elif log.user_id:
+            log.operator_name = str(log.user_id)[:8]
 
     return tasks, count
