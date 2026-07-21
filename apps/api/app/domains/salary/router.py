@@ -37,6 +37,7 @@ from app.domains.salary.schemas import (
     SalaryExportRequest,
 )
 from app.domains.salary.service import calculate_all_salaries, calculate_user_salary
+from app.domains.audit.service import create_audit_log
 
 
 router = APIRouter()
@@ -168,6 +169,12 @@ async def update_salary_params(
             code=ErrorCode.USER_NOT_FOUND,
             detail=f"User with id {user_id} not found"
         )
+
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="salary.update",
+        target_type="user", target_id=str(user_id),
+        details=f"Salary parameters updated", ip_address=None,
+    )
 
     return Message(message=f"Salary parameters updated for user {user_id}")
 

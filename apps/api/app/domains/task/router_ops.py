@@ -34,7 +34,7 @@ from app.domains.task.dependencies import (
     check_task_owner_or_admin,
 )
 from app.domains.starpoint.calculation import trigger_starpoint_calculation
-from app.domains.audit.repository import create_audit_log
+from app.domains.audit.service import create_audit_log
 
 router = APIRouter()
 
@@ -167,6 +167,11 @@ async def convert_to_urgent(
     session.add(task)
     await session.commit()
     await session.refresh(task)
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="task.convert_type",
+        target_type="task", target_id=str(task_id),
+        details=f"Task type converted to urgent", ip_address=None,
+    )
     return task
 
 
@@ -193,6 +198,11 @@ async def convert_to_convenient(
     session.add(task)
     await session.commit()
     await session.refresh(task)
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="task.convert_type",
+        target_type="task", target_id=str(task_id),
+        details=f"Task type converted to convenient", ip_address=None,
+    )
     return task
 
 
@@ -221,6 +231,11 @@ async def pause_approve_task(
     session.add(task)
     await session.commit()
     await session.refresh(task)
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="task.pause_approve",
+        target_type="task", target_id=str(task_id),
+        details=f"Task pause approved by admin", ip_address=None,
+    )
     return task
 
 
@@ -246,6 +261,11 @@ async def pause_reject_task(
     session.add(task)
     await session.commit()
     await session.refresh(task)
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="task.pause_reject",
+        target_type="task", target_id=str(task_id),
+        details=f"Task pause rejected by admin", ip_address=None,
+    )
     return task
 
 
@@ -277,6 +297,11 @@ async def reassign_task(
     session.add(task)
     await session.commit()
     await session.refresh(task)
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="task.reassign",
+        target_type="task", target_id=str(task_id),
+        details=f"Task reassigned to engineer {request.new_engineer_id}", ip_address=None,
+    )
     return task
 
 

@@ -30,7 +30,7 @@ from app.domains.task.dependencies import (
     check_task_assigned_to_engineer,
 )
 from app.domains.starpoint.calculation import trigger_starpoint_calculation
-from app.domains.audit.repository import create_audit_log
+from app.domains.audit.service import create_audit_log
 
 
 router = APIRouter()
