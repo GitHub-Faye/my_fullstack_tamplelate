@@ -77,8 +77,8 @@ async def get_audit_logs(
     # 填充操作人姓名（从已加载的关系中获取，无需额外查询）
     for log in tasks:
         if log.operator:
-            log.operator_name = log.operator.full_name or str(log.user_id)[:8]
+            log.operator_name = log.operator.full_name or str(log.user_id)
         elif log.user_id:
-            log.operator_name = str(log.user_id)[:8]
+            log.operator_name = str(log.user_id)
 
     return tasks, count

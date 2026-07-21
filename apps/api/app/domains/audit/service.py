@@ -18,9 +18,9 @@ async def create_audit_log(
     user_id: uuid.UUID,
     action: str,
     target_type: str,
-    target_id: Optional[str] = None,
-    details: Optional[str] = None,
-    ip_address: Optional[str] = None,
+    target_id: str | None = None,
+    details: str | None = None,
+    ip_address: str | None = None,
 ) -> None:
     """统一创建审计日志入口，委托给 repository 层写入数据库。"""
     await repo_create_audit_log(
