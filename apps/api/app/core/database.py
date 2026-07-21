@@ -45,6 +45,50 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             await session.close()
 
 
+async def sync_roles_scopes(session: AsyncSession) -> dict[str, list[str]]:
+    """
+    同步所有已存在角色的 scopes 到 DEFAULT_ROLE_SCOPES 的最新定义。
+
+    遍历所有已存在的角色，将 DEFAULT_ROLE_SCOPES 中新增的 scope 补充进去，
+    已有的 scope 保持不变。
+
+    Returns:
+        dict[str, list[str]]: 每个角色新增的 scope 列表
+    """
+    from app.core.scopes import DEFAULT_ROLE_SCOPES
+    from app.core.models import Role, RoleScope
+
+    result = await session.execute(select(Role))
+    all_roles = result.scalars().all()
+
+    changes: dict[str, list[str]] = {}
+
+    for role in all_roles:
+        if role.name not in DEFAULT_ROLE_SCOPES:
+            continue
+
+        # 获取该角色已有的 scope
+        scope_result = await session.execute(
+            select(RoleScope.scope).where(RoleScope.role_id == role.id)
+        )
+        existing_scopes = {row[0] for row in scope_result.all()}
+
+        # 获取 DEFAULT_ROLE_SCOPES 中定义的 scope 值
+        expected_scopes = {s.value for s in DEFAULT_ROLE_SCOPES[role.name]}
+        missing_scopes = expected_scopes - existing_scopes
+
+        if missing_scopes:
+            changes[role.name] = sorted(missing_scopes)
+            for scope in missing_scopes:
+                session.add(RoleScope(role_id=role.id, scope=scope))
+
+    if changes:
+        await session.commit()
+        return changes
+
+    return {}
+
+
 async def init_roles_and_scopes(session: AsyncSession) -> None:
     """
     初始化默认角色和权限范围。
