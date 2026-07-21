@@ -3856,6 +3856,12 @@ export type ReadAuditLogsV1AuditLogsGetData = {
          */
         target_type?: string | null;
         /**
+         * Target Id
+         *
+         * 按目标 ID 过滤
+         */
+        target_id?: string | null;
+        /**
          * Action
          *
          * 按操作类型过滤（如 task.create, user.toggle_active）

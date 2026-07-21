@@ -1398,6 +1398,7 @@ export const zReadAllClientResourcesV1ClientResourcesAllGetResponse = zClientRes
 
 export const zReadAuditLogsV1AuditLogsGetQuery = z.object({
     target_type: z.string().nullish(),
+    target_id: z.string().nullish(),
     action: z.string().nullish(),
     user_id: z.uuid().nullish(),
     start_time: z.string().nullish(),
