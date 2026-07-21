@@ -33,6 +33,7 @@ import {
   TASK_TYPE_LABELS,
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
+import { Pagination } from "@/components/ui/pagination";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -144,30 +145,12 @@ export function AdminTaskTable() {
         </div>
 
         {tasks && tasks.count > 20 && (
-          <div className="flex items-center justify-between mt-4">
-            <div className="text-sm text-muted-foreground">
-              共 {tasks.count} 条记录
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => setPage(page - 1)}
-              >
-                上一页
-              </Button>
-              <span className="text-sm">第 {page} 页</span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={tasks.count !== undefined && page * 20 >= tasks.count}
-                onClick={() => setPage(page + 1)}
-              >
-                下一页
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            page={page}
+            total={tasks.count}
+            pageSize={20}
+            onPageChange={setPage}
+          />
         )}
       </CardContent>
     </Card>

@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useAuditLogs } from "@/features/audit-log/api";
 import { AuditLogTable, type AuditLogItem } from "@/features/audit-log/client";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
 
 /**
  * PM 操作日志页面
@@ -36,32 +35,12 @@ export default function PMLogsPage() {
       />
 
       {count > 20 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            共 {count} 条记录
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-            >
-              <ChevronLeft className="h-4 w-4" />
-              上一页
-            </Button>
-            <span className="text-sm">第 {page} 页</span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page * 20 >= count}
-              onClick={() => setPage(page + 1)}
-            >
-              下一页
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          page={page}
+          total={count}
+          pageSize={20}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );
