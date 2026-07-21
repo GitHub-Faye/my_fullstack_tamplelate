@@ -102,7 +102,13 @@ async def get_pm_dashboard(
     Returns:
         PMDashboard DTO
     """
-    _, today_start, month_start = _get_time_bounds()
+    now, today_start, month_start = _get_time_bounds()
+
+    # 时间边界：昨日、上月
+    yesterday_start = today_start - timedelta(days=1)
+    last_month_start = (month_start - timedelta(days=1)).replace(day=1)
+    # 上个月结束 = 本月1号
+    last_month_end = month_start
 
     # 今日新增客资
     today_stmt = select(func.count()).select_from(ClientResource).where(
@@ -114,6 +120,17 @@ async def get_pm_dashboard(
     result = await session.execute(today_stmt)
     today_new_clients = result.scalar_one() or 0
 
+    # 昨日新增客资（环比）
+    yesterday_stmt = select(func.count()).select_from(ClientResource).where(
+        and_(
+            ClientResource.pm_id == pm.id,
+            ClientResource.created_at >= yesterday_start,
+            ClientResource.created_at < today_start,
+        )
+    )
+    result = await session.execute(yesterday_stmt)
+    yesterday_new_clients = result.scalar_one() or 0
+
     # 本月新增客资
     monthly_stmt = select(func.count()).select_from(ClientResource).where(
         and_(
@@ -124,20 +141,48 @@ async def get_pm_dashboard(
     result = await session.execute(monthly_stmt)
     monthly_new_clients = result.scalar_one() or 0
 
-    # 我发布的任务总数
-    task_count_stmt = select(func.count()).select_from(Task).where(
-        Task.pm_id == pm.id,
+    # 上月新增客资（环比）
+    last_month_stmt = select(func.count()).select_from(ClientResource).where(
+        and_(
+            ClientResource.pm_id == pm.id,
+            ClientResource.created_at >= last_month_start,
+            ClientResource.created_at < last_month_end,
+        )
     )
-    result = await session.execute(task_count_stmt)
-    pm_task_count = result.scalar_one() or 0
+    result = await session.execute(last_month_stmt)
+    last_month_new_clients = result.scalar_one() or 0
+
+    # 我发布的任务总数 + 分状态计数
+    from sqlalchemy import case, cast, Integer
+
+    task_status_cols = [
+        func.count(case((Task.status == TaskStatus.UNCONFIRMED, 1), else_=None)).label("unconfirmed"),
+        func.count(case((Task.status == TaskStatus.BIDDING, 1), else_=None)).label("bidding"),
+        func.count(case((Task.status == TaskStatus.IN_PROGRESS, 1), else_=None)).label("in_progress"),
+        func.count(case((Task.status == TaskStatus.PAUSED, 1), else_=None)).label("paused"),
+        func.count(case((Task.status == TaskStatus.COMPLETED, 1), else_=None)).label("completed"),
+        func.count(Task.id).label("total"),
+    ]
+
+    task_stmt = select(*task_status_cols).where(Task.pm_id == pm.id)
+    result = await session.execute(task_stmt)
+    row = result.one()
 
     return PMDashboard(
         user_id=pm.id,
         full_name=pm.full_name,
         today_new_clients=today_new_clients,
+        yesterday_new_clients=yesterday_new_clients,
         monthly_new_clients=monthly_new_clients,
-        pm_task_count=pm_task_count,
+        last_month_new_clients=last_month_new_clients,
+        pm_task_count=row.total or 0,
+        task_count_unconfirmed=row.unconfirmed or 0,
+        task_count_bidding=row.bidding or 0,
+        task_count_in_progress=row.in_progress or 0,
+        task_count_paused=row.paused or 0,
+        task_count_completed=row.completed or 0,
         salary_preview=salary_preview,
+        salary_detail_url="",
     )
 
 

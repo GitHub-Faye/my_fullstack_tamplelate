@@ -188,14 +188,80 @@ async def test_pm_dashboard(client: AsyncClient, db_session: AsyncSession):
     """测试 PM 仪表板 API"""
     pm = await create_test_pm(db_session)
 
-    from datetime import datetime, timezone
+    from datetime import datetime, timezone, timedelta
+    now = datetime.now(timezone.utc)
+
+    # 今日新增客资
     client_resource = ClientResource(
         pm_id=pm.id,
         actual_count=10,
         baseline_count=8,
-        date=datetime.now(timezone.utc),
+        date=now,
     )
     db_session.add(client_resource)
+
+    # 昨日新增客资（环比）
+    yesterday = now - timedelta(days=1)
+    yesterday_resource = ClientResource(
+        pm_id=pm.id,
+        actual_count=5,
+        baseline_count=4,
+        date=yesterday,
+        created_at=yesterday,
+    )
+    db_session.add(yesterday_resource)
+
+    # 上月新增客资（环比）
+    last_month = (now.replace(day=1) - timedelta(days=1)).replace(day=15)
+    last_month_resource = ClientResource(
+        pm_id=pm.id,
+        actual_count=3,
+        baseline_count=3,
+        date=last_month,
+        created_at=last_month,
+    )
+    db_session.add(last_month_resource)
+
+    # 创建不同状态的任务用于分状态计数
+    task_unconfirmed = Task(
+        name="Unconfirmed Task",
+        pm_id=pm.id,
+        status=TaskStatus.UNCONFIRMED,
+        task_type=TaskType.NORMAL,
+        T_reported=8.0,
+    )
+    db_session.add(task_unconfirmed)
+
+    task_bidding = Task(
+        name="Bidding Task",
+        pm_id=pm.id,
+        status=TaskStatus.BIDDING,
+        task_type=TaskType.NORMAL,
+        T_reported=8.0,
+    )
+    db_session.add(task_bidding)
+
+    task_in_progress = Task(
+        name="In Progress Task",
+        pm_id=pm.id,
+        engineer_id=pm.id,
+        status=TaskStatus.IN_PROGRESS,
+        task_type=TaskType.NORMAL,
+        T_reported=8.0,
+    )
+    db_session.add(task_in_progress)
+
+    task_completed = Task(
+        name="Completed Task",
+        pm_id=pm.id,
+        engineer_id=pm.id,
+        status=TaskStatus.COMPLETED,
+        task_type=TaskType.NORMAL,
+        T_reported=8.0,
+        T_actual=8.0,
+    )
+    db_session.add(task_completed)
+
     await db_session.commit()
 
     token = create_access_token(
@@ -211,10 +277,21 @@ async def test_pm_dashboard(client: AsyncClient, db_session: AsyncSession):
     assert response.status_code == 200
     data = response.json()
     assert data["user_id"] == str(pm.id)
+    # 客资指标
     assert data["today_new_clients"] >= 1
     assert data["monthly_new_clients"] >= 1
-    assert data["pm_task_count"] >= 0
+    assert data["yesterday_new_clients"] >= 1
+    assert data["last_month_new_clients"] >= 1
+    # 任务指标
+    assert data["pm_task_count"] >= 4
+    assert data["task_count_unconfirmed"] >= 1
+    assert data["task_count_bidding"] >= 1
+    assert data["task_count_in_progress"] >= 1
+    assert data["task_count_completed"] >= 1
+    assert data["task_count_paused"] == 0
+    # 收入指标
     assert data["salary_preview"] == 10000.0
+    assert data["salary_detail_url"] == ""
 
 
 @pytest.mark.asyncio

@@ -42,12 +42,20 @@ class PMDashboard(SQLModel):
     # 客资指标
     today_new_clients: int = Field(description="今日新增客资数")
     monthly_new_clients: int = Field(description="本月新增客资数")
+    yesterday_new_clients: int = Field(description="昨日新增客资数（环比对照）")
+    last_month_new_clients: int = Field(description="上月新增客资数（环比对照）")
 
     # 任务指标
     pm_task_count: int = Field(description="我发布的任务总数")
+    task_count_unconfirmed: int = Field(description="未确认任务数")
+    task_count_bidding: int = Field(description="竞价中任务数")
+    task_count_in_progress: int = Field(description="进行中任务数")
+    task_count_paused: int = Field(description="暂停中任务数")
+    task_count_completed: int = Field(description="已完成任务数")
 
     # 收入指标
     salary_preview: float = Field(description="收入试算（元）")
+    salary_detail_url: str = Field(default="", description="工资明细 URL（暂为空）")
 
 
 # ==================== 管理员指标 ====================

@@ -21,8 +21,16 @@ export type PMDashboardData = {
   full_name: string;
   today_new_clients: number;
   monthly_new_clients: number;
+  yesterday_new_clients: number;
+  last_month_new_clients: number;
   salary_preview: number;
   pm_task_count: number;
+  task_count_unconfirmed: number;
+  task_count_bidding: number;
+  task_count_in_progress: number;
+  task_count_paused: number;
+  task_count_completed: number;
+  salary_detail_url: string;
 };
 
 export type EngineerDashboardData = {
