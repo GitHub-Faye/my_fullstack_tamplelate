@@ -158,6 +158,7 @@ export const zEngineerDashboard = z.object({
     user_id: z.uuid(),
     full_name: z.string().nullish(),
     current_starpoint: z.int(),
+    in_progress_task_count: z.int(),
     T_monthly_plan: z.number(),
     T_actual_monthly: z.number(),
     T_remaining: z.number(),

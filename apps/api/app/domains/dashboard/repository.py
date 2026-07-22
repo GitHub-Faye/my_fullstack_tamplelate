@@ -73,10 +73,19 @@ async def get_engineer_dashboard(
     T_monthly_plan = engineer.T_monthly_plan or 0.0
     T_remaining = max(0, T_monthly_plan - T_actual_monthly)
 
+    # 进行中任务数
+    in_progress_stmt = select(func.count()).select_from(Task).where(
+        Task.engineer_id == engineer.id,
+        Task.status == TaskStatus.IN_PROGRESS,
+    )
+    result = await session.execute(in_progress_stmt)
+    in_progress_task_count = result.scalar_one() or 0
+
     return EngineerDashboard(
         user_id=engineer.id,
         full_name=engineer.full_name,
         current_starpoint=engineer.current_starpoint or 0,
+        in_progress_task_count=in_progress_task_count,
         T_monthly_plan=T_monthly_plan,
         T_actual_monthly=T_actual_monthly,
         T_remaining=T_remaining,

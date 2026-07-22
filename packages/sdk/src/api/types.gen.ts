@@ -585,6 +585,12 @@ export type EngineerDashboard = {
      */
     current_starpoint: number;
     /**
+     * In Progress Task Count
+     *
+     * 进行中任务数
+     */
+    in_progress_task_count: number;
+    /**
      * T Monthly Plan
      *
      * T月计划

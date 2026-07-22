@@ -38,6 +38,7 @@ export type EngineerDashboardData = {
   user_id: string;
   full_name: string;
   current_starpoint: number;
+  in_progress_task_count: number;
   T_monthly_plan: number;
   T_remaining: number;
   T_actual_monthly: number;
