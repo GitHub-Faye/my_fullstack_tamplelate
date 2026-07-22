@@ -486,7 +486,7 @@ export const createTaskV1TasksPost = <ThrowOnError extends boolean = false>(opti
 /**
  * 删除任务
  *
- * 删除任务（仅管理员或超管）
+ * 删除未确认状态的任务（PM 所有者或管理员可操作）
  */
 export const deleteTaskV1TasksTaskIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteTaskV1TasksTaskIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteTaskV1TasksTaskIdDeleteResponses, DeleteTaskV1TasksTaskIdDeleteErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
