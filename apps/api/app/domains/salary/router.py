@@ -37,7 +37,7 @@ from app.domains.salary.schemas import (
     SalaryExportRequest,
 )
 from app.domains.salary.service import calculate_all_salaries, calculate_user_salary
-from app.domains.audit.service import create_audit_log
+from app.domains.audit.repository import create_audit_log
 
 
 router = APIRouter()

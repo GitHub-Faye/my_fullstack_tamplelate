@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { ACTION_LABELS } from "./actionLabels";
 
 /**
  * Mirrors the backend AuditLog schema (domains/audit/models.py).
@@ -39,21 +40,6 @@ function formatDateTime(dateStr: string | null | undefined): string {
     ? "-"
     : `${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
 }
-
-const ACTION_LABELS: Record<string, string> = {
-  "task.create": "发布任务",
-  "task.approve": "审核通过",
-  "task.reject": "驳回任务",
-  "task.publish": "发布任务",
-  "task.convert_type": "转换类型",
-  "task.reassign": "改派任务",
-  "task.pause_approve": "批准暂停",
-  "task.pause_reject": "驳回暂停",
-  "user.create": "创建用户",
-  "user.toggle_active": "启用/禁用用户",
-  "salary.update": "更新工资参数",
-  "system_rule.update": "更新规则",
-};
 
 const TARGET_TYPE_LABELS: Record<string, string> = {
   task: "任务",

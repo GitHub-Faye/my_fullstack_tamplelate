@@ -24,7 +24,7 @@ from app.core.models import Bid
 from app.domains.task import repository
 from app.domains.task.schemas import TaskPublic
 from app.domains.task.dependencies import check_task_owner_or_admin
-from app.domains.audit.service import create_audit_log
+from app.domains.audit.repository import create_audit_log
 
 router = APIRouter()
 

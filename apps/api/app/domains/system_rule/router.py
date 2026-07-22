@@ -32,7 +32,7 @@ from app.domains.system_rule.schemas import (
     SystemRulePublic,
     SystemRulesPublic,
 )
-from app.domains.audit.service import create_audit_log
+from app.domains.audit.repository import create_audit_log
 from app.domains.audit.schemas import AuditLogPublic, AuditLogList
 from app.domains.audit.repository import get_audit_logs
 

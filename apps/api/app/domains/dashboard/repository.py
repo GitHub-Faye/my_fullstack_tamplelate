@@ -110,47 +110,30 @@ async def get_pm_dashboard(
     # 上个月结束 = 本月1号
     last_month_end = month_start
 
-    # 今日新增客资
-    today_stmt = select(func.count()).select_from(ClientResource).where(
-        and_(
-            ClientResource.pm_id == pm.id,
-            ClientResource.created_at >= today_start,
-        )
-    )
-    result = await session.execute(today_stmt)
-    today_new_clients = result.scalar_one() or 0
+    # 客资统计：今日/昨日/本月/上月（合并为一条 SQL）
+    from sqlalchemy import case
 
-    # 昨日新增客资（环比）
-    yesterday_stmt = select(func.count()).select_from(ClientResource).where(
-        and_(
-            ClientResource.pm_id == pm.id,
-            ClientResource.created_at >= yesterday_start,
-            ClientResource.created_at < today_start,
-        )
-    )
-    result = await session.execute(yesterday_stmt)
-    yesterday_new_clients = result.scalar_one() or 0
-
-    # 本月新增客资
-    monthly_stmt = select(func.count()).select_from(ClientResource).where(
-        and_(
-            ClientResource.pm_id == pm.id,
-            ClientResource.created_at >= month_start,
-        )
-    )
-    result = await session.execute(monthly_stmt)
-    monthly_new_clients = result.scalar_one() or 0
-
-    # 上月新增客资（环比）
-    last_month_stmt = select(func.count()).select_from(ClientResource).where(
-        and_(
-            ClientResource.pm_id == pm.id,
-            ClientResource.created_at >= last_month_start,
-            ClientResource.created_at < last_month_end,
-        )
-    )
-    result = await session.execute(last_month_stmt)
-    last_month_new_clients = result.scalar_one() or 0
+    cr_status_cols = [
+        func.sum(case((ClientResource.created_at >= today_start, 1), else_=0)).label("today_new_clients"),
+        func.sum(case(
+            (ClientResource.created_at >= yesterday_start, 1),
+            (ClientResource.created_at < today_start, 1),
+            else_=0
+        )).label("yesterday_new_clients"),
+        func.sum(case((ClientResource.created_at >= month_start, 1), else_=0)).label("monthly_new_clients"),
+        func.sum(case(
+            (ClientResource.created_at >= last_month_start, 1),
+            (ClientResource.created_at < last_month_end, 1),
+            else_=0
+        )).label("last_month_new_clients"),
+    ]
+    cr_stmt = select(*cr_status_cols).where(ClientResource.pm_id == pm.id)
+    result = await session.execute(cr_stmt)
+    cr_row = result.one()
+    today_new_clients = cr_row.today_new_clients or 0
+    yesterday_new_clients = cr_row.yesterday_new_clients or 0
+    monthly_new_clients = cr_row.monthly_new_clients or 0
+    last_month_new_clients = cr_row.last_month_new_clients or 0
 
     # 我发布的任务总数 + 分状态计数
     from sqlalchemy import case

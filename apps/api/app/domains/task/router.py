@@ -23,7 +23,7 @@ from app.core.dependencies import (
 )
 from app.core.scopes import TaskScope
 from app.core.schemas import Message
-from app.core.errors import BusinessException, ErrorCode, raise_task_not_found
+from app.core.errors import BusinessException, ErrorCode
 from app.core.models import Task, TaskStatus, TaskType, UserRoleType, User
 
 from app.domains.task import repository
@@ -34,11 +34,10 @@ from app.domains.task.schemas import (
     TaskUpdate,
 )
 from app.domains.task.dependencies import (
-    check_task_owner_or_admin,
-    check_task_status_editable,
-    check_pm_role,
+    TaskOr404,
+    TaskOwnerOrAdmin,
 )
-from app.domains.audit.service import create_audit_log
+from app.domains.audit.repository import create_audit_log
 
 router = APIRouter()
 
@@ -65,9 +64,6 @@ async def create_task(
     - 任务状态自动设为 unconfirmed
     - pm_id 为当前用户 ID
     """
-    # 检查是否是 PM 角色
-    await check_pm_role(session, current_user)
-
     task = await repository.create_task(
         session=session,
         task_in=task_in,
@@ -180,10 +176,9 @@ async def read_tasks(
     description="查看指定任务的详细信息",
 )
 async def read_task(
-    session: SessionDep,
-    current_user: CurrentUser,
-    task_id: uuid.UUID,
+    task: TaskOr404,
     _: Annotated[None, Depends(require_any_scope(TaskScope.READ, TaskScope.ADMIN))],
+    _task_owner: TaskOwnerOrAdmin,
 ) -> Any:
     """
     获取任务详情
@@ -191,13 +186,6 @@ async def read_task(
     - PM 只能查看自己的任务
     - 管理员可查看所有任务
     """
-    task = await repository.get_task(session=session, task_id=task_id)
-    if not task:
-        raise_task_not_found()
-
-    # 检查权限（所有者或管理员）
-    await check_task_owner_or_admin(session, current_user, task.pm_id)
-
     return task
 
 
@@ -210,8 +198,7 @@ async def read_task(
 async def update_task(
     *,
     session: SessionDep,
-    current_user: CurrentUser,
-    task_id: uuid.UUID,
+    task: TaskOwnerOrAdmin,
     task_in: TaskUpdate,
     _: Annotated[None, Depends(require_any_scope(TaskScope.UPDATE, TaskScope.ADMIN))],
 ) -> Any:
@@ -221,13 +208,6 @@ async def update_task(
     - PM 只能更新自己的任务
     - 'unconfirmed' 和 'bidding' 状态可编辑（PM 在竞价结束前可修改资料）
     """
-    task = await repository.get_task(session=session, task_id=task_id)
-    if not task:
-        raise_task_not_found()
-
-    # 检查权限（所有者或管理员）
-    await check_task_owner_or_admin(session, current_user, task.pm_id)
-
     # 检查状态是否可编辑（unconfirmed 或 bidding 状态允许编辑）
     if task.status not in (TaskStatus.UNCONFIRMED, TaskStatus.BIDDING):
         raise BusinessException(
@@ -252,8 +232,8 @@ async def update_task(
 )
 async def delete_task(
     session: SessionDep,
-    current_user: CurrentUser,
-    task_id: uuid.UUID,
+    task: TaskOwnerOrAdmin,
+    _: Annotated[None, Depends(require_any_scope(TaskScope.DELETE, TaskScope.ADMIN))],
 ) -> Message:
     """
     删除任务
@@ -261,13 +241,6 @@ async def delete_task(
     - PM 可删除自己发布的未确认任务
     - 管理员可删除任意未确认任务
     """
-    task = await repository.get_task(session=session, task_id=task_id)
-    if not task:
-        raise_task_not_found()
-
-    # 检查权限（所有者或管理员）
-    await check_task_owner_or_admin(session, current_user, task.pm_id)
-
     # 仅 'unconfirmed' 状态可删除
     if task.status != TaskStatus.UNCONFIRMED:
         raise BusinessException(
@@ -289,7 +262,7 @@ async def withdraw_task(
     *,
     session: SessionDep,
     current_user: CurrentUser,
-    task_id: uuid.UUID,
+    task: TaskOwnerOrAdmin,
     _: Annotated[None, Depends(require_scope(TaskScope.UPDATE))],
 ) -> Any:
     """
@@ -299,17 +272,6 @@ async def withdraw_task(
     - 状态从 'bidding' 回到 'unconfirmed'
     - 清除竞价截止时间
     """
-    task = await repository.get_task(session=session, task_id=task_id)
-    if not task:
-        raise_task_not_found()
-
-    # 检查权限（所有者）
-    if task.pm_id != current_user.id:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
-            detail="Only the task owner can withdraw the task"
-        )
-
     # 仅 'bidding' 状态可撤回
     if task.status != TaskStatus.BIDDING:
         raise BusinessException(
@@ -326,8 +288,8 @@ async def withdraw_task(
 
     await create_audit_log(
         session=session, user_id=current_user.id, action="task.withdraw",
-        target_type="task", target_id=str(task_id),
-        details=f"Task withdrawn from bidding, status back to unconfirmed",
+        target_type="task", target_id=str(task.id),
+        details="Task withdrawn from bidding, status back to unconfirmed",
         ip_address=None,
     )
     return task

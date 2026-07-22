@@ -1,34 +1,16 @@
 """
-审计日志模块 — 业务服务层
+审计日志模块 — 业务服务层（已弃用）
 
-统一审计日志的创建入口。
+⚠️ 请直接使用 `app.domains.audit.repository.create_audit_log`。
+此模块将在后续清理中移除。
 """
 
-import uuid
-from typing import Optional
+import warnings
 
-from sqlalchemy.ext.asyncio import AsyncSession
+warnings.warn(
+    "service.py is deprecated — import create_audit_log from app.domains.audit.repository directly",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-from app.domains.audit.repository import create_audit_log as repo_create_audit_log
-
-
-async def create_audit_log(
-    *,
-    session: AsyncSession,
-    user_id: uuid.UUID,
-    action: str,
-    target_type: str,
-    target_id: str | None = None,
-    details: str | None = None,
-    ip_address: str | None = None,
-) -> None:
-    """统一创建审计日志入口，委托给 repository 层写入数据库。"""
-    await repo_create_audit_log(
-        session=session,
-        user_id=user_id,
-        action=action,
-        target_type=target_type,
-        target_id=target_id,
-        details=details,
-        ip_address=ip_address,
-    )
+from app.domains.audit.repository import create_audit_log  # noqa: F401

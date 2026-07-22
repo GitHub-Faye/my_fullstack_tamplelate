@@ -44,6 +44,39 @@ from app.domains.task.schemas_execution import (
 from app.domains.starpoint.calculation import trigger_starpoint_calculation
 
 
+# ==================== 统一依赖注入 ====================
+
+
+async def get_task_or_404(
+    session: SessionDep,
+    task_id: uuid.UUID,
+) -> Task:
+    """获取任务或 404"""
+    task = await repository.get_task(session=session, task_id=task_id)
+    if not task:
+        raise_task_not_found()
+    return task
+
+
+TaskOr404 = Annotated[Task, Depends(get_task_or_404)]
+
+
+async def require_task_owner(
+    current_user: CurrentUser,
+    task: Task = Depends(get_task_or_404),
+) -> Task:
+    """要求当前用户是任务所有者或管理员"""
+    if task.pm_id != current_user.id and current_user.role != UserRoleType.ADMIN:
+        raise BusinessException(
+            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
+            detail="Only the task owner can perform this action"
+        )
+    return task
+
+
+TaskOwnerOrAdmin = Annotated[Task, Depends(require_task_owner)]
+
+
 async def check_task_owner_or_admin(
     session: SessionDep,
     current_user: CurrentUser,

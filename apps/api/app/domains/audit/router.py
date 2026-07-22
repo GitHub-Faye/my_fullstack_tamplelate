@@ -23,7 +23,7 @@ from app.domains.audit import repository
 router = APIRouter()
 
 
-def _parse_iso_datetime(value: str | None) -> datetime | None:
+def _parse_iso_datetime(value: str | None, param_name: str) -> datetime | None:
     """解析 ISO 格式时间字符串，非法输入返回 422 而非 500。"""
     if not value:
         return None
@@ -32,7 +32,7 @@ def _parse_iso_datetime(value: str | None) -> datetime | None:
     except (ValueError, TypeError):
         raise RequestValidationError([
             {
-                "loc": ["query", "start_time" if "start" in __import__("inspect").stack()[1].code_context[0] else "end_time"],
+                "loc": ["query", param_name],
                 "msg": "Invalid ISO datetime format",
                 "type": "value_error",
             }
@@ -72,8 +72,8 @@ async def read_audit_logs(
         resolved_user_id = user_id
 
     # 解析时间范围
-    start_dt = _parse_iso_datetime(start_time)
-    end_dt = _parse_iso_datetime(end_time)
+    start_dt = _parse_iso_datetime(start_time, "start_time")
+    end_dt = _parse_iso_datetime(end_time, "end_time")
 
     offset = (page - 1) * page_size
 
