@@ -1,4 +1,4 @@
-import { UserDetail } from "@/features/user/server";
+import { UserDetail } from "@/features/user/client/UserDetail";
 
 interface EditUserPageProps {
   params: Promise<{
