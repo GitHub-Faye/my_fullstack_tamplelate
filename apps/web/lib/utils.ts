@@ -51,17 +51,50 @@ export function formatUserRole(isSuperuser: boolean | undefined): string {
   return isSuperuser ? "超级管理员" : "普通用户";
 }
 
+/** 角色值 → 中文标签映射（供 Select 选项使用） */
+export const ROLE_OPTIONS = [
+  { value: "engineer", label: "工程师" },
+  { value: "pm", label: "PM" },
+  { value: "admin", label: "管理员" },
+] as const;
+
+/** 角色值 → 中文标签映射（供 Badge 显示使用） */
+export const ROLE_LABELS: Record<string, string> = {
+  engineer: "工程师",
+  pm: "PM",
+  admin: "管理员",
+};
+
 /**
  * Format user role type for display
  */
 export function formatRoleType(role: string | undefined): string {
-  const labels: Record<string, string> = {
-    engineer: "工程师",
-    pm: "PM",
-    admin: "管理员",
-  };
-  return role ? labels[role] || role : "-";
+  return role ? ROLE_LABELS[role] || role : "-";
 }
+
+/** 在岗状态 → 中文标签映射（供 Select 选项使用） */
+export const EMPLOYMENT_STATUS_OPTIONS = [
+  { value: "on_duty", label: "在职" },
+  { value: "probation", label: "试用" },
+  { value: "leave", label: "休假" },
+  { value: "resigned", label: "离职" },
+] as const;
+
+/** 在岗状态值 → 中文标签映射 */
+export const EMPLOYMENT_STATUS_LABELS: Record<string, string> = {
+  on_duty: "在职",
+  probation: "试用",
+  leave: "休假",
+  resigned: "离职",
+};
+
+/** 在岗状态 → Badge variant 映射 */
+export const EMPLOYMENT_STATUS_VARIANTS: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+  on_duty: "default",
+  probation: "secondary",
+  leave: "outline",
+  resigned: "destructive",
+};
 
 /**
  * Format user status for display
@@ -74,11 +107,5 @@ export function formatUserStatus(isActive: boolean | undefined): string {
  * Format employment status for display
  */
 export function formatEmploymentStatus(status: string | undefined | null): string {
-  const labels: Record<string, string> = {
-    on_duty: "在职",
-    probation: "试用",
-    leave: "休假",
-    resigned: "离职",
-  };
-  return status ? labels[status] || status : "-";
+  return status ? EMPLOYMENT_STATUS_LABELS[status] || status : "-";
 }

@@ -9,7 +9,6 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
-  Search,
   RotateCcw,
 } from "lucide-react";
 
@@ -51,36 +50,14 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { useUsers, useDeleteUser, userKeys } from "../api/client/queries";
 import { useAdminToggleUserActive, useAdminResetPassword } from "../api/client/admin-queries";
-import { formatDate, formatDateShort } from "@/lib/utils";
+import { formatDateShort, ROLE_LABELS, EMPLOYMENT_STATUS_LABELS, EMPLOYMENT_STATUS_VARIANTS } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { useUserMap } from "../api/client/queries";
 import type { UserAdminDetail } from "@repo/sdk";
 
 interface UserTableProps {
   currentUserId?: string;
 }
-
-/** 在岗状态标签映射 */
-const EMPLOYMENT_STATUS_LABELS: Record<string, string> = {
-  on_duty: "在职",
-  probation: "试用",
-  leave: "休假",
-  resigned: "离职",
-};
-
-/** 在岗状态 Badge 颜色映射 */
-const EMPLOYMENT_STATUS_VARIANTS: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
-  on_duty: "default",
-  probation: "secondary",
-  leave: "outline",
-  resigned: "destructive",
-};
-
-/** 角色标签映射 */
-const ROLE_LABELS: Record<string, string> = {
-  engineer: "工程师",
-  pm: "PM",
-  admin: "管理员",
-};
 
 export function UserTable({ currentUserId }: UserTableProps) {
   const router = useRouter();
@@ -103,9 +80,15 @@ export function UserTable({ currentUserId }: UserTableProps) {
   const totalCount = data?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  // 提取所有部门用于筛选
-  const departments = [...new Set(users.map((u) => u.department).filter(Boolean))] as string[];
+  // 从全量用户映射中提取所有部门（跨页）
+  const userMap = useUserMap();
+  const allDepartments = [...new Set(
+    (data?.data as UserAdminDetail[] || [])
+      .map((u) => u.department)
+      .filter(Boolean)
+  )] as string[];
 
+  // 当部门筛选且命中当前页时，仍用当前页数据
   const filteredUsers = departmentFilter === "all"
     ? users
     : users.filter((u) => u.department === departmentFilter);
@@ -170,7 +153,7 @@ export function UserTable({ currentUserId }: UserTableProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">全部部门</SelectItem>
-                  {departments.map((dep) => (
+                  {allDepartments.map((dep) => (
                     <SelectItem key={dep} value={dep}>{dep}</SelectItem>
                   ))}
                 </SelectContent>

@@ -39,27 +39,13 @@ import {
   type UserUpdateFormData,
 } from "../schemas";
 import { useAdminCreateUser, useAdminUpdateUser } from "../api/client/admin-queries";
+import { ROLE_OPTIONS, EMPLOYMENT_STATUS_OPTIONS } from "@/lib/utils";
 import type { UserAdminDetail } from "@repo/sdk";
 
 interface UserFormProps {
   user?: UserAdminDetail;
   mode: "create" | "edit";
 }
-
-/** 角色选项 */
-const ROLE_OPTIONS = [
-  { value: "engineer", label: "工程师" },
-  { value: "pm", label: "PM" },
-  { value: "admin", label: "管理员" },
-];
-
-/** 在岗状态选项 */
-const EMPLOYMENT_STATUS_OPTIONS = [
-  { value: "on_duty", label: "在职" },
-  { value: "probation", label: "试用" },
-  { value: "leave", label: "休假" },
-  { value: "resigned", label: "离职" },
-];
 
 export function UserForm({ user, mode }: UserFormProps) {
   const router = useRouter();
