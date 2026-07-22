@@ -22,7 +22,7 @@ export default function Home() {
         } else if (user?.role === "admin") {
           router.replace("/admin");
         } else {
-          router.replace("/dashboard");
+          router.replace("/admin");
         }
       } else {
         router.replace("/login");

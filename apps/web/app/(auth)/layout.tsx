@@ -21,7 +21,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       } else if (user?.role === "admin") {
         router.replace("/admin");
       } else {
-        router.replace("/dashboard");
+        router.replace("/admin");
       }
     }
   }, [isHydrated, isAuthenticated, user?.role, router]);

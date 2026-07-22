@@ -13,9 +13,9 @@ export function middleware(request: NextRequest) {
   // Get token from cookies
   const token = request.cookies.get('access_token')?.value;
 
-  // If has token and trying to access login/signup, redirect to dashboard
+  // If has token and trying to access login/signup, redirect to admin
   if (token && isPublicPath) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/admin', request.url));
   }
 
   // Note: We don't redirect unauthenticated users here anymore
