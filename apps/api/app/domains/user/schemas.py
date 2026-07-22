@@ -57,6 +57,11 @@ class UserAdminCreate(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     role: UserRoleType = Field(default=UserRoleType.ENGINEER, description="用户角色")
     is_active: bool = True
+    # 人事管理字段
+    phone: str | None = Field(default=None, max_length=20)
+    department: str | None = Field(default=None, max_length=100)
+    hire_date: datetime | None = None
+    employment_status: str | None = Field(default=None, max_length=20)
     # 工程师工资字段
     S0: float | None = Field(default=None, ge=0)
     H0: float | None = Field(default=None, ge=0)
@@ -76,6 +81,11 @@ class UserAdminUpdate(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     is_active: bool | None = None
     role: UserRoleType | None = None
+    # 人事管理字段
+    phone: str | None = Field(default=None, max_length=20)
+    department: str | None = Field(default=None, max_length=100)
+    hire_date: datetime | None = None
+    employment_status: str | None = Field(default=None, max_length=20)
     # 工程师工资字段
     S0: float | None = Field(default=None, ge=0)
     H0: float | None = Field(default=None, ge=0)
@@ -123,6 +133,11 @@ class UserAdminDetail(UserPublic):
     R_base: float | None = None
     R_assess: float | None = None
     baseline_client_count: int | None = None
+    # 人事管理字段
+    phone: str | None = None
+    department: str | None = None
+    hire_date: datetime | None = None
+    employment_status: str | None = None
 
 
 # 使用统一分页协议

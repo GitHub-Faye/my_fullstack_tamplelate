@@ -359,6 +359,52 @@ async def admin_set_pm_client_resource_params(
     return _to_admin_detail(updated_user)
 
 
+@router.delete(
+    "/users/{user_id}",
+    response_model=Message,
+    summary="删除用户（管理员）",
+    description="管理员删除指定用户账号",
+)
+async def admin_delete_user(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    user_id: uuid.UUID,
+    request: Request,
+    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
+) -> Any:
+    """
+    删除用户（管理员操作）。
+
+    权限：管理员（需 user:admin 权限）
+    """
+    user = await repository.get_user_detail(session=session, user_id=user_id)
+    if not user:
+        raise_user_not_found()
+
+    # 禁止管理员删除自己
+    if user.id == current_user.id:
+        raise BusinessException(
+            code=ErrorCode.USER_CANNOT_DELETE_SELF,
+            detail="Cannot delete your own account"
+        )
+
+    # 记录审计日志
+    await create_audit_log(
+        session=session,
+        user_id=current_user.id,
+        action="user.delete",
+        target_type="user",
+        target_id=str(user_id),
+        details=json.dumps({"email": user.email, "full_name": user.full_name}),
+        ip_address=request.client.host if request.client else None,
+    )
+
+    await repository.delete_user(session=session, db_user=user)
+
+    return Message(message="User deleted successfully")
+
+
 @router.get(
     "/audit-logs",
     response_model=AuditLogList,
@@ -435,4 +481,8 @@ def _to_admin_detail(user) -> UserAdminDetail:
         R_base=user.R_base,
         R_assess=user.R_assess,
         baseline_client_count=user.baseline_client_count,
+        phone=user.phone,
+        department=user.department,
+        hire_date=user.hire_date,
+        employment_status=user.employment_status,
     )

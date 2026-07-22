@@ -182,6 +182,13 @@ class UserBase(SQLModel):
     # 用户角色：engineer | pm | admin（完全独立，不支持兼任）
     role: UserRoleType = Field(default=UserRoleType.ENGINEER)
 
+    # ==================== 人事管理字段 ====================
+    phone: Optional[str] = Field(default=None, max_length=20)
+    department: Optional[str] = Field(default=None, max_length=100)
+    hire_date: Optional[datetime] = Field(default=None, sa_type=DateTime(timezone=True))
+    # employment_status: on_duty=在职, probation=试用, leave=休假, resigned=离职
+    employment_status: Optional[str] = Field(default=None, max_length=20)
+
 
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)

@@ -481,3 +481,108 @@ async def test_admin_create_user_audit_logged(client: AsyncClient, db_session: A
         log["action"] == "user.create" and log["target_id"] == user_id
         for log in logs["data"]
     )
+
+
+@pytest.mark.asyncio
+async def test_admin_delete_user(client: AsyncClient, db_session: AsyncSession):
+    """测试管理员删除用户"""
+    admin = await create_test_admin(db_session)
+    engineer = await create_test_regular_user(db_session)
+
+    token = create_access_token(
+        subject=str(admin.id),
+        expires_delta=timedelta(minutes=30),
+    )
+
+    response = await client.delete(
+        f"/v1/admin/users/{engineer.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "User deleted successfully"
+
+    # 验证用户已被删除
+    from sqlalchemy import select as sa_select
+    stmt = sa_select(User).where(User.id == engineer.id)
+    result = await db_session.execute(stmt)
+    assert result.scalar_one_or_none() is None
+
+
+@pytest.mark.asyncio
+async def test_admin_delete_self_forbidden(client: AsyncClient, db_session: AsyncSession):
+    """测试管理员不能删除自己"""
+    admin = await create_test_admin(db_session)
+
+    token = create_access_token(
+        subject=str(admin.id),
+        expires_delta=timedelta(minutes=30),
+    )
+
+    response = await client.delete(
+        f"/v1/admin/users/{admin.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
+async def test_admin_create_user_with_hr_fields(client: AsyncClient, db_session: AsyncSession):
+    """测试管理员创建用户时设置人事字段"""
+    admin = await create_test_admin(db_session)
+
+    token = create_access_token(
+        subject=str(admin.id),
+        expires_delta=timedelta(minutes=30),
+    )
+
+    response = await client.post(
+        "/v1/admin/users",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "email": f"hr_test_{uuid.uuid4()}@test.com",
+            "password": "testpassword123",
+            "full_name": "HR Test User",
+            "role": "engineer",
+            "phone": "13800000001",
+            "department": "技术部",
+            "hire_date": "2026-06-01T00:00:00Z",
+            "employment_status": "on_duty",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["phone"] == "13800000001"
+    assert data["department"] == "技术部"
+    assert data["hire_date"] is not None
+    assert data["employment_status"] == "on_duty"
+
+
+@pytest.mark.asyncio
+async def test_admin_update_user_hr_fields(client: AsyncClient, db_session: AsyncSession):
+    """测试管理员更新用户人事字段"""
+    admin = await create_test_admin(db_session)
+    engineer = await create_test_regular_user(db_session)
+
+    token = create_access_token(
+        subject=str(admin.id),
+        expires_delta=timedelta(minutes=30),
+    )
+
+    response = await client.patch(
+        f"/v1/admin/users/{engineer.id}",
+        headers={"Authorization": f"Bearer {token}"},
+        json={
+            "phone": "13900000002",
+            "department": "产品项目部",
+            "employment_status": "probation",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["phone"] == "13900000002"
+    assert data["department"] == "产品项目部"
+    assert data["employment_status"] == "probation"
