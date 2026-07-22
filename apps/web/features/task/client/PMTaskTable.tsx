@@ -333,52 +333,6 @@ function TaskDetailDialog({
             </div>
           )}
 
-          {/* 附件表格（占位） */}
-          <div className="border rounded-md">
-            <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">附件/截图</div>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-muted-foreground">
-                  <th className="text-left px-3 py-2 font-medium">文件</th>
-                  <th className="text-left px-3 py-2 font-medium">类型</th>
-                  <th className="text-left px-3 py-2 font-medium">状态</th>
-                  <th className="text-left px-3 py-2 font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                    暂无附件（后端功能尚未实现）
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* 工作日志（占位） */}
-          {isStarted && (
-            <div className="border rounded-md">
-              <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">最近工作日志</div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-muted-foreground">
-                    <th className="text-left px-3 py-2 font-medium">日期</th>
-                    <th className="text-left px-3 py-2 font-medium">投入</th>
-                    <th className="text-left px-3 py-2 font-medium">阶段/进度</th>
-                    <th className="text-left px-3 py-2 font-medium">说明</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                      暂无工作日志
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
-
           {/* 操作按钮 */}
           <div className="flex flex-wrap gap-2 pt-2 border-t">
             {actions.map((act) => (
