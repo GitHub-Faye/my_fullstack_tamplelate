@@ -1,6 +1,16 @@
 import { z } from "zod";
 
 /**
+ * 在岗状态枚举
+ */
+export const employmentStatusEnum = z.enum(["on_duty", "probation", "leave", "resigned"]);
+
+/**
+ * 用户角色枚举
+ */
+export const userRoleEnum = z.enum(["engineer", "pm", "admin"]);
+
+/**
  * User base schema (shared fields)
  * Matches backend UserBase
  */
@@ -21,7 +31,7 @@ export const userBaseSchema = z.object({
 
 /**
  * User create form schema (admin)
- * Matches backend UserCreate
+ * 对应后端 UserAdminCreate
  */
 export const userCreateSchema = z.object({
   email: z
@@ -41,13 +51,29 @@ export const userCreateSchema = z.object({
     .max(255, "姓名不能超过255个字符")
     .optional()
     .or(z.literal("")),
+  // 人事管理字段
+  phone: z.string().max(20, "手机号不能超过20个字符").optional().or(z.literal("")),
+  department: z.string().max(100, "部门不能超过100个字符").optional().or(z.literal("")),
+  hireDate: z.string().optional().or(z.literal("")),
+  employmentStatus: employmentStatusEnum.optional(),
+  role: userRoleEnum.optional(),
+  // 工程师工资字段
+  S0: z.number().min(0).optional(),
+  H0: z.number().min(0).optional(),
+  TMonthlyPlan: z.number().min(0).optional(),
+  // PM 工资字段
+  SBase: z.number().min(0).optional(),
+  SAssess: z.number().min(0).optional(),
+  RBase: z.number().min(0).max(1).optional(),
+  RAssess: z.number().min(0).max(1).optional(),
+  baselineClientCount: z.number().min(0).optional(),
 });
 
 export type UserCreateFormData = z.infer<typeof userCreateSchema>;
 
 /**
  * User update form schema (admin)
- * Matches backend UserUpdate
+ * 对应后端 UserAdminUpdate
  */
 export const userUpdateSchema = z.object({
   email: z
@@ -69,6 +95,22 @@ export const userUpdateSchema = z.object({
     .max(255, "姓名不能超过255个字符")
     .optional()
     .nullable(),
+  // 人事管理字段
+  phone: z.string().max(20, "手机号不能超过20个字符").optional().or(z.literal("")),
+  department: z.string().max(100, "部门不能超过100个字符").optional().or(z.literal("")),
+  hireDate: z.string().optional().or(z.literal("")),
+  employmentStatus: employmentStatusEnum.optional(),
+  role: userRoleEnum.optional(),
+  // 工程师工资字段
+  S0: z.number().min(0).optional(),
+  H0: z.number().min(0).optional(),
+  TMonthlyPlan: z.number().min(0).optional(),
+  // PM 工资字段
+  SBase: z.number().min(0).optional(),
+  SAssess: z.number().min(0).optional(),
+  RBase: z.number().min(0).max(1).optional(),
+  RAssess: z.number().min(0).max(1).optional(),
+  baselineClientCount: z.number().min(0).optional(),
 });
 
 export type UserUpdateFormData = z.infer<typeof userUpdateSchema>;

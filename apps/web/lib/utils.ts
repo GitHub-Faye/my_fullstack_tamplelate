@@ -52,8 +52,33 @@ export function formatUserRole(isSuperuser: boolean | undefined): string {
 }
 
 /**
+ * Format user role type for display
+ */
+export function formatRoleType(role: string | undefined): string {
+  const labels: Record<string, string> = {
+    engineer: "工程师",
+    pm: "PM",
+    admin: "管理员",
+  };
+  return role ? labels[role] || role : "-";
+}
+
+/**
  * Format user status for display
  */
 export function formatUserStatus(isActive: boolean | undefined): string {
   return isActive ? "活跃" : "已禁用";
+}
+
+/**
+ * Format employment status for display
+ */
+export function formatEmploymentStatus(status: string | undefined | null): string {
+  const labels: Record<string, string> = {
+    on_duty: "在职",
+    probation: "试用",
+    leave: "休假",
+    resigned: "离职",
+  };
+  return status ? labels[status] || status : "-";
 }
