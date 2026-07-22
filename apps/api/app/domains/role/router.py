@@ -100,7 +100,7 @@ async def admin_create_role(
     existing = await repository.get_role_by_name(session=session, name=role_in.name)
     if existing:
         raise BusinessException(
-            code=ErrorCode.RULE_NOT_FOUND,
+            code=ErrorCode.ROLE_ALREADY_EXISTS,
             detail=f"Role with name '{role_in.name}' already exists",
         )
 
@@ -166,7 +166,7 @@ async def admin_update_role(
         existing = await repository.get_role_by_name(session=session, name=role_in.name)
         if existing and existing.id != role_id:
             raise BusinessException(
-                code=ErrorCode.RULE_NOT_FOUND,
+                code=ErrorCode.ROLE_ALREADY_EXISTS,
                 detail=f"Role with name '{role_in.name}' already exists",
             )
 

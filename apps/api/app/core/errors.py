@@ -77,6 +77,9 @@ class ErrorCode(str, Enum):
     # ==================== 规则配置相关错误 (RULE) ====================
     RULE_NOT_FOUND = "RULE_NOT_FOUND"
 
+    # ==================== 角色相关错误 (ROLE) ====================
+    ROLE_ALREADY_EXISTS = "ROLE_ALREADY_EXISTS"
+
 
 # ==================== HTTP 状态码映射 ====================
 ERROR_STATUS_MAP: dict[ErrorCode, int] = {
@@ -121,6 +124,7 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     # 409 Conflict
     ErrorCode.USER_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     ErrorCode.USER_EMAIL_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
+    ErrorCode.ROLE_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
 
     # 422 Unprocessable Entity
     ErrorCode.SALARY_PARAM_NOT_SET: status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -179,6 +183,7 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.SYSTEM_VALIDATION_ERROR: "Validation error",
     ErrorCode.SYSTEM_RATE_LIMIT: "Too many requests",
     ErrorCode.RULE_NOT_FOUND: "Rule not found",
+    ErrorCode.ROLE_ALREADY_EXISTS: "Role with this name already exists",
 }
 
 

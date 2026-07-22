@@ -157,7 +157,7 @@ async def test_admin_create_role_duplicate_name(client: AsyncClient, db_session:
         },
     )
 
-    assert response.status_code == 404  # 业务错误，使用 RULE_NOT_FOUND 状态码
+    assert response.status_code == 409  # 角色名冲突
     data = response.json()
     assert "already exists" in data["detail"]
 

@@ -9,13 +9,28 @@
 - delete_role: 删除角色
 """
 import uuid
-from typing import Optional, Tuple
+from typing import Tuple
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.core.models import Role, RoleScope
+
+
+async def _reload_role_with_scopes(
+    *,
+    session: AsyncSession,
+    role_id: uuid.UUID,
+) -> Role:
+    """重新查询角色及其 scopes 关系"""
+    stmt = (
+        select(Role)
+        .options(selectinload(Role.scopes))
+        .where(Role.id == role_id)
+    )
+    result = await session.execute(stmt)
+    return result.unique().scalar_one()
 
 
 async def get_role(
@@ -87,14 +102,7 @@ async def create_role(
 
     await session.commit()
 
-    # 重新查询以加载 scopes 关系
-    stmt = (
-        select(Role)
-        .options(selectinload(Role.scopes))
-        .where(Role.id == role.id)
-    )
-    result = await session.execute(stmt)
-    return result.unique().scalar_one()
+    return await _reload_role_with_scopes(session=session, role_id=role.id)
 
 
 async def update_role(
@@ -110,9 +118,7 @@ async def update_role(
 
     if scopes is not None:
         # 删除旧 scopes
-        from sqlalchemy import delete as sa_delete
-
-        stmt = sa_delete(RoleScope).where(RoleScope.role_id == role.id)
+        stmt = delete(RoleScope).where(RoleScope.role_id == role.id)
         await session.execute(stmt)
 
         # 创建新 scopes
@@ -125,13 +131,9 @@ async def update_role(
     # 重新查询以加载 scopes 关系
     role_id = role.id
     session.expire(role)
-    stmt = (
-        select(Role)
-        .options(selectinload(Role.scopes))
-        .where(Role.id == role_id)
+    return await _reload_role_with_scopes(
+        session=session, role_id=role_id
     )
-    result = await session.execute(stmt)
-    return result.unique().scalar_one()
 
 
 async def delete_role(
