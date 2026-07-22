@@ -29,6 +29,7 @@ export default function PMWorkspacePage() {
     dashboard?.task_count_in_progress != null && `进行中 ${dashboard.task_count_in_progress}`,
     dashboard?.task_count_unconfirmed != null && `未确认 ${dashboard.task_count_unconfirmed}`,
     dashboard?.task_count_completed != null && `已完成 ${dashboard.task_count_completed}`,
+    dashboard?.task_count_paused != null && `暂停中 ${dashboard.task_count_paused}`,
   ]
     .filter(Boolean)
     .join(" / ");

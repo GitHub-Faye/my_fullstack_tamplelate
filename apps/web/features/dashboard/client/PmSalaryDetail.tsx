@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -29,8 +29,8 @@ export function PmSalaryDetailDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 打开时加载数据
-  useState(() => {
+  // 弹窗打开时加载数据
+  useEffect(() => {
     if (open && !data && !loading) {
       setLoading(true);
       setError(null);
@@ -43,7 +43,7 @@ export function PmSalaryDetailDialog({
         })
         .finally(() => setLoading(false));
     }
-  });
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

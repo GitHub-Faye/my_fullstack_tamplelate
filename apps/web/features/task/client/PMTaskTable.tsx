@@ -204,17 +204,19 @@ function TaskDetailDialog({
   task,
   open,
   onOpenChange,
+  currentUserId,
 }: {
   task: TaskPublic;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  currentUserId?: string;
 }) {
   if (!task) return null;
 
   const isStarted = ["pending_start", "in_progress", "paused", "completed"].includes(task.status);
   const statusText = STATUS_LABELS[task.status] || task.status;
   const typeText = task.task_type ? TYPE_LABELS[task.task_type] ?? task.task_type : "-";
-  const actions = getPmActions(task, undefined, () => {});
+  const actions = getPmActions(task, currentUserId, () => {});
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -282,6 +284,52 @@ function TaskDetailDialog({
             <div className="flex flex-col gap-1 text-sm">
               <span className="text-muted-foreground">任务说明</span>
               <p className="whitespace-pre-wrap">{task.description}</p>
+            </div>
+          )}
+
+          {/* 附件表格（占位） */}
+          <div className="border rounded-md">
+            <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">附件/截图</div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-muted-foreground">
+                  <th className="text-left px-3 py-2 font-medium">文件</th>
+                  <th className="text-left px-3 py-2 font-medium">类型</th>
+                  <th className="text-left px-3 py-2 font-medium">状态</th>
+                  <th className="text-left px-3 py-2 font-medium">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
+                    暂无附件（后端功能尚未实现）
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* 工作日志（占位） */}
+          {isStarted && (
+            <div className="border rounded-md">
+              <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">最近工作日志</div>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-muted-foreground">
+                    <th className="text-left px-3 py-2 font-medium">日期</th>
+                    <th className="text-left px-3 py-2 font-medium">投入</th>
+                    <th className="text-left px-3 py-2 font-medium">阶段/进度</th>
+                    <th className="text-left px-3 py-2 font-medium">说明</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
+                      暂无工作日志
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           )}
 
@@ -856,6 +904,7 @@ export function PMTaskTable() {
           onOpenChange={(open) => {
             if (!open) setDetailTask(null);
           }}
+          currentUserId={user?.id}
         />
       )}
 
