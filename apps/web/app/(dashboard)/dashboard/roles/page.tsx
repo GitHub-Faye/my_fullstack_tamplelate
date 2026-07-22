@@ -37,21 +37,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Loader2,
-  RotateCcw,
   Plus,
   Pencil,
   Trash2,
   X,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { ALL_SCOPES } from "@repo/contracts/scopes";
 import {
   useAdminRoles,
   useAdminCreateRole,
@@ -60,46 +53,52 @@ import {
 } from "@/features/role/api";
 import type { RolePublic, RoleCreate, RoleUpdate } from "@repo/sdk";
 
-/**
- * 可选的 scope 列表（实际可从后端 scopes.py 同步）
- */
-const SCOPE_OPTIONS = [
-  { value: "task:read", label: "任务：查看" },
-  { value: "task:create", label: "任务：创建" },
-  { value: "task:update", label: "任务：更新" },
-  { value: "task:delete", label: "任务：删除" },
-  { value: "task:admin", label: "任务：管理" },
-  { value: "task:approve", label: "任务：审核" },
-  { value: "task:convert", label: "任务：转换类型" },
-  { value: "task:reassign", label: "任务：改派" },
-  { value: "bid:create", label: "报价：提交" },
-  { value: "bid:update", label: "报价：修改" },
-  { value: "bid:read", label: "报价：查看" },
-  { value: "report:read", label: "日报：查看" },
-  { value: "report:create", label: "日报：填写" },
-  { value: "report:admin", label: "日报：管理" },
-  { value: "starpoint:read", label: "星点：查看" },
-  { value: "starpoint:admin", label: "星点：管理" },
-  { value: "salary:read", label: "工资：查看" },
-  { value: "salary:admin", label: "工资：管理" },
-  { value: "client-resource:read", label: "客资：查看" },
-  { value: "client-resource:create", label: "客资：录入" },
-  { value: "user:read", label: "用户：查看" },
-  { value: "user:create", label: "用户：创建" },
-  { value: "user:update", label: "用户：更新" },
-  { value: "user:delete", label: "用户：删除" },
-  { value: "user:admin", label: "用户：管理" },
-  { value: "rule:admin", label: "规则：管理" },
-  { value: "dashboard:admin", label: "仪表板：管理员" },
-  { value: "dashboard:engineer", label: "仪表板：工程师" },
-  { value: "dashboard:pm", label: "仪表板：PM" },
-];
+/** 生成 scope 的中文标签 */
+function scopeLabel(scope: string): string {
+  const parts = scope.split(":");
+  const resource = parts[0] || "";
+  const action = parts[1] || "";
+  const resourceLabels: Record<string, string> = {
+    task: "任务",
+    bid: "报价",
+    report: "日报",
+    starpoint: "星点",
+    salary: "工资",
+    "client-resource": "客资",
+    user: "用户",
+    rule: "规则",
+    dashboard: "仪表板",
+    item: "物品",
+    system: "系统",
+  };
+  const actionLabels: Record<string, string> = {
+    read: "查看",
+    create: "创建",
+    update: "更新",
+    delete: "删除",
+    admin: "管理",
+    approve: "审核",
+    convert: "转换类型",
+    reassign: "改派",
+    engineer: "工程师",
+    pm: "PM",
+  };
+  const res = resourceLabels[resource] || resource;
+  const act = actionLabels[action] || action;
+  return `${res}：${act}`;
+}
+
+/** 从 ALL_SCOPES 生成选项列表 */
+const SCOPE_OPTIONS = ALL_SCOPES.map((s) => ({
+  value: s,
+  label: scopeLabel(s),
+}));
 
 export default function AdminRolesPage() {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
-  const { data, isLoading } = useAdminRoles({ page, page_size: pageSize });
+  const { data, isLoading, error } = useAdminRoles({ page, page_size: pageSize });
   const createMutation = useAdminCreateRole();
   const updateMutation = useAdminUpdateRole();
   const deleteMutation = useAdminDeleteRole();
@@ -185,6 +184,14 @@ export default function AdminRolesPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-destructive">加载角色列表失败：{(error as Error)?.message || "未知错误"}</p>
       </div>
     );
   }
