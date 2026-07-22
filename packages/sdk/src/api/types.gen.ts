@@ -565,6 +565,18 @@ export type DailyReportsPublic = {
 };
 
 /**
+ * EmploymentStatus
+ *
+ * 在岗状态枚举
+ *
+ * - on_duty: 在职
+ * - probation: 试用
+ * - leave: 休假
+ * - resigned: 离职
+ */
+export type EmploymentStatus = 'on_duty' | 'probation' | 'leave' | 'resigned';
+
+/**
  * EngineerDashboard
  *
  * 工程师工作台首页指标
@@ -968,6 +980,96 @@ export type RemindResult = {
  * - paused: 暂停中
  */
 export type ReportStage = 'developing' | 'testing' | 'completed' | 'paused';
+
+/**
+ * RoleCreate
+ *
+ * 创建角色请求
+ */
+export type RoleCreate = {
+    /**
+     * Name
+     *
+     * 角色名称
+     */
+    name: string;
+    /**
+     * Scopes
+     *
+     * 权限范围列表
+     */
+    scopes?: Array<string>;
+};
+
+/**
+ * RolePublic
+ *
+ * 角色详情响应
+ */
+export type RolePublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Scopes
+     */
+    scopes?: Array<string>;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+};
+
+/**
+ * RoleUpdate
+ *
+ * 更新角色请求
+ */
+export type RoleUpdate = {
+    /**
+     * Name
+     *
+     * 角色名称
+     */
+    name?: string | null;
+    /**
+     * Scopes
+     *
+     * 权限范围列表（替换全部）
+     */
+    scopes?: Array<string> | null;
+};
+
+/**
+ * RolesPublic
+ */
+export type RolesPublic = {
+    /**
+     * Data
+     */
+    data: Array<unknown>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Page
+     */
+    page?: number | null;
+    /**
+     * Page Size
+     */
+    page_size?: number | null;
+    /**
+     * Total Pages
+     */
+    total_pages?: number | null;
+};
 
 /**
  * RuleCategory
@@ -1682,6 +1784,19 @@ export type UserAdminCreate = {
      */
     is_active?: boolean;
     /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Department
+     */
+    department?: string | null;
+    /**
+     * Hire Date
+     */
+    hire_date?: string | null;
+    employment_status?: EmploymentStatus | null;
+    /**
      * S0
      */
     S0?: number | null;
@@ -1780,6 +1895,19 @@ export type UserAdminDetail = {
      * Baseline Client Count
      */
     baseline_client_count?: number | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Department
+     */
+    department?: string | null;
+    /**
+     * Hire Date
+     */
+    hire_date?: string | null;
+    employment_status?: EmploymentStatus | null;
 };
 
 /**
@@ -1801,6 +1929,19 @@ export type UserAdminUpdate = {
      */
     is_active?: boolean | null;
     role?: UserRoleType | null;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Department
+     */
+    department?: string | null;
+    /**
+     * Hire Date
+     */
+    hire_date?: string | null;
+    employment_status?: EmploymentStatus | null;
     /**
      * S0
      */
@@ -2429,6 +2570,36 @@ export type AdminCreateUserV1AdminUsersPostResponses = {
 };
 
 export type AdminCreateUserV1AdminUsersPostResponse = AdminCreateUserV1AdminUsersPostResponses[keyof AdminCreateUserV1AdminUsersPostResponses];
+
+export type AdminDeleteUserV1AdminUsersUserIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/v1/admin/users/{user_id}';
+};
+
+export type AdminDeleteUserV1AdminUsersUserIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminDeleteUserV1AdminUsersUserIdDeleteError = AdminDeleteUserV1AdminUsersUserIdDeleteErrors[keyof AdminDeleteUserV1AdminUsersUserIdDeleteErrors];
+
+export type AdminDeleteUserV1AdminUsersUserIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type AdminDeleteUserV1AdminUsersUserIdDeleteResponse = AdminDeleteUserV1AdminUsersUserIdDeleteResponses[keyof AdminDeleteUserV1AdminUsersUserIdDeleteResponses];
 
 export type AdminReadUserV1AdminUsersUserIdGetData = {
     body?: never;
@@ -4144,6 +4315,159 @@ export type ReadAllClientResourcesV1ClientResourcesAllGetResponses = {
 };
 
 export type ReadAllClientResourcesV1ClientResourcesAllGetResponse = ReadAllClientResourcesV1ClientResourcesAllGetResponses[keyof ReadAllClientResourcesV1ClientResourcesAllGetResponses];
+
+export type AdminReadRolesV1AdminRolesGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page
+         *
+         * 页码，从1开始
+         */
+        page?: number;
+        /**
+         * Page Size
+         *
+         * 每页数量
+         */
+        page_size?: number;
+    };
+    url: '/v1/admin/roles';
+};
+
+export type AdminReadRolesV1AdminRolesGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminReadRolesV1AdminRolesGetError = AdminReadRolesV1AdminRolesGetErrors[keyof AdminReadRolesV1AdminRolesGetErrors];
+
+export type AdminReadRolesV1AdminRolesGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: RolesPublic;
+};
+
+export type AdminReadRolesV1AdminRolesGetResponse = AdminReadRolesV1AdminRolesGetResponses[keyof AdminReadRolesV1AdminRolesGetResponses];
+
+export type AdminCreateRoleV1AdminRolesPostData = {
+    body: RoleCreate;
+    path?: never;
+    query?: never;
+    url: '/v1/admin/roles';
+};
+
+export type AdminCreateRoleV1AdminRolesPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminCreateRoleV1AdminRolesPostError = AdminCreateRoleV1AdminRolesPostErrors[keyof AdminCreateRoleV1AdminRolesPostErrors];
+
+export type AdminCreateRoleV1AdminRolesPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: RolePublic;
+};
+
+export type AdminCreateRoleV1AdminRolesPostResponse = AdminCreateRoleV1AdminRolesPostResponses[keyof AdminCreateRoleV1AdminRolesPostResponses];
+
+export type AdminDeleteRoleV1AdminRolesRoleIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/v1/admin/roles/{role_id}';
+};
+
+export type AdminDeleteRoleV1AdminRolesRoleIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminDeleteRoleV1AdminRolesRoleIdDeleteError = AdminDeleteRoleV1AdminRolesRoleIdDeleteErrors[keyof AdminDeleteRoleV1AdminRolesRoleIdDeleteErrors];
+
+export type AdminDeleteRoleV1AdminRolesRoleIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type AdminDeleteRoleV1AdminRolesRoleIdDeleteResponse = AdminDeleteRoleV1AdminRolesRoleIdDeleteResponses[keyof AdminDeleteRoleV1AdminRolesRoleIdDeleteResponses];
+
+export type AdminReadRoleV1AdminRolesRoleIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/v1/admin/roles/{role_id}';
+};
+
+export type AdminReadRoleV1AdminRolesRoleIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminReadRoleV1AdminRolesRoleIdGetError = AdminReadRoleV1AdminRolesRoleIdGetErrors[keyof AdminReadRoleV1AdminRolesRoleIdGetErrors];
+
+export type AdminReadRoleV1AdminRolesRoleIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: RolePublic;
+};
+
+export type AdminReadRoleV1AdminRolesRoleIdGetResponse = AdminReadRoleV1AdminRolesRoleIdGetResponses[keyof AdminReadRoleV1AdminRolesRoleIdGetResponses];
+
+export type AdminUpdateRoleV1AdminRolesRoleIdPutData = {
+    body: RoleUpdate;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: string;
+    };
+    query?: never;
+    url: '/v1/admin/roles/{role_id}';
+};
+
+export type AdminUpdateRoleV1AdminRolesRoleIdPutErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminUpdateRoleV1AdminRolesRoleIdPutError = AdminUpdateRoleV1AdminRolesRoleIdPutErrors[keyof AdminUpdateRoleV1AdminRolesRoleIdPutErrors];
+
+export type AdminUpdateRoleV1AdminRolesRoleIdPutResponses = {
+    /**
+     * Successful Response
+     */
+    200: RolePublic;
+};
+
+export type AdminUpdateRoleV1AdminRolesRoleIdPutResponse = AdminUpdateRoleV1AdminRolesRoleIdPutResponses[keyof AdminUpdateRoleV1AdminRolesRoleIdPutResponses];
 
 export type ReadAuditLogsV1AuditLogsGetData = {
     body?: never;

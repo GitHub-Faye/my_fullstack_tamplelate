@@ -150,6 +150,23 @@ export const zDailyReportsPublic = z.object({
 });
 
 /**
+ * EmploymentStatus
+ *
+ * 在岗状态枚举
+ *
+ * - on_duty: 在职
+ * - probation: 试用
+ * - leave: 休假
+ * - resigned: 离职
+ */
+export const zEmploymentStatus = z.enum([
+    'on_duty',
+    'probation',
+    'leave',
+    'resigned'
+]);
+
+/**
  * EngineerDashboard
  *
  * 工程师工作台首页指标
@@ -347,6 +364,49 @@ export const zDailyReportUpdate = z.object({
     notes: z.string().max(1000).nullish(),
     summary: z.string().max(1000).nullish(),
     has_blocker: z.boolean().nullish()
+});
+
+/**
+ * RoleCreate
+ *
+ * 创建角色请求
+ */
+export const zRoleCreate = z.object({
+    name: z.string().min(1).max(50),
+    scopes: z.array(z.string()).optional().default([])
+});
+
+/**
+ * RolePublic
+ *
+ * 角色详情响应
+ */
+export const zRolePublic = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    scopes: z.array(z.string()).optional().default([]),
+    created_at: z.iso.datetime().nullish()
+});
+
+/**
+ * RoleUpdate
+ *
+ * 更新角色请求
+ */
+export const zRoleUpdate = z.object({
+    name: z.string().min(1).max(50).nullish(),
+    scopes: z.array(z.string()).nullish()
+});
+
+/**
+ * RolesPublic
+ */
+export const zRolesPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
 });
 
 /**
@@ -743,6 +803,10 @@ export const zUserAdminCreate = z.object({
     full_name: z.string().max(255).nullish(),
     role: zUserRoleType.optional().default('engineer'),
     is_active: z.boolean().optional().default(true),
+    phone: z.string().max(20).nullish(),
+    department: z.string().max(100).nullish(),
+    hire_date: z.iso.datetime().nullish(),
+    employment_status: zEmploymentStatus.nullish(),
     S0: z.number().gte(0).nullish(),
     H0: z.number().gte(0).nullish(),
     T_monthly_plan: z.number().gte(0).nullish(),
@@ -772,7 +836,11 @@ export const zUserAdminDetail = z.object({
     S_assess: z.number().nullish(),
     R_base: z.number().nullish(),
     R_assess: z.number().nullish(),
-    baseline_client_count: z.int().nullish()
+    baseline_client_count: z.int().nullish(),
+    phone: z.string().nullish(),
+    department: z.string().nullish(),
+    hire_date: z.iso.datetime().nullish(),
+    employment_status: zEmploymentStatus.nullish()
 });
 
 /**
@@ -785,6 +853,10 @@ export const zUserAdminUpdate = z.object({
     full_name: z.string().max(255).nullish(),
     is_active: z.boolean().nullish(),
     role: zUserRoleType.nullish(),
+    phone: z.string().max(20).nullish(),
+    department: z.string().max(100).nullish(),
+    hire_date: z.iso.datetime().nullish(),
+    employment_status: zEmploymentStatus.nullish(),
     S0: z.number().gte(0).nullish(),
     H0: z.number().gte(0).nullish(),
     T_monthly_plan: z.number().gte(0).nullish(),
@@ -986,6 +1058,15 @@ export const zAdminCreateUserV1AdminUsersPostBody = zUserAdminCreate;
  * Successful Response
  */
 export const zAdminCreateUserV1AdminUsersPostResponse = zUserAdminDetail;
+
+export const zAdminDeleteUserV1AdminUsersUserIdDeletePath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminDeleteUserV1AdminUsersUserIdDeleteResponse = zMessage;
 
 export const zAdminReadUserV1AdminUsersUserIdGetPath = z.object({
     user_id: z.uuid()
@@ -1500,6 +1581,52 @@ export const zReadAllClientResourcesV1ClientResourcesAllGetQuery = z.object({
  * Successful Response
  */
 export const zReadAllClientResourcesV1ClientResourcesAllGetResponse = zClientResourcesPublic;
+
+export const zAdminReadRolesV1AdminRolesGetQuery = z.object({
+    page: z.int().gte(1).optional().default(1),
+    page_size: z.int().gte(1).lte(100).optional().default(20)
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminReadRolesV1AdminRolesGetResponse = zRolesPublic;
+
+export const zAdminCreateRoleV1AdminRolesPostBody = zRoleCreate;
+
+/**
+ * Successful Response
+ */
+export const zAdminCreateRoleV1AdminRolesPostResponse = zRolePublic;
+
+export const zAdminDeleteRoleV1AdminRolesRoleIdDeletePath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminDeleteRoleV1AdminRolesRoleIdDeleteResponse = zMessage;
+
+export const zAdminReadRoleV1AdminRolesRoleIdGetPath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminReadRoleV1AdminRolesRoleIdGetResponse = zRolePublic;
+
+export const zAdminUpdateRoleV1AdminRolesRoleIdPutBody = zRoleUpdate;
+
+export const zAdminUpdateRoleV1AdminRolesRoleIdPutPath = z.object({
+    role_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminUpdateRoleV1AdminRolesRoleIdPutResponse = zRolePublic;
 
 export const zReadAuditLogsV1AuditLogsGetQuery = z.object({
     target_type: z.string().nullish(),
