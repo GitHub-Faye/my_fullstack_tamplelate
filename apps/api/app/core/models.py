@@ -128,6 +128,21 @@ class UserRoleType(str, Enum):
     ADMIN = "admin"
 
 
+class EmploymentStatus(str, Enum):
+    """
+    在岗状态枚举
+
+    - on_duty: 在职
+    - probation: 试用
+    - leave: 休假
+    - resigned: 离职
+    """
+    ON_DUTY = "on_duty"
+    PROBATION = "probation"
+    LEAVE = "leave"
+    RESIGNED = "resigned"
+
+
 # ==================================== Role ====================================
 
 class RoleBase(SQLModel):
@@ -186,7 +201,7 @@ class UserBase(SQLModel):
     phone: Optional[str] = Field(default=None, max_length=20)
     department: Optional[str] = Field(default=None, max_length=100)
     hire_date: Optional[datetime] = Field(default=None, sa_type=DateTime(timezone=True))
-    # employment_status: on_duty=在职, probation=试用, leave=休假, resigned=离职
+    # employment_status: 在岗状态枚举（EmploymentStatus）
     employment_status: Optional[str] = Field(default=None, max_length=20)
 
 

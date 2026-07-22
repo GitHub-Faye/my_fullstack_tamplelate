@@ -6,7 +6,7 @@ from pydantic import EmailStr
 from sqlmodel import Field, SQLModel
 
 from app.core.schemas import PaginatedResponse
-from app.core.models import UserRoleType
+from app.core.models import UserRoleType, EmploymentStatus
 
 
 # ------------------------------- 用户模型 -------------------------------------------------
@@ -61,7 +61,7 @@ class UserAdminCreate(SQLModel):
     phone: str | None = Field(default=None, max_length=20)
     department: str | None = Field(default=None, max_length=100)
     hire_date: datetime | None = None
-    employment_status: str | None = Field(default=None, max_length=20)
+    employment_status: EmploymentStatus | None = Field(default=None, max_length=20)
     # 工程师工资字段
     S0: float | None = Field(default=None, ge=0)
     H0: float | None = Field(default=None, ge=0)
@@ -85,7 +85,7 @@ class UserAdminUpdate(SQLModel):
     phone: str | None = Field(default=None, max_length=20)
     department: str | None = Field(default=None, max_length=100)
     hire_date: datetime | None = None
-    employment_status: str | None = Field(default=None, max_length=20)
+    employment_status: EmploymentStatus | None = Field(default=None, max_length=20)
     # 工程师工资字段
     S0: float | None = Field(default=None, ge=0)
     H0: float | None = Field(default=None, ge=0)
@@ -137,7 +137,7 @@ class UserAdminDetail(UserPublic):
     phone: str | None = None
     department: str | None = None
     hire_date: datetime | None = None
-    employment_status: str | None = None
+    employment_status: EmploymentStatus | None = None
 
 
 # 使用统一分页协议
