@@ -24,11 +24,11 @@ export interface NavItem {
 /** 所有导航项 */
 export const NAVIGATION: NavItem[] = [
   // PM 导航
-  { label: "PM工作台", href: "/pm", icon: LayoutDashboard, roles: ["pm", "admin"] },
-  { label: "操作日志", href: "/pm/logs", icon: FileCheck, roles: ["pm", "admin"] },
+  { label: "PM工作台", href: "/pm", icon: LayoutDashboard, roles: ["pm"] },
+  { label: "操作日志", href: "/pm/logs", icon: FileCheck, roles: ["pm"] },
   // 工程师导航
-  { label: "工程师工作台", href: "/engineer", icon: Wrench, roles: ["engineer", "admin"] },
-  { label: "工作日志", href: "/engineer/logs", icon: FileCheck, roles: ["engineer", "admin"] },
+  { label: "工程师工作台", href: "/engineer", icon: Wrench, roles: ["engineer"] },
+  { label: "工作日志", href: "/engineer/logs", icon: FileCheck, roles: ["engineer"] },
   // 管理员导航
   { label: "数据概览", href: "/admin", icon: LayoutDashboard, roles: ["admin"] },
   { label: "任务管理", href: "/admin/tasks", icon: ClipboardList, roles: ["admin"] },
