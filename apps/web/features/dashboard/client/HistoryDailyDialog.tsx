@@ -8,15 +8,18 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { readDailyReportsV1DailyReportsGet, type TaskPublic } from "@repo/sdk";
+import { readDailyReportsV1DailyReportsGet } from "@repo/sdk";
 import { formatDate } from "@/lib/utils";
 
 /**
  * 历史日报弹窗
  *
  * 查看当前工程师的历史日报记录
+ * 支持日期筛选
+ * 表格：日期、进行中任务、T报、T实、今日投入、当前阶段、当前进度、完成判定、预计星点、说明
  */
 export function HistoryDailyDialog({
   open,
@@ -27,27 +30,58 @@ export function HistoryDailyDialog({
 }) {
   const [reports, setReports] = useState<any[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [filterDate, setFilterDate] = useState("");
 
   useEffect(() => {
     if (open) {
       setLoading(true);
+      const query: Record<string, any> = { page: 1, page_size: 50 };
+      if (filterDate) query.report_date = filterDate;
       readDailyReportsV1DailyReportsGet({
         throwOnError: true,
-        query: { page: 1, page_size: 50 },
+        query,
       })
         .then((res) => setReports(res.data?.data ?? []))
         .catch(() => setReports([]))
         .finally(() => setLoading(false));
     }
-  }, [open]);
+  }, [open, filterDate]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>历史日报</DialogTitle>
           <DialogDescription>查看历史日报记录</DialogDescription>
         </DialogHeader>
+
+        {/* 筛选 */}
+        <div className="flex items-center gap-2 mb-4">
+          <label className="text-sm text-muted-foreground">日期</label>
+          <Input
+            type="date"
+            className="w-[150px]"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setFilterDate("");
+              setLoading(true);
+              readDailyReportsV1DailyReportsGet({
+                throwOnError: true,
+                query: { page: 1, page_size: 50 },
+              })
+                .then((res) => setReports(res.data?.data ?? []))
+                .catch(() => setReports([]))
+                .finally(() => setLoading(false));
+            }}
+          >
+            重置
+          </Button>
+        </div>
 
         {loading ? (
           <div className="flex justify-center py-8">
@@ -59,11 +93,14 @@ export function HistoryDailyDialog({
               <thead>
                 <tr className="border-b text-muted-foreground bg-muted/50">
                   <th className="text-left px-3 py-2 font-medium whitespace-nowrap">日期</th>
-                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">投入</th>
-                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">阶段</th>
-                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">进度</th>
+                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">进行中任务</th>
+                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">T报</th>
+                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">T实</th>
+                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">今日投入</th>
+                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">当前阶段</th>
+                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">当前进度</th>
                   <th className="text-left px-3 py-2 font-medium whitespace-nowrap">完成判定</th>
-                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">星点变化</th>
+                  <th className="text-left px-3 py-2 font-medium whitespace-nowrap">预计星点</th>
                   <th className="text-left px-3 py-2 font-medium whitespace-nowrap">说明</th>
                 </tr>
               </thead>
@@ -72,6 +109,15 @@ export function HistoryDailyDialog({
                   <tr key={i} className="border-b last:border-0">
                     <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
                       {formatDate(rpt.report_date ?? rpt.created_at)}
+                    </td>
+                    <td className="px-3 py-2 max-w-[120px] truncate">
+                      {rpt.task_name ?? "-"}
+                    </td>
+                    <td className="px-3 py-2">
+                      {rpt.T_reported != null ? `${rpt.T_reported}h` : "-"}
+                    </td>
+                    <td className="px-3 py-2">
+                      {rpt.T_actual != null ? `${rpt.T_actual}h` : "-"}
                     </td>
                     <td className="px-3 py-2">{rpt.today_hours ?? "-"}h</td>
                     <td className="px-3 py-2">{rpt.current_stage ?? "-"}</td>
@@ -86,7 +132,7 @@ export function HistoryDailyDialog({
                         "-"
                       )}
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground max-w-[200px] truncate">
+                    <td className="px-3 py-2 text-muted-foreground max-w-[150px] truncate">
                       {rpt.notes ?? "-"}
                     </td>
                   </tr>

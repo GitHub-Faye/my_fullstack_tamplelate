@@ -23,38 +23,33 @@ import { useTasks } from "@/features/task/api";
 import {
   createDailyReportV1DailyReportsPost,
   type TaskPublic,
-  type TaskStatus,
-  type TaskType,
 } from "@repo/sdk";
 import {
-  TASK_STATUS_LABELS,
-  TASK_TYPE_LABELS,
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 import { useCurrentUser } from "@/features/user";
 import { toast } from "sonner";
 
-const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
-const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
-
 /** 日报表单条目 */
 interface DailyReportEntry {
   taskId: string;
   taskName: string;
-  taskType: TaskType | null;
   T_reported: number | null;
   T_actual: number | null;
   todayHours: string;
   currentStage: string;
   progress: string;
+  completionJudgment: string;
+  estimatedStarpoint: string;
   notes: string;
 }
 
 /**
  * 工作汇报弹窗（日报提交）
  *
- * 展示所有进行中任务，每行可填今日投入、阶段、进度、说明
+ * 展示所有进行中任务，每行可填今日投入、阶段、进度、完成判定、预计星点、说明
  * 每个任务单独调用 createDailyReportV1DailyReportsPost
+ * 每个任务独立有 has_blocker
  */
 export function DailyReportDialog({
   open,
@@ -67,7 +62,6 @@ export function DailyReportDialog({
 }) {
   const user = useCurrentUser();
   const [summary, setSummary] = useState("");
-  const [hasBlocker, setHasBlocker] = useState("false");
   const [submitting, setSubmitting] = useState(false);
 
   const { data: tasks, isLoading } = useTasks({
@@ -87,12 +81,13 @@ export function DailyReportDialog({
         taskList.map((t) => ({
           taskId: t.id,
           taskName: t.name,
-          taskType: t.task_type ?? null,
           T_reported: t.T_reported ?? null,
           T_actual: t.T_actual ?? null,
           todayHours: "",
           currentStage: "development",
           progress: t.progress ?? "",
+          completionJudgment: "",
+          estimatedStarpoint: "",
           notes: "",
         }))
       );
@@ -100,7 +95,6 @@ export function DailyReportDialog({
     if (!open) {
       setEntries([]);
       setSummary("");
-      setHasBlocker("false");
     }
   }, [open, taskList]);
 
@@ -129,7 +123,7 @@ export function DailyReportDialog({
             progress: entry.progress || undefined,
             notes: entry.notes || undefined,
             summary: summary || undefined,
-            has_blocker: hasBlocker === "true",
+            has_blocker: false,
           },
         });
         successCount++;
@@ -147,7 +141,7 @@ export function DailyReportDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>工作汇报</DialogTitle>
           <DialogDescription>提交今日工作日报</DialogDescription>
@@ -174,13 +168,15 @@ export function DailyReportDialog({
                     <th className="text-left px-3 py-2 font-medium whitespace-nowrap">今日投入</th>
                     <th className="text-left px-3 py-2 font-medium whitespace-nowrap">当前阶段</th>
                     <th className="text-left px-3 py-2 font-medium whitespace-nowrap">当前进度</th>
+                    <th className="text-left px-3 py-2 font-medium whitespace-nowrap">完成判定</th>
+                    <th className="text-left px-3 py-2 font-medium whitespace-nowrap">预计星点</th>
                     <th className="text-left px-3 py-2 font-medium whitespace-nowrap">说明</th>
                   </tr>
                 </thead>
                 <tbody>
                   {entries.map((entry) => (
                     <tr key={entry.taskId} className="border-b last:border-0">
-                      <td className="px-3 py-2 font-medium max-w-[150px] truncate">
+                      <td className="px-3 py-2 font-medium max-w-[120px] truncate">
                         {entry.taskName}
                       </td>
                       <td className="px-3 py-2 text-muted-foreground">
@@ -212,7 +208,7 @@ export function DailyReportDialog({
                             updateEntry(entry.taskId, "currentStage", v)
                           }
                         >
-                          <SelectTrigger className="w-[100px] h-8">
+                          <SelectTrigger className="w-[90px] h-8">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -235,7 +231,27 @@ export function DailyReportDialog({
                       </td>
                       <td className="px-3 py-2">
                         <Input
-                          className="w-[140px] h-8 text-sm"
+                          className="w-20 h-8 text-sm"
+                          placeholder="判定"
+                          value={entry.completionJudgment}
+                          onChange={(e) =>
+                            updateEntry(entry.taskId, "completionJudgment", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Input
+                          className="w-16 h-8 text-sm"
+                          placeholder="星点"
+                          value={entry.estimatedStarpoint}
+                          onChange={(e) =>
+                            updateEntry(entry.taskId, "estimatedStarpoint", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="px-3 py-2">
+                        <Input
+                          className="w-[120px] h-8 text-sm"
                           placeholder="说明"
                           value={entry.notes}
                           onChange={(e) =>
@@ -260,20 +276,6 @@ export function DailyReportDialog({
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
                 />
-              </div>
-              <div className="flex items-center gap-4">
-                <label className="text-sm text-muted-foreground">
-                  是否有阻塞
-                </label>
-                <Select value={hasBlocker} onValueChange={setHasBlocker}>
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="false">无</SelectItem>
-                    <SelectItem value="true">有，需要暂停/顺延</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 

@@ -74,13 +74,8 @@ interface ConfirmState {
   open: boolean;
   action: "start" | "decline" | "resume" | "bid" | null;
   task: TaskPublic | null;
-}
-
-/** 报价弹窗状态 */
-interface BidState {
-  open: boolean;
-  task: TaskPublic | null;
-  hours: string;
+  /** 报价弹窗专用：工时输入 */
+  bidHours?: string;
 }
 
 /**
@@ -104,7 +99,6 @@ export function EngineerTaskTable({
   const userMap = useUserMap();
 
   const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null });
-  const [bidState, setBidState] = useState<BidState>({ open: false, task: null, hours: "" });
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
 
   const queryParams: Record<string, any> = {
@@ -155,6 +149,17 @@ export function EngineerTaskTable({
           await resumeTaskV1TasksTaskIdResumePost({ path: { task_id: taskId } });
           toast.success("任务已恢复");
           break;
+        case "bid":
+          if (!confirm.bidHours) {
+            toast.error("请填写工时");
+            return;
+          }
+          await createBidV1TasksTaskIdBidsPost({
+            path: { task_id: taskId },
+            body: { T_reported: parseFloat(confirm.bidHours) },
+          });
+          toast.success("报价成功");
+          break;
       }
       refetch();
     } catch (e: any) {
@@ -163,22 +168,6 @@ export function EngineerTaskTable({
       setConfirm({ open: false, action: null, task: null });
     }
   }, [confirm, refetch]);
-
-  /** 提交报价 */
-  const handleBidConfirm = useCallback(async () => {
-    if (!bidState.task || !bidState.hours) return;
-    try {
-      await createBidV1TasksTaskIdBidsPost({
-        path: { task_id: bidState.task.id },
-        body: { T_reported: parseFloat(bidState.hours) },
-      });
-      toast.success("报价成功");
-      setBidState({ open: false, task: null, hours: "" });
-      refetch();
-    } catch (e: any) {
-      toast.error(e.message || "报价失败");
-    }
-  }, [bidState, refetch]);
 
   if (isLoading) {
     return (
@@ -362,7 +351,7 @@ export function EngineerTaskTable({
                           <Button
                             variant="link"
                             size="sm"
-                            onClick={() => setBidState({ open: true, task, hours: "" })}
+                            onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: "" })}
                           >
                             报价
                           </Button>
@@ -438,7 +427,7 @@ export function EngineerTaskTable({
                         <Button
                           variant="link"
                           size="sm"
-                          onClick={() => setBidState({ open: true, task, hours: "" })}
+                          onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: "" })}
                         >
                           报价
                         </Button>
@@ -520,54 +509,39 @@ export function EngineerTaskTable({
         </AlertDialog>
       )}
 
-      {/* 确认弹窗（启动/拒绝/恢复） */}
+      {/* 统一确认弹窗（启动/拒绝/恢复/报价） */}
       <AlertDialog open={confirm.open} onOpenChange={(o) => { if (!o) setConfirm({ open: false, action: null, task: null }); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirm.action === "start" ? "确认启动" : confirm.action === "decline" ? "确认拒绝" : "确认恢复"}
+              {confirm.action === "start" ? "确认启动" : confirm.action === "decline" ? "确认拒绝" : confirm.action === "resume" ? "确认恢复" : "报价"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirm.action === "start" && "启动后任务将进入进行中状态。"}
               {confirm.action === "decline" && "拒绝后任务将重新进入竞价流程。"}
               {confirm.action === "resume" && "恢复后任务将继续进行中状态。"}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAction}>
-              确认
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* 报价弹窗 */}
-      <AlertDialog open={bidState.open} onOpenChange={(o) => { if (!o) setBidState({ open: false, task: null, hours: "" }); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>报价</AlertDialogTitle>
-            <AlertDialogDescription>
-              <div className="space-y-4 mt-2">
-                <div className="text-sm font-medium">{bidState.task?.name}</div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-muted-foreground">工时（小时）</label>
-                  <input
-                    type="number"
-                    min="0.5"
-                    step="0.5"
-                    className="w-24 h-9 px-2 border rounded text-sm"
-                    value={bidState.hours}
-                    onChange={(e) => setBidState((prev) => ({ ...prev, hours: e.target.value }))}
-                  />
+              {confirm.action === "bid" && (
+                <div className="space-y-4 mt-2">
+                  <div className="text-sm font-medium">{confirm.task?.name}</div>
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-muted-foreground">工时（小时）</label>
+                    <input
+                      type="number"
+                      min="0.5"
+                      step="0.5"
+                      className="w-24 h-9 px-2 border rounded text-sm"
+                      value={confirm.bidHours ?? ""}
+                      onChange={(e) => setConfirm((prev) => ({ ...prev, bidHours: e.target.value }))}
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBidConfirm} disabled={!bidState.hours}>
-              确认报价
+            <AlertDialogAction onClick={handleConfirmAction} disabled={confirm.action === "bid" && !confirm.bidHours}>
+              确认
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -9,13 +9,15 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { readMySalaryV1SalariesMyGet } from "@repo/sdk";
 import { useEngineerDashboard } from "../api/client/queries";
 
 /**
  * 工程师收入试算弹窗
  *
- * 显示 S0、月计划工时、T月剩余、K系数、收入试算等
+ * 显示 S0、月计划工时、T月剩余、K系数、调休/调整、收入试算
+ * 使用 react-query hook 替代 raw fetch
  */
 export function EngineerSalaryDetail({
   open,
@@ -25,18 +27,15 @@ export function EngineerSalaryDetail({
   onOpenChange: (open: boolean) => void;
 }) {
   const { data: dashboard } = useEngineerDashboard();
-  const [salary, setSalary] = useState<any | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (open && !salary && !loading) {
-      setLoading(true);
-      readMySalaryV1SalariesMyGet({ throwOnError: true })
-        .then((r) => setSalary(r.data))
-        .catch(() => setSalary(null))
-        .finally(() => setLoading(false));
-    }
-  }, [open, salary, loading]);
+  const { data: salary, isLoading } = useQuery({
+    queryKey: ["salary", "my"],
+    queryFn: async () => {
+      const res = await readMySalaryV1SalariesMyGet({ throwOnError: true });
+      return res.data as any;
+    },
+    enabled: open,
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -46,7 +45,7 @@ export function EngineerSalaryDetail({
           <DialogDescription>本人收入预估数据</DialogDescription>
         </DialogHeader>
 
-        {loading ? (
+        {isLoading ? (
           <div className="flex justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
@@ -58,8 +57,8 @@ export function EngineerSalaryDetail({
                   <tr className="border-b">
                     <td className="px-3 py-2 text-muted-foreground">S0</td>
                     <td className="px-3 py-2 font-medium">
-                      {salary?.S0 != null
-                        ? `¥${salary.S0.toLocaleString()}`
+                      {(salary as any)?.S0 != null
+                        ? `¥${(salary as any).S0.toLocaleString()}`
                         : "-"}
                     </td>
                     <td className="px-3 py-2 text-xs text-muted-foreground">
@@ -67,7 +66,9 @@ export function EngineerSalaryDetail({
                     </td>
                   </tr>
                   <tr className="border-b">
-                    <td className="px-3 py-2 text-muted-foreground">个人月计划工时</td>
+                    <td className="px-3 py-2 text-muted-foreground">
+                      个人月计划工时
+                    </td>
                     <td className="px-3 py-2 font-medium">
                       {dashboard?.T_monthly_plan != null
                         ? `${dashboard.T_monthly_plan}h`
@@ -91,10 +92,23 @@ export function EngineerSalaryDetail({
                   <tr className="border-b">
                     <td className="px-3 py-2 text-muted-foreground">K系数</td>
                     <td className="px-3 py-2 font-medium">
-                      {salary?.K != null ? salary.K : "-"}
+                      {(salary as any)?.K != null ? (salary as any).K : "-"}
                     </td>
                     <td className="px-3 py-2 text-xs text-muted-foreground">
                       星点排名系数
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-3 py-2 text-muted-foreground">
+                      调休/调整
+                    </td>
+                    <td className="px-3 py-2 font-medium">
+                      {(salary as any)?.adjustment_hours != null
+                        ? `+${(salary as any).adjustment_hours}h`
+                        : "-"}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-muted-foreground">
+                      紧急任务超法定工时返还
                     </td>
                   </tr>
                   <tr>

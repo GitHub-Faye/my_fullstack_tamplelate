@@ -30,7 +30,7 @@ export default function EngineerWorkspacePage() {
     {
       label: "当前星点",
       value: dashboard?.current_starpoint != null ? `${dashboard.current_starpoint}` : "-",
-      desc: "净增 + 累计",
+      desc: "点击查看明细",
       color: "purple",
       onClick: () => setStarPointOpen(true),
     },
