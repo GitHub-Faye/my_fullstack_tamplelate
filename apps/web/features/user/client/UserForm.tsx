@@ -86,7 +86,7 @@ export function UserForm({ user, mode }: UserFormProps) {
           userId: user.id,
           data: updateData as UserUpdateFormData,
         });
-        router.push("/dashboard/admin");
+        router.push("/admin/users");
       } else {
         await createMutation.mutateAsync({
           email: data.email!,
@@ -95,7 +95,7 @@ export function UserForm({ user, mode }: UserFormProps) {
           is_active: data.isActive,
           is_superuser: data.isSuperuser,
         });
-        router.push("/dashboard/admin");
+        router.push("/admin/users");
       }
     } catch {
       // Error is handled by the mutation

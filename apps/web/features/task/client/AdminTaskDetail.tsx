@@ -75,7 +75,7 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/admin/tasks">
+            <Link href="/admin/tasks">
               <ArrowLeft className="mr-2 h-4 w-4" />
               返回列表
             </Link>
@@ -175,7 +175,7 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
       <div className="space-y-6">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/admin/tasks">
+            <Link href="/admin/tasks">
               <ArrowLeft className="mr-2 h-4 w-4" />
               返回列表
             </Link>

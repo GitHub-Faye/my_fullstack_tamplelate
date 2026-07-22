@@ -12,7 +12,6 @@ Five canonical triage roles mapped to default label strings. See `docs/agents/tr
 
 Single-context layout — root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
 
-
 ## MCP + mattpocock Skills 集成映射
 
 所有 `mattpocock-skills:*` skill 在执行时，必须优先使用 codebase-memory-mcp 工具进行代码探索，而非依赖逐文件 grep/read。具体映射如下：
@@ -85,4 +84,4 @@ Single-context layout — root `CONTEXT.md` + `docs/adr/`. See `docs/agents/doma
 - 当用户描述场景时：用 `search_graph` + `search_code` 快速理解当前项目状态，以便推荐最合适的 skill
 
 ### grill-with-docs / grilling
-- 在深度访谈中涉及代码假设时：用 `trace_path` 或 `search_graph` 验证用户的直觉，用事实替代纯提问
+- 在深度访谈中涉及代码假设时：用 `trace_path` 或 `search_graph` 验证用户的直觉，用事实替代纯提问1

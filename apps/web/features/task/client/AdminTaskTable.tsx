@@ -126,7 +126,7 @@ export function AdminTaskTable() {
                     <Button
                       variant="link"
                       size="sm"
-                      onClick={() => router.push(`/dashboard/admin/tasks/${task.id}`)}
+                      onClick={() => router.push(`/admin/tasks/${task.id}`)}
                     >
                       审核
                     </Button>

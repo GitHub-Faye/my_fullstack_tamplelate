@@ -127,7 +127,7 @@ export function UserTable({ currentUserId }: UserTableProps) {
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           onClick={() =>
-                            router.push(`/dashboard/admin/users/${user.id}/edit`)
+                            router.push(`/admin/users/${user.id}/edit`)
                           }
                         >
                           <Pencil className="mr-2 h-4 w-4" />

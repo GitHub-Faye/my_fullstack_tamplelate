@@ -30,13 +30,13 @@ export const NAVIGATION: NavItem[] = [
   { label: "工程师工作台", href: "/engineer", icon: Wrench, roles: ["engineer", "admin"] },
   { label: "工作日志", href: "/engineer/logs", icon: FileCheck, roles: ["engineer", "admin"] },
   // 管理员导航
-  { label: "数据概览", href: "/dashboard", icon: LayoutDashboard, roles: ["admin"] },
-  { label: "任务管理", href: "/dashboard/tasks", icon: ClipboardList, roles: ["admin"] },
-  { label: "工资管理", href: "/dashboard/salaries", icon: Banknote, roles: ["admin"] },
-  { label: "角色管理", href: "/dashboard/roles", icon: Shield, roles: ["admin"] },
-  { label: "账号管理", href: "/dashboard/users", icon: Users, roles: ["admin"] },
-  { label: "规则配置", href: "/dashboard/rules", icon: ScrollText, roles: ["admin"] },
-  { label: "操作日志", href: "/dashboard/logs", icon: FileText, roles: ["admin"] },
+  { label: "数据概览", href: "/admin", icon: LayoutDashboard, roles: ["admin"] },
+  { label: "任务管理", href: "/admin/tasks", icon: ClipboardList, roles: ["admin"] },
+  { label: "工资管理", href: "/admin/salaries", icon: Banknote, roles: ["admin"] },
+  { label: "角色管理", href: "/admin/roles", icon: Shield, roles: ["admin"] },
+  { label: "账号管理", href: "/admin/users", icon: Users, roles: ["admin"] },
+  { label: "规则配置", href: "/admin/rules", icon: ScrollText, roles: ["admin"] },
+  { label: "操作日志", href: "/admin/logs", icon: FileText, roles: ["admin"] },
   { label: "设置", href: "/dashboard/settings", icon: User, roles: ["admin"] },
 ];
 

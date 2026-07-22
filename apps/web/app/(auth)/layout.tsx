@@ -18,6 +18,8 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         router.replace("/pm");
       } else if (user?.role === "engineer") {
         router.replace("/engineer");
+      } else if (user?.role === "admin") {
+        router.replace("/admin");
       } else {
         router.replace("/dashboard");
       }

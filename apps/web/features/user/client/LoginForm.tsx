@@ -55,6 +55,8 @@ export function LoginForm() {
         router.push("/pm");
       } else if (user?.role === "engineer") {
         router.push("/engineer");
+      } else if (user?.role === "admin") {
+        router.push("/admin");
       } else {
         router.push("/dashboard");
       }
