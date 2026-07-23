@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, User, Settings } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNavigationByRole } from "@/config/navigation";
 
@@ -42,7 +42,7 @@ export function Navbar() {
   }
 
   // 个人设置仅 admin 可见（settings 页面只在 /dashboard/settings 存在）
-  const showSettings = isSuperuser || user?.role === "admin";
+  const showSettings = false;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -50,7 +50,7 @@ export function Navbar() {
         {/* Logo */}
         <div className="mr-4 flex">
           <Link href="/dashboard" className="flex items-center space-x-2">
-            <span className="font-bold text-lg">MyApp</span>
+            <span className="font-bold text-lg">同城体育</span>
           </Link>
         </div>
 

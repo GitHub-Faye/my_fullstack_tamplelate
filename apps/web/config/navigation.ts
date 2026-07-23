@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Users,
-  User,
   FileCheck,
   Wrench,
   Banknote,
@@ -37,7 +36,6 @@ export const NAVIGATION: NavItem[] = [
   { label: "账号管理", href: "/admin/users", icon: Users, roles: ["admin"] },
   { label: "规则配置", href: "/admin/rules", icon: ScrollText, roles: ["admin"] },
   { label: "操作日志", href: "/admin/logs", icon: FileText, roles: ["admin"] },
-  { label: "设置", href: "/dashboard/settings", icon: User, roles: ["admin"] },
 ];
 
 /** 根据角色获取可见导航 */
