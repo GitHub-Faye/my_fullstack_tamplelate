@@ -1,11 +1,11 @@
 {
     "schema_version": 2,
-    "commit": "254e068f77a0b03a29c517ec7f083dadedd11a3a",
-    "indexed_at": "2026-07-22T05:34:18Z",
+    "commit": "784b963589a722dc14bdf6b4adde1ca1440b4359",
+    "indexed_at": "2026-07-23T04:08:00Z",
     "project": "home-daria-fullstack-my_fullstack_tamplelate",
-    "nodes": 3784,
-    "edges": 17436,
-    "original_size": 15663104,
-    "compressed_size": 2167704,
+    "nodes": 3848,
+    "edges": 15794,
+    "original_size": 14811136,
+    "compressed_size": 2111679,
     "compression_level": 3
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -40,7 +41,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight } from "lucide-react";
+import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight, Play, Pause, Plus } from "lucide-react";
 import { useTasks, useTask } from "../api";
 import { useUserMap } from "@/features/user";
 import {
@@ -49,6 +50,9 @@ import {
   usePublishTask,
   useConvertToUrgent,
   useConvertToConvenient,
+  usePauseApproveTask,
+  usePauseRejectTask,
+  useAdminRestoreTask,
 } from "../api/client/adminMutations";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
@@ -71,16 +75,30 @@ const REVIEW_FILTERS: { value: string; label: string }[] = [
   { value: TaskStatusConst.BIDDING, label: "竞价中" },
   { value: TaskStatusConst.PENDING_START, label: "待启动" },
   { value: TaskStatusConst.IN_PROGRESS, label: "进行中" },
+  { value: TaskStatusConst.PAUSE_REQUESTED, label: "暂停待审批" },
   { value: TaskStatusConst.PAUSED, label: "已暂停" },
   { value: TaskStatusConst.COMPLETED, label: "已完成" },
 ];
+
+/** 报价倒计时函数 */
+function countdown(deadline: string | null | undefined): string {
+  if (!deadline) return "-";
+  const now = new Date();
+  const end = new Date(deadline);
+  const diff = end.getTime() - now.getTime();
+  if (diff <= 0) return "已截止";
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
 
 /** 根据任务状态返回管理员可执行的操作列表 */
 function getAdminActions(status: TaskStatus) {
   switch (status) {
     case TaskStatusConst.UNCONFIRMED:
       return [
-        { key: "publish", label: "补充/发布", icon: Send },
+        { key: "approve", label: "审核通过", icon: CheckCircle },
         { key: "reject", label: "驳回", icon: XCircle },
       ];
     case TaskStatusConst.CONFIRMED_UNPUBLISHED:
@@ -103,8 +121,15 @@ function getAdminActions(status: TaskStatus) {
       return [
         { key: "detail", label: "详情", icon: Eye },
       ];
+    case TaskStatusConst.PAUSE_REQUESTED:
+      return [
+        { key: "pauseApprove", label: "审批暂停", icon: CheckCircle },
+        { key: "pauseReject", label: "驳回暂停", icon: XCircle },
+        { key: "detail", label: "详情", icon: Eye },
+      ];
     case TaskStatusConst.PAUSED:
       return [
+        { key: "adminRestore", label: "恢复任务", icon: Play },
         { key: "detail", label: "详情", icon: Eye },
       ];
     case TaskStatusConst.COMPLETED:
@@ -148,6 +173,9 @@ export function AdminTaskTable() {
   const publishTask = usePublishTask();
   const convertToUrgent = useConvertToUrgent();
   const convertToConvenient = useConvertToConvenient();
+  const pauseApproveTask = usePauseApproveTask();
+  const pauseRejectTask = usePauseRejectTask();
+  const adminRestoreTask = useAdminRestoreTask();
 
   if (isLoading) {
     return (
@@ -175,6 +203,13 @@ export function AdminTaskTable() {
 
   async function handleAction(task: TaskPublic, action: string) {
     switch (action) {
+      case "approve":
+        try {
+          await approveTask.mutateAsync(task.id);
+        } catch {
+          // handled by mutation
+        }
+        break;
       case "publish":
         setActionDialog({ open: true, task, action: "publish" });
         break;
@@ -205,6 +240,27 @@ export function AdminTaskTable() {
       case "reassign":
         router.push(`/admin/tasks/${task.id}?tab=assign`);
         break;
+      case "pauseApprove":
+        try {
+          await pauseApproveTask.mutateAsync(task.id);
+        } catch {
+          // handled by mutation
+        }
+        break;
+      case "pauseReject":
+        try {
+          await pauseRejectTask.mutateAsync(task.id);
+        } catch {
+          // handled by mutation
+        }
+        break;
+      case "adminRestore":
+        try {
+          await adminRestoreTask.mutateAsync(task.id);
+        } catch {
+          // handled by mutation
+        }
+        break;
       case "detail":
         router.push(`/admin/tasks/${task.id}`);
         break;
@@ -226,7 +282,15 @@ export function AdminTaskTable() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>任务管理</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>任务管理</CardTitle>
+          <Button asChild>
+            <Link href="/admin/tasks/new">
+              <Plus className="mr-2 h-4 w-4" />
+              发布任务
+            </Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {/* 筛选栏 */}
@@ -276,6 +340,7 @@ export function AdminTaskTable() {
                 <TableHead>状态</TableHead>
                 <TableHead>T报</TableHead>
                 <TableHead>T实</TableHead>
+                <TableHead>报价倒计时</TableHead>
                 <TableHead>进度</TableHead>
                 <TableHead>预计上线时间</TableHead>
                 <TableHead>创建时间</TableHead>
@@ -285,7 +350,7 @@ export function AdminTaskTable() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-8">
+                  <TableCell colSpan={12} className="text-center py-8">
                     暂无任务数据
                   </TableCell>
                 </TableRow>
@@ -307,6 +372,11 @@ export function AdminTaskTable() {
                       </TableCell>
                       <TableCell>{task.T_reported != null ? `${task.T_reported}h` : "-"}</TableCell>
                       <TableCell>{task.T_actual != null ? `${task.T_actual}h` : "-"}</TableCell>
+                      <TableCell>
+                        {task.status === TaskStatusConst.BIDDING && task.bidding_deadline
+                          ? <span className="font-mono text-xs text-orange-600">{countdown(task.bidding_deadline)}</span>
+                          : "-"}
+                      </TableCell>
                       <TableCell>{task.progress ?? "-"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {task.expected_online_time ? formatDateShort(task.expected_online_time) : "-"}
