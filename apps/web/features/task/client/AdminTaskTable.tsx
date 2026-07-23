@@ -31,9 +31,25 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Loader2, MoreHorizontal, Eye } from "lucide-react";
-import { useTasks } from "../api";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight } from "lucide-react";
+import { useTasks, useTask } from "../api";
 import { useUserMap } from "@/features/user";
+import {
+  useApproveTask,
+  useRejectTask,
+  usePublishTask,
+  useConvertToUrgent,
+  useConvertToConvenient,
+} from "../api/client/adminMutations";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -42,6 +58,7 @@ import {
 } from "@repo/contracts";
 import { Pagination } from "@/components/ui/pagination";
 import { formatDateShort } from "@/lib/utils";
+import { toast } from "sonner";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -54,14 +71,57 @@ const REVIEW_FILTERS: { value: string; label: string }[] = [
   { value: TaskStatusConst.BIDDING, label: "竞价中" },
   { value: TaskStatusConst.PENDING_START, label: "待启动" },
   { value: TaskStatusConst.IN_PROGRESS, label: "进行中" },
-  { value: TaskStatusConst.COMPLETED, label: "已完成" },
   { value: TaskStatusConst.PAUSED, label: "已暂停" },
+  { value: TaskStatusConst.COMPLETED, label: "已完成" },
 ];
+
+/** 根据任务状态返回管理员可执行的操作列表 */
+function getAdminActions(status: TaskStatus) {
+  switch (status) {
+    case TaskStatusConst.UNCONFIRMED:
+      return [
+        { key: "publish", label: "补充/发布", icon: Send },
+        { key: "reject", label: "驳回", icon: XCircle },
+      ];
+    case TaskStatusConst.CONFIRMED_UNPUBLISHED:
+      return [
+        { key: "publish", label: "发布到竞价池", icon: Send },
+        { key: "reject", label: "驳回", icon: XCircle },
+      ];
+    case TaskStatusConst.BIDDING:
+      return [
+        { key: "viewBids", label: "查看报价", icon: Eye },
+        { key: "convertUrgent", label: "改为紧急", icon: AlertTriangle },
+        { key: "convertConvenient", label: "改为便捷", icon: RefreshCw },
+      ];
+    case TaskStatusConst.PENDING_START:
+      return [
+        { key: "reassign", label: "改派工程师", icon: ArrowLeftRight },
+        { key: "detail", label: "详情", icon: Eye },
+      ];
+    case TaskStatusConst.IN_PROGRESS:
+      return [
+        { key: "detail", label: "详情", icon: Eye },
+      ];
+    case TaskStatusConst.PAUSED:
+      return [
+        { key: "detail", label: "详情", icon: Eye },
+      ];
+    case TaskStatusConst.COMPLETED:
+      return [
+        { key: "detail", label: "详情", icon: Eye },
+      ];
+    default:
+      return [
+        { key: "detail", label: "详情", icon: Eye },
+      ];
+  }
+}
 
 /**
  * 管理端任务列表组件
  *
- * 展示所有任务，支持状态/工程师/PM 筛选和操作入口
+ * 展示所有任务，支持状态/工程师/PM 筛选，根据任务状态展示不同操作
  */
 export function AdminTaskTable() {
   const router = useRouter();
@@ -76,6 +136,18 @@ export function AdminTaskTable() {
     status: status !== "all" ? (status as TaskStatus) : undefined,
   });
   const userMap = useUserMap();
+
+  // 操作弹窗状态
+  const [actionDialog, setActionDialog] = useState<{ open: boolean; task: TaskPublic | null; action: string }>({
+    open: false, task: null, action: "",
+  });
+  const [biddingDays, setBiddingDays] = useState(3);
+
+  const approveTask = useApproveTask();
+  const rejectTask = useRejectTask();
+  const publishTask = usePublishTask();
+  const convertToUrgent = useConvertToUrgent();
+  const convertToConvenient = useConvertToConvenient();
 
   if (isLoading) {
     return (
@@ -99,6 +171,56 @@ export function AdminTaskTable() {
   }
   if (pmFilter !== "all") {
     filtered = filtered.filter((t) => t.pm_id === pmFilter);
+  }
+
+  async function handleAction(task: TaskPublic, action: string) {
+    switch (action) {
+      case "publish":
+        setActionDialog({ open: true, task, action: "publish" });
+        break;
+      case "reject":
+        try {
+          await rejectTask.mutateAsync(task.id);
+        } catch {
+          // handled by mutation
+        }
+        break;
+      case "viewBids":
+        router.push(`/admin/tasks/${task.id}?tab=bids`);
+        break;
+      case "convertUrgent":
+        try {
+          await convertToUrgent.mutateAsync(task.id);
+        } catch {
+          // handled by mutation
+        }
+        break;
+      case "convertConvenient":
+        try {
+          await convertToConvenient.mutateAsync(task.id);
+        } catch {
+          // handled by mutation
+        }
+        break;
+      case "reassign":
+        router.push(`/admin/tasks/${task.id}?tab=assign`);
+        break;
+      case "detail":
+        router.push(`/admin/tasks/${task.id}`);
+        break;
+    }
+  }
+
+  async function handleConfirmPublish() {
+    const task = actionDialog.task;
+    if (!task) return;
+    try {
+      await publishTask.mutateAsync({ taskId: task.id, biddingDays });
+      setActionDialog({ open: false, task: null, action: "" });
+      setBiddingDays(3);
+    } catch {
+      // handled by mutation
+    }
   }
 
   return (
@@ -168,45 +290,53 @@ export function AdminTaskTable() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filtered.map((task: TaskPublic) => (
-                  <TableRow key={task.id}>
-                    <TableCell className="font-medium max-w-[200px] truncate">{task.name}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="text-xs">
-                        {task.task_type ? TYPE_LABELS[task.task_type] : "正常"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{userMap?.[task.pm_id] || task.pm_id?.slice(0, 8) || "-"}</TableCell>
-                    <TableCell>{userMap?.[task.engineer_id ?? ""] || task.engineer_id?.slice(0, 8) || "-"}</TableCell>
-                    <TableCell>
-                      <Badge>{STATUS_LABELS[task.status]}</Badge>
-                    </TableCell>
-                    <TableCell>{task.T_reported != null ? `${task.T_reported}h` : "-"}</TableCell>
-                    <TableCell>{task.T_actual != null ? `${task.T_actual}h` : "-"}</TableCell>
-                    <TableCell>{task.progress ?? "-"}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {task.expected_online_time ? formatDateShort(task.expected_online_time) : "-"}
-                    </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {task.created_at ? formatDateShort(task.created_at) : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => router.push(`/admin/tasks/${task.id}`)}>
-                            <Eye className="mr-2 h-4 w-4" />
-                            审核
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
+                filtered.map((task: TaskPublic) => {
+                  const actions = getAdminActions(task.status);
+                  return (
+                    <TableRow key={task.id}>
+                      <TableCell className="font-medium max-w-[200px] truncate">{task.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">
+                          {task.task_type ? TYPE_LABELS[task.task_type] : "正常"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{userMap?.[task.pm_id] || task.pm_id?.slice(0, 8) || "-"}</TableCell>
+                      <TableCell>{userMap?.[task.engineer_id ?? ""] || task.engineer_id?.slice(0, 8) || "-"}</TableCell>
+                      <TableCell>
+                        <Badge>{STATUS_LABELS[task.status]}</Badge>
+                      </TableCell>
+                      <TableCell>{task.T_reported != null ? `${task.T_reported}h` : "-"}</TableCell>
+                      <TableCell>{task.T_actual != null ? `${task.T_actual}h` : "-"}</TableCell>
+                      <TableCell>{task.progress ?? "-"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {task.expected_online_time ? formatDateShort(task.expected_online_time) : "-"}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {task.created_at ? formatDateShort(task.created_at) : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {actions.map((act) => (
+                              <DropdownMenuItem
+                                key={act.key}
+                                onClick={() => handleAction(task, act.key)}
+                              >
+                                <act.icon className="mr-2 h-4 w-4" />
+                                {act.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>
@@ -221,6 +351,50 @@ export function AdminTaskTable() {
           />
         )}
       </CardContent>
+
+      {/* 发布到竞价池弹窗 */}
+      <Dialog
+        open={actionDialog.open && actionDialog.action === "publish"}
+        onOpenChange={(open) => { if (!open) setActionDialog({ open: false, task: null, action: "" }); }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>发布到竞价池</DialogTitle>
+            <DialogDescription>
+              将任务 <strong>{actionDialog.task?.name}</strong> 发布到竞价池，工程师将可以看到并进行报价。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">竞价天数</label>
+              <Input
+                type="number"
+                min={1}
+                max={30}
+                value={biddingDays}
+                onChange={(e) => setBiddingDays(Number(e.target.value))}
+              />
+              <p className="text-xs text-muted-foreground">设置竞价截止天数，默认 3 天</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setActionDialog({ open: false, task: null, action: "" })}
+            >
+              取消
+            </Button>
+            <Button
+              onClick={handleConfirmPublish}
+              disabled={publishTask.isPending}
+            >
+              {publishTask.isPending ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />发布中...</>
+              ) : "确认发布"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
