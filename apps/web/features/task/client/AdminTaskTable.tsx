@@ -41,7 +41,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight, Play, Plus } from "lucide-react";
+import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight, Play, Plus, FileText } from "lucide-react";
 import { useTasks, useTask } from "../api";
 import { useUserMap } from "@/features/user";
 import {
@@ -126,6 +126,7 @@ function getAdminActions(status: TaskStatus) {
       ];
     case TaskStatusConst.COMPLETED:
       return [
+        { key: "auditLogs", label: "操作日志", icon: FileText },
         { key: "detail", label: "详情", icon: Eye },
       ];
     default:
@@ -251,6 +252,9 @@ export function AdminTaskTable() {
         } catch {
           // handled by mutation
         }
+        break;
+      case "auditLogs":
+        router.push(`/admin/tasks/${task.id}?tab=audit-logs`);
         break;
       case "detail":
         router.push(`/admin/tasks/${task.id}`);
