@@ -244,7 +244,7 @@ async def assign_user_role(
     Args:
         session: 数据库会话
         user: 用户对象
-        role_name: 角色名称（如 engineer, pm, admin_role）
+        role_name: 角色名称（如 engineer, pm, admin）
     """
     # 查找或创建角色
     stmt = select(Role).where(Role.name == role_name)
@@ -312,7 +312,7 @@ async def update_user_role(
     role_mapping = {
         UserRoleType.ENGINEER: "engineer",
         UserRoleType.PM: "pm",
-        UserRoleType.ADMIN: "admin_role",
+        UserRoleType.ADMIN: "admin",
     }
     role_name = role_mapping.get(new_role, "engineer")
 

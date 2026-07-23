@@ -327,7 +327,7 @@ export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
   ],
 
   /** 管理员角色 */
-  admin_role: [
+  admin: [
     TaskScope.READ,
     TaskScope.CREATE,
     TaskScope.UPDATE,

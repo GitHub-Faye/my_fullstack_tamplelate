@@ -72,7 +72,7 @@ async def create_test_admin(session: AsyncSession) -> User:
     await session.commit()
 
     # 创建管理员角色并关联 scopes
-    role = Role(name=f"admin_role_{uuid.uuid4()}")
+    role = Role(name=f"admin_{uuid.uuid4()}")
     session.add(role)
     await session.commit()
 

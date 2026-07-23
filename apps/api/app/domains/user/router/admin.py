@@ -65,7 +65,7 @@ async def admin_create_user(
     """
     创建用户（管理员操作）。
 
-    权限：管理员（需 user:admin 权限，该 scope 仅 admin_role 具有）
+    权限：管理员（需 user:admin 权限，该 scope 仅 admin 角色具有）
     """
     # 检查邮箱唯一性
     existing = await repository.get_user_by_email(session=session, email=user_in.email)
@@ -79,7 +79,7 @@ async def admin_create_user(
     role_mapping = {
         "engineer": "engineer",
         "pm": "pm",
-        "admin": "admin_role",
+        "admin": "admin",
     }
     role_name = role_mapping.get(user_in.role.value, "engineer")
     await repository.assign_user_role(session=session, user=user, role_name=role_name)

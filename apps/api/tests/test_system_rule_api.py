@@ -45,7 +45,7 @@ async def _create_test_admin(db_session: AsyncSession) -> User:
     db_session.add(admin)
     await db_session.commit()
 
-    role = Role(name=f"admin_role_{uuid.uuid4().hex[:8]}")
+    role = Role(name=f"admin_{uuid.uuid4().hex[:8]}")
     db_session.add(role)
     await db_session.commit()
 

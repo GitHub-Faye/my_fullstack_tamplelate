@@ -146,7 +146,7 @@ DEFAULT_ROLE_SCOPES = {
         DashboardScope.PM,
     ],
     # 管理员角色权限
-    "admin_role": [
+    "admin": [
         TaskScope.READ,
         TaskScope.CREATE,
         TaskScope.UPDATE,
