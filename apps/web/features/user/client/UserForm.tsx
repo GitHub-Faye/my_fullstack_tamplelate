@@ -103,6 +103,7 @@ export function UserForm({ user, mode }: UserFormProps) {
           email: data.email || null,
           full_name: data.fullName || null,
           is_active: data.isActive ?? null,
+          is_superuser: data.isSuperuser ?? null,
           phone: data.phone || null,
           department: data.department || null,
           hire_date: data.hireDate || null,

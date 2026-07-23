@@ -81,6 +81,7 @@ class UserAdminUpdate(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     password: str | None = Field(default=None, min_length=8, max_length=128)
     is_active: bool | None = None
+    is_superuser: bool | None = None
     role: UserRoleType | None = None
     # 人事管理字段
     phone: str | None = Field(default=None, max_length=20)

@@ -865,6 +865,7 @@ export const zUserAdminUpdate = z.object({
     full_name: z.string().max(255).nullish(),
     password: z.string().min(8).max(128).nullish(),
     is_active: z.boolean().nullish(),
+    is_superuser: z.boolean().nullish(),
     role: zUserRoleType.nullish(),
     phone: z.string().max(20).nullish(),
     department: z.string().max(100).nullish(),
