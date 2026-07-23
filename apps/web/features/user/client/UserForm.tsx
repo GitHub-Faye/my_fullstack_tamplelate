@@ -98,26 +98,32 @@ export function UserForm({ user, mode }: UserFormProps) {
   async function onSubmit(data: UserCreateFormData | UserUpdateFormData) {
     try {
       if (isEdit && user) {
+        // 构建 body，只传有值的字段
+        const body: Record<string, unknown> = {
+          email: data.email || null,
+          full_name: data.fullName || null,
+          is_active: data.isActive ?? null,
+          phone: data.phone || null,
+          department: data.department || null,
+          hire_date: data.hireDate || null,
+          employment_status: data.employmentStatus || null,
+          role: data.role || null,
+          S0: data.S0 ?? null,
+          H0: data.H0 ?? null,
+          T_monthly_plan: data.TMonthlyPlan ?? null,
+          S_base: data.SBase ?? null,
+          S_assess: data.SAssess ?? null,
+          R_base: data.RBase ?? null,
+          R_assess: data.RAssess ?? null,
+          baseline_client_count: data.baselineClientCount ?? null,
+        };
+        // 编辑时如果填了密码则一起提交
+        if (data.password) {
+          body.password = data.password;
+        }
         await updateMutation.mutateAsync({
           path: { user_id: user.id },
-          body: {
-            email: data.email || null,
-            full_name: data.fullName || null,
-            is_active: data.isActive ?? null,
-            phone: data.phone || null,
-            department: data.department || null,
-            hire_date: data.hireDate || null,
-            employment_status: data.employmentStatus || null,
-            role: data.role || null,
-            S0: data.S0 ?? null,
-            H0: data.H0 ?? null,
-            T_monthly_plan: data.TMonthlyPlan ?? null,
-            S_base: data.SBase ?? null,
-            S_assess: data.SAssess ?? null,
-            R_base: data.RBase ?? null,
-            R_assess: data.RAssess ?? null,
-            baseline_client_count: data.baselineClientCount ?? null,
-          },
+          body,
           url: '/v1/admin/users/{user_id}',
         });
         router.push("/admin/users");

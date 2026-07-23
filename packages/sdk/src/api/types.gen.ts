@@ -665,9 +665,9 @@ export type EngineerDashboard = {
     /**
      * H0
      *
-     * H0（基准时薪）
+     * H0（基准时薪），由管理员设置
      */
-    H0?: number;
+    H0: number | null;
 };
 
 /**
@@ -1960,6 +1960,10 @@ export type UserAdminUpdate = {
      * Full Name
      */
     full_name?: string | null;
+    /**
+     * Password
+     */
+    password?: string | null;
     /**
      * Is Active
      */

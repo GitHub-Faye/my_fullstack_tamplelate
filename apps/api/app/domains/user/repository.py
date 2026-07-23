@@ -280,7 +280,11 @@ async def admin_update_user(
         更新后的用户对象
     """
     user_data = user_in.model_dump(exclude_unset=True)
-    db_user.sqlmodel_update(user_data)
+    extra_data = {}
+    if "password" in user_data:
+        password = user_data.pop("password")
+        extra_data["hashed_password"] = get_password_hash(password)
+    db_user.sqlmodel_update(user_data, update=extra_data)
     session.add(db_user)
     await session.commit()
     await session.refresh(db_user)

@@ -181,7 +181,7 @@ export const zEngineerDashboard = z.object({
     T_remaining: z.number(),
     salary_preview: z.number(),
     accuracy_rate: z.number(),
-    H0: z.number().optional().default(100)
+    H0: z.number().nullable()
 });
 
 /**
@@ -863,6 +863,7 @@ export const zUserAdminDetail = z.object({
 export const zUserAdminUpdate = z.object({
     email: z.email().max(255).nullish(),
     full_name: z.string().max(255).nullish(),
+    password: z.string().min(8).max(128).nullish(),
     is_active: z.boolean().nullish(),
     role: zUserRoleType.nullish(),
     phone: z.string().max(20).nullish(),

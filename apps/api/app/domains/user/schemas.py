@@ -79,6 +79,7 @@ class UserAdminUpdate(SQLModel):
     """管理员更新用户信息"""
     email: EmailStr | None = Field(default=None, max_length=255)
     full_name: str | None = Field(default=None, max_length=255)
+    password: str | None = Field(default=None, min_length=8, max_length=128)
     is_active: bool | None = None
     role: UserRoleType | None = None
     # 人事管理字段
