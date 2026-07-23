@@ -173,7 +173,7 @@ export function EngineerTaskTable({
     } catch (e: any) {
       toast.error(e.message || "操作失败");
     } finally {
-      setConfirm({ open: false, action: null, task: null });
+      setConfirm({ open: false, action: null, task: null, bidHours: 0 });
     }
   }, [confirm, refetch]);
 
@@ -332,7 +332,7 @@ export function EngineerTaskTable({
                             <Button
                               variant="link"
                               size="sm"
-                              onClick={() => setConfirm({ open: true, action: "start", task })}
+                              onClick={() => setConfirm({ open: true, action: "start", task, bidHours: 0 })}
                             >
                               启动
                             </Button>
@@ -340,7 +340,7 @@ export function EngineerTaskTable({
                               variant="link"
                               size="sm"
                               className="text-red-600"
-                              onClick={() => setConfirm({ open: true, action: "decline", task })}
+                              onClick={() => setConfirm({ open: true, action: "decline", task, bidHours: 0 })}
                             >
                               拒绝
                             </Button>
@@ -502,7 +502,7 @@ export function EngineerTaskTable({
       )}
 
       {/* 统一确认弹窗（启动/拒绝/恢复/报价） */}
-      <AlertDialog open={confirm.open} onOpenChange={(o) => { if (!o) setConfirm({ open: false, action: null, task: null }); }}>
+      <AlertDialog open={confirm.open} onOpenChange={(o) => { if (!o) setConfirm({ open: false, action: null, task: null, bidHours: 0 }); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>

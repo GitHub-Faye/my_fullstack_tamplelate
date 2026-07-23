@@ -10,10 +10,13 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive } from "lucide-react";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
+  PM_EDITABLE_STATUSES,
+  TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 import { formatDateTime } from "@/lib/utils";
 
@@ -161,34 +164,27 @@ export function TaskDetailDialog({
             </div>
           )}
 
-          {/* 附件表格 */}
-          {task.attachments && task.attachments.length > 0 ? (
-            <div className="border rounded-md">
-              <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">附件/截图</div>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-muted-foreground">
-                    <th className="text-left px-3 py-2 font-medium">文件</th>
-                    <th className="text-left px-3 py-2 font-medium">类型</th>
-                    <th className="text-left px-3 py-2 font-medium">状态</th>
-                    <th className="text-left px-3 py-2 font-medium">操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {task.attachments.map((att: any) => (
-                    <tr key={att.id}>
-                      <td className="px-3 py-2">{att.filename}</td>
-                      <td className="px-3 py-2">{att.file_type}</td>
-                      <td className="px-3 py-2">{att.status}</td>
-                      <td className="px-3 py-2">
-                        <Button variant="link" size="sm" onClick={() => window.open(att.url)}>下载</Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
+          {/* 附件表格（后端功能尚未实现） */}
+          <div className="border rounded-md">
+            <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">附件/截图</div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-muted-foreground">
+                  <th className="text-left px-3 py-2 font-medium">文件</th>
+                  <th className="text-left px-3 py-2 font-medium">类型</th>
+                  <th className="text-left px-3 py-2 font-medium">状态</th>
+                  <th className="text-left px-3 py-2 font-medium">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
+                    暂无附件
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
