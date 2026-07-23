@@ -63,6 +63,9 @@ import { Pagination } from "@/components/ui/pagination";
 import { formatDateShort, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 import { BidLogDialog } from "./BidLogDialog";
+import { TaskDetailDialog } from "./TaskDetailDialog";
+import { WorkLogDialog } from "./WorkLogDialog";
+import { AuditLogDialog } from "./AuditLogDialog";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -171,6 +174,9 @@ export function AdminTaskTable() {
   });
   const [biddingDays, setBiddingDays] = useState(3);
   const [bidLogTask, setBidLogTask] = useState<TaskPublic | null>(null);
+  const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
+  const [workLogTask, setWorkLogTask] = useState<TaskPublic | null>(null);
+  const [auditLogTask, setAuditLogTask] = useState<TaskPublic | null>(null);
 
   const rejectTask = useRejectTask();
   const publishTask = usePublishTask();
@@ -258,10 +264,13 @@ export function AdminTaskTable() {
         }
         break;
       case "auditLogs":
-        router.push(`/admin/tasks/${task.id}?tab=audit-logs`);
+        setAuditLogTask(task);
         break;
       case "detail":
-        router.push(`/admin/tasks/${task.id}`);
+        setDetailTask(task);
+        break;
+      case "workLog":
+        setWorkLogTask(task);
         break;
     }
   }
@@ -475,6 +484,34 @@ export function AdminTaskTable() {
           task={bidLogTask}
           open={!!bidLogTask}
           onOpenChange={(open) => { if (!open) setBidLogTask(null); }}
+        />
+      )}
+
+      {/* 详情弹窗 */}
+      {detailTask && (
+        <TaskDetailDialog
+          task={detailTask}
+          open={!!detailTask}
+          onOpenChange={(open) => { if (!open) setDetailTask(null); }}
+          userMap={userMap}
+        />
+      )}
+
+      {/* 工作日志弹窗 */}
+      {workLogTask && (
+        <WorkLogDialog
+          task={workLogTask}
+          open={!!workLogTask}
+          onOpenChange={(open) => { if (!open) setWorkLogTask(null); }}
+        />
+      )}
+
+      {/* 审计日志弹窗 */}
+      {auditLogTask && (
+        <AuditLogDialog
+          task={auditLogTask}
+          open={!!auditLogTask}
+          onOpenChange={(open) => { if (!open) setAuditLogTask(null); }}
         />
       )}
     </Card>
