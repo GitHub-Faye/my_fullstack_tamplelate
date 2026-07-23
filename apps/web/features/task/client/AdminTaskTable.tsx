@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -83,32 +83,31 @@ const REVIEW_FILTERS: { value: string; label: string }[] = [
 function useCountdown(deadline: string | null | undefined): string {
   const [display, setDisplay] = useState("-");
 
-  useEffect(() => {
+  const tick = useCallback(() => {
     if (!deadline) {
       setDisplay("-");
       return;
     }
-
-    function tick() {
-      const now = new Date();
-      const end = new Date(deadline!);
-      const diff = end.getTime() - now.getTime();
-      if (diff <= 0) {
-        setDisplay("已截止");
-        return;
-      }
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setDisplay(
-        `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
-      );
+    const now = new Date();
+    const end = new Date(deadline);
+    const diff = end.getTime() - now.getTime();
+    if (diff <= 0) {
+      setDisplay("已截止");
+      return;
     }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    setDisplay(
+      `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+    );
+  }, [deadline]);
 
+  useEffect(() => {
     tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [deadline]);
+  }, [tick]);
 
   return display;
 }
