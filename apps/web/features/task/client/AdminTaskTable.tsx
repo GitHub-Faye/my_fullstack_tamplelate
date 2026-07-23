@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -80,36 +80,16 @@ const REVIEW_FILTERS: { value: string; label: string }[] = [
   { value: TaskStatusConst.COMPLETED, label: "已完成" },
 ];
 
-function useCountdown(deadline: string | null | undefined): string {
-  const [display, setDisplay] = useState("-");
-
-  const tick = useCallback(() => {
-    if (!deadline) {
-      setDisplay("-");
-      return;
-    }
-    const now = new Date();
-    const end = new Date(deadline);
-    const diff = end.getTime() - now.getTime();
-    if (diff <= 0) {
-      setDisplay("已截止");
-      return;
-    }
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
-    setDisplay(
-      `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
-    );
-  }, [deadline]);
-
-  useEffect(() => {
-    tick();
-    const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
-  }, [tick]);
-
-  return display;
+/** 报价倒计时函数（纯函数，由组件层每秒触发的 now 驱动重新渲染） */
+function formatCountdown(deadline: string | null | undefined, now: number): string {
+  if (!deadline) return "-";
+  const end = new Date(deadline).getTime();
+  const diff = end - now;
+  if (diff <= 0) return "已截止";
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
 /** 根据任务状态返回管理员可执行的操作列表 */
@@ -173,6 +153,13 @@ export function AdminTaskTable() {
   const [status, setStatus] = useState("all");
   const [engineerFilter, setEngineerFilter] = useState("all");
   const [pmFilter, setPmFilter] = useState("all");
+  // 每秒递增的 ticker，用于驱动报价倒计时刷新
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const { data: tasks, isLoading } = useTasks({
     page,
@@ -393,7 +380,7 @@ export function AdminTaskTable() {
                       <TableCell>{task.T_actual != null ? `${task.T_actual}h` : "-"}</TableCell>
                       <TableCell>
                         {task.status === TaskStatusConst.BIDDING && task.bidding_deadline
-                          ? <span className="font-mono text-xs text-orange-600">{useCountdown(task.bidding_deadline)}</span>
+                          ? <span className="font-mono text-xs text-orange-600">{formatCountdown(task.bidding_deadline, now)}</span>
                           : "-"}
                       </TableCell>
                       <TableCell>{task.progress ?? "-"}</TableCell>
