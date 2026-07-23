@@ -350,7 +350,7 @@ export function EngineerTaskTable({
                           <Button
                             variant="link"
                             size="sm"
-                            onClick={() => setConfirm({ open: true, action: "pauseRequest", task })}
+                            onClick={() => setConfirm({ open: true, action: "pauseRequest", task, bidHours: 0 })}
                           >
                             申请暂停/顺延
                           </Button>
@@ -359,7 +359,7 @@ export function EngineerTaskTable({
                           <Button
                             variant="link"
                             size="sm"
-                            onClick={() => setConfirm({ open: true, action: "resume", task })}
+                            onClick={() => setConfirm({ open: true, action: "resume", task, bidHours: 0 })}
                           >
                             恢复
                           </Button>
@@ -453,7 +453,7 @@ export function EngineerTaskTable({
                         <Button
                           variant="link"
                           size="sm"
-                          onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: "" })}
+                          onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: 0 })}
                         >
                           报价
                         </Button>
