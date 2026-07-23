@@ -91,6 +91,7 @@ async def get_engineer_dashboard(
         T_remaining=T_remaining,
         salary_preview=salary_preview,
         accuracy_rate=round(accuracy_rate, 2),
+        H0=engineer.H0 or 100.0,
     )
 
 

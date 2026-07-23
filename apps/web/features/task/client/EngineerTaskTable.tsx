@@ -32,6 +32,8 @@ import {
 import { Loader2, Search, RotateCcw } from "lucide-react";
 import { useTasks } from "../api";
 import { useUserMap, useCurrentUser } from "@/features/user";
+import { useEngineerDashboard } from "@/features/dashboard";
+import { TaskDetailDialog } from "./TaskDetailDialog";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -41,6 +43,7 @@ import {
 import {
   startTaskV1TasksTaskIdStartPost,
   declineTaskV1TasksTaskIdDeclinePost,
+  pauseRequestTaskV1TasksTaskIdPauseRequestPost,
   resumeTaskV1TasksTaskIdResumePost,
   createBidV1TasksTaskIdBidsPost,
 } from "@repo/sdk";
@@ -72,7 +75,7 @@ type TabType = "mine" | "bidding";
 /** 确认弹窗状态 */
 interface ConfirmState {
   open: boolean;
-  action: "start" | "decline" | "resume" | "bid" | null;
+  action: "start" | "decline" | "resume" | "pauseRequest" | "bid" | null;
   task: TaskPublic | null;
   /** 报价弹窗专用：工时输入 */
   bidHours?: string;
@@ -97,6 +100,7 @@ export function EngineerTaskTable({
 
   const user = useCurrentUser();
   const userMap = useUserMap();
+  const { data: dashboard } = useEngineerDashboard();
 
   const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null });
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
@@ -148,6 +152,10 @@ export function EngineerTaskTable({
         case "resume":
           await resumeTaskV1TasksTaskIdResumePost({ path: { task_id: taskId } });
           toast.success("任务已恢复");
+          break;
+        case "pauseRequest":
+          await pauseRequestTaskV1TasksTaskIdPauseRequestPost({ path: { task_id: taskId } });
+          toast.success("已申请暂停，等待管理员审批");
           break;
         case "bid":
           if (!confirm.bidHours) {
@@ -338,6 +346,15 @@ export function EngineerTaskTable({
                             </Button>
                           </>
                         )}
+                        {task.status === TaskStatusConst.IN_PROGRESS && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            onClick={() => setConfirm({ open: true, action: "pauseRequest", task })}
+                          >
+                            申请暂停/顺延
+                          </Button>
+                        )}
                         {task.status === TaskStatusConst.PAUSED && (
                           <Button
                             variant="link"
@@ -345,6 +362,15 @@ export function EngineerTaskTable({
                             onClick={() => setConfirm({ open: true, action: "resume", task })}
                           >
                             恢复
+                          </Button>
+                        )}
+                        {task.status === TaskStatusConst.COMPLETED && (
+                          <Button
+                            variant="link"
+                            size="sm"
+                            onClick={() => setDetailTask(task)}
+                          >
+                            详情
                           </Button>
                         )}
                         {task.status === TaskStatusConst.BIDDING && (
@@ -465,48 +491,14 @@ export function EngineerTaskTable({
         </CardContent>
       </Card>
 
-      {/* 详情弹窗（占位，后续可用 TaskDetailDialog） */}
+      {/* 详情弹窗 */}
       {detailTask && (
-        <AlertDialog open={!!detailTask} onOpenChange={(o) => { if (!o) setDetailTask(null); }}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{detailTask.name}</AlertDialogTitle>
-              <AlertDialogDescription>
-                <div className="space-y-2 mt-2">
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">类型：</span>
-                    {detailTask.task_type ? TYPE_LABELS[detailTask.task_type] : "-"}
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">状态：</span>
-                    {STATUS_LABELS[detailTask.status]}
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">T报：</span>
-                    {detailTask.T_reported != null ? `${detailTask.T_reported}h` : "-"}
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">T实：</span>
-                    {detailTask.T_actual != null ? `${detailTask.T_actual}h` : "-"}
-                  </div>
-                  <div className="text-sm">
-                    <span className="text-muted-foreground">进度：</span>
-                    {detailTask.progress ?? "-"}
-                  </div>
-                  {detailTask.description && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">说明：</span>
-                      <p className="whitespace-pre-wrap mt-1">{detailTask.description}</p>
-                    </div>
-                  )}
-                </div>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>关闭</AlertDialogCancel>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <TaskDetailDialog
+          task={detailTask}
+          open={!!detailTask}
+          onOpenChange={(o) => { if (!o) setDetailTask(null); }}
+          currentUserId={user?.id}
+        />
       )}
 
       {/* 统一确认弹窗（启动/拒绝/恢复/报价） */}
@@ -514,15 +506,21 @@ export function EngineerTaskTable({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirm.action === "start" ? "确认启动" : confirm.action === "decline" ? "确认拒绝" : confirm.action === "resume" ? "确认恢复" : "报价"}
+              {confirm.action === "start" ? "确认启动" : confirm.action === "decline" ? "确认拒绝" : confirm.action === "resume" ? "确认恢复" : confirm.action === "pauseRequest" ? "确认申请暂停" : "报价"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirm.action === "start" && "启动后任务将进入进行中状态。"}
               {confirm.action === "decline" && "拒绝后任务将重新进入竞价流程。"}
               {confirm.action === "resume" && "恢复后任务将继续进行中状态。"}
+              {confirm.action === "pauseRequest" && "申请暂停后需等待管理员审批。"}
               {confirm.action === "bid" && (
                 <div className="space-y-4 mt-2">
                   <div className="text-sm font-medium">{confirm.task?.name}</div>
+                  {dashboard && (
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span>H0（基准时薪）：¥{dashboard.H0 ?? 100}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <label className="text-sm text-muted-foreground">工时（小时）</label>
                     <input
@@ -534,6 +532,11 @@ export function EngineerTaskTable({
                       onChange={(e) => setConfirm((prev) => ({ ...prev, bidHours: e.target.value }))}
                     />
                   </div>
+                  {confirm.bidHours && !isNaN(parseFloat(confirm.bidHours)) && (
+                    <div className="text-sm text-muted-foreground">
+                      报价金额：<span className="font-medium text-foreground">¥{(parseFloat(confirm.bidHours) * (dashboard?.H0 ?? 100)).toFixed(2)}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </AlertDialogDescription>

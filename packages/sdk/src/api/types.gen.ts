@@ -662,6 +662,12 @@ export type EngineerDashboard = {
      * T报准确率（%）
      */
     accuracy_rate: number;
+    /**
+     * H0
+     *
+     * H0（基准时薪）
+     */
+    H0?: number;
 };
 
 /**
@@ -1691,10 +1697,10 @@ export type TaskReassignRequest = {
  * 任务状态枚举
  *
  * 状态流转：
- * unconfirmed -> confirmed_unpublished -> bidding -> pending_start -> in_progress -> completed
+ * unconfirmed -> bidding -> pending_start -> in_progress -> completed
  * 中间状态：paused（可从 in_progress 暂停）
  */
-export type TaskStatus = 'unconfirmed' | 'confirmed_unpublished' | 'bidding' | 'pending_start' | 'in_progress' | 'pause_requested' | 'paused' | 'completed';
+export type TaskStatus = 'unconfirmed' | 'bidding' | 'pending_start' | 'in_progress' | 'pause_requested' | 'paused' | 'completed';
 
 /**
  * TaskType
@@ -3043,36 +3049,6 @@ export type WithdrawTaskV1TasksTaskIdWithdrawPostResponses = {
 };
 
 export type WithdrawTaskV1TasksTaskIdWithdrawPostResponse = WithdrawTaskV1TasksTaskIdWithdrawPostResponses[keyof WithdrawTaskV1TasksTaskIdWithdrawPostResponses];
-
-export type ApproveTaskV1TasksTaskIdApprovePostData = {
-    body?: never;
-    path: {
-        /**
-         * Task Id
-         */
-        task_id: string;
-    };
-    query?: never;
-    url: '/v1/tasks/{task_id}/approve';
-};
-
-export type ApproveTaskV1TasksTaskIdApprovePostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ApproveTaskV1TasksTaskIdApprovePostError = ApproveTaskV1TasksTaskIdApprovePostErrors[keyof ApproveTaskV1TasksTaskIdApprovePostErrors];
-
-export type ApproveTaskV1TasksTaskIdApprovePostResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskPublic;
-};
-
-export type ApproveTaskV1TasksTaskIdApprovePostResponse = ApproveTaskV1TasksTaskIdApprovePostResponses[keyof ApproveTaskV1TasksTaskIdApprovePostResponses];
 
 export type RejectTaskV1TasksTaskIdRejectPostData = {
     body?: never;
