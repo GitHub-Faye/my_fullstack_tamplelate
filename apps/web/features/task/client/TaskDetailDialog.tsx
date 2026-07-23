@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive } from "lucide-react";
+import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2 } from "lucide-react";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -18,7 +18,8 @@ import {
   PM_EDITABLE_STATUSES,
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatDate } from "@/lib/utils";
+import { readDailyReportsV1DailyReportsGet } from "@repo/sdk";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -98,6 +99,24 @@ export function TaskDetailDialog({
   const isStarted = ["pending_start", "in_progress", "paused", "completed"].includes(task.status);
   const statusText = STATUS_LABELS[task.status] || task.status;
   const typeText = task.task_type ? TYPE_LABELS[task.task_type] ?? task.task_type : "-";
+
+  // 最近工作日志
+  const [recentReports, setRecentReports] = useState<any[] | null>(null);
+  const [reportsLoading, setReportsLoading] = useState(false);
+
+  useEffect(() => {
+    if (open && task && isStarted) {
+      setReportsLoading(true);
+      readDailyReportsV1DailyReportsGet({
+        query: { task_id: task.id, page: 1, page_size: 5 },
+      })
+        .then((res) => setRecentReports(res.data?.data ?? []))
+        .catch(() => setRecentReports([]))
+        .finally(() => setReportsLoading(false));
+    } else if (!open) {
+      setRecentReports(null);
+    }
+  }, [open, task]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -185,6 +204,48 @@ export function TaskDetailDialog({
               </tbody>
             </table>
           </div>
+
+          {/* 最近工作日志 */}
+          {isStarted && (
+            <div className="border rounded-md">
+              <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">最近工作日志</div>
+              {reportsLoading ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+              ) : recentReports && recentReports.length > 0 ? (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b text-muted-foreground">
+                      <th className="text-left px-3 py-2 font-medium">日期</th>
+                      <th className="text-left px-3 py-2 font-medium">投入</th>
+                      <th className="text-left px-3 py-2 font-medium">阶段/进度</th>
+                      <th className="text-left px-3 py-2 font-medium">说明</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentReports.map((rpt: any, i: number) => (
+                      <tr key={i} className="border-b last:border-0">
+                        <td className="px-3 py-2 text-muted-foreground whitespace-nowrap">
+                          {formatDate(rpt.report_date ?? rpt.created_at)}
+                        </td>
+                        <td className="px-3 py-2">{rpt.today_hours ?? "-"}h</td>
+                        <td className="px-3 py-2">
+                          {rpt.current_stage ?? "-"}
+                          {rpt.progress ? ` / ${rpt.progress}` : ""}
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground max-w-[200px] truncate">
+                          {rpt.notes ?? "-"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-center py-4 text-sm text-muted-foreground">暂无工作日志</p>
+              )}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
