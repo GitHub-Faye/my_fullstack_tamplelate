@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -41,7 +41,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight, Play, Pause, Plus } from "lucide-react";
+import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight, Play, Plus } from "lucide-react";
 import { useTasks, useTask } from "../api";
 import { useUserMap } from "@/features/user";
 import {
@@ -80,17 +80,37 @@ const REVIEW_FILTERS: { value: string; label: string }[] = [
   { value: TaskStatusConst.COMPLETED, label: "已完成" },
 ];
 
-/** 报价倒计时函数 */
-function countdown(deadline: string | null | undefined): string {
-  if (!deadline) return "-";
-  const now = new Date();
-  const end = new Date(deadline);
-  const diff = end.getTime() - now.getTime();
-  if (diff <= 0) return "已截止";
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+function useCountdown(deadline: string | null | undefined): string {
+  const [display, setDisplay] = useState("-");
+
+  useEffect(() => {
+    if (!deadline) {
+      setDisplay("-");
+      return;
+    }
+
+    function tick() {
+      const now = new Date();
+      const end = new Date(deadline!);
+      const diff = end.getTime() - now.getTime();
+      if (diff <= 0) {
+        setDisplay("已截止");
+        return;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setDisplay(
+        `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+      );
+    }
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [deadline]);
+
+  return display;
 }
 
 /** 根据任务状态返回管理员可执行的操作列表 */
@@ -374,7 +394,7 @@ export function AdminTaskTable() {
                       <TableCell>{task.T_actual != null ? `${task.T_actual}h` : "-"}</TableCell>
                       <TableCell>
                         {task.status === TaskStatusConst.BIDDING && task.bidding_deadline
-                          ? <span className="font-mono text-xs text-orange-600">{countdown(task.bidding_deadline)}</span>
+                          ? <span className="font-mono text-xs text-orange-600">{useCountdown(task.bidding_deadline)}</span>
                           : "-"}
                       </TableCell>
                       <TableCell>{task.progress ?? "-"}</TableCell>
