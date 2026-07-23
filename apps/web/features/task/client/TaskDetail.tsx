@@ -25,7 +25,6 @@ const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 
 const STATUS_COLORS: Record<TaskStatus, string> = {
   unconfirmed: "secondary",
-  confirmed_unpublished: "secondary",
   bidding: "default",
   pending_start: "default",
   in_progress: "default",

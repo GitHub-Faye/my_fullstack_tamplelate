@@ -11,12 +11,11 @@
  * 任务状态
  *
  * 状态流转：
- * unconfirmed -> confirmed_unpublished -> bidding -> pending_start -> in_progress -> completed
+ * unconfirmed -> bidding -> pending_start -> in_progress -> completed
  * 中间状态：paused（可从 in_progress 暂停）
  */
 export const TaskStatus = {
   UNCONFIRMED: "unconfirmed",
-  CONFIRMED_UNPUBLISHED: "confirmed_unpublished",
   BIDDING: "bidding",
   PENDING_START: "pending_start",
   IN_PROGRESS: "in_progress",
@@ -32,7 +31,6 @@ export type TaskStatusType = typeof TaskStatus[keyof typeof TaskStatus];
  */
 export const TASK_STATUS_LABELS: Record<TaskStatusType, string> = {
   [TaskStatus.UNCONFIRMED]: "未确认",
-  [TaskStatus.CONFIRMED_UNPUBLISHED]: "已确认未发布",
   [TaskStatus.BIDDING]: "竞价中",
   [TaskStatus.PENDING_START]: "待启动",
   [TaskStatus.IN_PROGRESS]: "进行中",
@@ -46,7 +44,6 @@ export const TASK_STATUS_LABELS: Record<TaskStatusType, string> = {
  */
 export const TASK_STATUS_COLORS: Record<TaskStatusType, string> = {
   [TaskStatus.UNCONFIRMED]: "gray",
-  [TaskStatus.CONFIRMED_UNPUBLISHED]: "gray",
   [TaskStatus.BIDDING]: "orange",
   [TaskStatus.PENDING_START]: "orange",
   [TaskStatus.IN_PROGRESS]: "blue",

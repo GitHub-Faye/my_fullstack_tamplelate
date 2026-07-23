@@ -45,7 +45,6 @@ import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, Al
 import { useTasks, useTask } from "../api";
 import { useUserMap } from "@/features/user";
 import {
-  useApproveTask,
   useRejectTask,
   usePublishTask,
   useConvertToUrgent,
@@ -71,7 +70,6 @@ const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
 const REVIEW_FILTERS: { value: string; label: string }[] = [
   { value: "all", label: "全部状态" },
   { value: TaskStatusConst.UNCONFIRMED, label: "未确认" },
-  { value: TaskStatusConst.CONFIRMED_UNPUBLISHED, label: "已确认未发布" },
   { value: TaskStatusConst.BIDDING, label: "竞价中" },
   { value: TaskStatusConst.PENDING_START, label: "待启动" },
   { value: TaskStatusConst.IN_PROGRESS, label: "进行中" },
@@ -98,10 +96,6 @@ function getAdminActions(status: TaskStatus) {
     case TaskStatusConst.UNCONFIRMED:
       return [
         { key: "publish", label: "发布到竞价池", icon: Send },
-        { key: "reject", label: "驳回", icon: XCircle },
-      ];
-    case TaskStatusConst.CONFIRMED_UNPUBLISHED:
-      return [
         { key: "reject", label: "驳回", icon: XCircle },
       ];
     case TaskStatusConst.BIDDING:

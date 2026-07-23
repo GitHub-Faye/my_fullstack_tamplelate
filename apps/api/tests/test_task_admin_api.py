@@ -48,79 +48,6 @@ async def create_test_pm(db_session: AsyncSession) -> User:
     return pm
 
 
-# ==================== 测试用例：审核通过 ====================
-
-@pytest.mark.asyncio
-async def test_approve_task_success(client: AsyncClient, db_session: AsyncSession) -> None:
-    """测试管理员审核通过任务"""
-    # 创建管理员和 PM 用户
-    admin = await create_test_admin(db_session)
-    pm = await create_test_pm(db_session)
-
-    # 创建未确认任务
-    task = Task(
-        name="待审核任务",
-        description="测试任务",
-        task_type=TaskType.NORMAL,
-        status=TaskStatus.UNCONFIRMED,
-        pm_id=pm.id,
-    )
-    db_session.add(task)
-    await db_session.commit()
-    await db_session.refresh(task)
-
-    # 生成管理员 token
-    token = create_access_token(
-        subject=str(admin.id),
-        expires_delta=timedelta(minutes=30),
-    )
-
-    # 审核通过
-    response = await client.post(
-        f"/v1/tasks/{task.id}/approve",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response.status_code == 200
-    data = response.json()
-    assert data["status"] == "confirmed_unpublished"
-    assert data["id"] == str(task.id)
-
-
-@pytest.mark.asyncio
-async def test_approve_task_wrong_status_fails(client: AsyncClient, db_session: AsyncSession) -> None:
-    """测试无法审核非未确认状态的任务"""
-    # 创建管理员和 PM 用户
-    admin = await create_test_admin(db_session)
-    pm = await create_test_pm(db_session)
-
-    # 创建已发布的任务
-    task = Task(
-        name="已发布任务",
-        description="测试任务",
-        task_type=TaskType.NORMAL,
-        status=TaskStatus.BIDDING,
-        pm_id=pm.id,
-    )
-    db_session.add(task)
-    await db_session.commit()
-    await db_session.refresh(task)
-
-    # 生成管理员 token
-    token = create_access_token(
-        subject=str(admin.id),
-        expires_delta=timedelta(minutes=30),
-    )
-
-    # 尝试审核
-    response = await client.post(
-        f"/v1/tasks/{task.id}/approve",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response.status_code == 400
-
-
 # ==================== 测试用例：发布任务 ====================
 
 @pytest.mark.asyncio
@@ -135,7 +62,7 @@ async def test_publish_task_success(client: AsyncClient, db_session: AsyncSessio
         name="待发布任务",
         description="测试任务",
         task_type=TaskType.NORMAL,
-        status=TaskStatus.CONFIRMED_UNPUBLISHED,
+        status=TaskStatus.UNCONFIRMED,
         pm_id=pm.id,
     )
     db_session.add(task)
@@ -161,38 +88,6 @@ async def test_publish_task_success(client: AsyncClient, db_session: AsyncSessio
     assert data["bidding_deadline"] is not None
 
 
-@pytest.mark.asyncio
-async def test_publish_unconfirmed_task_fails(client: AsyncClient, db_session: AsyncSession) -> None:
-    """测试无法发布未审核的任务"""
-    # 创建管理员和 PM 用户
-    admin = await create_test_admin(db_session)
-    pm = await create_test_pm(db_session)
-
-    # 创建未确认的任务
-    task = Task(
-        name="未确认任务",
-        description="测试任务",
-        task_type=TaskType.NORMAL,
-        status=TaskStatus.UNCONFIRMED,
-        pm_id=pm.id,
-    )
-    db_session.add(task)
-    await db_session.commit()
-    await db_session.refresh(task)
-
-    # 生成管理员 token
-    token = create_access_token(
-        subject=str(admin.id),
-        expires_delta=timedelta(minutes=30),
-    )
-
-    # 尝试发布
-    response = await client.post(
-        f"/v1/tasks/{task.id}/publish",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response.status_code == 400
 
 
 # ==================== 测试用例：类型转换 ====================
@@ -342,37 +237,3 @@ async def test_reject_task_success(client: AsyncClient, db_session: AsyncSession
     assert data["status"] == "unconfirmed"
 
 
-# ==================== 测试用例：权限检查 ====================
-
-@pytest.mark.asyncio
-async def test_pm_cannot_approve_task(client: AsyncClient, db_session: AsyncSession) -> None:
-    """测试 PM 无法审核任务"""
-    # 创建两个 PM 用户
-    pm1 = await create_test_pm(db_session)
-    pm2 = await create_test_pm(db_session)
-
-    # PM1 创建任务
-    task = Task(
-        name="PM1的任务",
-        description="测试任务",
-        task_type=TaskType.NORMAL,
-        status=TaskStatus.UNCONFIRMED,
-        pm_id=pm1.id,
-    )
-    db_session.add(task)
-    await db_session.commit()
-    await db_session.refresh(task)
-
-    # PM2 尝试审核
-    token = create_access_token(
-        subject=str(pm2.id),
-        expires_delta=timedelta(minutes=30),
-    )
-
-    response = await client.post(
-        f"/v1/tasks/{task.id}/approve",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    # PM 不应该有 task:approve 权限
-    assert response.status_code == 403

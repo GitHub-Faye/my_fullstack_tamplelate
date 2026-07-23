@@ -165,7 +165,7 @@
 
 3. **任务模型**：新增 `Task` 表
    - 字段：id, name, description, task_type(enum), status(enum), pm_id, engineer_id, T_reported, T_actual, bidding_deadline, created_at, updated_at
-   - 状态枚举：`unconfirmed`, `confirmed_unpublished`, `bidding`, `pending_start`, `in_progress`, `paused`, `completed`
+   - 状态枚举：`unconfirmed`, `unconfirmed`, `bidding`, `pending_start`, `in_progress`, `paused`, `completed`
    - 类型枚举：`normal`, `urgent`, `convenient`
 
 4. **报价模型**：新增 `Bid` 表

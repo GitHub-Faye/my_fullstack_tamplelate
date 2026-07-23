@@ -22,11 +22,10 @@ class TaskStatus(str, Enum):
     任务状态枚举
 
     状态流转：
-    unconfirmed -> confirmed_unpublished -> bidding -> pending_start -> in_progress -> completed
+    unconfirmed -> bidding -> pending_start -> in_progress -> completed
     中间状态：paused（可从 in_progress 暂停）
     """
     UNCONFIRMED = "unconfirmed"                      # 未确认（PM提交，待管理员审核）
-    CONFIRMED_UNPUBLISHED = "confirmed_unpublished"  # 已确认未发布（管理员审核通过，待发布）
     BIDDING = "bidding"                              # 竞价中
     PENDING_START = "pending_start"                  # 待开工
     IN_PROGRESS = "in_progress"                      # 进行中

@@ -23,8 +23,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Loader2, AlertCircle, CheckCircle, Send, Zap, Clock } from "lucide-react";
-import { useTask, useApproveTask, useRejectTask, usePublishTask, useConvertToUrgent, useConvertToConvenient } from "../api";
+import { ArrowLeft, Loader2, AlertCircle, Send, Zap, Clock } from "lucide-react";
+import { useTask, useRejectTask, usePublishTask, useConvertToUrgent, useConvertToConvenient } from "../api";
 import type { TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -38,7 +38,7 @@ const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
 /** 默认竞价天数 */
 const DEFAULT_BIDDING_DAYS = 3;
 
-type ConfirmAction = "approve" | "reject" | "publish" | "convertUrgent" | "convertConvenient";
+type ConfirmAction = "reject" | "publish" | "convertUrgent" | "convertConvenient";
 
 interface AdminTaskDetailProps {
   taskId: string;
@@ -53,7 +53,6 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
   const router = useRouter();
   const { data: task, isLoading, error } = useTask(taskId);
 
-  const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
   const publishTask = usePublishTask();
   const convertToUrgent = useConvertToUrgent();
@@ -90,14 +89,10 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
   }
 
   const isUnconfirmed = task.status === TaskStatusConst.UNCONFIRMED;
-  const isConfirmedUnpublished = task.status === TaskStatusConst.CONFIRMED_UNPUBLISHED;
 
   const handleConfirm = () => {
     if (!confirmAction) return;
     switch (confirmAction) {
-      case "approve":
-        approveTask.mutate(taskId);
-        break;
       case "reject":
         rejectTask.mutate(taskId);
         break;
@@ -116,7 +111,6 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
 
   const isPending = confirmAction
     ? ({
-        approve: approveTask.isPending,
         reject: rejectTask.isPending,
         publish: publishTask.isPending,
         convertUrgent: convertToUrgent.isPending,
@@ -126,11 +120,6 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
 
   const confirmConfig = confirmAction
     ? ({
-        approve: {
-          title: "审核通过任务",
-          description: `确认审核通过此任务？审核后状态变为"已确认未发布"，PM 可继续编辑。`,
-          actionLabel: "审核通过",
-        },
         reject: {
           title: "驳回任务",
           description: `确认驳回此任务？驳回后任务保持"未确认"状态，PM 可重新编辑后再次提交。`,
@@ -247,36 +236,8 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
               </div>
             )}
 
-            {/* 审核操作 */}
+            {/* 发布操作 — 未确认状态直接发布到竞价池 */}
             {isUnconfirmed && (
-              <div className="border-t pt-4 mt-4 space-y-3">
-                <h3 className="text-sm font-semibold">审核操作</h3>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => setConfirmAction("approve")}
-                    disabled={approveTask.isPending}
-                    variant="default"
-                  >
-                    <CheckCircle className="mr-2 h-4 w-4" />
-                    {approveTask.isPending ? "审核中..." : "审核通过"}
-                  </Button>
-                  <Button
-                    onClick={() => setConfirmAction("reject")}
-                    disabled={rejectTask.isPending}
-                    variant="outline"
-                  >
-                    <AlertCircle className="mr-2 h-4 w-4" />
-                    {rejectTask.isPending ? "驳回中..." : "驳回"}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  审核通过后状态变为"已确认未发布"，驳回后任务保持"未确认"状态供 PM 重新编辑。
-                </p>
-              </div>
-            )}
-
-            {/* 发布操作 */}
-            {isConfirmedUnpublished && (
               <div className="border-t pt-4 mt-4 space-y-3">
                 <h3 className="text-sm font-semibold">发布操作</h3>
                 <div className="flex gap-2">
@@ -288,15 +249,23 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
                     <Send className="mr-2 h-4 w-4" />
                     {publishTask.isPending ? "发布中..." : "发布到竞价池"}
                   </Button>
+                  <Button
+                    onClick={() => setConfirmAction("reject")}
+                    disabled={rejectTask.isPending}
+                    variant="outline"
+                  >
+                    <AlertCircle className="mr-2 h-4 w-4" />
+                    {rejectTask.isPending ? "驳回中..." : "驳回"}
+                  </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  发布后任务进入竞价池，状态变为"竞价中"，竞价截止 {DEFAULT_BIDDING_DAYS} 天后。
+                  发布后任务进入竞价池，状态变为"竞价中"；驳回后任务保持"未确认"状态供 PM 重新编辑。
                 </p>
               </div>
             )}
 
             {/* 类型转换操作 */}
-            {(isUnconfirmed || isConfirmedUnpublished) && (
+            {isUnconfirmed && (
               <div className="border-t pt-4 mt-4 space-y-3">
                 <h3 className="text-sm font-semibold">类型转换</h3>
                 <div className="flex gap-2">

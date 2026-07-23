@@ -1,6 +1,5 @@
 # 04 — 管理端任务详情对齐原型
 
-**What to build:** 管理员在 `/admin/tasks/[id]` 页面看到与原型一致的任务详情和操作。当前 `AdminTaskDetail` 只处理了未确认(unconfirmed) 和已确定未发布(confirmed_unpublished) 状态的操作，需要补充：
 
 - 暂停待审批(pause_requested) 状态 → "审批暂停"和"驳回暂停"按钮
 - 暂停中(paused) 状态 → "恢复任务"按钮

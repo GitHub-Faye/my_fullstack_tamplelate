@@ -305,41 +305,6 @@ async def withdraw_task(
 
 
 @router.post(
-    "/{task_id}/approve",
-    response_model=TaskPublic,
-    summary="审核通过任务（管理员）",
-    description="管理员审核通过任务，状态变为 'confirmed_unpublished'",
-)
-async def approve_task(
-    *,
-    session: SessionDep,
-    current_user: CurrentUser,
-    task_id: uuid.UUID,
-    _: Annotated[None, Depends(require_scope(TaskScope.APPROVE))],
-) -> Any:
-    """审核通过任务 — 仅 'unconfirmed' 状态可审核"""
-    task = await repository.get_task(session=session, task_id=task_id)
-    if not task:
-        raise_task_not_found()
-    if task.status != TaskStatus.UNCONFIRMED:
-        raise BusinessException(
-            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
-            detail=f"Task status '{task.status.value}' cannot be approved."
-        )
-    task.status = TaskStatus.CONFIRMED_UNPUBLISHED
-    session.add(task)
-    await session.commit()
-    await session.refresh(task)
-    await create_audit_log(
-        session=session, user_id=current_user.id, action="task.approve",
-        target_type="task", target_id=str(task_id),
-        details=f"Task approved, status changed to confirmed_unpublished",
-        ip_address=None,
-    )
-    return task
-
-
-@router.post(
     "/{task_id}/reject",
     response_model=TaskPublic,
     summary="驳回任务（管理员）",
@@ -383,7 +348,7 @@ async def publish_task(
     bidding_days: int = 3,
     _: Annotated[None, Depends(require_scope(TaskScope.APPROVE))],
 ) -> Any:
-    """发布任务到竞价池 — 仅 "unconfirmed" 状态可发布（跳过 confirmed_unpublished 中间状态）"""
+    """发布任务到竞价池 — 仅 "unconfirmed" 状态可发布"""
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
         raise_task_not_found()

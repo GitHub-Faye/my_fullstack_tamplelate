@@ -18,7 +18,6 @@ def test_task_type_enum_values():
 def test_task_status_enum_values():
     """测试任务状态枚举值"""
     assert TaskStatus.UNCONFIRMED == "unconfirmed"
-    assert TaskStatus.CONFIRMED_UNPUBLISHED == "confirmed_unpublished"
     assert TaskStatus.BIDDING == "bidding"
     assert TaskStatus.PENDING_START == "pending_start"
     assert TaskStatus.IN_PROGRESS == "in_progress"
@@ -72,8 +71,6 @@ def test_task_can_change_status():
         pm_id="00000000-0000-0000-0000-000000000001",
         status=TaskStatus.UNCONFIRMED
     )
-    task.status = TaskStatus.CONFIRMED_UNPUBLISHED
-    assert task.status == TaskStatus.CONFIRMED_UNPUBLISHED
 
     task.status = TaskStatus.BIDDING
     assert task.status == TaskStatus.BIDDING

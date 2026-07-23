@@ -134,7 +134,7 @@ class TestBiddingSettlement:
     async def test_settle_bidding_task_no_bids(self, db_session: AsyncSession):
         """
         测试无人报价情况
-        - 任务应回退到 CONFIRMED_UNPUBLISHED 状态
+        - 任务应回退到 UNCONFIRMED 状态
         """
         # 1. 创建 PM
         pm = await create_test_user(db_session, UserRoleType.PM, "pm2@test.com")
@@ -158,7 +158,7 @@ class TestBiddingSettlement:
 
         # 5. 验证任务状态
         updated_task = await db_session.get(Task, task.id)
-        assert updated_task.status == TaskStatus.CONFIRMED_UNPUBLISHED
+        assert updated_task.status == TaskStatus.UNCONFIRMED
         assert updated_task.engineer_id is None
 
     @pytest.mark.asyncio

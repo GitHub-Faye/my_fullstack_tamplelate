@@ -103,8 +103,8 @@ async def settle_bidding_task_async(session: AsyncSession, task_id: str) -> dict
     异步执行竞价结算逻辑
 
     Spec §23: 计算所有报价的平均值，选择报价最接近均价的工程师中标。
-    - 无人报价 → 回退到 CONFIRMED_UNPUBLISHED
-    - 全部拒绝 → 回退到 CONFIRMED_UNPUBLISHED，进入下一轮
+    - 无人报价 → 回退到 UNCONFIRMED
+    - 全部拒绝 → 回退到 UNCONFIRMED，进入下一轮
     """
     task_uuid = uuid.UUID(task_id)
     task_result = await session.execute(select(Task).where(Task.id == task_uuid))
@@ -134,7 +134,7 @@ async def settle_bidding_task_async(session: AsyncSession, task_id: str) -> dict
 
     # 无人报价
     if len(bids) == 0:
-        task.status = TaskStatus.CONFIRMED_UNPUBLISHED
+        task.status = TaskStatus.UNCONFIRMED
         task.bidding_deadline = None
         await session.commit()
         return {"task_id": task_id, "winner_id": None, "avg_amount": 0.0, "bid_count": 0, "status": "no_bids"}

@@ -10,15 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive } from "lucide-react";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
-  PM_EDITABLE_STATUSES,
-  TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
-import { formatDateTime, formatDate } from "@/lib/utils";
+import { formatDateTime } from "@/lib/utils";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -86,19 +83,18 @@ export function TaskDetailDialog({
   task,
   open,
   onOpenChange,
-  currentUserId,
+  userMap = {},
 }: {
   task: TaskPublic;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  currentUserId?: string;
+  userMap?: Record<string, string>;
 }) {
   if (!task) return null;
 
   const isStarted = ["pending_start", "in_progress", "paused", "completed"].includes(task.status);
   const statusText = STATUS_LABELS[task.status] || task.status;
   const typeText = task.task_type ? TYPE_LABELS[task.task_type] ?? task.task_type : "-";
-  const actions = getPmActions(task, currentUserId);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -121,7 +117,7 @@ export function TaskDetailDialog({
             </div>
             <div className="flex gap-1">
               <span className="text-muted-foreground shrink-0">发布人</span>
-              <span>PM</span>
+              <span>{userMap[task.pm_id] ?? task.pm_id.slice(0, 8)}</span>
             </div>
             <div className="flex gap-1">
               <span className="text-muted-foreground shrink-0">发布时间</span>
@@ -137,25 +133,21 @@ export function TaskDetailDialog({
             </div>
             <div className="flex gap-1">
               <span className="text-muted-foreground shrink-0">T报完成时间</span>
-              <span>{formatDate(task.T_reported_complete_time)}</span>
-            </div>
-            <div className="flex gap-1">
-              <span className="text-muted-foreground shrink-0">资料完整度</span>
-              <span>-</span>
+              <span>{formatDateTime(task.T_reported_complete_time)}</span>
             </div>
             {isStarted && (
               <>
                 <div className="flex gap-1">
                   <span className="text-muted-foreground shrink-0">执行工程师</span>
-                  <span>-</span>
-                </div>
-                <div className="flex gap-1">
-                  <span className="text-muted-foreground shrink-0">当前进度</span>
-                  <span>{task.progress ?? "-"}</span>
+                  <span>{task.engineer_id ? (userMap[task.engineer_id] ?? task.engineer_id.slice(0, 8)) : "-"}</span>
                 </div>
                 <div className="flex gap-1">
                   <span className="text-muted-foreground shrink-0">T实</span>
                   <span>{task.T_actual != null ? `${task.T_actual}h` : "-"}</span>
+                </div>
+                <div className="flex gap-1">
+                  <span className="text-muted-foreground shrink-0">当前进度</span>
+                  <span>{task.progress ?? "-"}</span>
                 </div>
               </>
             )}
@@ -169,68 +161,34 @@ export function TaskDetailDialog({
             </div>
           )}
 
-          {/* 附件表格（占位） */}
-          <div className="border rounded-md">
-            <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">附件/截图</div>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-muted-foreground">
-                  <th className="text-left px-3 py-2 font-medium">文件</th>
-                  <th className="text-left px-3 py-2 font-medium">类型</th>
-                  <th className="text-left px-3 py-2 font-medium">状态</th>
-                  <th className="text-left px-3 py-2 font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                    暂无附件（后端功能尚未实现）
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* 工作日志（占位） */}
-          {isStarted && (
+          {/* 附件表格 */}
+          {task.attachments && task.attachments.length > 0 ? (
             <div className="border rounded-md">
-              <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">最近工作日志</div>
+              <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">附件/截图</div>
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-muted-foreground">
-                    <th className="text-left px-3 py-2 font-medium">日期</th>
-                    <th className="text-left px-3 py-2 font-medium">投入</th>
-                    <th className="text-left px-3 py-2 font-medium">阶段/进度</th>
-                    <th className="text-left px-3 py-2 font-medium">说明</th>
+                    <th className="text-left px-3 py-2 font-medium">文件</th>
+                    <th className="text-left px-3 py-2 font-medium">类型</th>
+                    <th className="text-left px-3 py-2 font-medium">状态</th>
+                    <th className="text-left px-3 py-2 font-medium">操作</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                      暂无工作日志
-                    </td>
-                  </tr>
+                  {task.attachments.map((att: any) => (
+                    <tr key={att.id}>
+                      <td className="px-3 py-2">{att.filename}</td>
+                      <td className="px-3 py-2">{att.file_type}</td>
+                      <td className="px-3 py-2">{att.status}</td>
+                      <td className="px-3 py-2">
+                        <Button variant="link" size="sm" onClick={() => window.open(att.url)}>下载</Button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-          )}
-
-          {/* 操作按钮 */}
-          <div className="flex flex-wrap gap-2 pt-2 border-t">
-            {actions.map((act) => (
-              <Button
-                key={act.action}
-                variant={act.variant || "outline"}
-                size="sm"
-                onClick={() => {
-                  onOpenChange(false);
-                }}
-              >
-                {act.icon}
-                <span className="ml-1">{act.label}</span>
-              </Button>
-            ))}
-          </div>
+          ) : null}
         </div>
       </DialogContent>
     </Dialog>

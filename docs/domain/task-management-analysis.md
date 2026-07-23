@@ -53,7 +53,7 @@ flowchart LR
 
 ```
 flowchart LR
-    A[unconfirmed] -->|管理员审核通过| B[confirmed_unpublished]
+    A[unconfirmed] -->|管理员审核通过| B[unconfirmed]
     B -->|管理员发布| C[bidding]
     C -->|报价截止/中标| D[pending_start]
     D -->|工程师启动| E[in_progress]
@@ -74,7 +74,7 @@ flowchart LR
 | 状态 | 枚举值 | 中文标签 | 说明 |
 |------|--------|---------|------|
 | 未确认 | `unconfirmed` | 未确认 | PM刚发布，待管理员审核 |
-| 已确定未发布 | `confirmed_unpublished` | 已确认未发布 | 管理员审核通过，尚未发布 |
+| 已确定未发布 | `unconfirmed` | 已确认未发布 | 管理员审核通过，尚未发布 |
 | 竞价中 | `bidding` | 竞价中 | 工程师报价阶段 |
 | 待启动 | `pending_start` | 待启动 | 已中标/指派，等待工程师启动 |
 | 进行中 | `in_progress` | 进行中 | 开发执行中 |
@@ -101,7 +101,7 @@ flowchart LR
 | 状态 | 可执行操作 | 原型中按钮 | 后端 API |
 |------|-----------|-----------|---------|
 | 未确认(unconfirmed) | 编辑资料、删除 | "编辑"、"删除" | `PUT /{task_id}`、`DELETE /{task_id}` |
-| 已确定未发布(confirmed_unpublished) | 编辑 | "编辑" | `PUT /{task_id}` |
+| 已确定未发布(unconfirmed) | 编辑 | "编辑" | `PUT /{task_id}` |
 | 竞价中(bidding) | 编辑资料、查看报价记录、撤回 | "编辑"、"报价记录"、"撤回" | `PUT /{task_id}`、`POST /{task_id}/withdraw` |
 | 待启动(pending_start) | 查看日志 | "查看日志" | 前端路由 |
 | 进行中(in_progress) | 资料变更、查看工作日志 | "资料变更"、"工作日志" | 前端路由 |
@@ -113,7 +113,7 @@ flowchart LR
 | 状态 | 可执行操作 | 原型中按钮 | 后端 API |
 |------|-----------|-----------|---------|
 | 未确认(unconfirmed) | 审核通过、驳回、改为紧急/便捷 | "补充/发布"、"驳回" | `POST /{task_id}/approve`、`POST /{task_id}/reject`、`POST /{task_id}/convert-urgent\|convert-convenient` |
-| 已确定未发布(confirmed_unpublished) | 发布到竞价池、驳回、改为紧急/便捷 | "发布到竞价池"、"驳回" | `POST /{task_id}/publish` |
+| 已确定未发布(unconfirmed) | 发布到竞价池、驳回、改为紧急/便捷 | "发布到竞价池"、"驳回" | `POST /{task_id}/publish` |
 | 竞价中(bidding) | 查看报价、改为紧急/便捷 | "查看报价"、"改为紧急/便捷" | `POST /{task_id}/convert-urgent\|convert-convenient` |
 | 待启动(pending_start) | 改派工程师 | "改派工程师" | `POST /{task_id}/reassign` |
 | 进行中(in_progress) | 查看操作日志 | "操作日志" | 前端路由 |
@@ -139,7 +139,7 @@ flowchart LR
 |---------|---------|------|
 | 工程师完成(complete) | 触发星点计算 | `trigger_starpoint_calculation` 根据 T_actual vs T_reported 计算星点变化 |
 | 管理员改派(reassign) | 记录 AuditLog | 记录操作日志 |
-| 管理员审核通过(approve) | 状态变为 confirmed_unpublished | 记录 AuditLog |
+| 管理员审核通过(approve) | 状态变为 unconfirmed | 记录 AuditLog |
 | PM撤回(withdraw) | 清除 bidding_deadline，清空 engineer_id | 回到 unconfirmed |
 | 工程师拒绝(decline) | 清空 engineer_id，设置新的 bidding_deadline | 重新进入竞价 |
 | 管理员创建紧急/便捷任务 | 直接设置 engineer_id，状态设为 pending_start | 跳过竞价流程 |

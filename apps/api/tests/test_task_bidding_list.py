@@ -79,7 +79,7 @@ async def test_get_bidding_tasks_list(client: AsyncClient, db_session: AsyncSess
         name="已确认未发布任务",
         description="测试任务",
         task_type=TaskType.NORMAL,
-        status=TaskStatus.CONFIRMED_UNPUBLISHED,
+        status=TaskStatus.UNCONFIRMED,
         pm_id=pm.id,
     )
 

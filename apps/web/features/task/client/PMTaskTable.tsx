@@ -248,7 +248,6 @@ export function PMTaskTable() {
               <SelectContent>
                 <SelectItem value="all">全部状态</SelectItem>
                 <SelectItem value="unconfirmed">未确认</SelectItem>
-                <SelectItem value="confirmed_unpublished">已确认未发布</SelectItem>
                 <SelectItem value="bidding">竞价中</SelectItem>
                 <SelectItem value="pending_start">待启动</SelectItem>
                 <SelectItem value="in_progress">进行中</SelectItem>
@@ -380,7 +379,7 @@ export function PMTaskTable() {
           task={detailTask}
           open={!!detailTask}
           onOpenChange={(open) => { if (!open) setDetailTask(null); }}
-          currentUserId={user?.id}
+          userMap={userMap}
         />
       )}
 

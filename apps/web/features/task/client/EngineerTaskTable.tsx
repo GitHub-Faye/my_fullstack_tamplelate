@@ -78,7 +78,7 @@ interface ConfirmState {
   action: "start" | "decline" | "resume" | "pauseRequest" | "bid" | null;
   task: TaskPublic | null;
   /** 报价弹窗专用：工时输入 */
-  bidHours?: string;
+  bidHours: number;
 }
 
 /**
@@ -102,7 +102,7 @@ export function EngineerTaskTable({
   const userMap = useUserMap();
   const { data: dashboard } = useEngineerDashboard();
 
-  const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null });
+  const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null, bidHours: 0 });
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
 
   const queryParams: Record<string, any> = {
@@ -158,13 +158,13 @@ export function EngineerTaskTable({
           toast.success("已申请暂停，等待管理员审批");
           break;
         case "bid":
-          if (!confirm.bidHours) {
+          if (!confirm.bidHours || confirm.bidHours <= 0) {
             toast.error("请填写工时");
             return;
           }
           await createBidV1TasksTaskIdBidsPost({
             path: { task_id: taskId },
-            body: { T_reported: parseFloat(confirm.bidHours) },
+            body: { T_reported: confirm.bidHours },
           });
           toast.success("报价成功");
           break;
@@ -377,7 +377,7 @@ export function EngineerTaskTable({
                           <Button
                             variant="link"
                             size="sm"
-                            onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: "" })}
+                            onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: 0 })}
                           >
                             报价
                           </Button>
@@ -497,7 +497,7 @@ export function EngineerTaskTable({
           task={detailTask}
           open={!!detailTask}
           onOpenChange={(o) => { if (!o) setDetailTask(null); }}
-          currentUserId={user?.id}
+          userMap={userMap}
         />
       )}
 
@@ -518,7 +518,7 @@ export function EngineerTaskTable({
                   <div className="text-sm font-medium">{confirm.task?.name}</div>
                   {dashboard && (
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>H0（基准时薪）：¥{dashboard.H0 ?? 100}</span>
+                      <span>基准时薪：¥{(dashboard.H0 ?? 100).toFixed(2)}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-2">
@@ -528,13 +528,13 @@ export function EngineerTaskTable({
                       min="0.5"
                       step="0.5"
                       className="w-24 h-9 px-2 border rounded text-sm"
-                      value={confirm.bidHours ?? ""}
-                      onChange={(e) => setConfirm((prev) => ({ ...prev, bidHours: e.target.value }))}
+                      value={confirm.bidHours || ""}
+                      onChange={(e) => setConfirm((prev) => ({ ...prev, bidHours: parseFloat(e.target.value) || 0 }))}
                     />
                   </div>
-                  {confirm.bidHours && !isNaN(parseFloat(confirm.bidHours)) && (
+                  {confirm.bidHours > 0 && (
                     <div className="text-sm text-muted-foreground">
-                      报价金额：<span className="font-medium text-foreground">¥{(parseFloat(confirm.bidHours) * (dashboard?.H0 ?? 100)).toFixed(2)}</span>
+                      报价金额：<span className="font-medium text-foreground">¥{(confirm.bidHours * (dashboard?.H0 ?? 100)).toFixed(2)}</span>
                     </div>
                   )}
                 </div>
@@ -543,7 +543,7 @@ export function EngineerTaskTable({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAction} disabled={confirm.action === "bid" && !confirm.bidHours}>
+            <AlertDialogAction onClick={handleConfirmAction} disabled={confirm.action === "bid" && confirm.bidHours <= 0}>
               确认
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -15,7 +15,6 @@ import {
 import { toast } from "sonner";
 import {
   // SDK functions
-  approveTaskV1TasksTaskIdApprovePost,
   rejectTaskV1TasksTaskIdRejectPost,
   publishTaskV1TasksTaskIdPublishPost,
   convertToUrgentV1TasksTaskIdConvertUrgentPost,
@@ -54,23 +53,6 @@ function makeAdminMutation<T>(
 }
 
 // ==================== Mutations ====================
-
-/**
- * 审核通过任务（管理员）
- */
-export function useApproveTask() {
-  return makeAdminMutation(
-    async (taskId: string) => {
-      const response = await approveTaskV1TasksTaskIdApprovePost({
-        path: { task_id: taskId },
-        throwOnError: true,
-      });
-      return response.data;
-    },
-    "任务审核通过",
-    "审核失败",
-  );
-}
 
 /**
  * 驳回任务（管理员）

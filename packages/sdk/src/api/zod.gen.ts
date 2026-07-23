@@ -180,7 +180,8 @@ export const zEngineerDashboard = z.object({
     T_actual_monthly: z.number(),
     T_remaining: z.number(),
     salary_preview: z.number(),
-    accuracy_rate: z.number()
+    accuracy_rate: z.number(),
+    H0: z.number().optional().default(100)
 });
 
 /**
@@ -653,12 +654,11 @@ export const zTaskReassignRequest = z.object({
  * 任务状态枚举
  *
  * 状态流转：
- * unconfirmed -> confirmed_unpublished -> bidding -> pending_start -> in_progress -> completed
+ * unconfirmed -> bidding -> pending_start -> in_progress -> completed
  * 中间状态：paused（可从 in_progress 暂停）
  */
 export const zTaskStatus = z.enum([
     'unconfirmed',
-    'confirmed_unpublished',
     'bidding',
     'pending_start',
     'in_progress',
@@ -1204,15 +1204,6 @@ export const zWithdrawTaskV1TasksTaskIdWithdrawPostPath = z.object({
  * Successful Response
  */
 export const zWithdrawTaskV1TasksTaskIdWithdrawPostResponse = zTaskPublic;
-
-export const zApproveTaskV1TasksTaskIdApprovePostPath = z.object({
-    task_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zApproveTaskV1TasksTaskIdApprovePostResponse = zTaskPublic;
 
 export const zRejectTaskV1TasksTaskIdRejectPostPath = z.object({
     task_id: z.uuid()
