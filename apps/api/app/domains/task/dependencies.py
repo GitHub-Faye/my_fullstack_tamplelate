@@ -33,7 +33,7 @@ from app.domains.task.schemas import (
     TasksPublic,
     TaskUpdate,
 )
-from app.domains.task.schemas_execution import (
+from app.domains.task.schemas import (
     TaskStartRequest,
     TaskRejectRequest,
     TaskPauseRequest,
