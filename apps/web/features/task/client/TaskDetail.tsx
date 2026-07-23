@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDate } from "@/lib/utils";
+import { formatDateTime, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useTask } from "../api";
+import { useUserMap } from "@/features/user";
 import type { TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -45,6 +46,7 @@ interface TaskDetailProps {
 export function TaskDetail({ taskId }: TaskDetailProps) {
   const router = useRouter();
   const { data: task, isLoading, error } = useTask(taskId);
+  const userMap = useUserMap();
 
   if (isLoading) {
     return (
@@ -74,6 +76,7 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
   }
 
   const isEditable = PM_EDITABLE_STATUSES.includes(task.status as any);
+  const isStarted = ["pending_start", "in_progress", "paused", "completed"].includes(task.status);
 
   return (
     <div className="space-y-6">
@@ -105,57 +108,59 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
               <span className="text-sm">{TYPE_LABELS[task.task_type ?? "normal"]}</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">任务ID</span>
-              <span className="text-sm font-mono text-xs">{task.id}</span>
-            </div>
-            {task.engineer_id && (
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted-foreground">工程师ID</span>
-                <span className="text-sm font-mono text-xs">{task.engineer_id}</span>
-              </div>
-            )}
-            {task.T_reported !== undefined && task.T_reported !== null && (
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted-foreground">T报</span>
-                <span className="text-sm">{task.T_reported}h</span>
-              </div>
-            )}
-            {task.T_actual !== undefined && task.T_actual !== null && (
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted-foreground">T实</span>
-                <span className="text-sm">{task.T_actual}h</span>
-              </div>
-            )}
-            {task.bidding_deadline && (
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted-foreground">竞价截止</span>
-                <span className="text-sm">{formatDate(task.bidding_deadline)}</span>
-              </div>
-            )}
-            <div className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">创建时间</span>
-              <span className="text-sm">{formatDate(task.created_at)}</span>
+              <span className="text-sm text-muted-foreground">状态</span>
+              <span className="text-sm">{STATUS_LABELS[task.status]}</span>
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">更新时间</span>
-              <span className="text-sm">{formatDate(task.updated_at)}</span>
+              <span className="text-sm text-muted-foreground">发布人</span>
+              <span className="text-sm">{userMap[task.pm_id] ?? task.pm_id.slice(0, 8)}</span>
             </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm text-muted-foreground">发布时间</span>
+              <span className="text-sm">{formatDateTime(task.created_at)}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm text-muted-foreground">预期上线</span>
+              <span className="text-sm">{formatDateTime(task.expected_online_time)}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm text-muted-foreground">T报</span>
+              <span className="text-sm">{task.T_reported != null ? `${task.T_reported}h` : "-"}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm text-muted-foreground">T报完成时间</span>
+              <span className="text-sm">{formatDateTime(task.T_reported_complete_time)}</span>
+            </div>
+            {isStarted && (
+              <>
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm text-muted-foreground">执行工程师</span>
+                  <span className="text-sm">{task.engineer_id ? (userMap[task.engineer_id] ?? task.engineer_id.slice(0, 8)) : "-"}</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm text-muted-foreground">T实</span>
+                  <span className="text-sm">{task.T_actual != null ? `${task.T_actual}h` : "-"}</span>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm text-muted-foreground">当前进度</span>
+                  <span className="text-sm">{task.progress ?? "-"}</span>
+                </div>
+              </>
+            )}
           </div>
 
           {task.description && (
             <div className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">任务描述</span>
+              <span className="text-sm text-muted-foreground">任务说明</span>
               <p className="text-sm whitespace-pre-wrap">{task.description}</p>
             </div>
           )}
 
           <div className="flex gap-2 pt-4">
             {isEditable && (
-              <>
-                <Button asChild>
-                  <Link href={`/pm/tasks/${task.id}/edit`}>编辑任务</Link>
-                </Button>
-              </>
+              <Button asChild>
+                <Link href={`/pm/tasks/${task.id}/edit`}>编辑任务</Link>
+              </Button>
             )}
           </div>
         </CardContent>

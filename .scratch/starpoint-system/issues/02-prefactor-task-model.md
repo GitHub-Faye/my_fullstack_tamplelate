@@ -7,7 +7,7 @@
 **Status:** ready-for-agent
 
 - [ ] 创建 Task 模型（字段：id, name, description, task_type, status, pm_id, engineer_id, T_reported, T_actual, bidding_deadline, created_at, updated_at）
-- [ ] Task 状态枚举：unconfirmed, unconfirmed, bidding, pending_start, in_progress, paused, completed
+- [ ] Task 状态枚举：unconfirmed, bidding, pending_start, in_progress, paused, completed
 - [ ] Task 类型枚举：normal, urgent, convenient
 - [ ] 创建 Bid 模型（字段：id, task_id, engineer_id, T_reported, amount, created_at, updated_at）
 - [ ] 创建 Attachment 模型（字段：id, task_id, file_name, file_path, file_size, uploaded_by, created_at）

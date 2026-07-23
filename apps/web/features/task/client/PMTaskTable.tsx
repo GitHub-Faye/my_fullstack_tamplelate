@@ -170,6 +170,9 @@ export function PMTaskTable() {
       case "workLog":
         setWorkLogTask(task);
         break;
+      case "changeDoc":
+        router.push(`/pm/tasks/${task.id}/edit`);
+        break;
     }
   }, [router]);
 

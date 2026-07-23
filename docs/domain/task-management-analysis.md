@@ -53,8 +53,8 @@ flowchart LR
 
 ```
 flowchart LR
-    A[unconfirmed] -->|管理员审核通过| B[unconfirmed]
-    B -->|管理员发布| C[bidding]
+    A[unconfirmed] -->|管理员审核通过| C[bidding]
+    C -->|管理员发布| C[bidding]
     C -->|报价截止/中标| D[pending_start]
     D -->|工程师启动| E[in_progress]
     D -->|工程师拒绝| C[bidding]
@@ -74,7 +74,7 @@ flowchart LR
 | 状态 | 枚举值 | 中文标签 | 说明 |
 |------|--------|---------|------|
 | 未确认 | `unconfirmed` | 未确认 | PM刚发布，待管理员审核 |
-| 已确定未发布 | `unconfirmed` | 已确认未发布 | 管理员审核通过，尚未发布 |
+| 已确定未发布 | `confirmed_unpublished`（已移除） | 已确认未发布 | 管理员审核通过，尚未发布（该状态已从代码中移除，现直接发布到竞价池） |
 | 竞价中 | `bidding` | 竞价中 | 工程师报价阶段 |
 | 待启动 | `pending_start` | 待启动 | 已中标/指派，等待工程师启动 |
 | 进行中 | `in_progress` | 进行中 | 开发执行中 |
@@ -101,7 +101,7 @@ flowchart LR
 | 状态 | 可执行操作 | 原型中按钮 | 后端 API |
 |------|-----------|-----------|---------|
 | 未确认(unconfirmed) | 编辑资料、删除 | "编辑"、"删除" | `PUT /{task_id}`、`DELETE /{task_id}` |
-| 已确定未发布(unconfirmed) | 编辑 | "编辑" | `PUT /{task_id}` |
+| 已确定未发布（已移除） | 编辑 | "编辑" | `PUT /{task_id}` |
 | 竞价中(bidding) | 编辑资料、查看报价记录、撤回 | "编辑"、"报价记录"、"撤回" | `PUT /{task_id}`、`POST /{task_id}/withdraw` |
 | 待启动(pending_start) | 查看日志 | "查看日志" | 前端路由 |
 | 进行中(in_progress) | 资料变更、查看工作日志 | "资料变更"、"工作日志" | 前端路由 |
@@ -113,7 +113,7 @@ flowchart LR
 | 状态 | 可执行操作 | 原型中按钮 | 后端 API |
 |------|-----------|-----------|---------|
 | 未确认(unconfirmed) | 审核通过、驳回、改为紧急/便捷 | "补充/发布"、"驳回" | `POST /{task_id}/approve`、`POST /{task_id}/reject`、`POST /{task_id}/convert-urgent\|convert-convenient` |
-| 已确定未发布(unconfirmed) | 发布到竞价池、驳回、改为紧急/便捷 | "发布到竞价池"、"驳回" | `POST /{task_id}/publish` |
+| 已确定未发布（已移除） | 发布到竞价池、驳回、改为紧急/便捷 | "发布到竞价池"、"驳回" | `POST /{task_id}/publish` |
 | 竞价中(bidding) | 查看报价、改为紧急/便捷 | "查看报价"、"改为紧急/便捷" | `POST /{task_id}/convert-urgent\|convert-convenient` |
 | 待启动(pending_start) | 改派工程师 | "改派工程师" | `POST /{task_id}/reassign` |
 | 进行中(in_progress) | 查看操作日志 | "操作日志" | 前端路由 |
@@ -214,12 +214,12 @@ flowchart LR
 | 组件 | 文件 | 修改内容 |
 |------|------|---------|
 | EngineerTaskTable | `apps/web/features/task/client/EngineerTaskTable.tsx` | 补充"暂停中"状态的"恢复"按钮，补充详情弹窗完整字段 |
-| PMTaskTable | `apps/web/features/task/client/PMTaskTable.tsx` | 确认操作列与原型一致，补充"已确定未发布"状态的编辑操作 |
+| PMTaskTable | `apps/web/features/task/client/PMTaskTable.tsx` | 确认操作列与原型一致，补充"已确定未发布（已移除）"状态的编辑操作 |
 | AdminTaskTable | `apps/web/features/task/client/AdminTaskTable.tsx` | 增加"报价倒计时"列，增加"暂停待审批"状态筛选，补充"暂停审批"操作 |
 | AdminTaskDetail | `apps/web/features/task/client/AdminTaskDetail.tsx` | 增加"暂停待审批"状态的审批/驳回操作、改派操作 |
 | TaskDetailDialog | `apps/web/features/task/client/TaskDetailDialog.tsx` | 补全工程师姓名、T实显示 |
 | TaskCreateForm | `apps/web/features/task/client/TaskCreateForm.tsx` | 补充预期上线时间、附件上传 |
-| TaskEditForm | `apps/web/features/task/client/TaskEditForm.tsx` | 确认已确定未发布状态也可编辑 |
+| TaskEditForm | `apps/web/features/task/client/TaskEditForm.tsx` | 确认已确定未发布（已移除）状态也可编辑 |
 
 ---
 
