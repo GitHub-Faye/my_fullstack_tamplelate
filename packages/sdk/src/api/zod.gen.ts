@@ -683,6 +683,18 @@ export const zTaskType = z.enum([
 ]);
 
 /**
+ * AdminTaskCreate
+ *
+ * 管理员创建任务请求
+ */
+export const zAdminTaskCreate = z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().max(2000).nullish(),
+    task_type: zTaskType.optional().default('normal'),
+    engineer_id: z.uuid()
+});
+
+/**
  * TaskCreate
  *
  * 创建任务请求
@@ -1270,6 +1282,22 @@ export const zReassignTaskV1TasksTaskIdReassignPostPath = z.object({
  * Successful Response
  */
 export const zReassignTaskV1TasksTaskIdReassignPostResponse = zTaskPublic;
+
+export const zAdminRestoreTaskV1TasksTaskIdRestorePostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zAdminRestoreTaskV1TasksTaskIdRestorePostResponse = zTaskPublic;
+
+export const zAdminCreateTaskV1TasksCreatePostBody = zAdminTaskCreate;
+
+/**
+ * Successful Response
+ */
+export const zAdminCreateTaskV1TasksCreatePostResponse = zTaskPublic;
 
 export const zStartTaskV1TasksTaskIdStartPostPath = z.object({
     task_id: z.uuid()

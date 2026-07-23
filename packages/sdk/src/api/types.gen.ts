@@ -77,6 +77,36 @@ export type AdminPasswordReset = {
 };
 
 /**
+ * AdminTaskCreate
+ *
+ * 管理员创建任务请求
+ */
+export type AdminTaskCreate = {
+    /**
+     * Name
+     *
+     * 任务名称
+     */
+    name: string;
+    /**
+     * Description
+     *
+     * 任务描述
+     */
+    description?: string | null;
+    /**
+     * 任务类型
+     */
+    task_type?: TaskType;
+    /**
+     * Engineer Id
+     *
+     * 指派工程师 ID
+     */
+    engineer_id: string;
+};
+
+/**
  * AuditLogList
  */
 export type AuditLogList = {
@@ -3258,6 +3288,61 @@ export type ReassignTaskV1TasksTaskIdReassignPostResponses = {
 };
 
 export type ReassignTaskV1TasksTaskIdReassignPostResponse = ReassignTaskV1TasksTaskIdReassignPostResponses[keyof ReassignTaskV1TasksTaskIdReassignPostResponses];
+
+export type AdminRestoreTaskV1TasksTaskIdRestorePostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/restore';
+};
+
+export type AdminRestoreTaskV1TasksTaskIdRestorePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminRestoreTaskV1TasksTaskIdRestorePostError = AdminRestoreTaskV1TasksTaskIdRestorePostErrors[keyof AdminRestoreTaskV1TasksTaskIdRestorePostErrors];
+
+export type AdminRestoreTaskV1TasksTaskIdRestorePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type AdminRestoreTaskV1TasksTaskIdRestorePostResponse = AdminRestoreTaskV1TasksTaskIdRestorePostResponses[keyof AdminRestoreTaskV1TasksTaskIdRestorePostResponses];
+
+export type AdminCreateTaskV1TasksCreatePostData = {
+    body: AdminTaskCreate;
+    path?: never;
+    query?: never;
+    url: '/v1/tasks/create';
+};
+
+export type AdminCreateTaskV1TasksCreatePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdminCreateTaskV1TasksCreatePostError = AdminCreateTaskV1TasksCreatePostErrors[keyof AdminCreateTaskV1TasksCreatePostErrors];
+
+export type AdminCreateTaskV1TasksCreatePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type AdminCreateTaskV1TasksCreatePostResponse = AdminCreateTaskV1TasksCreatePostResponses[keyof AdminCreateTaskV1TasksCreatePostResponses];
 
 export type StartTaskV1TasksTaskIdStartPostData = {
     body?: never;
