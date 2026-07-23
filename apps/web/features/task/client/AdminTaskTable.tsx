@@ -62,6 +62,7 @@ import {
 import { Pagination } from "@/components/ui/pagination";
 import { formatDateShort, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
+import { BidLogDialog } from "./BidLogDialog";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -97,12 +98,14 @@ function getAdminActions(status: TaskStatus) {
       return [
         { key: "publish", label: "发布到竞价池", icon: Send },
         { key: "reject", label: "驳回", icon: XCircle },
+        { key: "detail", label: "详情", icon: Eye },
       ];
     case TaskStatusConst.BIDDING:
       return [
-        { key: "viewBids", label: "查看报价", icon: Eye },
+        { key: "viewBids", label: "查看报价", icon: FileText },
         { key: "convertUrgent", label: "改为紧急", icon: AlertTriangle },
         { key: "convertConvenient", label: "改为便捷", icon: RefreshCw },
+        { key: "detail", label: "详情", icon: Eye },
       ];
     case TaskStatusConst.PENDING_START:
       return [
@@ -167,6 +170,7 @@ export function AdminTaskTable() {
     open: false, task: null, action: "",
   });
   const [biddingDays, setBiddingDays] = useState(3);
+  const [bidLogTask, setBidLogTask] = useState<TaskPublic | null>(null);
 
   const rejectTask = useRejectTask();
   const publishTask = usePublishTask();
@@ -213,7 +217,7 @@ export function AdminTaskTable() {
         }
         break;
       case "viewBids":
-        router.push(`/admin/tasks/${task.id}?tab=bids`);
+        setBidLogTask(task);
         break;
       case "convertUrgent":
         try {
@@ -464,6 +468,15 @@ export function AdminTaskTable() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* 报价记录弹窗 */}
+      {bidLogTask && (
+        <BidLogDialog
+          task={bidLogTask}
+          open={!!bidLogTask}
+          onOpenChange={(open) => { if (!open) setBidLogTask(null); }}
+        />
+      )}
     </Card>
   );
 }
