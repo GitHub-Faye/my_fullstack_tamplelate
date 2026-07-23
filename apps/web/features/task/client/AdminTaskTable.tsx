@@ -61,7 +61,7 @@ import {
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 import { Pagination } from "@/components/ui/pagination";
-import { formatDateShort } from "@/lib/utils";
+import { formatDateShort, formatDate } from "@/lib/utils";
 import { toast } from "sonner";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
@@ -97,12 +97,11 @@ function getAdminActions(status: TaskStatus) {
   switch (status) {
     case TaskStatusConst.UNCONFIRMED:
       return [
-        { key: "approve", label: "审核通过", icon: CheckCircle },
+        { key: "publish", label: "发布到竞价池", icon: Send },
         { key: "reject", label: "驳回", icon: XCircle },
       ];
     case TaskStatusConst.CONFIRMED_UNPUBLISHED:
       return [
-        { key: "publish", label: "发布到竞价池", icon: Send },
         { key: "reject", label: "驳回", icon: XCircle },
       ];
     case TaskStatusConst.BIDDING:
@@ -174,7 +173,6 @@ export function AdminTaskTable() {
   });
   const [biddingDays, setBiddingDays] = useState(3);
 
-  const approveTask = useApproveTask();
   const rejectTask = useRejectTask();
   const publishTask = usePublishTask();
   const convertToUrgent = useConvertToUrgent();
@@ -209,13 +207,6 @@ export function AdminTaskTable() {
 
   async function handleAction(task: TaskPublic, action: string) {
     switch (action) {
-      case "approve":
-        try {
-          await approveTask.mutateAsync(task.id);
-        } catch {
-          // handled by mutation
-        }
-        break;
       case "publish":
         setActionDialog({ open: true, task, action: "publish" });
         break;
@@ -348,6 +339,7 @@ export function AdminTaskTable() {
                 <TableHead>T实</TableHead>
                 <TableHead>报价倒计时</TableHead>
                 <TableHead>进度</TableHead>
+                <TableHead>T报完成时间</TableHead>
                 <TableHead>预计上线时间</TableHead>
                 <TableHead>创建时间</TableHead>
                 <TableHead className="w-[80px]">操作</TableHead>
@@ -384,6 +376,9 @@ export function AdminTaskTable() {
                           : "-"}
                       </TableCell>
                       <TableCell>{task.progress ?? "-"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {formatDate(task.T_reported_complete_time)}
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {task.expected_online_time ? formatDateShort(task.expected_online_time) : "-"}
                       </TableCell>

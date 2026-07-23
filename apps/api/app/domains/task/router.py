@@ -383,11 +383,11 @@ async def publish_task(
     bidding_days: int = 3,
     _: Annotated[None, Depends(require_scope(TaskScope.APPROVE))],
 ) -> Any:
-    """发布任务到竞价池 — 仅 'confirmed_unpublished' 状态可发布"""
+    """发布任务到竞价池 — 仅 "unconfirmed" 状态可发布（跳过 confirmed_unpublished 中间状态）"""
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
         raise_task_not_found()
-    if task.status != TaskStatus.CONFIRMED_UNPUBLISHED:
+    if task.status != TaskStatus.UNCONFIRMED:
         raise BusinessException(
             code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
             detail=f"Task status '{task.status.value}' cannot be published."
