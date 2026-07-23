@@ -182,10 +182,12 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
         all_scopes = set()
         from app.core.scopes import (
             ItemScope, TaskScope, BidScope, ReportScope,
-            StarPointScope, SalaryScope, ClientResourceScope, RuleScope, UserScope
+            StarPointScope, SalaryScope, ClientResourceScope, RuleScope, UserScope,
+            DashboardScope,
         )
         for scope in (ItemScope, TaskScope, BidScope, ReportScope,
-                      StarPointScope, SalaryScope, ClientResourceScope, RuleScope, UserScope):
+                      StarPointScope, SalaryScope, ClientResourceScope, RuleScope, UserScope,
+                      DashboardScope):
             all_scopes.update(s.value for s in scope)
         return all_scopes
     
