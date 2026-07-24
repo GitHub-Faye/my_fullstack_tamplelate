@@ -28,6 +28,8 @@ import {
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 import { useCurrentUser } from "@/features/user";
+import { useQueryClient } from "@tanstack/react-query";
+import { taskKeys } from "@/features/task/api";
 import { toast } from "sonner";
 
 /** 日报表单条目 */
@@ -66,6 +68,7 @@ export function DailyReportDialog({
   onSuccess?: () => void;
 }) {
   const user = useCurrentUser();
+  const queryClient = useQueryClient();
   const [summary, setSummary] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitResults, setSubmitResults] = useState<SubmitResult[] | null>(null);
@@ -169,6 +172,8 @@ export function DailyReportDialog({
     if (results.length > 0) {
       setSubmitResults(results);
       toast.success(`${results.length} 个任务日报已提交`);
+      // 刷新任务列表（完成的任务状态已变更）
+      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
       onSuccess?.();
     }
     setSubmitting(false);
