@@ -696,7 +696,7 @@ export const resumeTaskV1TasksTaskIdResumePost = <ThrowOnError extends boolean =
 /**
  * 完成任务
  *
- * 工程师标记任务完成，填写实际工时
+ * 工程师标记任务完成（T报来自竞价报价，无需重复填写）
  */
 export const completeTaskV1TasksTaskIdCompletePost = <ThrowOnError extends boolean = false>(options: Options<CompleteTaskV1TasksTaskIdCompletePostData, ThrowOnError>) => (options.client ?? client).post<CompleteTaskV1TasksTaskIdCompletePostResponses, CompleteTaskV1TasksTaskIdCompletePostErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

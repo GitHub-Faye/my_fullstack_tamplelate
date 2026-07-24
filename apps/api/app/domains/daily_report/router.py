@@ -191,7 +191,7 @@ async def create_daily_report(
         session.add(report)
 
     # 7. 同步任务状态（根据日报的 current_stage）
-    # 如果日报标记为 completed，则同步任务状态为 COMPLETED
+    # 如果日报标记为 completed，则同步任务状态为 COMPLETED 并触发星点计算
     if report_in.current_stage == ReportStage.COMPLETED and task.status == TaskStatus.IN_PROGRESS:
         task.status = TaskStatus.COMPLETED
         # Spec §27: 阶段选择"已完成"时，进度自动设为 100%
@@ -209,6 +209,15 @@ async def create_daily_report(
     await session.commit()
 
     await session.refresh(report)
+
+    # 8. 如果任务刚变为 COMPLETED，触发星点自动计算
+    if report_in.current_stage == ReportStage.COMPLETED and task.status == TaskStatus.COMPLETED:
+        try:
+            from app.domains.starpoint.calculation import trigger_starpoint_calculation
+            await trigger_starpoint_calculation(session=session, task=task)
+        except Exception:
+            pass
+
     return report
 
 

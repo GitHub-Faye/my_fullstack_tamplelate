@@ -1146,7 +1146,7 @@ export const resumeTaskV1TasksTaskIdResumePostMutation = (options?: Partial<Opti
 /**
  * 完成任务
  *
- * 工程师标记任务完成，填写实际工时
+ * 工程师标记任务完成（T报来自竞价报价，无需重复填写）
  */
 export const completeTaskV1TasksTaskIdCompletePostMutation = (options?: Partial<Options<CompleteTaskV1TasksTaskIdCompletePostData>>): UseMutationOptions<CompleteTaskV1TasksTaskIdCompletePostResponse, CompleteTaskV1TasksTaskIdCompletePostError, Options<CompleteTaskV1TasksTaskIdCompletePostData>> => {
     const mutationOptions: UseMutationOptions<CompleteTaskV1TasksTaskIdCompletePostResponse, CompleteTaskV1TasksTaskIdCompletePostError, Options<CompleteTaskV1TasksTaskIdCompletePostData>> = {

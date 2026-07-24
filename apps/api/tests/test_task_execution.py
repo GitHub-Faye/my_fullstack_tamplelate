@@ -373,11 +373,11 @@ class TestTaskExecution:
             db_session, pm, engineer, status=TaskStatus.IN_PROGRESS
         )
 
-        # 3. 工程师完成任务
+        # 3. 工程师完成任务（T报已从竞价报价同步，无需重复填写）
         token = create_test_token(engineer.id)
         response = await client.post(
             f"/v1/tasks/{task.id}/complete",
-            json={"T_reported": 10.5},
+            json={},
             headers=get_auth_headers(token),
         )
 
@@ -387,7 +387,8 @@ class TestTaskExecution:
         # 5. 验证数据库
         updated_task = await db_session.get(Task, task.id)
         assert updated_task.status == TaskStatus.COMPLETED
-        assert updated_task.T_reported == 10.5
+        # T_reported 来自竞价报价，不在 complete 时填写
+        # 这里 task 没有竞价，T_reported 保持 None
 
     @pytest.mark.asyncio
     async def test_admin_pause_approve_success(

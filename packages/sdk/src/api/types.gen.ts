@@ -1576,12 +1576,7 @@ export type SystemRulesPublic = {
  * 完成任务请求
  */
 export type TaskCompleteRequest = {
-    /**
-     * T Reported
-     *
-     * 工程师填报工时（小时）
-     */
-    T_reported: number;
+    [key: string]: unknown;
 };
 
 /**

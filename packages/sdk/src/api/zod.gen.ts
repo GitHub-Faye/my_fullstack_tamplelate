@@ -635,9 +635,7 @@ export const zSystemRulesPublic = z.object({
  *
  * 完成任务请求
  */
-export const zTaskCompleteRequest = z.object({
-    T_reported: z.number().gte(0)
-});
+export const zTaskCompleteRequest = z.record(z.string(), z.unknown());
 
 /**
  * TaskReassignRequest

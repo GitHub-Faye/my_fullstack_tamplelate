@@ -90,7 +90,7 @@ class TaskResumeRequest(SQLModel):
 
 class TaskCompleteRequest(SQLModel):
     """完成任务请求"""
-    T_reported: float = Field(ge=0, description="工程师填报工时（小时）")
+    pass
 
 
 class TaskReassignRequest(SQLModel):

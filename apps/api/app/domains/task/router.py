@@ -743,7 +743,7 @@ async def resume_task(
     "/{task_id}/complete",
     response_model=TaskPublic,
     summary="完成任务",
-    description="工程师标记任务完成，填写实际工时",
+    description="工程师标记任务完成（T报来自竞价报价，无需重复填写）",
 )
 async def complete_task(
     *,
@@ -752,14 +752,13 @@ async def complete_task(
     task_id: uuid.UUID,
     request: TaskCompleteRequest,
 ) -> Any:
-    """完成任务 — 触发星点计算"""
+    """完成任务 — 触发星点计算（T报取竞价报价时写入的值）"""
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
         raise_task_not_found()
     await check_task_assigned_to_engineer(session, current_user, task)
     await check_task_status(task, TaskStatus.IN_PROGRESS)
     task.status = TaskStatus.COMPLETED
-    task.T_reported = request.T_reported
     session.add(task)
     await session.commit()
     await session.refresh(task)
@@ -770,7 +769,7 @@ async def complete_task(
     await create_audit_log(
         session=session, user_id=current_user.id, action="task.complete",
         target_type="task", target_id=str(task_id),
-        details=f"Task completed, T_reported={request.T_reported}", ip_address=None,
+        details=f"Task completed, T_reported={task.T_reported}", ip_address=None,
     )
     await session.refresh(task)
     return task

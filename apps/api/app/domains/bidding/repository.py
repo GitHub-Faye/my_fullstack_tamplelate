@@ -151,6 +151,7 @@ async def settle_bidding_task_async(session: AsyncSession, task_id: str, force: 
 
     task.status = TaskStatus.PENDING_START
     task.engineer_id = winner.engineer_id
+    task.T_reported = winner.T_reported
     await session.commit()
 
     return {
