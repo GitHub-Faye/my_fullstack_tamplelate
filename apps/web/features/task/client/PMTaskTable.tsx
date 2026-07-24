@@ -291,7 +291,7 @@ export function PMTaskTable() {
                       {task.name}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {task.pm_id ? userMap[task.pm_id] ?? task.pm_id.slice(0, 8) : "-"}
+                      {(task as any).pm_name ?? (task.pm_id ? userMap[task.pm_id] ?? task.pm_id.slice(0, 8) : "-")}
                     </TableCell>
                     <TableCell>
                       {task.task_type ? (
@@ -311,9 +311,7 @@ export function PMTaskTable() {
                       )}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {task.engineer_id
-                        ? userMap[task.engineer_id] ?? task.engineer_id.slice(0, 8)
-                        : "-"}
+                      {(task as any).engineer_name ?? (task.engineer_id ? userMap[task.engineer_id] ?? task.engineer_id.slice(0, 8) : "-")}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {formatDateTime(task.expected_online_time)}

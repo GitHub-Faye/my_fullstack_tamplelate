@@ -291,6 +291,7 @@ async def withdraw_task(
     session.add(task)
     await session.commit()
     await session.refresh(task)
+    await repository._fill_user_names(session, task)
 
     await create_audit_log(
         session=session, user_id=current_user.id, action="task.withdraw",
@@ -345,7 +346,7 @@ async def publish_task(
     session: SessionDep,
     current_user: CurrentUser,
     task_id: uuid.UUID,
-    bidding_days: int = 3,
+    bidding_days: int = 1,
     _: Annotated[None, Depends(require_scope(TaskScope.APPROVE))],
 ) -> Any:
     """发布任务到竞价池 — 仅 "unconfirmed" 状态可发布"""
@@ -362,6 +363,7 @@ async def publish_task(
     session.add(task)
     await session.commit()
     await session.refresh(task)
+    await repository._fill_user_names(session, task)
     await create_audit_log(
         session=session, user_id=current_user.id, action="task.publish",
         target_type="task", target_id=str(task_id),

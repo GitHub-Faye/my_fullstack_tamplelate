@@ -29,7 +29,10 @@ async def get_task(*, session: AsyncSession, task_id: uuid.UUID) -> Task | None:
     Returns:
         Task 对象或 None
     """
-    return await session.get(Task, task_id)
+    task = await session.get(Task, task_id)
+    if task:
+        await _fill_user_names(session, task)
+    return task
 
 
 async def get_tasks(
@@ -81,6 +84,10 @@ async def get_tasks(
         order_by=Task.created_at.desc(),
     )
 
+    # 填充所有任务的姓名
+    for task in tasks:
+        await _fill_user_names(session, task)
+
     return tasks, count
 
 
@@ -127,6 +134,7 @@ async def create_task(
     session.add(db_task)
     await session.commit()
     await session.refresh(db_task)
+    await _fill_user_names(session, db_task)
     return db_task
 
 
@@ -152,6 +160,7 @@ async def update_task(
     session.add(db_task)
     await session.commit()
     await session.refresh(db_task)
+    await _fill_user_names(session, db_task)
     return db_task
 
 

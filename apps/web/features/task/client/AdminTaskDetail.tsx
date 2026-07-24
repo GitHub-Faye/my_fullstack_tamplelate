@@ -251,7 +251,7 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-sm text-muted-foreground">发布人</span>
-                <span className="text-sm">{userMap?.[task.pm_id] || task.pm_id?.slice(0, 8) || "-"}</span>
+                <span className="text-sm">{(task as any).pm_name ?? (userMap?.[task.pm_id] || task.pm_id?.slice(0, 8) || "-")}</span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-sm text-muted-foreground">任务ID</span>
@@ -261,7 +261,7 @@ export function AdminTaskDetail({ taskId }: AdminTaskDetailProps) {
                 <span className="text-sm text-muted-foreground">工程师</span>
                 <span className="text-sm">
                   {task.engineer_id
-                    ? userMap?.[task.engineer_id] || task.engineer_id.slice(0, 8)
+                    ? ((task as any).engineer_name ?? (userMap?.[task.engineer_id] || task.engineer_id.slice(0, 8)))
                     : "-"}
                 </span>
               </div>

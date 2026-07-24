@@ -374,8 +374,8 @@ export function AdminTaskTable() {
                           {task.task_type ? TYPE_LABELS[task.task_type] : "正常"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{userMap?.[task.pm_id] || task.pm_id?.slice(0, 8) || "-"}</TableCell>
-                      <TableCell>{userMap?.[task.engineer_id ?? ""] || task.engineer_id?.slice(0, 8) || "-"}</TableCell>
+                      <TableCell>{(task as any).pm_name ?? (userMap?.[task.pm_id] || task.pm_id?.slice(0, 8) || "-")}</TableCell>
+                      <TableCell>{(task as any).engineer_name ?? (userMap?.[task.engineer_id ?? ""] || task.engineer_id?.slice(0, 8) || "-")}</TableCell>
                       <TableCell>
                         <Badge>{STATUS_LABELS[task.status]}</Badge>
                       </TableCell>

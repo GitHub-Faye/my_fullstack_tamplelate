@@ -48,7 +48,9 @@ class TaskPublic(TaskBase):
     """返回给客户端的任务信息"""
     id: uuid.UUID
     pm_id: uuid.UUID
+    pm_name: str = Field(description="发布任务的PM姓名")
     engineer_id: Optional[uuid.UUID] = None
+    engineer_name: Optional[str] = Field(default=None, description="工程师姓名")
     status: TaskStatus
     bidding_deadline: Optional[datetime] = None
     T_reported: Optional[float] = None

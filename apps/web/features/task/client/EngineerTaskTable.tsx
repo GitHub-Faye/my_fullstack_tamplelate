@@ -434,7 +434,7 @@ export function EngineerTaskTable({
                         ) : "-"}
                       </TableCell>
                       <TableCell className="text-sm">
-                        {task.pm_id ? userMap[task.pm_id] ?? task.pm_id.slice(0, 8) : "-"}
+                        {(task as any).pm_name ?? (task.pm_id ? userMap[task.pm_id] ?? task.pm_id.slice(0, 8) : "-")}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDateTime(task.expected_online_time)}

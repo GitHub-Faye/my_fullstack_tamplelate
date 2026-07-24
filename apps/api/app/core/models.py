@@ -296,10 +296,20 @@ class Task(TaskBase, table=True):
         nullable=False,
         description="发布任务的PM ID"
     )
+    pm_name: str = Field(
+        default="",
+        max_length=255,
+        description="发布任务的PM姓名（冗余字段，通过关联填充）"
+    )
     engineer_id: Optional[uuid.UUID] = Field(
         default=None,
         foreign_key="user.id",
         description="被分配的工程师ID"
+    )
+    engineer_name: Optional[str] = Field(
+        default=None,
+        max_length=255,
+        description="工程师姓名（冗余字段，通过关联填充）"
     )
 
     # 竞价截止时间
