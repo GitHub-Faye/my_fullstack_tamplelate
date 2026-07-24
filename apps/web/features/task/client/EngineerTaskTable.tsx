@@ -29,7 +29,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2, Search, RotateCcw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTasks } from "../api";
 import { useCurrentUser } from "@/features/user";
 import { useEngineerDashboard } from "@/features/dashboard";
@@ -253,15 +253,6 @@ export function EngineerTaskTable({
                   ))}
                 </SelectContent>
               </Select>
-
-              <Button variant="outline" size="sm" onClick={() => setPage(1)}>
-                <Search className="mr-1 h-4 w-4" />
-                搜索
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setTaskTypeFilter("all"); setPage(1); }}>
-                <RotateCcw className="mr-1 h-4 w-4" />
-                重置
-              </Button>
             </div>
           )}
 
