@@ -116,6 +116,11 @@ export function EngineerTaskTable({
     queryParams.engineer_id = user.id;
   }
 
+  // 竞价任务：强制只展示竞价中的任务
+  if (tab === "bidding") {
+    queryParams.status = TaskStatusConst.BIDDING;
+  }
+
   const { data: tasks, isLoading, refetch } = useTasks(queryParams as any);
 
   const taskList = (tasks?.data as TaskPublic[]) || [];
@@ -217,46 +222,48 @@ export function EngineerTaskTable({
           </div>
         </CardHeader>
         <CardContent>
-          {/* 筛选栏 */}
-          <div className="flex items-center gap-4 mb-4 flex-wrap">
-            <Select
-              value={taskTypeFilter}
-              onValueChange={(v) => { setTaskTypeFilter(v); setPage(1); }}
-            >
-              <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="任务类型" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部类型</SelectItem>
-                <SelectItem value="normal">正常任务</SelectItem>
-                <SelectItem value="urgent">紧急任务</SelectItem>
-                <SelectItem value="convenient">便捷任务</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* 筛选栏 — 仅我的任务展示 */}
+          {tab === "mine" && (
+            <div className="flex items-center gap-4 mb-4 flex-wrap">
+              <Select
+                value={taskTypeFilter}
+                onValueChange={(v) => { setTaskTypeFilter(v); setPage(1); }}
+              >
+                <SelectTrigger className="w-[130px]">
+                  <SelectValue placeholder="任务类型" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">全部类型</SelectItem>
+                  <SelectItem value="normal">正常任务</SelectItem>
+                  <SelectItem value="urgent">紧急任务</SelectItem>
+                  <SelectItem value="convenient">便捷任务</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <Select
-              value={statusFilter}
-              onValueChange={(v) => { setStatusFilter(v); setPage(1); }}
-            >
-              <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="任务状态" />
-              </SelectTrigger>
-              <SelectContent>
-                {(tab === "mine" ? ENGINEER_TASK_STATUSES : BIDDING_TASK_STATUSES).map((s) => (
-                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Select
+                value={statusFilter}
+                onValueChange={(v) => { setStatusFilter(v); setPage(1); }}
+              >
+                <SelectTrigger className="w-[130px]">
+                  <SelectValue placeholder="任务状态" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(tab === "mine" ? ENGINEER_TASK_STATUSES : BIDDING_TASK_STATUSES).map((s) => (
+                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Button variant="outline" size="sm" onClick={() => setPage(1)}>
-              <Search className="mr-1 h-4 w-4" />
-              搜索
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setTaskTypeFilter("all"); setPage(1); }}>
-              <RotateCcw className="mr-1 h-4 w-4" />
-              重置
-            </Button>
-          </div>
+              <Button variant="outline" size="sm" onClick={() => setPage(1)}>
+                <Search className="mr-1 h-4 w-4" />
+                搜索
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => { setStatusFilter("all"); setTaskTypeFilter("all"); setPage(1); }}>
+                <RotateCcw className="mr-1 h-4 w-4" />
+                重置
+              </Button>
+            </div>
+          )}
 
           {/* 我的任务表格 */}
           {tab === "mine" && (
