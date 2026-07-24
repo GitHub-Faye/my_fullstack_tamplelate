@@ -243,15 +243,6 @@ export function PMTaskTable() {
                 <SelectItem value="completed">已完成</SelectItem>
               </SelectContent>
             </Select>
-
-            <Button variant="outline" size="sm" onClick={handleSearch}>
-              <Search className="mr-1 h-4 w-4" />
-              搜索
-            </Button>
-            <Button variant="ghost" size="sm" onClick={handleReset}>
-              <RotateCcw className="mr-1 h-4 w-4" />
-              重置
-            </Button>
           </div>
 
           <div className="rounded-md border">
