@@ -162,8 +162,10 @@ export function PMTaskTable() {
         break;
       case "viewLog":
       case "pauseLog":
-      case "archiveLog":
         setLogTask(task);
+        break;
+      case "archiveLog":
+        setWorkLogTask(task);
         break;
       case "workLog":
         setWorkLogTask(task);
