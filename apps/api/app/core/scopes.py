@@ -139,6 +139,7 @@ DEFAULT_ROLE_SCOPES = {
         TaskScope.READ,
         TaskScope.CREATE,
         TaskScope.UPDATE,
+        TaskScope.DELETE,
         ReportScope.READ,
         ClientResourceScope.READ,
         ClientResourceScope.CREATE,
