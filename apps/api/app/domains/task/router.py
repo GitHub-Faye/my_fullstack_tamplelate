@@ -493,13 +493,15 @@ async def reassign_task(
         raise BusinessException(code=ErrorCode.USER_ROLE_MISMATCH, detail="Target user is not an engineer")
     task.engineer_id = request.new_engineer_id
     task.status = TaskStatus.PENDING_START
+    if request.T_reported is not None:
+        task.T_reported = request.T_reported
     session.add(task)
     await session.commit()
     await session.refresh(task)
     await create_audit_log(
         session=session, user_id=current_user.id, action="task.reassign",
         target_type="task", target_id=str(task_id),
-        details=f"Task reassigned to engineer {request.new_engineer_id}", ip_address=None,
+        details=f"Task reassigned to engineer {request.new_engineer_id}, T_reported={request.T_reported}", ip_address=None,
     )
     return task
 

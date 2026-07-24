@@ -70,7 +70,7 @@ async def read_engineer_dashboard(
 @router.get(
     "/pm",
     summary="PM 工作台首页",
-    description="PM 查看自己的工作指标：今日新增客资、本月新增客资、收入试算",
+    description="PM 查看自己的工作指标：收入试算、我发布的任务",
     response_model=PMDashboard,
 )
 async def read_pm_dashboard(
@@ -96,7 +96,7 @@ async def read_pm_dashboard(
 @router.get(
     "/admin",
     summary="管理端数据概览",
-    description="管理员查看全系统数据概览：客资、日志、任务、工程师负载、星点排行榜、收入统计",
+    description="管理员查看全系统数据概览：日志、任务、工程师负载、星点排行榜、收入统计",
     response_model=AdminDashboard,
 )
 async def read_admin_dashboard(

@@ -186,15 +186,13 @@ export default function AdminSalariesPage() {
                     <TableHead>S考</TableHead>
                     <TableHead>R底</TableHead>
                     <TableHead>R考</TableHead>
-                    <TableHead>L实</TableHead>
-                    <TableHead>L基</TableHead>
                     <TableHead className="text-right">总工资</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredSalaries.filter((s) => s.role === "pm").length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center h-32">
+                      <TableCell colSpan={6} className="text-center h-32">
                         暂无数据
                       </TableCell>
                     </TableRow>
@@ -208,8 +206,6 @@ export default function AdminSalariesPage() {
                           <TableCell>{s.S_assess ?? "-"}</TableCell>
                           <TableCell>{s.R_base ?? "-"}</TableCell>
                           <TableCell>{s.R_assess ?? "-"}</TableCell>
-                          <TableCell>{s.L_actual ?? "-"}</TableCell>
-                          <TableCell>{s.L_base ?? "-"}</TableCell>
                           <TableCell className="text-right font-medium">
                             {s.salary_total != null ? `¥${s.salary_total.toLocaleString()}` : "-"}
                           </TableCell>

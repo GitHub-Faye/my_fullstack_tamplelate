@@ -9,7 +9,6 @@ from app.domains.starpoint.router import router as starpoint_router
 from app.domains.salary.router import router as salary_router
 from app.domains.dashboard.router import router as dashboard_router
 from app.domains.system_rule.router import router as system_rule_router
-from app.domains.client_resource.router import router as client_resource_router
 from app.domains.role.router import router as role_router
 from app.domains.audit.router import router as audit_router
 
@@ -43,9 +42,6 @@ router.include_router(dashboard_router, prefix="/dashboard", tags=["dashboard"])
 
 # 规则配置相关路由
 router.include_router(system_rule_router, prefix="/system-rules", tags=["system-rules"])
-
-# 客资管理相关路由
-router.include_router(client_resource_router, prefix="/client-resources", tags=["client-resources"])
 
 # 审计日志相关路由
 router.include_router(role_router, prefix="/admin", tags=["admin-roles"])

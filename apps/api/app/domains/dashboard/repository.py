@@ -5,7 +5,7 @@
 """
 
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from typing import Optional, Tuple
 
 from sqlalchemy import func, select, and_
@@ -17,7 +17,6 @@ from app.core.models import (
     TaskStatus,
     UserRoleType,
     DailyReport,
-    ClientResource,
 )
 from app.domains.dashboard.schemas import (
     EngineerDashboard,
@@ -112,39 +111,6 @@ async def get_pm_dashboard(
     Returns:
         PMDashboard DTO
     """
-    now, today_start, month_start = _get_time_bounds()
-
-    # 时间边界：昨日、上月
-    yesterday_start = today_start - timedelta(days=1)
-    last_month_start = (month_start - timedelta(days=1)).replace(day=1)
-    # 上个月结束 = 本月1号
-    last_month_end = month_start
-
-    # 客资统计：今日/昨日/本月/上月（合并为一条 SQL）
-    from sqlalchemy import case
-
-    cr_status_cols = [
-        func.sum(case((ClientResource.created_at >= today_start, 1), else_=0)).label("today_new_clients"),
-        func.sum(case(
-            (ClientResource.created_at >= yesterday_start, 1),
-            (ClientResource.created_at < today_start, 1),
-            else_=0
-        )).label("yesterday_new_clients"),
-        func.sum(case((ClientResource.created_at >= month_start, 1), else_=0)).label("monthly_new_clients"),
-        func.sum(case(
-            (ClientResource.created_at >= last_month_start, 1),
-            (ClientResource.created_at < last_month_end, 1),
-            else_=0
-        )).label("last_month_new_clients"),
-    ]
-    cr_stmt = select(*cr_status_cols).where(ClientResource.pm_id == pm.id)
-    result = await session.execute(cr_stmt)
-    cr_row = result.one()
-    today_new_clients = cr_row.today_new_clients or 0
-    yesterday_new_clients = cr_row.yesterday_new_clients or 0
-    monthly_new_clients = cr_row.monthly_new_clients or 0
-    last_month_new_clients = cr_row.last_month_new_clients or 0
-
     # 我发布的任务总数 + 分状态计数
     from sqlalchemy import case
 
@@ -164,10 +130,6 @@ async def get_pm_dashboard(
     return PMDashboard(
         user_id=pm.id,
         full_name=pm.full_name,
-        today_new_clients=today_new_clients,
-        yesterday_new_clients=yesterday_new_clients,
-        monthly_new_clients=monthly_new_clients,
-        last_month_new_clients=last_month_new_clients,
         pm_task_count=row.total or 0,
         task_count_unconfirmed=row.unconfirmed or 0,
         task_count_bidding=row.bidding or 0,
@@ -199,20 +161,6 @@ async def get_admin_dashboard(
         AdminDashboard DTO
     """
     _, today_start, month_start = _get_time_bounds()
-
-    # 今日新增客资
-    today_clients_stmt = select(func.count()).select_from(ClientResource).where(
-        ClientResource.created_at >= today_start
-    )
-    result = await session.execute(today_clients_stmt)
-    today_new_clients = result.scalar_one() or 0
-
-    # 本月新增客资
-    monthly_clients_stmt = select(func.count()).select_from(ClientResource).where(
-        ClientResource.created_at >= month_start
-    )
-    result = await session.execute(monthly_clients_stmt)
-    monthly_new_clients = result.scalar_one() or 0
 
     # 今日提交日志量
     today_reports_stmt = select(func.count()).select_from(DailyReport).where(
@@ -257,8 +205,6 @@ async def get_admin_dashboard(
     ]
 
     return AdminDashboard(
-        today_new_clients=today_new_clients,
-        monthly_new_clients=monthly_new_clients,
         today_submitted_reports=today_submitted_reports,
         ongoing_tasks=ongoing_tasks,
         engineer_loads=engineer_loads,

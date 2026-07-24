@@ -232,9 +232,6 @@ class User(UserBase, table=True):
     # R_assess: 考核比例
     R_assess: Optional[float] = Field(default=None, ge=0, le=1)
 
-    # ==================== PM 客资字段 ====================
-    # baseline_client_count: 基准客资数（L基）
-    baseline_client_count: Optional[int] = Field(default=None, ge=0)
     created_at: Optional[datetime] = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),

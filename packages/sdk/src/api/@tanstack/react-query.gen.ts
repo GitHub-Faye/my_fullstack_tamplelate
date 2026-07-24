@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen.js';
-import { adjustStarpointV1StarpointsAdjustPost, adminCreateRoleV1AdminRolesPost, adminCreateTaskV1TasksCreatePost, adminCreateUserV1AdminUsersPost, adminDeleteRoleV1AdminRolesRoleIdDelete, adminDeleteUserV1AdminUsersUserIdDelete, adminReadAuditLogsV1AdminAuditLogsGet, adminReadRolesV1AdminRolesGet, adminReadRoleV1AdminRolesRoleIdGet, adminReadUsersV1AdminUsersGet, adminReadUserV1AdminUsersUserIdGet, adminResetPasswordV1AdminUsersUserIdResetPasswordPost, adminRestoreTaskV1TasksTaskIdRestorePost, adminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPut, adminToggleUserActiveV1AdminUsersUserIdToggleActivePost, adminUpdateRoleV1AdminRolesRoleIdPut, adminUpdateUserV1AdminUsersUserIdPatch, completeTaskV1TasksTaskIdCompletePost, convertToConvenientV1TasksTaskIdConvertConvenientPost, convertToUrgentV1TasksTaskIdConvertUrgentPost, createBidV1TasksTaskIdBidsPost, createClientResourceV1ClientResourcesPost, createDailyReportV1DailyReportsPost, createRuleV1SystemRulesPost, createTaskV1TasksPost, createUserV1UsersPost, declineTaskV1TasksTaskIdDeclinePost, deleteDailyReportV1DailyReportsReportIdDelete, deleteRuleV1SystemRulesRuleIdDelete, deleteTaskV1TasksTaskIdDelete, deleteUserMeV1UsersMeDelete, deleteUserV1UsersUserIdDelete, exportSalariesV1SalariesExportPost, getRemindReportV1DailyReportsRemindGet, healthCheckV1UsersHealthCheckGet, loginAccessTokenV1LoginAccessTokenPost, manualSettleBiddingV1TasksTaskIdSettleBiddingPost, type Options, pauseApproveTaskV1TasksTaskIdPauseApprovePost, pauseRejectTaskV1TasksTaskIdPauseRejectPost, pauseRequestTaskV1TasksTaskIdPauseRequestPost, publishTaskV1TasksTaskIdPublishPost, readAdminClientResourceSummaryV1ClientResourcesAdminGet, readAdminDashboardV1DashboardAdminGet, readAllClientResourcesV1ClientResourcesAllGet, readAuditLogsV1AuditLogsGet, readBidsByTaskV1TasksTaskIdBidsGet, readDailyReportsV1DailyReportsGet, readDailyReportV1DailyReportsReportIdGet, readEngineerDashboardV1DashboardEngineerGet, readMyBidsV1BidsMyGet, readMyClientResourcesV1ClientResourcesGet, readMySalaryV1SalariesMyGet, readMyStarpointSummaryV1StarpointsMySummaryGet, readMyStarpointsV1StarpointsMyGet, readPmDashboardV1DashboardPmGet, readRuleAuditLogsV1SystemRulesAuditLogsGet, readRulesV1SystemRulesGet, readRuleV1SystemRulesRuleIdGet, readSalarySummaryV1SalariesGet, readStarpointLeaderboardV1StarpointsLeaderboardGet, readTasksV1TasksGet, readTaskV1TasksTaskIdGet, readUserByIdV1UsersUserIdGet, readUserMeV1UsersMeGet, readUsersV1UsersGet, reassignTaskV1TasksTaskIdReassignPost, registerUserV1UsersSignupPost, resumeTaskV1TasksTaskIdResumePost, startTaskV1TasksTaskIdStartPost, testTokenV1LoginTestTokenPost, updateBidV1TasksTaskIdBidsBidIdPut, updateDailyReportV1DailyReportsReportIdPut, updatePasswordMeV1UsersMePasswordPatch, updateRuleV1SystemRulesRuleIdPut, updateSalaryParamsV1SalariesUsersUserIdParamsPut, updateTaskV1TasksTaskIdPut, updateUserMeV1UsersMePatch, updateUserV1UsersUserIdPatch, withdrawTaskV1TasksTaskIdWithdrawPost } from '../sdk.gen.js';
-import type { AdjustStarpointV1StarpointsAdjustPostData, AdjustStarpointV1StarpointsAdjustPostError, AdjustStarpointV1StarpointsAdjustPostResponse, AdminCreateRoleV1AdminRolesPostData, AdminCreateRoleV1AdminRolesPostError, AdminCreateRoleV1AdminRolesPostResponse, AdminCreateTaskV1TasksCreatePostData, AdminCreateTaskV1TasksCreatePostError, AdminCreateTaskV1TasksCreatePostResponse, AdminCreateUserV1AdminUsersPostData, AdminCreateUserV1AdminUsersPostError, AdminCreateUserV1AdminUsersPostResponse, AdminDeleteRoleV1AdminRolesRoleIdDeleteData, AdminDeleteRoleV1AdminRolesRoleIdDeleteError, AdminDeleteRoleV1AdminRolesRoleIdDeleteResponse, AdminDeleteUserV1AdminUsersUserIdDeleteData, AdminDeleteUserV1AdminUsersUserIdDeleteError, AdminDeleteUserV1AdminUsersUserIdDeleteResponse, AdminReadAuditLogsV1AdminAuditLogsGetData, AdminReadAuditLogsV1AdminAuditLogsGetError, AdminReadAuditLogsV1AdminAuditLogsGetResponse, AdminReadRolesV1AdminRolesGetData, AdminReadRolesV1AdminRolesGetError, AdminReadRolesV1AdminRolesGetResponse, AdminReadRoleV1AdminRolesRoleIdGetData, AdminReadRoleV1AdminRolesRoleIdGetError, AdminReadRoleV1AdminRolesRoleIdGetResponse, AdminReadUsersV1AdminUsersGetData, AdminReadUsersV1AdminUsersGetError, AdminReadUsersV1AdminUsersGetResponse, AdminReadUserV1AdminUsersUserIdGetData, AdminReadUserV1AdminUsersUserIdGetError, AdminReadUserV1AdminUsersUserIdGetResponse, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostError, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse, AdminRestoreTaskV1TasksTaskIdRestorePostData, AdminRestoreTaskV1TasksTaskIdRestorePostError, AdminRestoreTaskV1TasksTaskIdRestorePostResponse, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutError, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostData, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostError, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponse, AdminUpdateRoleV1AdminRolesRoleIdPutData, AdminUpdateRoleV1AdminRolesRoleIdPutError, AdminUpdateRoleV1AdminRolesRoleIdPutResponse, AdminUpdateUserV1AdminUsersUserIdPatchData, AdminUpdateUserV1AdminUsersUserIdPatchError, AdminUpdateUserV1AdminUsersUserIdPatchResponse, CompleteTaskV1TasksTaskIdCompletePostData, CompleteTaskV1TasksTaskIdCompletePostError, CompleteTaskV1TasksTaskIdCompletePostResponse, ConvertToConvenientV1TasksTaskIdConvertConvenientPostData, ConvertToConvenientV1TasksTaskIdConvertConvenientPostError, ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponse, ConvertToUrgentV1TasksTaskIdConvertUrgentPostData, ConvertToUrgentV1TasksTaskIdConvertUrgentPostError, ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponse, CreateBidV1TasksTaskIdBidsPostData, CreateBidV1TasksTaskIdBidsPostError, CreateBidV1TasksTaskIdBidsPostResponse, CreateClientResourceV1ClientResourcesPostData, CreateClientResourceV1ClientResourcesPostError, CreateClientResourceV1ClientResourcesPostResponse, CreateDailyReportV1DailyReportsPostData, CreateDailyReportV1DailyReportsPostError, CreateDailyReportV1DailyReportsPostResponse, CreateRuleV1SystemRulesPostData, CreateRuleV1SystemRulesPostError, CreateRuleV1SystemRulesPostResponse, CreateTaskV1TasksPostData, CreateTaskV1TasksPostError, CreateTaskV1TasksPostResponse, CreateUserV1UsersPostData, CreateUserV1UsersPostError, CreateUserV1UsersPostResponse, DeclineTaskV1TasksTaskIdDeclinePostData, DeclineTaskV1TasksTaskIdDeclinePostError, DeclineTaskV1TasksTaskIdDeclinePostResponse, DeleteDailyReportV1DailyReportsReportIdDeleteData, DeleteDailyReportV1DailyReportsReportIdDeleteError, DeleteDailyReportV1DailyReportsReportIdDeleteResponse, DeleteRuleV1SystemRulesRuleIdDeleteData, DeleteRuleV1SystemRulesRuleIdDeleteError, DeleteRuleV1SystemRulesRuleIdDeleteResponse, DeleteTaskV1TasksTaskIdDeleteData, DeleteTaskV1TasksTaskIdDeleteError, DeleteTaskV1TasksTaskIdDeleteResponse, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponse, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteError, DeleteUserV1UsersUserIdDeleteResponse, ExportSalariesV1SalariesExportPostData, ExportSalariesV1SalariesExportPostError, GetRemindReportV1DailyReportsRemindGetData, GetRemindReportV1DailyReportsRemindGetResponse, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponse, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostError, LoginAccessTokenV1LoginAccessTokenPostResponse, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostData, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostError, PauseApproveTaskV1TasksTaskIdPauseApprovePostData, PauseApproveTaskV1TasksTaskIdPauseApprovePostError, PauseApproveTaskV1TasksTaskIdPauseApprovePostResponse, PauseRejectTaskV1TasksTaskIdPauseRejectPostData, PauseRejectTaskV1TasksTaskIdPauseRejectPostError, PauseRejectTaskV1TasksTaskIdPauseRejectPostResponse, PauseRequestTaskV1TasksTaskIdPauseRequestPostData, PauseRequestTaskV1TasksTaskIdPauseRequestPostError, PauseRequestTaskV1TasksTaskIdPauseRequestPostResponse, PublishTaskV1TasksTaskIdPublishPostData, PublishTaskV1TasksTaskIdPublishPostError, PublishTaskV1TasksTaskIdPublishPostResponse, ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData, ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse, ReadAdminDashboardV1DashboardAdminGetData, ReadAdminDashboardV1DashboardAdminGetResponse, ReadAllClientResourcesV1ClientResourcesAllGetData, ReadAllClientResourcesV1ClientResourcesAllGetError, ReadAllClientResourcesV1ClientResourcesAllGetResponse, ReadAuditLogsV1AuditLogsGetData, ReadAuditLogsV1AuditLogsGetError, ReadAuditLogsV1AuditLogsGetResponse, ReadBidsByTaskV1TasksTaskIdBidsGetData, ReadBidsByTaskV1TasksTaskIdBidsGetError, ReadBidsByTaskV1TasksTaskIdBidsGetResponse, ReadDailyReportsV1DailyReportsGetData, ReadDailyReportsV1DailyReportsGetError, ReadDailyReportsV1DailyReportsGetResponse, ReadDailyReportV1DailyReportsReportIdGetData, ReadDailyReportV1DailyReportsReportIdGetError, ReadDailyReportV1DailyReportsReportIdGetResponse, ReadEngineerDashboardV1DashboardEngineerGetData, ReadEngineerDashboardV1DashboardEngineerGetResponse, ReadMyBidsV1BidsMyGetData, ReadMyBidsV1BidsMyGetResponse, ReadMyClientResourcesV1ClientResourcesGetData, ReadMyClientResourcesV1ClientResourcesGetError, ReadMyClientResourcesV1ClientResourcesGetResponse, ReadMySalaryV1SalariesMyGetData, ReadMySalaryV1SalariesMyGetResponse, ReadMyStarpointSummaryV1StarpointsMySummaryGetData, ReadMyStarpointSummaryV1StarpointsMySummaryGetResponse, ReadMyStarpointsV1StarpointsMyGetData, ReadMyStarpointsV1StarpointsMyGetError, ReadMyStarpointsV1StarpointsMyGetResponse, ReadPmDashboardV1DashboardPmGetData, ReadPmDashboardV1DashboardPmGetResponse, ReadRuleAuditLogsV1SystemRulesAuditLogsGetData, ReadRuleAuditLogsV1SystemRulesAuditLogsGetError, ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponse, ReadRulesV1SystemRulesGetData, ReadRulesV1SystemRulesGetError, ReadRulesV1SystemRulesGetResponse, ReadRuleV1SystemRulesRuleIdGetData, ReadRuleV1SystemRulesRuleIdGetError, ReadRuleV1SystemRulesRuleIdGetResponse, ReadSalarySummaryV1SalariesGetData, ReadSalarySummaryV1SalariesGetError, ReadSalarySummaryV1SalariesGetResponse, ReadStarpointLeaderboardV1StarpointsLeaderboardGetData, ReadStarpointLeaderboardV1StarpointsLeaderboardGetError, ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponse, ReadTasksV1TasksGetData, ReadTasksV1TasksGetError, ReadTasksV1TasksGetResponse, ReadTaskV1TasksTaskIdGetData, ReadTaskV1TasksTaskIdGetError, ReadTaskV1TasksTaskIdGetResponse, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponse, ReadUsersV1UsersGetData, ReadUsersV1UsersGetError, ReadUsersV1UsersGetResponse, ReassignTaskV1TasksTaskIdReassignPostData, ReassignTaskV1TasksTaskIdReassignPostError, ReassignTaskV1TasksTaskIdReassignPostResponse, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostError, RegisterUserV1UsersSignupPostResponse, ResumeTaskV1TasksTaskIdResumePostData, ResumeTaskV1TasksTaskIdResumePostError, ResumeTaskV1TasksTaskIdResumePostResponse, StartTaskV1TasksTaskIdStartPostData, StartTaskV1TasksTaskIdStartPostError, StartTaskV1TasksTaskIdStartPostResponse, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponse, UpdateBidV1TasksTaskIdBidsBidIdPutData, UpdateBidV1TasksTaskIdBidsBidIdPutError, UpdateBidV1TasksTaskIdBidsBidIdPutResponse, UpdateDailyReportV1DailyReportsReportIdPutData, UpdateDailyReportV1DailyReportsReportIdPutError, UpdateDailyReportV1DailyReportsReportIdPutResponse, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchError, UpdatePasswordMeV1UsersMePasswordPatchResponse, UpdateRuleV1SystemRulesRuleIdPutData, UpdateRuleV1SystemRulesRuleIdPutError, UpdateRuleV1SystemRulesRuleIdPutResponse, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutData, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutError, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponse, UpdateTaskV1TasksTaskIdPutData, UpdateTaskV1TasksTaskIdPutError, UpdateTaskV1TasksTaskIdPutResponse, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchError, UpdateUserMeV1UsersMePatchResponse, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchError, UpdateUserV1UsersUserIdPatchResponse, WithdrawTaskV1TasksTaskIdWithdrawPostData, WithdrawTaskV1TasksTaskIdWithdrawPostError, WithdrawTaskV1TasksTaskIdWithdrawPostResponse } from '../types.gen.js';
+import { adjustStarpointV1StarpointsAdjustPost, adminCreateRoleV1AdminRolesPost, adminCreateTaskV1TasksCreatePost, adminCreateUserV1AdminUsersPost, adminDeleteRoleV1AdminRolesRoleIdDelete, adminDeleteUserV1AdminUsersUserIdDelete, adminReadAuditLogsV1AdminAuditLogsGet, adminReadRolesV1AdminRolesGet, adminReadRoleV1AdminRolesRoleIdGet, adminReadUsersV1AdminUsersGet, adminReadUserV1AdminUsersUserIdGet, adminResetPasswordV1AdminUsersUserIdResetPasswordPost, adminRestoreTaskV1TasksTaskIdRestorePost, adminToggleUserActiveV1AdminUsersUserIdToggleActivePost, adminUpdateRoleV1AdminRolesRoleIdPut, adminUpdateUserV1AdminUsersUserIdPatch, completeTaskV1TasksTaskIdCompletePost, convertToConvenientV1TasksTaskIdConvertConvenientPost, convertToUrgentV1TasksTaskIdConvertUrgentPost, createBidV1TasksTaskIdBidsPost, createDailyReportV1DailyReportsPost, createRuleV1SystemRulesPost, createTaskV1TasksPost, createUserV1UsersPost, declineTaskV1TasksTaskIdDeclinePost, deleteDailyReportV1DailyReportsReportIdDelete, deleteRuleV1SystemRulesRuleIdDelete, deleteTaskV1TasksTaskIdDelete, deleteUserMeV1UsersMeDelete, deleteUserV1UsersUserIdDelete, exportSalariesV1SalariesExportPost, getRemindReportV1DailyReportsRemindGet, healthCheckV1UsersHealthCheckGet, loginAccessTokenV1LoginAccessTokenPost, manualSettleBiddingV1TasksTaskIdSettleBiddingPost, type Options, pauseApproveTaskV1TasksTaskIdPauseApprovePost, pauseRejectTaskV1TasksTaskIdPauseRejectPost, pauseRequestTaskV1TasksTaskIdPauseRequestPost, publishTaskV1TasksTaskIdPublishPost, readAdminDashboardV1DashboardAdminGet, readAuditLogsV1AuditLogsGet, readBidsByTaskV1TasksTaskIdBidsGet, readDailyReportsV1DailyReportsGet, readDailyReportV1DailyReportsReportIdGet, readEngineerDashboardV1DashboardEngineerGet, readMyBidsV1BidsMyGet, readMySalaryV1SalariesMyGet, readMyStarpointSummaryV1StarpointsMySummaryGet, readMyStarpointsV1StarpointsMyGet, readPmDashboardV1DashboardPmGet, readRuleAuditLogsV1SystemRulesAuditLogsGet, readRulesV1SystemRulesGet, readRuleV1SystemRulesRuleIdGet, readSalarySummaryV1SalariesGet, readStarpointLeaderboardV1StarpointsLeaderboardGet, readTasksV1TasksGet, readTaskV1TasksTaskIdGet, readUserByIdV1UsersUserIdGet, readUserMeV1UsersMeGet, readUsersV1UsersGet, reassignTaskV1TasksTaskIdReassignPost, registerUserV1UsersSignupPost, resumeTaskV1TasksTaskIdResumePost, startTaskV1TasksTaskIdStartPost, testTokenV1LoginTestTokenPost, updateBidV1TasksTaskIdBidsBidIdPut, updateDailyReportV1DailyReportsReportIdPut, updatePasswordMeV1UsersMePasswordPatch, updateRuleV1SystemRulesRuleIdPut, updateSalaryParamsV1SalariesUsersUserIdParamsPut, updateTaskV1TasksTaskIdPut, updateUserMeV1UsersMePatch, updateUserV1UsersUserIdPatch, withdrawTaskV1TasksTaskIdWithdrawPost } from '../sdk.gen.js';
+import type { AdjustStarpointV1StarpointsAdjustPostData, AdjustStarpointV1StarpointsAdjustPostError, AdjustStarpointV1StarpointsAdjustPostResponse, AdminCreateRoleV1AdminRolesPostData, AdminCreateRoleV1AdminRolesPostError, AdminCreateRoleV1AdminRolesPostResponse, AdminCreateTaskV1TasksCreatePostData, AdminCreateTaskV1TasksCreatePostError, AdminCreateTaskV1TasksCreatePostResponse, AdminCreateUserV1AdminUsersPostData, AdminCreateUserV1AdminUsersPostError, AdminCreateUserV1AdminUsersPostResponse, AdminDeleteRoleV1AdminRolesRoleIdDeleteData, AdminDeleteRoleV1AdminRolesRoleIdDeleteError, AdminDeleteRoleV1AdminRolesRoleIdDeleteResponse, AdminDeleteUserV1AdminUsersUserIdDeleteData, AdminDeleteUserV1AdminUsersUserIdDeleteError, AdminDeleteUserV1AdminUsersUserIdDeleteResponse, AdminReadAuditLogsV1AdminAuditLogsGetData, AdminReadAuditLogsV1AdminAuditLogsGetError, AdminReadAuditLogsV1AdminAuditLogsGetResponse, AdminReadRolesV1AdminRolesGetData, AdminReadRolesV1AdminRolesGetError, AdminReadRolesV1AdminRolesGetResponse, AdminReadRoleV1AdminRolesRoleIdGetData, AdminReadRoleV1AdminRolesRoleIdGetError, AdminReadRoleV1AdminRolesRoleIdGetResponse, AdminReadUsersV1AdminUsersGetData, AdminReadUsersV1AdminUsersGetError, AdminReadUsersV1AdminUsersGetResponse, AdminReadUserV1AdminUsersUserIdGetData, AdminReadUserV1AdminUsersUserIdGetError, AdminReadUserV1AdminUsersUserIdGetResponse, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostError, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse, AdminRestoreTaskV1TasksTaskIdRestorePostData, AdminRestoreTaskV1TasksTaskIdRestorePostError, AdminRestoreTaskV1TasksTaskIdRestorePostResponse, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostData, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostError, AdminToggleUserActiveV1AdminUsersUserIdToggleActivePostResponse, AdminUpdateRoleV1AdminRolesRoleIdPutData, AdminUpdateRoleV1AdminRolesRoleIdPutError, AdminUpdateRoleV1AdminRolesRoleIdPutResponse, AdminUpdateUserV1AdminUsersUserIdPatchData, AdminUpdateUserV1AdminUsersUserIdPatchError, AdminUpdateUserV1AdminUsersUserIdPatchResponse, CompleteTaskV1TasksTaskIdCompletePostData, CompleteTaskV1TasksTaskIdCompletePostError, CompleteTaskV1TasksTaskIdCompletePostResponse, ConvertToConvenientV1TasksTaskIdConvertConvenientPostData, ConvertToConvenientV1TasksTaskIdConvertConvenientPostError, ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponse, ConvertToUrgentV1TasksTaskIdConvertUrgentPostData, ConvertToUrgentV1TasksTaskIdConvertUrgentPostError, ConvertToUrgentV1TasksTaskIdConvertUrgentPostResponse, CreateBidV1TasksTaskIdBidsPostData, CreateBidV1TasksTaskIdBidsPostError, CreateBidV1TasksTaskIdBidsPostResponse, CreateDailyReportV1DailyReportsPostData, CreateDailyReportV1DailyReportsPostError, CreateDailyReportV1DailyReportsPostResponse, CreateRuleV1SystemRulesPostData, CreateRuleV1SystemRulesPostError, CreateRuleV1SystemRulesPostResponse, CreateTaskV1TasksPostData, CreateTaskV1TasksPostError, CreateTaskV1TasksPostResponse, CreateUserV1UsersPostData, CreateUserV1UsersPostError, CreateUserV1UsersPostResponse, DeclineTaskV1TasksTaskIdDeclinePostData, DeclineTaskV1TasksTaskIdDeclinePostError, DeclineTaskV1TasksTaskIdDeclinePostResponse, DeleteDailyReportV1DailyReportsReportIdDeleteData, DeleteDailyReportV1DailyReportsReportIdDeleteError, DeleteDailyReportV1DailyReportsReportIdDeleteResponse, DeleteRuleV1SystemRulesRuleIdDeleteData, DeleteRuleV1SystemRulesRuleIdDeleteError, DeleteRuleV1SystemRulesRuleIdDeleteResponse, DeleteTaskV1TasksTaskIdDeleteData, DeleteTaskV1TasksTaskIdDeleteError, DeleteTaskV1TasksTaskIdDeleteResponse, DeleteUserMeV1UsersMeDeleteData, DeleteUserMeV1UsersMeDeleteResponse, DeleteUserV1UsersUserIdDeleteData, DeleteUserV1UsersUserIdDeleteError, DeleteUserV1UsersUserIdDeleteResponse, ExportSalariesV1SalariesExportPostData, ExportSalariesV1SalariesExportPostError, GetRemindReportV1DailyReportsRemindGetData, GetRemindReportV1DailyReportsRemindGetResponse, HealthCheckV1UsersHealthCheckGetData, HealthCheckV1UsersHealthCheckGetResponse, LoginAccessTokenV1LoginAccessTokenPostData, LoginAccessTokenV1LoginAccessTokenPostError, LoginAccessTokenV1LoginAccessTokenPostResponse, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostData, ManualSettleBiddingV1TasksTaskIdSettleBiddingPostError, PauseApproveTaskV1TasksTaskIdPauseApprovePostData, PauseApproveTaskV1TasksTaskIdPauseApprovePostError, PauseApproveTaskV1TasksTaskIdPauseApprovePostResponse, PauseRejectTaskV1TasksTaskIdPauseRejectPostData, PauseRejectTaskV1TasksTaskIdPauseRejectPostError, PauseRejectTaskV1TasksTaskIdPauseRejectPostResponse, PauseRequestTaskV1TasksTaskIdPauseRequestPostData, PauseRequestTaskV1TasksTaskIdPauseRequestPostError, PauseRequestTaskV1TasksTaskIdPauseRequestPostResponse, PublishTaskV1TasksTaskIdPublishPostData, PublishTaskV1TasksTaskIdPublishPostError, PublishTaskV1TasksTaskIdPublishPostResponse, ReadAdminDashboardV1DashboardAdminGetData, ReadAdminDashboardV1DashboardAdminGetResponse, ReadAuditLogsV1AuditLogsGetData, ReadAuditLogsV1AuditLogsGetError, ReadAuditLogsV1AuditLogsGetResponse, ReadBidsByTaskV1TasksTaskIdBidsGetData, ReadBidsByTaskV1TasksTaskIdBidsGetError, ReadBidsByTaskV1TasksTaskIdBidsGetResponse, ReadDailyReportsV1DailyReportsGetData, ReadDailyReportsV1DailyReportsGetError, ReadDailyReportsV1DailyReportsGetResponse, ReadDailyReportV1DailyReportsReportIdGetData, ReadDailyReportV1DailyReportsReportIdGetError, ReadDailyReportV1DailyReportsReportIdGetResponse, ReadEngineerDashboardV1DashboardEngineerGetData, ReadEngineerDashboardV1DashboardEngineerGetResponse, ReadMyBidsV1BidsMyGetData, ReadMyBidsV1BidsMyGetResponse, ReadMySalaryV1SalariesMyGetData, ReadMySalaryV1SalariesMyGetResponse, ReadMyStarpointSummaryV1StarpointsMySummaryGetData, ReadMyStarpointSummaryV1StarpointsMySummaryGetResponse, ReadMyStarpointsV1StarpointsMyGetData, ReadMyStarpointsV1StarpointsMyGetError, ReadMyStarpointsV1StarpointsMyGetResponse, ReadPmDashboardV1DashboardPmGetData, ReadPmDashboardV1DashboardPmGetResponse, ReadRuleAuditLogsV1SystemRulesAuditLogsGetData, ReadRuleAuditLogsV1SystemRulesAuditLogsGetError, ReadRuleAuditLogsV1SystemRulesAuditLogsGetResponse, ReadRulesV1SystemRulesGetData, ReadRulesV1SystemRulesGetError, ReadRulesV1SystemRulesGetResponse, ReadRuleV1SystemRulesRuleIdGetData, ReadRuleV1SystemRulesRuleIdGetError, ReadRuleV1SystemRulesRuleIdGetResponse, ReadSalarySummaryV1SalariesGetData, ReadSalarySummaryV1SalariesGetError, ReadSalarySummaryV1SalariesGetResponse, ReadStarpointLeaderboardV1StarpointsLeaderboardGetData, ReadStarpointLeaderboardV1StarpointsLeaderboardGetError, ReadStarpointLeaderboardV1StarpointsLeaderboardGetResponse, ReadTasksV1TasksGetData, ReadTasksV1TasksGetError, ReadTasksV1TasksGetResponse, ReadTaskV1TasksTaskIdGetData, ReadTaskV1TasksTaskIdGetError, ReadTaskV1TasksTaskIdGetResponse, ReadUserByIdV1UsersUserIdGetData, ReadUserByIdV1UsersUserIdGetError, ReadUserByIdV1UsersUserIdGetResponse, ReadUserMeV1UsersMeGetData, ReadUserMeV1UsersMeGetResponse, ReadUsersV1UsersGetData, ReadUsersV1UsersGetError, ReadUsersV1UsersGetResponse, ReassignTaskV1TasksTaskIdReassignPostData, ReassignTaskV1TasksTaskIdReassignPostError, ReassignTaskV1TasksTaskIdReassignPostResponse, RegisterUserV1UsersSignupPostData, RegisterUserV1UsersSignupPostError, RegisterUserV1UsersSignupPostResponse, ResumeTaskV1TasksTaskIdResumePostData, ResumeTaskV1TasksTaskIdResumePostError, ResumeTaskV1TasksTaskIdResumePostResponse, StartTaskV1TasksTaskIdStartPostData, StartTaskV1TasksTaskIdStartPostError, StartTaskV1TasksTaskIdStartPostResponse, TestTokenV1LoginTestTokenPostData, TestTokenV1LoginTestTokenPostResponse, UpdateBidV1TasksTaskIdBidsBidIdPutData, UpdateBidV1TasksTaskIdBidsBidIdPutError, UpdateBidV1TasksTaskIdBidsBidIdPutResponse, UpdateDailyReportV1DailyReportsReportIdPutData, UpdateDailyReportV1DailyReportsReportIdPutError, UpdateDailyReportV1DailyReportsReportIdPutResponse, UpdatePasswordMeV1UsersMePasswordPatchData, UpdatePasswordMeV1UsersMePasswordPatchError, UpdatePasswordMeV1UsersMePasswordPatchResponse, UpdateRuleV1SystemRulesRuleIdPutData, UpdateRuleV1SystemRulesRuleIdPutError, UpdateRuleV1SystemRulesRuleIdPutResponse, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutData, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutError, UpdateSalaryParamsV1SalariesUsersUserIdParamsPutResponse, UpdateTaskV1TasksTaskIdPutData, UpdateTaskV1TasksTaskIdPutError, UpdateTaskV1TasksTaskIdPutResponse, UpdateUserMeV1UsersMePatchData, UpdateUserMeV1UsersMePatchError, UpdateUserMeV1UsersMePatchResponse, UpdateUserV1UsersUserIdPatchData, UpdateUserV1UsersUserIdPatchError, UpdateUserV1UsersUserIdPatchResponse, WithdrawTaskV1TasksTaskIdWithdrawPostData, WithdrawTaskV1TasksTaskIdWithdrawPostError, WithdrawTaskV1TasksTaskIdWithdrawPostResponse } from '../types.gen.js';
 
 /**
  * Login Access Token
@@ -673,25 +673,6 @@ export const adminResetPasswordV1AdminUsersUserIdResetPasswordPostMutation = (op
     const mutationOptions: UseMutationOptions<AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse, AdminResetPasswordV1AdminUsersUserIdResetPasswordPostError, Options<AdminResetPasswordV1AdminUsersUserIdResetPasswordPostData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await adminResetPasswordV1AdminUsersUserIdResetPasswordPost({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-/**
- * 设置 PM 客资参数（管理员）
- *
- * 管理员设置 PM 的基准客资数（baseline_client_count）
- */
-export const adminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutMutation = (options?: Partial<Options<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData>>): UseMutationOptions<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutError, Options<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData>> => {
-    const mutationOptions: UseMutationOptions<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse, AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutError, Options<AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await adminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPut({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1626,7 +1607,7 @@ export const readPmDashboardV1DashboardPmGetQueryKey = (options?: Options<ReadPm
 /**
  * PM 工作台首页
  *
- * PM 查看自己的工作指标：今日新增客资、本月新增客资、收入试算
+ * PM 查看自己的工作指标：收入试算、我发布的任务
  */
 export const readPmDashboardV1DashboardPmGetOptions = (options?: Options<ReadPmDashboardV1DashboardPmGetData>) => queryOptions<ReadPmDashboardV1DashboardPmGetResponse, DefaultError, ReadPmDashboardV1DashboardPmGetResponse, ReturnType<typeof readPmDashboardV1DashboardPmGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -1646,7 +1627,7 @@ export const readAdminDashboardV1DashboardAdminGetQueryKey = (options?: Options<
 /**
  * 管理端数据概览
  *
- * 管理员查看全系统数据概览：客资、日志、任务、工程师负载、星点排行榜、收入统计
+ * 管理员查看全系统数据概览：日志、任务、工程师负载、星点排行榜、收入统计
  */
 export const readAdminDashboardV1DashboardAdminGetOptions = (options?: Options<ReadAdminDashboardV1DashboardAdminGetData>) => queryOptions<ReadAdminDashboardV1DashboardAdminGetResponse, DefaultError, ReadAdminDashboardV1DashboardAdminGetResponse, ReturnType<typeof readAdminDashboardV1DashboardAdminGetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -1835,143 +1816,6 @@ export const updateRuleV1SystemRulesRuleIdPutMutation = (options?: Partial<Optio
     };
     return mutationOptions;
 };
-
-export const readMyClientResourcesV1ClientResourcesGetQueryKey = (options?: Options<ReadMyClientResourcesV1ClientResourcesGetData>) => createQueryKey('readMyClientResourcesV1ClientResourcesGet', options);
-
-/**
- * 查看客资历史
- *
- * PM 查看自己的客资录入历史
- */
-export const readMyClientResourcesV1ClientResourcesGetOptions = (options?: Options<ReadMyClientResourcesV1ClientResourcesGetData>) => queryOptions<ReadMyClientResourcesV1ClientResourcesGetResponse, ReadMyClientResourcesV1ClientResourcesGetError, ReadMyClientResourcesV1ClientResourcesGetResponse, ReturnType<typeof readMyClientResourcesV1ClientResourcesGetQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readMyClientResourcesV1ClientResourcesGet({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: readMyClientResourcesV1ClientResourcesGetQueryKey(options)
-});
-
-export const readMyClientResourcesV1ClientResourcesGetInfiniteQueryKey = (options?: Options<ReadMyClientResourcesV1ClientResourcesGetData>): QueryKey<Options<ReadMyClientResourcesV1ClientResourcesGetData>> => createQueryKey('readMyClientResourcesV1ClientResourcesGet', options, true);
-
-/**
- * 查看客资历史
- *
- * PM 查看自己的客资录入历史
- */
-export const readMyClientResourcesV1ClientResourcesGetInfiniteOptions = (options?: Options<ReadMyClientResourcesV1ClientResourcesGetData>) => infiniteQueryOptions<ReadMyClientResourcesV1ClientResourcesGetResponse, ReadMyClientResourcesV1ClientResourcesGetError, InfiniteData<ReadMyClientResourcesV1ClientResourcesGetResponse>, QueryKey<Options<ReadMyClientResourcesV1ClientResourcesGetData>>, number | Pick<QueryKey<Options<ReadMyClientResourcesV1ClientResourcesGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<ReadMyClientResourcesV1ClientResourcesGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await readMyClientResourcesV1ClientResourcesGet({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: readMyClientResourcesV1ClientResourcesGetInfiniteQueryKey(options)
-});
-
-/**
- * 录入客资
- *
- * PM 录入自己的客资数据
- */
-export const createClientResourceV1ClientResourcesPostMutation = (options?: Partial<Options<CreateClientResourceV1ClientResourcesPostData>>): UseMutationOptions<CreateClientResourceV1ClientResourcesPostResponse, CreateClientResourceV1ClientResourcesPostError, Options<CreateClientResourceV1ClientResourcesPostData>> => {
-    const mutationOptions: UseMutationOptions<CreateClientResourceV1ClientResourcesPostResponse, CreateClientResourceV1ClientResourcesPostError, Options<CreateClientResourceV1ClientResourcesPostData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await createClientResourceV1ClientResourcesPost({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-export const readAdminClientResourceSummaryV1ClientResourcesAdminGetQueryKey = (options?: Options<ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData>) => createQueryKey('readAdminClientResourceSummaryV1ClientResourcesAdminGet', options);
-
-/**
- * 管理员查看客资汇总
- *
- * 管理员查看所有 PM 的客资数据汇总
- */
-export const readAdminClientResourceSummaryV1ClientResourcesAdminGetOptions = (options?: Options<ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData>) => queryOptions<ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse, DefaultError, ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse, ReturnType<typeof readAdminClientResourceSummaryV1ClientResourcesAdminGetQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readAdminClientResourceSummaryV1ClientResourcesAdminGet({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: readAdminClientResourceSummaryV1ClientResourcesAdminGetQueryKey(options)
-});
-
-export const readAllClientResourcesV1ClientResourcesAllGetQueryKey = (options?: Options<ReadAllClientResourcesV1ClientResourcesAllGetData>) => createQueryKey('readAllClientResourcesV1ClientResourcesAllGet', options);
-
-/**
- * 管理员查看所有客资
- *
- * 管理员查看所有 PM 的客资明细记录
- */
-export const readAllClientResourcesV1ClientResourcesAllGetOptions = (options?: Options<ReadAllClientResourcesV1ClientResourcesAllGetData>) => queryOptions<ReadAllClientResourcesV1ClientResourcesAllGetResponse, ReadAllClientResourcesV1ClientResourcesAllGetError, ReadAllClientResourcesV1ClientResourcesAllGetResponse, ReturnType<typeof readAllClientResourcesV1ClientResourcesAllGetQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await readAllClientResourcesV1ClientResourcesAllGet({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: readAllClientResourcesV1ClientResourcesAllGetQueryKey(options)
-});
-
-export const readAllClientResourcesV1ClientResourcesAllGetInfiniteQueryKey = (options?: Options<ReadAllClientResourcesV1ClientResourcesAllGetData>): QueryKey<Options<ReadAllClientResourcesV1ClientResourcesAllGetData>> => createQueryKey('readAllClientResourcesV1ClientResourcesAllGet', options, true);
-
-/**
- * 管理员查看所有客资
- *
- * 管理员查看所有 PM 的客资明细记录
- */
-export const readAllClientResourcesV1ClientResourcesAllGetInfiniteOptions = (options?: Options<ReadAllClientResourcesV1ClientResourcesAllGetData>) => infiniteQueryOptions<ReadAllClientResourcesV1ClientResourcesAllGetResponse, ReadAllClientResourcesV1ClientResourcesAllGetError, InfiniteData<ReadAllClientResourcesV1ClientResourcesAllGetResponse>, QueryKey<Options<ReadAllClientResourcesV1ClientResourcesAllGetData>>, number | Pick<QueryKey<Options<ReadAllClientResourcesV1ClientResourcesAllGetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
-// @ts-ignore
-{
-    queryFn: async ({ pageParam, queryKey, signal }) => {
-        // @ts-ignore
-        const page: Pick<QueryKey<Options<ReadAllClientResourcesV1ClientResourcesAllGetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
-            query: {
-                page: pageParam
-            }
-        };
-        const params = createInfiniteParams(queryKey, page);
-        const { data } = await readAllClientResourcesV1ClientResourcesAllGet({
-            ...options,
-            ...params,
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: readAllClientResourcesV1ClientResourcesAllGetInfiniteQueryKey(options)
-});
 
 export const adminReadRolesV1AdminRolesGetQueryKey = (options?: Options<AdminReadRolesV1AdminRolesGetData>) => createQueryKey('adminReadRolesV1AdminRolesGet', options);
 

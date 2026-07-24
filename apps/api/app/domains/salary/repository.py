@@ -17,29 +17,6 @@ from app.core.db_utils import paginated_query
 _SALARY_USER_FILTER = User.role.in_([UserRoleType.ENGINEER.value, UserRoleType.PM.value])
 
 
-async def get_pm_monthly_client_actual(
-    *,
-    session: AsyncSession,
-    pm_id: uuid.UUID,
-) -> int:
-    """获取 PM 本月实际客资数（L实）"""
-    from datetime import datetime, timezone
-    from sqlalchemy import and_
-    from app.core.models import ClientResource
-
-    now = datetime.now(timezone.utc)
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-
-    stmt = select(func.coalesce(func.sum(ClientResource.actual_count), 0)).where(
-        and_(
-            ClientResource.pm_id == pm_id,
-            ClientResource.date >= month_start,
-        )
-    )
-    result = await session.execute(stmt)
-    return int(result.scalar_one() or 0)
-
-
 async def get_all_salaries(
     *,
     session: AsyncSession,
@@ -90,8 +67,6 @@ async def update_user_salary_params(
             user.R_base = params.R_base
         if params.R_assess is not None:
             user.R_assess = params.R_assess
-        if params.baseline_client_count is not None:
-            user.baseline_client_count = params.baseline_client_count
         if params.manual_adjustment is not None:
             user.S_base = (user.S_base or 0.0) + params.manual_adjustment
 

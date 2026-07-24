@@ -16,7 +16,7 @@ import type { PmSalaryDetail } from "@repo/sdk";
 /**
  * PM 收入试算明细弹窗
  *
- * 从 GET /v1/salaries/my 获取工资试算详情，展示 S底、S考、L实、L基 等字段
+ * 从 GET /v1/salaries/my 获取工资试算详情，展示 S底、S考 等字段
  */
 export function PmSalaryDetailDialog({
   open,
@@ -76,8 +76,6 @@ export function PmSalaryDetailDialog({
               {data.R_assess != null && (
                 <Row label="R考（考核比例）" value={`${(data.R_assess * 100).toFixed(0)}%`} />
               )}
-              <Row label="L实（本月实际客资数）" value={data.L_actual ?? "-"} />
-              <Row label="L基（基准客资数）" value={data.L_base ?? "-"} />
             </div>
 
             <div className="border-t pt-3 mt-3">

@@ -76,67 +76,6 @@ export const zBodyLoginAccessTokenV1LoginAccessTokenPost = z.object({
 });
 
 /**
- * ClientResourceCreate
- *
- * 录入客资请求
- */
-export const zClientResourceCreate = z.object({
-    actual_count: z.int().gte(0),
-    date: z.iso.datetime()
-});
-
-/**
- * ClientResourceParamsUpdate
- *
- * 管理员设置 PM 的基准客资数
- */
-export const zClientResourceParamsUpdate = z.object({
-    baseline_client_count: z.int().gte(0)
-});
-
-/**
- * ClientResourcePublic
- *
- * 客资公开信息
- */
-export const zClientResourcePublic = z.object({
-    id: z.uuid(),
-    pm_id: z.uuid(),
-    actual_count: z.int(),
-    baseline_count: z.int(),
-    date: z.iso.datetime(),
-    created_at: z.iso.datetime().nullish()
-});
-
-/**
- * ClientResourceSummary
- *
- * PM 客资汇总（管理员视角）
- */
-export const zClientResourceSummary = z.object({
-    pm_id: z.uuid(),
-    pm_name: z.string(),
-    baseline_count: z.int().nullish(),
-    total_actual: z.int().optional().default(0),
-    avg_actual: z.number().optional().default(0),
-    record_count: z.int().optional().default(0),
-    performance_rate: z.number().nullish()
-});
-
-/**
- * ClientResourcesPublic
- *
- * 客资列表
- */
-export const zClientResourcesPublic = z.object({
-    data: z.array(z.unknown()),
-    count: z.int(),
-    page: z.int().nullish(),
-    page_size: z.int().nullish(),
-    total_pages: z.int().nullish()
-});
-
-/**
  * DailyReportsWithTaskNamePublic
  *
  * 日报列表分页响应（含任务名称）
@@ -251,10 +190,6 @@ export const zMessage = z.object({
 export const zPmDashboard = z.object({
     user_id: z.uuid(),
     full_name: z.string().nullish(),
-    today_new_clients: z.int(),
-    monthly_new_clients: z.int(),
-    yesterday_new_clients: z.int(),
-    last_month_new_clients: z.int(),
     pm_task_count: z.int(),
     task_count_unconfirmed: z.int(),
     task_count_bidding: z.int(),
@@ -278,8 +213,6 @@ export const zPmSalaryDetail = z.object({
     S_assess: z.number(),
     R_base: z.number().nullish(),
     R_assess: z.number().nullish(),
-    L_actual: z.int().optional().default(0),
-    L_base: z.int().optional().default(0),
     salary_total: z.number()
 });
 
@@ -451,7 +384,6 @@ export const zSalaryParamsUpdate = z.object({
     S_assess: z.number().gte(0).nullish(),
     R_base: z.number().gte(0).lte(1).nullish(),
     R_assess: z.number().gte(0).lte(1).nullish(),
-    baseline_client_count: z.int().gte(0).nullish(),
     manual_adjustment: z.number().nullish()
 });
 
@@ -561,8 +493,6 @@ export const zStarpointRank = z.object({
  * 管理端数据概览
  */
 export const zAdminDashboard = z.object({
-    today_new_clients: z.int(),
-    monthly_new_clients: z.int(),
     today_submitted_reports: z.int(),
     ongoing_tasks: z.int(),
     engineer_loads: z.array(zEngineerLoad).optional(),
@@ -643,7 +573,8 @@ export const zTaskCompleteRequest = z.record(z.string(), z.unknown());
  * 改派任务请求
  */
 export const zTaskReassignRequest = z.object({
-    new_engineer_id: z.uuid()
+    new_engineer_id: z.uuid(),
+    T_reported: z.number().gte(0).nullish()
 });
 
 /**
@@ -828,8 +759,7 @@ export const zUserAdminCreate = z.object({
     S_base: z.number().gte(0).nullish(),
     S_assess: z.number().gte(0).nullish(),
     R_base: z.number().gte(0).lte(1).nullish(),
-    R_assess: z.number().gte(0).lte(1).nullish(),
-    baseline_client_count: z.int().gte(0).nullish()
+    R_assess: z.number().gte(0).lte(1).nullish()
 });
 
 /**
@@ -851,7 +781,6 @@ export const zUserAdminDetail = z.object({
     S_assess: z.number().nullish(),
     R_base: z.number().nullish(),
     R_assess: z.number().nullish(),
-    baseline_client_count: z.int().nullish(),
     phone: z.string().nullish(),
     department: z.string().nullish(),
     hire_date: z.iso.datetime().nullish(),
@@ -880,8 +809,7 @@ export const zUserAdminUpdate = z.object({
     S_base: z.number().gte(0).nullish(),
     S_assess: z.number().gte(0).nullish(),
     R_base: z.number().gte(0).lte(1).nullish(),
-    R_assess: z.number().gte(0).lte(1).nullish(),
-    baseline_client_count: z.int().gte(0).nullish()
+    R_assess: z.number().gte(0).lte(1).nullish()
 });
 
 /**
@@ -1126,17 +1054,6 @@ export const zAdminResetPasswordV1AdminUsersUserIdResetPasswordPostPath = z.obje
  * Successful Response
  */
 export const zAdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse = zMessage;
-
-export const zAdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutBody = zClientResourceParamsUpdate;
-
-export const zAdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutPath = z.object({
-    user_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zAdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse = zUserAdminDetail;
 
 export const zAdminReadAuditLogsV1AdminAuditLogsGetQuery = z.object({
     page: z.int().gte(1).optional().default(1),
@@ -1562,40 +1479,6 @@ export const zUpdateRuleV1SystemRulesRuleIdPutPath = z.object({
  * Successful Response
  */
 export const zUpdateRuleV1SystemRulesRuleIdPutResponse = zSystemRulePublic;
-
-export const zReadMyClientResourcesV1ClientResourcesGetQuery = z.object({
-    page: z.int().gte(1).optional().default(1),
-    page_size: z.int().gte(1).lte(100).optional().default(20)
-});
-
-/**
- * Successful Response
- */
-export const zReadMyClientResourcesV1ClientResourcesGetResponse = zClientResourcesPublic;
-
-export const zCreateClientResourceV1ClientResourcesPostBody = zClientResourceCreate;
-
-/**
- * Successful Response
- */
-export const zCreateClientResourceV1ClientResourcesPostResponse = zClientResourcePublic;
-
-/**
- * Response Read Admin Client Resource Summary V1 Client Resources Admin Get
- *
- * Successful Response
- */
-export const zReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse = z.array(zClientResourceSummary);
-
-export const zReadAllClientResourcesV1ClientResourcesAllGetQuery = z.object({
-    page: z.int().gte(1).optional().default(1),
-    page_size: z.int().gte(1).lte(100).optional().default(20)
-});
-
-/**
- * Successful Response
- */
-export const zReadAllClientResourcesV1ClientResourcesAllGetResponse = zClientResourcesPublic;
 
 export const zAdminReadRolesV1AdminRolesGetQuery = z.object({
     page: z.int().gte(1).optional().default(1),

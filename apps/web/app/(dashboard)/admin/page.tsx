@@ -8,8 +8,6 @@ export default function AdminOverviewPage() {
   const { data: dashboard, isLoading } = useAdminDashboard();
 
   const metrics = [
-    { label: "今日新增客资", value: dashboard?.today_new_clients ?? "-", desc: "昨日新增 38", color: "cyan" },
-    { label: "本月新增客资", value: dashboard?.monthly_new_clients ?? "-", desc: "上月新增客资 290", color: "orange" },
     { label: "今日提交日志量", value: dashboard?.today_submitted_reports ?? "-", desc: "工程师提交的工作日志", color: "cyan" },
     { label: "进行中任务", value: dashboard?.ongoing_tasks ?? "-", desc: "当前进行中的任务总数", color: "blue" },
   ];
@@ -21,7 +19,7 @@ export default function AdminOverviewPage() {
   return (
     <div className="space-y-6">
       <div><h1 className="text-3xl font-bold">数据概览</h1><p className="text-muted-foreground">系统整体运营数据</p></div>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {metrics.map((metric) => (
           <Card key={metric.label} className={`border-l-4 border-l-${metric.color}-500`}>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{metric.label}</CardTitle></CardHeader>
@@ -53,10 +51,6 @@ export default function AdminOverviewPage() {
         </Card>
       </div>
       <div className="grid grid-cols-2 gap-6">
-        <Card>
-          <CardHeader><CardTitle>PM客资列表</CardTitle></CardHeader>
-          <CardContent><p className="text-sm text-muted-foreground">PM客资数据将在后续版本中展示</p></CardContent>
-        </Card>
         <Card>
           <CardHeader><CardTitle>收入统计</CardTitle></CardHeader>
           <CardContent className="space-y-2">

@@ -45,12 +45,6 @@ class PMDashboard(SQLModel):
     user_id: uuid.UUID
     full_name: Optional[str] = None
 
-    # 客资指标
-    today_new_clients: int = Field(description="今日新增客资数")
-    monthly_new_clients: int = Field(description="本月新增客资数")
-    yesterday_new_clients: int = Field(description="昨日新增客资数（环比对照）")
-    last_month_new_clients: int = Field(description="上月新增客资数（环比对照）")
-
     # 任务指标
     pm_task_count: int = Field(description="我发布的任务总数")
     task_count_unconfirmed: int = Field(description="未确认任务数")
@@ -85,10 +79,6 @@ class StarpointRank(SQLModel):
 
 class AdminDashboard(SQLModel):
     """管理端数据概览"""
-    # 客资指标
-    today_new_clients: int = Field(description="今日新增客资数")
-    monthly_new_clients: int = Field(description="本月新增客资数")
-
     # 提交日志指标
     today_submitted_reports: int = Field(description="今日提交日志量")
 

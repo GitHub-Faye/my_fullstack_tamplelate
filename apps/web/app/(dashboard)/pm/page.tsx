@@ -36,22 +36,6 @@ export default function PMWorkspacePage() {
 
   const metrics = [
     {
-      label: "本月新增客资",
-      value: dashboard?.monthly_new_clients ?? "-",
-      desc: dashboard?.last_month_new_clients != null
-        ? `上月新增客资 ${dashboard.last_month_new_clients}`
-        : "本月客资累计",
-      color: "cyan",
-    },
-    {
-      label: "今日新增客资",
-      value: dashboard?.today_new_clients ?? "-",
-      desc: dashboard?.yesterday_new_clients != null
-        ? `昨日新增客资 ${dashboard.yesterday_new_clients}`
-        : "今日新增客户资源",
-      color: "blue",
-    },
-    {
       label: "收入试算",
       value: dashboard?.salary_preview != null ? `¥${dashboard.salary_preview.toLocaleString()}` : "-",
       desc: "本月预估收入",
@@ -79,7 +63,7 @@ export default function PMWorkspacePage() {
   return (
     <div className="space-y-6">
       {/* 指标卡 */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {metrics.map((metric) => (
           <Card key={metric.label} className={colorClasses[metric.color] || ""}>
             <CardHeader className="pb-2">

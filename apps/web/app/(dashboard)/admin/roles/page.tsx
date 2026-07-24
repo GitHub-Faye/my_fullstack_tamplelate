@@ -64,7 +64,6 @@ function scopeLabel(scope: string): string {
     report: "日报",
     starpoint: "星点",
     salary: "工资",
-    "client-resource": "客资",
     user: "用户",
     rule: "规则",
     dashboard: "仪表板",

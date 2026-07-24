@@ -38,7 +38,6 @@ from app.domains.user.schemas import (
     UserToggleActive,
     AdminPasswordReset,
     UsersAdminPublic,
-    ClientResourceParamsUpdate,
 )
 from app.domains.audit.repository import create_audit_log
 from app.domains.audit.schemas import AuditLogPublic, AuditLogList
@@ -308,57 +307,6 @@ async def admin_reset_password(
     return Message(message="Password reset successfully")
 
 
-@router.put(
-    "/users/{user_id}/client-resource-params",
-    response_model=UserAdminDetail,
-    summary="设置 PM 客资参数（管理员）",
-    description="管理员设置 PM 的基准客资数（baseline_client_count）",
-)
-async def admin_set_pm_client_resource_params(
-    *,
-    session: SessionDep,
-    current_user: CurrentUser,
-    user_id: uuid.UUID,
-    body: ClientResourceParamsUpdate,
-    request: Request,
-    _: Annotated[None, Depends(require_scope(UserScope.ADMIN))] = None,
-) -> Any:
-    """
-    设置 PM 的客资参数（管理员操作）。
-
-    权限：管理员（需 user:admin 权限）
-    """
-    user = await repository.get_user_detail(session=session, user_id=user_id)
-    if not user:
-        raise_user_not_found()
-
-    # 仅允许设置 PM 角色的基准客资数
-    if user.role != UserRoleType.PM:
-        raise BusinessException(
-            code=ErrorCode.USER_ROLE_MISMATCH,
-            detail="Only PM users can have client resource parameters",
-        )
-
-    updated_user = await repository.admin_update_user(
-        session=session,
-        db_user=user,
-        user_in=body,
-    )
-
-    # 记录审计日志
-    await create_audit_log(
-        session=session,
-        user_id=current_user.id,
-        action="user.set_client_resource_params",
-        target_type="user",
-        target_id=str(user_id),
-        details=json.dumps({"baseline_client_count": body.baseline_client_count}),
-        ip_address=request.client.host if request.client else None,
-    )
-
-    return _to_admin_detail(updated_user)
-
-
 @router.delete(
     "/users/{user_id}",
     response_model=Message,
@@ -480,7 +428,6 @@ def _to_admin_detail(user) -> UserAdminDetail:
         S_assess=user.S_assess,
         R_base=user.R_base,
         R_assess=user.R_assess,
-        baseline_client_count=user.baseline_client_count,
         phone=user.phone,
         department=user.department,
         hire_date=user.hire_date,

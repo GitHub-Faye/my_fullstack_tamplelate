@@ -92,6 +92,7 @@ class TaskCompleteRequest(SQLModel):
 class TaskReassignRequest(SQLModel):
     """改派任务请求"""
     new_engineer_id: uuid.UUID = Field(description="新工程师ID")
+    T_reported: Optional[float] = Field(default=None, ge=0, description="T报（管理员改派时重新给定）")
 
 # ==================== 通用 DTO ====================
 

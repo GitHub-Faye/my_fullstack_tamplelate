@@ -66,6 +66,7 @@ import { BidLogDialog } from "./BidLogDialog";
 import { TaskDetailDialog } from "./TaskDetailDialog";
 import { WorkLogDialog } from "./WorkLogDialog";
 import { AuditLogDialog } from "./AuditLogDialog";
+import { AdminTaskAssignDialog } from "./AdminTaskAssignDialog";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -156,6 +157,9 @@ export function AdminTaskTable() {
   // 每秒递增的 ticker，用于驱动报价倒计时刷新
   const [now, setNow] = useState(Date.now());
 
+  // 改派弹窗状态
+  const [assignTask, setAssignTask] = useState<TaskPublic | null>(null);
+
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(interval);
@@ -244,7 +248,7 @@ export function AdminTaskTable() {
         }
         break;
       case "reassign":
-        router.push(`/admin/tasks/${task.id}?tab=assign`);
+        setAssignTask(task);
         break;
       case "pauseApprove":
         try {
@@ -508,6 +512,17 @@ export function AdminTaskTable() {
           task={workLogTask}
           open={!!workLogTask}
           onOpenChange={(open) => { if (!open) setWorkLogTask(null); }}
+        />
+      )}
+
+      {/* 改派弹窗 */}
+      {assignTask && (
+        <AdminTaskAssignDialog
+          taskId={assignTask.id}
+          open={!!assignTask}
+          onOpenChange={(open) => {
+            if (!open) setAssignTask(null);
+          }}
         />
       )}
 

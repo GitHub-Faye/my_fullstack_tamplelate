@@ -148,7 +148,7 @@ async def update_salary_params(
 
     可设置字段：
     - 工程师：S0, H0, T_monthly_plan
-    - PM：S_base, S_assess, R_base, R_assess, baseline_client_count
+    - PM：S_base, S_assess, R_base, R_assess
     """
     # 转换为字典，过滤 None 值
     if not params.model_dump(exclude_none=True):

@@ -26,8 +26,6 @@ class SalaryParamsUpdate(SQLModel):
     S_assess: Optional[float] = Field(default=None, ge=0, description="S考（考核部分）")
     R_base: Optional[float] = Field(default=None, ge=0, le=1, description="R底（底薪比例）")
     R_assess: Optional[float] = Field(default=None, ge=0, le=1, description="R考（考核比例）")
-    baseline_client_count: Optional[int] = Field(default=None, ge=0, description="L基（基准客资数）")
-
     # 手动调整
     manual_adjustment: Optional[float] = Field(
         default=None, description="手动工资调整（正数=奖励，负数=扣减）"
@@ -70,10 +68,6 @@ class PMSalaryDetail(SQLModel):
     S_assess: float = Field(description="S考（考核部分）")
     R_base: Optional[float] = Field(default=None, description="R底（底薪比例）")
     R_assess: Optional[float] = Field(default=None, description="R考（考核比例）")
-
-    # 客资数据
-    L_actual: int = Field(default=0, description="L实（本月实际客资数）")
-    L_base: int = Field(default=0, description="L基（基准客资数）")
 
     # 最终工资
     salary_total: float = Field(description="总工资 S总 = S底 + S考")

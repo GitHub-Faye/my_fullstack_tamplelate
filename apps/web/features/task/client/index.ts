@@ -4,7 +4,7 @@ export { EngineerTaskTable } from "./EngineerTaskTable";
 export { TaskDetail } from "./TaskDetail";
 export { TaskEditForm } from "./TaskEditForm";
 export { AdminTaskTable } from "./AdminTaskTable";
-export { AdminTaskDetail } from "./AdminTaskDetail";
+export { AdminTaskAssignDialog } from "./AdminTaskAssignDialog";
 export { TaskDetailDialog, getPmActions } from "./TaskDetailDialog";
 export { BidLogDialog } from "./BidLogDialog";
 export { AuditLogDialog } from "./AuditLogDialog";

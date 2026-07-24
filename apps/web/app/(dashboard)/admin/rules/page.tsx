@@ -27,7 +27,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   all: "全部",
   starpoint_reward: "星点奖励",
   salary_formula: "工资公式",
-  client_resource: "客资参数",
   completion_judgment: "完成判定",
   system_param: "系统参数",
 };

@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import User, UserRoleType
 from app.core.errors import BusinessException, ErrorCode
-from app.domains.salary import repository as salary_repo
 from app.domains.starpoint import repository as starpoint_repo
 from app.domains.salary.schemas import (
     EngineerSalaryDetail,
@@ -59,19 +58,12 @@ async def calculate_engineer_salary(
 
 async def calculate_pm_salary(
     *,
-    session: AsyncSession,
     pm: User,
 ) -> PMSalaryDetail:
     """计算 PM 工资：S总 = S底 + S考"""
     S_base = pm.S_base or 0.0
     S_assess = pm.S_assess or 0.0
     salary_total = S_base + S_assess
-
-    actual_total = await salary_repo.get_pm_monthly_client_actual(
-        session=session,
-        pm_id=pm.id,
-    )
-    baseline_count = pm.baseline_client_count or 0
 
     return PMSalaryDetail(
         user_id=pm.id,
@@ -81,8 +73,6 @@ async def calculate_pm_salary(
         S_assess=S_assess,
         R_base=pm.R_base,
         R_assess=pm.R_assess,
-        L_actual=actual_total,
-        L_base=baseline_count,
         salary_total=salary_total,
     )
 
@@ -104,7 +94,7 @@ async def calculate_user_salary(
             k_coefficient=k_coefficient,
         )
     elif user.role == UserRoleType.PM:
-        return await calculate_pm_salary(session=session, pm=user)
+        return await calculate_pm_salary(pm=user)
     else:
         raise BusinessException(
             code=ErrorCode.USER_ROLE_MISMATCH,

@@ -71,7 +71,6 @@ class UserAdminCreate(SQLModel):
     S_assess: float | None = Field(default=None, ge=0)
     R_base: float | None = Field(default=None, ge=0, le=1)
     R_assess: float | None = Field(default=None, ge=0, le=1)
-    baseline_client_count: int | None = Field(default=None, ge=0)
 
 
 # 管理员更新用户
@@ -97,7 +96,6 @@ class UserAdminUpdate(SQLModel):
     S_assess: float | None = Field(default=None, ge=0)
     R_base: float | None = Field(default=None, ge=0, le=1)
     R_assess: float | None = Field(default=None, ge=0, le=1)
-    baseline_client_count: int | None = Field(default=None, ge=0)
 
 
 # 启用/禁用用户
@@ -108,12 +106,6 @@ class UserToggleActive(SQLModel):
 # 管理员重置密码
 class AdminPasswordReset(SQLModel):
     new_password: str = Field(min_length=8, max_length=128)
-
-
-# 管理员设置 PM 客资参数
-class ClientResourceParamsUpdate(SQLModel):
-    """管理员设置 PM 的基准客资数"""
-    baseline_client_count: int = Field(ge=0, description="基准客资数（L基）")
 
 
 # ---------------------------- API 响应模型（Response DTO） --------------------------------
@@ -134,7 +126,6 @@ class UserAdminDetail(UserPublic):
     S_assess: float | None = None
     R_base: float | None = None
     R_assess: float | None = None
-    baseline_client_count: int | None = None
     # 人事管理字段
     phone: str | None = None
     department: str | None = None

@@ -11,18 +11,6 @@ export type ClientOptions = {
  */
 export type AdminDashboard = {
     /**
-     * Today New Clients
-     *
-     * 今日新增客资数
-     */
-    today_new_clients: number;
-    /**
-     * Monthly New Clients
-     *
-     * 本月新增客资数
-     */
-    monthly_new_clients: number;
-    /**
      * Today Submitted Reports
      *
      * 今日提交日志量
@@ -246,136 +234,6 @@ export type BodyLoginAccessTokenV1LoginAccessTokenPost = {
      * Client Secret
      */
     client_secret?: string | null;
-};
-
-/**
- * ClientResourceCreate
- *
- * 录入客资请求
- */
-export type ClientResourceCreate = {
-    /**
-     * Actual Count
-     *
-     * 实际客资数
-     */
-    actual_count: number;
-    /**
-     * Date
-     *
-     * 记录日期
-     */
-    date: string;
-};
-
-/**
- * ClientResourceParamsUpdate
- *
- * 管理员设置 PM 的基准客资数
- */
-export type ClientResourceParamsUpdate = {
-    /**
-     * Baseline Client Count
-     *
-     * 基准客资数（L基）
-     */
-    baseline_client_count: number;
-};
-
-/**
- * ClientResourcePublic
- *
- * 客资公开信息
- */
-export type ClientResourcePublic = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Pm Id
-     */
-    pm_id: string;
-    /**
-     * Actual Count
-     */
-    actual_count: number;
-    /**
-     * Baseline Count
-     */
-    baseline_count: number;
-    /**
-     * Date
-     */
-    date: string;
-    /**
-     * Created At
-     */
-    created_at?: string | null;
-};
-
-/**
- * ClientResourceSummary
- *
- * PM 客资汇总（管理员视角）
- */
-export type ClientResourceSummary = {
-    /**
-     * Pm Id
-     */
-    pm_id: string;
-    /**
-     * Pm Name
-     */
-    pm_name: string;
-    /**
-     * Baseline Count
-     */
-    baseline_count?: number | null;
-    /**
-     * Total Actual
-     */
-    total_actual?: number;
-    /**
-     * Avg Actual
-     */
-    avg_actual?: number;
-    /**
-     * Record Count
-     */
-    record_count?: number;
-    /**
-     * Performance Rate
-     */
-    performance_rate?: number | null;
-};
-
-/**
- * ClientResourcesPublic
- *
- * 客资列表
- */
-export type ClientResourcesPublic = {
-    /**
-     * Data
-     */
-    data: Array<unknown>;
-    /**
-     * Count
-     */
-    count: number;
-    /**
-     * Page
-     */
-    page?: number | null;
-    /**
-     * Page Size
-     */
-    page_size?: number | null;
-    /**
-     * Total Pages
-     */
-    total_pages?: number | null;
 };
 
 /**
@@ -844,30 +702,6 @@ export type PmDashboard = {
      */
     full_name?: string | null;
     /**
-     * Today New Clients
-     *
-     * 今日新增客资数
-     */
-    today_new_clients: number;
-    /**
-     * Monthly New Clients
-     *
-     * 本月新增客资数
-     */
-    monthly_new_clients: number;
-    /**
-     * Yesterday New Clients
-     *
-     * 昨日新增客资数（环比对照）
-     */
-    yesterday_new_clients: number;
-    /**
-     * Last Month New Clients
-     *
-     * 上月新增客资数（环比对照）
-     */
-    last_month_new_clients: number;
-    /**
      * Pm Task Count
      *
      * 我发布的任务总数
@@ -959,18 +793,6 @@ export type PmSalaryDetail = {
      * R考（考核比例）
      */
     R_assess?: number | null;
-    /**
-     * L Actual
-     *
-     * L实（本月实际客资数）
-     */
-    L_actual?: number;
-    /**
-     * L Base
-     *
-     * L基（基准客资数）
-     */
-    L_base?: number;
     /**
      * Salary Total
      *
@@ -1188,12 +1010,6 @@ export type SalaryParamsUpdate = {
      * R考（考核比例）
      */
     R_assess?: number | null;
-    /**
-     * Baseline Client Count
-     *
-     * L基（基准客资数）
-     */
-    baseline_client_count?: number | null;
     /**
      * Manual Adjustment
      *
@@ -1710,6 +1526,12 @@ export type TaskReassignRequest = {
      * 新工程师ID
      */
     new_engineer_id: string;
+    /**
+     * T Reported
+     *
+     * T报（管理员改派时重新给定）
+     */
+    T_reported?: number | null;
 };
 
 /**
@@ -1887,10 +1709,6 @@ export type UserAdminCreate = {
      * R Assess
      */
     R_assess?: number | null;
-    /**
-     * Baseline Client Count
-     */
-    baseline_client_count?: number | null;
 };
 
 /**
@@ -1954,10 +1772,6 @@ export type UserAdminDetail = {
      * R Assess
      */
     R_assess?: number | null;
-    /**
-     * Baseline Client Count
-     */
-    baseline_client_count?: number | null;
     /**
      * Phone
      */
@@ -2041,10 +1855,6 @@ export type UserAdminUpdate = {
      * R Assess
      */
     R_assess?: number | null;
-    /**
-     * Baseline Client Count
-     */
-    baseline_client_count?: number | null;
 };
 
 /**
@@ -2791,36 +2601,6 @@ export type AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponses = {
 };
 
 export type AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponse = AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponses[keyof AdminResetPasswordV1AdminUsersUserIdResetPasswordPostResponses];
-
-export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutData = {
-    body: ClientResourceParamsUpdate;
-    path: {
-        /**
-         * User Id
-         */
-        user_id: string;
-    };
-    query?: never;
-    url: '/v1/admin/users/{user_id}/client-resource-params';
-};
-
-export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutError = AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutErrors[keyof AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutErrors];
-
-export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserAdminDetail;
-};
-
-export type AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponse = AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponses[keyof AdminSetPmClientResourceParamsV1AdminUsersUserIdClientResourceParamsPutResponses];
 
 export type AdminReadAuditLogsV1AdminAuditLogsGetData = {
     body?: never;
@@ -4262,125 +4042,6 @@ export type UpdateRuleV1SystemRulesRuleIdPutResponses = {
 };
 
 export type UpdateRuleV1SystemRulesRuleIdPutResponse = UpdateRuleV1SystemRulesRuleIdPutResponses[keyof UpdateRuleV1SystemRulesRuleIdPutResponses];
-
-export type ReadMyClientResourcesV1ClientResourcesGetData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Page
-         *
-         * 页码，从1开始
-         */
-        page?: number;
-        /**
-         * Page Size
-         *
-         * 每页数量，默认20
-         */
-        page_size?: number;
-    };
-    url: '/v1/client-resources';
-};
-
-export type ReadMyClientResourcesV1ClientResourcesGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadMyClientResourcesV1ClientResourcesGetError = ReadMyClientResourcesV1ClientResourcesGetErrors[keyof ReadMyClientResourcesV1ClientResourcesGetErrors];
-
-export type ReadMyClientResourcesV1ClientResourcesGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: ClientResourcesPublic;
-};
-
-export type ReadMyClientResourcesV1ClientResourcesGetResponse = ReadMyClientResourcesV1ClientResourcesGetResponses[keyof ReadMyClientResourcesV1ClientResourcesGetResponses];
-
-export type CreateClientResourceV1ClientResourcesPostData = {
-    body: ClientResourceCreate;
-    path?: never;
-    query?: never;
-    url: '/v1/client-resources';
-};
-
-export type CreateClientResourceV1ClientResourcesPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateClientResourceV1ClientResourcesPostError = CreateClientResourceV1ClientResourcesPostErrors[keyof CreateClientResourceV1ClientResourcesPostErrors];
-
-export type CreateClientResourceV1ClientResourcesPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: ClientResourcePublic;
-};
-
-export type CreateClientResourceV1ClientResourcesPostResponse = CreateClientResourceV1ClientResourcesPostResponses[keyof CreateClientResourceV1ClientResourcesPostResponses];
-
-export type ReadAdminClientResourceSummaryV1ClientResourcesAdminGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/v1/client-resources/admin';
-};
-
-export type ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponses = {
-    /**
-     * Response Read Admin Client Resource Summary V1 Client Resources Admin Get
-     *
-     * Successful Response
-     */
-    200: Array<ClientResourceSummary>;
-};
-
-export type ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponse = ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponses[keyof ReadAdminClientResourceSummaryV1ClientResourcesAdminGetResponses];
-
-export type ReadAllClientResourcesV1ClientResourcesAllGetData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Page
-         *
-         * 页码，从1开始
-         */
-        page?: number;
-        /**
-         * Page Size
-         *
-         * 每页数量，默认20
-         */
-        page_size?: number;
-    };
-    url: '/v1/client-resources/all';
-};
-
-export type ReadAllClientResourcesV1ClientResourcesAllGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadAllClientResourcesV1ClientResourcesAllGetError = ReadAllClientResourcesV1ClientResourcesAllGetErrors[keyof ReadAllClientResourcesV1ClientResourcesAllGetErrors];
-
-export type ReadAllClientResourcesV1ClientResourcesAllGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: ClientResourcesPublic;
-};
-
-export type ReadAllClientResourcesV1ClientResourcesAllGetResponse = ReadAllClientResourcesV1ClientResourcesAllGetResponses[keyof ReadAllClientResourcesV1ClientResourcesAllGetResponses];
 
 export type AdminReadRolesV1AdminRolesGetData = {
     body?: never;

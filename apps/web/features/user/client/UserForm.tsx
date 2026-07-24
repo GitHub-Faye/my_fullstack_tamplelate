@@ -494,21 +494,6 @@ export function UserForm({ user, mode }: UserFormProps) {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="baselineClientCount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>L基（基准客资数）</FormLabel>
-                        <FormControl>
-                          <Input type="number" min={0} step={1} placeholder="0" {...field}
-                            onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                            value={field.value ?? ""} disabled={isPending} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
               </>
             )}
