@@ -33,7 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Plus, Search, RotateCcw } from "lucide-react";
 import Link from "next/link";
 import { useTasks } from "../api";
-import { useUserMap, useCurrentUser } from "@/features/user";
+import { useCurrentUser } from "@/features/user";
 import {
   withdrawTaskV1TasksTaskIdWithdrawPost,
   deleteTaskV1TasksTaskIdDelete,
@@ -86,8 +86,6 @@ export function PMTaskTable() {
 
   // 当前用户信息
   const user = useCurrentUser();
-  // 用户 ID → 姓名 映射
-  const userMap = useUserMap();
 
   // 筛选条件状态
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -291,7 +289,7 @@ export function PMTaskTable() {
                       {task.name}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {(task as any).pm_name ?? (task.pm_id ? userMap[task.pm_id] ?? task.pm_id.slice(0, 8) : "-")}
+                      {(task as any).pm_name ?? (task.pm_id ? task.pm_id.slice(0, 8) : "-")}
                     </TableCell>
                     <TableCell>
                       {task.task_type ? (
@@ -311,7 +309,7 @@ export function PMTaskTable() {
                       )}
                     </TableCell>
                     <TableCell className="text-sm">
-                      {(task as any).engineer_name ?? (task.engineer_id ? userMap[task.engineer_id] ?? task.engineer_id.slice(0, 8) : "-")}
+                      {(task as any).engineer_name ?? (task.engineer_id ? task.engineer_id.slice(0, 8) : "-")}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {formatDateTime(task.expected_online_time)}
@@ -380,7 +378,6 @@ export function PMTaskTable() {
           task={detailTask}
           open={!!detailTask}
           onOpenChange={(open) => { if (!open) setDetailTask(null); }}
-          userMap={userMap}
         />
       )}
 

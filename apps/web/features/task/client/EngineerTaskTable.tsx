@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Loader2, Search, RotateCcw } from "lucide-react";
 import { useTasks } from "../api";
-import { useUserMap, useCurrentUser } from "@/features/user";
+import { useCurrentUser } from "@/features/user";
 import { useEngineerDashboard } from "@/features/dashboard";
 import { TaskDetailDialog } from "./TaskDetailDialog";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
@@ -99,7 +99,6 @@ export function EngineerTaskTable({
   const [taskTypeFilter, setTaskTypeFilter] = useState("all");
 
   const user = useCurrentUser();
-  const userMap = useUserMap();
   const { data: dashboard } = useEngineerDashboard();
 
   const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null, bidHours: 0 });
@@ -434,7 +433,7 @@ export function EngineerTaskTable({
                         ) : "-"}
                       </TableCell>
                       <TableCell className="text-sm">
-                        {(task as any).pm_name ?? (task.pm_id ? userMap[task.pm_id] ?? task.pm_id.slice(0, 8) : "-")}
+                        {(task as any).pm_name ?? (task.pm_id ? task.pm_id.slice(0, 8) : "-")}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDateTime(task.expected_online_time)}
@@ -497,7 +496,6 @@ export function EngineerTaskTable({
           task={detailTask}
           open={!!detailTask}
           onOpenChange={(o) => { if (!o) setDetailTask(null); }}
-          userMap={userMap}
         />
       )}
 

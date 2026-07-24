@@ -43,7 +43,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight, Play, Plus, FileText } from "lucide-react";
 import { useTasks, useTask } from "../api";
-import { useUserMap } from "@/features/user";
 import {
   useRejectTask,
   usePublishTask,
@@ -166,7 +165,6 @@ export function AdminTaskTable() {
     page_size: 20,
     status: status !== "all" ? (status as TaskStatus) : undefined,
   });
-  const userMap = useUserMap();
 
   // 操作弹窗状态
   const [actionDialog, setActionDialog] = useState<{ open: boolean; task: TaskPublic | null; action: string }>({
@@ -320,7 +318,7 @@ export function AdminTaskTable() {
             <SelectContent>
               <SelectItem value="all">全部工程师</SelectItem>
               {engineerIds.map((id) => (
-                <SelectItem key={id} value={id}>{userMap?.[id] || id.slice(0, 8)}</SelectItem>
+                <SelectItem key={id} value={id}>{id.slice(0, 8)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -331,7 +329,7 @@ export function AdminTaskTable() {
             <SelectContent>
               <SelectItem value="all">全部PM</SelectItem>
               {pmIds.map((id) => (
-                <SelectItem key={id} value={id}>{userMap?.[id] || id.slice(0, 8)}</SelectItem>
+                <SelectItem key={id} value={id}>{id.slice(0, 8)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -374,8 +372,8 @@ export function AdminTaskTable() {
                           {task.task_type ? TYPE_LABELS[task.task_type] : "正常"}
                         </Badge>
                       </TableCell>
-                      <TableCell>{(task as any).pm_name ?? (userMap?.[task.pm_id] || task.pm_id?.slice(0, 8) || "-")}</TableCell>
-                      <TableCell>{(task as any).engineer_name ?? (userMap?.[task.engineer_id ?? ""] || task.engineer_id?.slice(0, 8) || "-")}</TableCell>
+                      <TableCell>{(task as any).pm_name ?? (task.pm_id?.slice(0, 8) || "-")}</TableCell>
+                      <TableCell>{(task as any).engineer_name ?? (task.engineer_id?.slice(0, 8) || "-")}</TableCell>
                       <TableCell>
                         <Badge>{STATUS_LABELS[task.status]}</Badge>
                       </TableCell>
@@ -493,7 +491,6 @@ export function AdminTaskTable() {
           task={detailTask}
           open={!!detailTask}
           onOpenChange={(open) => { if (!open) setDetailTask(null); }}
-          userMap={userMap}
         />
       )}
 

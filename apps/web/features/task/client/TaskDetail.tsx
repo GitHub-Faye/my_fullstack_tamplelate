@@ -14,7 +14,6 @@ import { formatDateTime, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useTask } from "../api";
-import { useUserMap } from "@/features/user";
 import type { TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -46,7 +45,6 @@ interface TaskDetailProps {
 export function TaskDetail({ taskId }: TaskDetailProps) {
   const router = useRouter();
   const { data: task, isLoading, error } = useTask(taskId);
-  const userMap = useUserMap();
 
   if (isLoading) {
     return (
@@ -113,7 +111,7 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-sm text-muted-foreground">发布人</span>
-              <span className="text-sm">{(task as any).pm_name ?? userMap[task.pm_id] ?? task.pm_id.slice(0, 8)}</span>
+              <span className="text-sm">{(task as any).pm_name ?? task.pm_id.slice(0, 8)}</span>
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-sm text-muted-foreground">发布时间</span>
@@ -135,7 +133,7 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
               <>
                 <div className="flex flex-col gap-1">
                   <span className="text-sm text-muted-foreground">执行工程师</span>
-                  <span className="text-sm">{task.engineer_id ? ((task as any).engineer_name ?? userMap[task.engineer_id] ?? task.engineer_id.slice(0, 8)) : "-"}</span>
+                  <span className="text-sm">{task.engineer_id ? ((task as any).engineer_name ?? task.engineer_id.slice(0, 8)) : "-"}</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-sm text-muted-foreground">T实</span>

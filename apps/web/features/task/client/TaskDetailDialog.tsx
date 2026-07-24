@@ -87,12 +87,10 @@ export function TaskDetailDialog({
   task,
   open,
   onOpenChange,
-  userMap = {},
 }: {
   task: TaskPublic;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  userMap?: Record<string, string>;
 }) {
   if (!task) return null;
 
@@ -139,7 +137,7 @@ export function TaskDetailDialog({
             </div>
             <div className="flex gap-1">
               <span className="text-muted-foreground shrink-0">发布人</span>
-              <span>{(task as any).pm_name ?? userMap[task.pm_id] ?? task.pm_id.slice(0, 8)}</span>
+              <span>{(task as any).pm_name ?? task.pm_id.slice(0, 8)}</span>
             </div>
             <div className="flex gap-1">
               <span className="text-muted-foreground shrink-0">发布时间</span>
@@ -161,7 +159,7 @@ export function TaskDetailDialog({
               <>
                 <div className="flex gap-1">
                   <span className="text-muted-foreground shrink-0">执行工程师</span>
-                  <span>{task.engineer_id ? ((task as any).engineer_name ?? userMap[task.engineer_id] ?? task.engineer_id.slice(0, 8)) : "-"}</span>
+                  <span>{task.engineer_id ? ((task as any).engineer_name ?? task.engineer_id.slice(0, 8)) : "-"}</span>
                 </div>
                 <div className="flex gap-1">
                   <span className="text-muted-foreground shrink-0">T实</span>
