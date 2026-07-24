@@ -64,6 +64,16 @@ class DailyReportsPublic(PaginatedResponse[DailyReportPublic]):
     pass
 
 
+class DailyReportWithTaskName(DailyReportPublic):
+    """日报响应（含任务名称）"""
+    task_name: Optional[str] = Field(default=None, description="任务名称")
+
+
+class DailyReportsWithTaskNamePublic(PaginatedResponse[DailyReportWithTaskName]):
+    """日报列表分页响应（含任务名称）"""
+    pass
+
+
 # ==================== 提醒模型 ====================
 
 class RemindResult(SQLModel):

@@ -34,6 +34,8 @@ from app.domains.daily_report.schemas import (
     DailyReportsPublic,
     DailyReportUpdate,
     RemindResult,
+    DailyReportWithTaskName,
+    DailyReportsWithTaskNamePublic,
 )
 
 
@@ -162,16 +164,39 @@ async def create_daily_report(
         task.T_actual = 0.0
     task.T_actual += report_in.today_hours
 
-    # 6. 同步任务状态（根据日报的 current_stage）
+    # 6. 计算完成判定和预计星点（预估，基于 T_reported vs T_actual）
+    if task.T_reported and task.T_reported > 0:
+        actual_total = task.T_actual
+        reported = task.T_reported
+        ratio = actual_total / reported
+
+        if ratio <= 0.8:
+            completion_judgment = "提前完成"
+            starpoint_change = 5
+        elif ratio <= 1.0:
+            completion_judgment = "按时完成"
+            starpoint_change = 3
+        elif ratio <= 1.2:
+            completion_judgment = "超时≤20%"
+            starpoint_change = -5
+        elif ratio <= 1.5:
+            completion_judgment = "超时21-50%"
+            starpoint_change = -10
+        else:
+            completion_judgment = "超时>100%"
+            starpoint_change = -30
+
+        report.completion_judgment = completion_judgment
+        report.starpoint_change = starpoint_change
+        session.add(report)
+
+    # 7. 同步任务状态（根据日报的 current_stage）
     # 如果日报标记为 completed，则同步任务状态为 COMPLETED
     if report_in.current_stage == ReportStage.COMPLETED and task.status == TaskStatus.IN_PROGRESS:
         task.status = TaskStatus.COMPLETED
         # Spec §27: 阶段选择"已完成"时，进度自动设为 100%
         if not report_in.progress:
             report_in.progress = "100%"
-    # 如果日报标记为 paused，则同步任务状态为 PAUSED
-    elif report_in.current_stage == ReportStage.PAUSED and task.status == TaskStatus.IN_PROGRESS:
-        task.status = TaskStatus.PAUSED
 
     # 同步进度描述到任务（使用专用 progress 字段，不污染 PM 原始描述）
     # Spec §27: 阶段选择"已完成"时，进度自动设为 100%
@@ -189,7 +214,7 @@ async def create_daily_report(
 
 @router.get(
     "/",
-    response_model=DailyReportsPublic,
+    response_model=DailyReportsWithTaskNamePublic,
     summary="查看日报列表",
     description="工程师查看自己的日报列表，PM/管理员查看所有日报"
 )
@@ -229,7 +254,7 @@ async def read_daily_reports(
     )
 
     return DailyReportsPublic(
-        data=reports,
+        data=[DailyReportWithTaskName(**r) for r in reports],
         count=count,
         page=page,
         page_size=page_size,

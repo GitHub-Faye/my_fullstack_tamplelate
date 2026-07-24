@@ -567,11 +567,11 @@ export type DailyReportUpdate = {
 };
 
 /**
- * DailyReportsPublic
+ * DailyReportsWithTaskNamePublic
  *
- * 日报列表分页响应
+ * 日报列表分页响应（含任务名称）
  */
-export type DailyReportsPublic = {
+export type DailyReportsWithTaskNamePublic = {
     /**
      * Data
      */
@@ -3675,7 +3675,7 @@ export type ReadDailyReportsV1DailyReportsGetResponses = {
     /**
      * Successful Response
      */
-    200: DailyReportsPublic;
+    200: DailyReportsWithTaskNamePublic;
 };
 
 export type ReadDailyReportsV1DailyReportsGetResponse = ReadDailyReportsV1DailyReportsGetResponses[keyof ReadDailyReportsV1DailyReportsGetResponses];

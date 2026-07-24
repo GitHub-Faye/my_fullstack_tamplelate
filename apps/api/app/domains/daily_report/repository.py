@@ -81,9 +81,10 @@ async def get_daily_reports(
     report_date: Optional[date] = None,
     skip: int = 0,
     limit: int = 100,
-) -> Tuple[list[DailyReport], int]:
+) -> Tuple[list[dict], int]:
     """
     获取日报列表（分页），支持按工程师、任务、日期过滤
+    返回结果中包含 task_name（通过 LEFT JOIN Task 获取）
 
     Args:
         session: 数据库会话
@@ -94,8 +95,10 @@ async def get_daily_reports(
         limit: 返回记录数上限
 
     Returns:
-        (日报列表, 总数) 元组
+        (日报 dict 列表（含 task_name）, 总数) 元组
     """
+    from app.core.models import Task
+
     # 构建计数查询
     count_statement = select(func.count()).select_from(DailyReport)
     if engineer_id:
@@ -109,8 +112,12 @@ async def get_daily_reports(
     result = await session.execute(count_statement)
     count = result.scalar_one()
 
-    # 构建查询
-    statement = select(DailyReport).order_by(DailyReport.created_at.desc())
+    # 构建查询（LEFT JOIN Task 获取任务名称）
+    statement = (
+        select(DailyReport, Task.name.label("task_name"))
+        .outerjoin(Task, DailyReport.task_id == Task.id)
+        .order_by(DailyReport.created_at.desc())
+    )
     if engineer_id:
         statement = statement.where(DailyReport.engineer_id == engineer_id)
     if task_id:
@@ -121,9 +128,21 @@ async def get_daily_reports(
 
     statement = statement.offset(skip).limit(limit)
     result = await session.execute(statement)
-    reports = result.scalars().all()
+    rows = result.all()
 
-    return list(reports), count
+    # 将 ORM 对象转为 dict 并注入 task_name
+    reports = []
+    for row in rows:
+        report = row[0]
+        task_name = row[1]
+        report_dict = {
+            col.name: getattr(report, col.name)
+            for col in report.__table__.columns
+        }
+        report_dict["task_name"] = task_name
+        reports.append(report_dict)
+
+    return reports, count
 
 
 async def create_daily_report(

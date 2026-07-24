@@ -39,17 +39,22 @@ interface DailyReportEntry {
   todayHours: string;
   currentStage: string;
   progress: string;
-  completionJudgment: string;
-  estimatedStarpoint: string;
   notes: string;
+}
+
+/** 预览计算结果（提交后由后端返回） */
+interface SubmitResult {
+  taskName: string;
+  completionJudgment: string | null;
+  starpointChange: number | null;
 }
 
 /**
  * 工作汇报弹窗（日报提交）
  *
- * 展示所有进行中任务，每行可填今日投入、阶段、进度、完成判定、预计星点、说明
- * 每个任务单独调用 createDailyReportV1DailyReportsPost
- * 每个任务独立有 has_blocker
+ * 展示所有进行中任务，每行可填今日投入、阶段、进度、说明
+ * 完成判定和预计星点由后端自动计算，提交后在结果中回显
+ * 阶段仅可选：开发中、测试中、已完成（暂停中通过暂停按钮触发）
  */
 export function DailyReportDialog({
   open,
@@ -63,6 +68,7 @@ export function DailyReportDialog({
   const user = useCurrentUser();
   const [summary, setSummary] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [submitResults, setSubmitResults] = useState<SubmitResult[] | null>(null);
 
   const { data: tasks, isLoading } = useTasks({
     page: 1,
@@ -86,8 +92,6 @@ export function DailyReportDialog({
           todayHours: "",
           currentStage: "development",
           progress: t.progress ?? "",
-          completionJudgment: "",
-          estimatedStarpoint: "",
           notes: "",
         }))
       );
@@ -95,18 +99,32 @@ export function DailyReportDialog({
     if (!open) {
       setEntries([]);
       setSummary("");
+      setSubmitResults(null);
     }
   }, [open, taskList]);
 
   const updateEntry = (taskId: string, field: keyof DailyReportEntry, value: string) => {
     setEntries((prev) =>
-      prev.map((e) => (e.taskId === taskId ? { ...e, [field]: value } : e))
+      prev.map((e) => {
+        if (e.taskId !== taskId) return e;
+        const updated = { ...e, [field]: value };
+        // 阶段选"已完成"时，自动设进度为 100%
+        if (field === "currentStage" && value === "completed") {
+          updated.progress = "100%";
+        }
+        return updated;
+      })
     );
   };
 
+  /** 判断进度 input 是否为禁用状态 */
+  function isProgressDisabled(entry: DailyReportEntry): boolean {
+    return entry.currentStage === "completed";
+  }
+
   const handleSubmit = async () => {
     setSubmitting(true);
-    let successCount = 0;
+    const results: SubmitResult[] = [];
     for (const entry of entries) {
       const hours = parseFloat(entry.todayHours);
       if (isNaN(hours) || hours <= 0) {
@@ -114,7 +132,7 @@ export function DailyReportDialog({
         continue;
       }
       try {
-        await createDailyReportV1DailyReportsPost({
+        const res = await createDailyReportV1DailyReportsPost({
           throwOnError: true,
           body: {
             task_id: entry.taskId,
@@ -126,18 +144,56 @@ export function DailyReportDialog({
             has_blocker: false,
           },
         });
-        successCount++;
+        const data = res.data as any;
+        results.push({
+          taskName: entry.taskName,
+          completionJudgment: data?.completion_judgment ?? null,
+          starpointChange: data?.starpoint_change ?? null,
+        });
       } catch (e: any) {
         toast.error(`"${entry.taskName}" 提交失败: ${e.message}`);
       }
     }
-    if (successCount > 0) {
-      toast.success(`${successCount} 个任务日报已提交`);
+    if (results.length > 0) {
+      setSubmitResults(results);
+      toast.success(`${results.length} 个任务日报已提交`);
       onSuccess?.();
-      onOpenChange(false);
     }
     setSubmitting(false);
   };
+
+  /** 提交结果弹窗内容 */
+  function renderSubmitResults() {
+    if (!submitResults || submitResults.length === 0) return null;
+    return (
+      <div className="mt-4 rounded-md border overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-muted-foreground bg-muted/50">
+              <th className="text-left px-3 py-2 font-medium whitespace-nowrap">任务</th>
+              <th className="text-left px-3 py-2 font-medium whitespace-nowrap">完成判定</th>
+              <th className="text-left px-3 py-2 font-medium whitespace-nowrap">星点变化</th>
+            </tr>
+          </thead>
+          <tbody>
+            {submitResults.map((r, i) => (
+              <tr key={i} className="border-b last:border-0">
+                <td className="px-3 py-2 font-medium">{r.taskName}</td>
+                <td className="px-3 py-2">{r.completionJudgment ?? "-"}</td>
+                <td className="px-3 py-2">
+                  {r.starpointChange != null ? (
+                    <span className={r.starpointChange >= 0 ? "text-green-600" : "text-red-600"}>
+                      {r.starpointChange >= 0 ? `+${r.starpointChange}` : r.starpointChange}
+                    </span>
+                  ) : "-"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -151,6 +207,16 @@ export function DailyReportDialog({
           <div className="flex justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>
+        ) : submitResults ? (
+          <>
+            <p className="text-sm text-muted-foreground mb-2">日报已提交，完成判定与星点变化如下：</p>
+            {renderSubmitResults()}
+            <div className="flex justify-end gap-2 mt-4">
+              <Button onClick={() => { setSubmitResults(null); onOpenChange(false); }}>
+                关闭
+              </Button>
+            </div>
+          </>
         ) : entries.length === 0 ? (
           <p className="text-center py-8 text-muted-foreground">
             {taskList.length === 0 ? "暂无进行中任务" : "请先填写任务信息"}
@@ -168,8 +234,6 @@ export function DailyReportDialog({
                     <th className="text-left px-3 py-2 font-medium whitespace-nowrap">今日投入</th>
                     <th className="text-left px-3 py-2 font-medium whitespace-nowrap">当前阶段</th>
                     <th className="text-left px-3 py-2 font-medium whitespace-nowrap">当前进度</th>
-                    <th className="text-left px-3 py-2 font-medium whitespace-nowrap">完成判定</th>
-                    <th className="text-left px-3 py-2 font-medium whitespace-nowrap">预计星点</th>
                     <th className="text-left px-3 py-2 font-medium whitespace-nowrap">说明</th>
                   </tr>
                 </thead>
@@ -215,37 +279,17 @@ export function DailyReportDialog({
                             <SelectItem value="development">开发中</SelectItem>
                             <SelectItem value="testing">测试中</SelectItem>
                             <SelectItem value="completed">已完成</SelectItem>
-                            <SelectItem value="paused">暂停中</SelectItem>
                           </SelectContent>
                         </Select>
                       </td>
                       <td className="px-3 py-2">
                         <Input
-                          className="w-16 h-8 text-sm"
+                          className={`w-16 h-8 text-sm ${isProgressDisabled(entry) ? "bg-muted" : ""}`}
                           placeholder="%"
                           value={entry.progress}
+                          disabled={isProgressDisabled(entry)}
                           onChange={(e) =>
                             updateEntry(entry.taskId, "progress", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td className="px-3 py-2">
-                        <Input
-                          className="w-20 h-8 text-sm"
-                          placeholder="判定"
-                          value={entry.completionJudgment}
-                          onChange={(e) =>
-                            updateEntry(entry.taskId, "completionJudgment", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td className="px-3 py-2">
-                        <Input
-                          className="w-16 h-8 text-sm"
-                          placeholder="星点"
-                          value={entry.estimatedStarpoint}
-                          onChange={(e) =>
-                            updateEntry(entry.taskId, "estimatedStarpoint", e.target.value)
                           }
                         />
                       </td>

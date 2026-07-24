@@ -137,11 +137,11 @@ export const zClientResourcesPublic = z.object({
 });
 
 /**
- * DailyReportsPublic
+ * DailyReportsWithTaskNamePublic
  *
- * 日报列表分页响应
+ * 日报列表分页响应（含任务名称）
  */
-export const zDailyReportsPublic = z.object({
+export const zDailyReportsWithTaskNamePublic = z.object({
     data: z.array(z.unknown()),
     count: z.int(),
     page: z.int().nullish(),
@@ -1392,7 +1392,7 @@ export const zReadDailyReportsV1DailyReportsGetQuery = z.object({
 /**
  * Successful Response
  */
-export const zReadDailyReportsV1DailyReportsGetResponse = zDailyReportsPublic;
+export const zReadDailyReportsV1DailyReportsGetResponse = zDailyReportsWithTaskNamePublic;
 
 export const zCreateDailyReportV1DailyReportsPostBody = zDailyReportCreate;
 
