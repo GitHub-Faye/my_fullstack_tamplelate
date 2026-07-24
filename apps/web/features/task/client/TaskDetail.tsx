@@ -28,7 +28,6 @@ const STATUS_COLORS: Record<TaskStatus, string> = {
   bidding: "default",
   pending_start: "default",
   in_progress: "default",
-  pause_requested: "default",
   paused: "default",
   completed: "default",
 } as const;

@@ -48,8 +48,6 @@ import {
   usePublishTask,
   useConvertToUrgent,
   useConvertToConvenient,
-  usePauseApproveTask,
-  usePauseRejectTask,
   useAdminRestoreTask,
   useSettleBidding,
 } from "../api/client/adminMutations";
@@ -78,7 +76,6 @@ const REVIEW_FILTERS: { value: string; label: string }[] = [
   { value: TaskStatusConst.BIDDING, label: "竞价中" },
   { value: TaskStatusConst.PENDING_START, label: "待启动" },
   { value: TaskStatusConst.IN_PROGRESS, label: "进行中" },
-  { value: TaskStatusConst.PAUSE_REQUESTED, label: "暂停待审批" },
   { value: TaskStatusConst.PAUSED, label: "已暂停" },
   { value: TaskStatusConst.COMPLETED, label: "已完成" },
 ];
@@ -118,12 +115,6 @@ function getAdminActions(status: TaskStatus) {
       ];
     case TaskStatusConst.IN_PROGRESS:
       return [
-        { key: "detail", label: "详情", icon: Eye },
-      ];
-    case TaskStatusConst.PAUSE_REQUESTED:
-      return [
-        { key: "pauseApprove", label: "审批暂停", icon: CheckCircle },
-        { key: "pauseReject", label: "驳回暂停", icon: XCircle },
         { key: "detail", label: "详情", icon: Eye },
       ];
     case TaskStatusConst.PAUSED:
@@ -196,8 +187,6 @@ export function AdminTaskTable() {
   const publishTask = usePublishTask();
   const convertToUrgent = useConvertToUrgent();
   const convertToConvenient = useConvertToConvenient();
-  const pauseApproveTask = usePauseApproveTask();
-  const pauseRejectTask = usePauseRejectTask();
   const adminRestoreTask = useAdminRestoreTask();
   const settleBidding = useSettleBidding();
 
@@ -249,20 +238,6 @@ export function AdminTaskTable() {
         break;
       case "reassign":
         setAssignTask(task);
-        break;
-      case "pauseApprove":
-        try {
-          await pauseApproveTask.mutateAsync(task.id);
-        } catch {
-          // handled by mutation
-        }
-        break;
-      case "pauseReject":
-        try {
-          await pauseRejectTask.mutateAsync(task.id);
-        } catch {
-          // handled by mutation
-        }
         break;
       case "adminRestore":
         try {

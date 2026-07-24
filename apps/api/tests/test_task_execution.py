@@ -253,8 +253,8 @@ class TestTaskExecution:
         self, db_session: AsyncSession, client: AsyncClient
     ):
         """
-        测试工程师成功申请暂停任务
-        - 任务状态从 IN_PROGRESS 变为 PAUSE_REQUESTED（待管理员审批）
+        测试工程师成功暂停任务
+        - 状态从 IN_PROGRESS 变为 PAUSED
         """
         # 1. 创建 PM 和工程师
         pm = await create_test_user(
@@ -292,7 +292,7 @@ class TestTaskExecution:
 
         # 5. 验证数据库 - 状态变为 PAUSE_REQUESTED（待审批）
         updated_task = await db_session.get(Task, task.id)
-        assert updated_task.status == TaskStatus.PAUSE_REQUESTED
+        assert updated_task.status == TaskStatus.PAUSED
 
     @pytest.mark.asyncio
     async def test_resume_task_success(
@@ -389,158 +389,6 @@ class TestTaskExecution:
         assert updated_task.status == TaskStatus.COMPLETED
         # T_reported 来自竞价报价，不在 complete 时填写
         # 这里 task 没有竞价，T_reported 保持 None
-
-    @pytest.mark.asyncio
-    async def test_admin_pause_approve_success(
-        self, db_session: AsyncSession, client: AsyncClient
-    ):
-        """
-        测试管理员审批暂停任务
-        - 审批通过后状态从 PAUSE_REQUESTED 变为 PAUSED
-        """
-        # 1. 创建 PM、工程师和管理员
-        pm = await create_test_user(
-            db_session,
-            email="pm_admin_pause@example.com",
-            is_superuser=False,
-        )
-        pm.role = UserRoleType.PM
-        db_session.add(pm)
-        await db_session.commit()
-
-        engineer = await create_test_user(
-            db_session,
-            email="eng_admin_pause@example.com",
-            is_superuser=False,
-        )
-        engineer.role = UserRoleType.ENGINEER
-        db_session.add(engineer)
-        await db_session.commit()
-
-        admin = await create_test_user(
-            db_session,
-            email="admin_pause@example.com",
-            is_superuser=True,  # 超级管理员
-        )
-
-        # 2. 创建暂停待审批的任务
-        task = await create_test_task(
-            db_session, pm, engineer, status=TaskStatus.PAUSE_REQUESTED
-        )
-
-        # 3. 管理员审批暂停
-        token = create_test_token(admin.id)
-        response = await client.post(
-            f"/v1/tasks/{task.id}/pause-approve",
-            headers=get_auth_headers(token),
-        )
-
-        # 4. 验证响应
-        assert response.status_code == 200
-
-        # 5. 验证数据库 - 状态变为 PAUSED
-        updated_task = await db_session.get(Task, task.id)
-        assert updated_task.status == TaskStatus.PAUSED
-
-    @pytest.mark.asyncio
-    async def test_admin_pause_reject_success(
-        self, db_session: AsyncSession, client: AsyncClient
-    ):
-        """
-        测试管理员驳回暂停申请
-        - 驳回后状态从 PAUSE_REQUESTED 回到 IN_PROGRESS
-        """
-        # 1. 创建 PM、工程师和管理员
-        pm = await create_test_user(
-            db_session,
-            email="pm_reject_pause@example.com",
-            is_superuser=False,
-        )
-        pm.role = UserRoleType.PM
-        db_session.add(pm)
-        await db_session.commit()
-
-        engineer = await create_test_user(
-            db_session,
-            email="eng_reject_pause@example.com",
-            is_superuser=False,
-        )
-        engineer.role = UserRoleType.ENGINEER
-        db_session.add(engineer)
-        await db_session.commit()
-
-        admin = await create_test_user(
-            db_session,
-            email="admin_reject_pause@example.com",
-            is_superuser=True,
-        )
-
-        # 2. 创建暂停待审批的任务
-        task = await create_test_task(
-            db_session, pm, engineer, status=TaskStatus.PAUSE_REQUESTED
-        )
-
-        # 3. 管理员驳回暂停
-        token = create_test_token(admin.id)
-        response = await client.post(
-            f"/v1/tasks/{task.id}/pause-reject",
-            headers=get_auth_headers(token),
-        )
-
-        # 4. 验证响应
-        assert response.status_code == 200
-
-        # 5. 验证数据库 - 状态回到 IN_PROGRESS
-        updated_task = await db_session.get(Task, task.id)
-        assert updated_task.status == TaskStatus.IN_PROGRESS
-
-    @pytest.mark.asyncio
-    async def test_admin_pause_approve_wrong_status(
-        self, db_session: AsyncSession, client: AsyncClient
-    ):
-        """
-        测试管理员审批非 PAUSE_REQUESTED 状态的任务
-        - 应返回 400 错误
-        """
-        # 1. 创建 PM、工程师和管理员
-        pm = await create_test_user(
-            db_session,
-            email="pm_wrong_status_approve@example.com",
-            is_superuser=False,
-        )
-        pm.role = UserRoleType.PM
-        db_session.add(pm)
-        await db_session.commit()
-
-        engineer = await create_test_user(
-            db_session,
-            email="eng_wrong_status_approve@example.com",
-            is_superuser=False,
-        )
-        engineer.role = UserRoleType.ENGINEER
-        db_session.add(engineer)
-        await db_session.commit()
-
-        admin = await create_test_user(
-            db_session,
-            email="admin_wrong_status_approve@example.com",
-            is_superuser=True,
-        )
-
-        # 2. 创建 IN_PROGRESS 状态的任务（非 PAUSE_REQUESTED）
-        task = await create_test_task(
-            db_session, pm, engineer, status=TaskStatus.IN_PROGRESS
-        )
-
-        # 3. 管理员尝试审批
-        token = create_test_token(admin.id)
-        response = await client.post(
-            f"/v1/tasks/{task.id}/pause-approve",
-            headers=get_auth_headers(token),
-        )
-
-        # 4. 验证响应
-        assert response.status_code == 400
 
     @pytest.mark.asyncio
     async def test_admin_reassign_task_success(

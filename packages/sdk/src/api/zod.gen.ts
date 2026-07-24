@@ -591,7 +591,6 @@ export const zTaskStatus = z.enum([
     'bidding',
     'pending_start',
     'in_progress',
-    'pause_requested',
     'paused',
     'completed'
 ]);
@@ -1157,24 +1156,6 @@ export const zConvertToConvenientV1TasksTaskIdConvertConvenientPostPath = z.obje
  * Successful Response
  */
 export const zConvertToConvenientV1TasksTaskIdConvertConvenientPostResponse = zTaskPublic;
-
-export const zPauseApproveTaskV1TasksTaskIdPauseApprovePostPath = z.object({
-    task_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zPauseApproveTaskV1TasksTaskIdPauseApprovePostResponse = zTaskPublic;
-
-export const zPauseRejectTaskV1TasksTaskIdPauseRejectPostPath = z.object({
-    task_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zPauseRejectTaskV1TasksTaskIdPauseRejectPostResponse = zTaskPublic;
 
 export const zReassignTaskV1TasksTaskIdReassignPostBody = zTaskReassignRequest;
 

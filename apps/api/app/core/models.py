@@ -29,8 +29,7 @@ class TaskStatus(str, Enum):
     BIDDING = "bidding"                              # 竞价中
     PENDING_START = "pending_start"                  # 待开工
     IN_PROGRESS = "in_progress"                      # 进行中
-    PAUSE_REQUESTED = "pause_requested"              # 暂停待审批（工程师申请，待管理员审批）
-    PAUSED = "paused"                                # 暂停中（管理员审批通过）
+    PAUSED = "paused"                                # 暂停中（工程师直接暂停）
     COMPLETED = "completed"                          # 已完成
 
 

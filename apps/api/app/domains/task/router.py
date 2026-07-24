@@ -405,67 +405,7 @@ async def convert_to_convenient(
     return task
 
 
-# ==================== 管理员暂停审批与改派 ====================
-
-
-@router.post(
-    "/{task_id}/pause-approve",
-    response_model=TaskPublic,
-    summary="审批暂停（管理员）",
-    description="管理员审批确认任务暂停，状态从 PAUSE_REQUESTED 变为 PAUSED",
-)
-async def pause_approve_task(
-    *,
-    session: SessionDep,
-    current_user: CurrentUser,
-    task_id: uuid.UUID,
-) -> Any:
-    """审批暂停 — 需要管理员权限"""
-    task = await repository.get_task(session=session, task_id=task_id)
-    if not task:
-        raise_task_not_found()
-    await check_admin_scope(session, current_user)
-    await check_task_status(task, TaskStatus.PAUSE_REQUESTED)
-    task.status = TaskStatus.PAUSED
-    session.add(task)
-    await session.commit()
-    await session.refresh(task)
-    await create_audit_log(
-        session=session, user_id=current_user.id, action="task.pause_approve",
-        target_type="task", target_id=str(task_id),
-        details=f"Task pause approved by administrator", ip_address=None,
-    )
-    return task
-
-
-@router.post(
-    "/{task_id}/pause-reject",
-    response_model=TaskPublic,
-    summary="驳回暂停（管理员）",
-    description="管理员驳回工程师的暂停申请，状态回到 IN_PROGRESS",
-)
-async def pause_reject_task(
-    *,
-    session: SessionDep,
-    current_user: CurrentUser,
-    task_id: uuid.UUID,
-) -> Any:
-    """驳回暂停申请 — 需要管理员权限"""
-    task = await repository.get_task(session=session, task_id=task_id)
-    if not task:
-        raise_task_not_found()
-    await check_admin_scope(session, current_user)
-    await check_task_status(task, TaskStatus.PAUSE_REQUESTED)
-    task.status = TaskStatus.IN_PROGRESS
-    session.add(task)
-    await session.commit()
-    await session.refresh(task)
-    await create_audit_log(
-        session=session, user_id=current_user.id, action="task.pause_reject",
-        target_type="task", target_id=str(task_id),
-        details=f"Task pause rejected by administrator", ip_address=None,
-    )
-    return task
+# ==================== 管理员改派 ====================
 
 
 @router.post(
@@ -668,20 +608,20 @@ async def pause_request_task(
     current_user: CurrentUser,
     task_id: uuid.UUID,
 ) -> Any:
-    """申请暂停 — 需管理员审批"""
+    """申请暂停 — 工程师直接暂停任务"""
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
         raise_task_not_found()
     await check_task_assigned_to_engineer(session, current_user, task)
     await check_task_status(task, TaskStatus.IN_PROGRESS)
-    task.status = TaskStatus.PAUSE_REQUESTED
+    task.status = TaskStatus.PAUSED
     session.add(task)
     await session.commit()
     await session.refresh(task)
     await create_audit_log(
-        session=session, user_id=current_user.id, action="task.pause_request",
+        session=session, user_id=current_user.id, action="task.pause",
         target_type="task", target_id=str(task_id),
-        details=f"Engineer requested pause", ip_address=None,
+        details=f"Engineer paused task", ip_address=None,
     )
     return task
 

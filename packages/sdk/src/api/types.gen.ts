@@ -1543,7 +1543,7 @@ export type TaskReassignRequest = {
  * unconfirmed -> bidding -> pending_start -> in_progress -> completed
  * 中间状态：paused（可从 in_progress 暂停）
  */
-export type TaskStatus = 'unconfirmed' | 'bidding' | 'pending_start' | 'in_progress' | 'pause_requested' | 'paused' | 'completed';
+export type TaskStatus = 'unconfirmed' | 'bidding' | 'pending_start' | 'in_progress' | 'paused' | 'completed';
 
 /**
  * TaskType
@@ -2959,66 +2959,6 @@ export type ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponses = {
 };
 
 export type ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponse = ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponses[keyof ConvertToConvenientV1TasksTaskIdConvertConvenientPostResponses];
-
-export type PauseApproveTaskV1TasksTaskIdPauseApprovePostData = {
-    body?: never;
-    path: {
-        /**
-         * Task Id
-         */
-        task_id: string;
-    };
-    query?: never;
-    url: '/v1/tasks/{task_id}/pause-approve';
-};
-
-export type PauseApproveTaskV1TasksTaskIdPauseApprovePostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type PauseApproveTaskV1TasksTaskIdPauseApprovePostError = PauseApproveTaskV1TasksTaskIdPauseApprovePostErrors[keyof PauseApproveTaskV1TasksTaskIdPauseApprovePostErrors];
-
-export type PauseApproveTaskV1TasksTaskIdPauseApprovePostResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskPublic;
-};
-
-export type PauseApproveTaskV1TasksTaskIdPauseApprovePostResponse = PauseApproveTaskV1TasksTaskIdPauseApprovePostResponses[keyof PauseApproveTaskV1TasksTaskIdPauseApprovePostResponses];
-
-export type PauseRejectTaskV1TasksTaskIdPauseRejectPostData = {
-    body?: never;
-    path: {
-        /**
-         * Task Id
-         */
-        task_id: string;
-    };
-    query?: never;
-    url: '/v1/tasks/{task_id}/pause-reject';
-};
-
-export type PauseRejectTaskV1TasksTaskIdPauseRejectPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type PauseRejectTaskV1TasksTaskIdPauseRejectPostError = PauseRejectTaskV1TasksTaskIdPauseRejectPostErrors[keyof PauseRejectTaskV1TasksTaskIdPauseRejectPostErrors];
-
-export type PauseRejectTaskV1TasksTaskIdPauseRejectPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskPublic;
-};
-
-export type PauseRejectTaskV1TasksTaskIdPauseRejectPostResponse = PauseRejectTaskV1TasksTaskIdPauseRejectPostResponses[keyof PauseRejectTaskV1TasksTaskIdPauseRejectPostResponses];
 
 export type ReassignTaskV1TasksTaskIdReassignPostData = {
     body: TaskReassignRequest;

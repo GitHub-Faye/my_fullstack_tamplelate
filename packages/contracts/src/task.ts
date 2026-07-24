@@ -19,7 +19,6 @@ export const TaskStatus = {
   BIDDING: "bidding",
   PENDING_START: "pending_start",
   IN_PROGRESS: "in_progress",
-  PAUSE_REQUESTED: "pause_requested",
   PAUSED: "paused",
   COMPLETED: "completed",
 } as const;
@@ -34,7 +33,6 @@ export const TASK_STATUS_LABELS: Record<TaskStatusType, string> = {
   [TaskStatus.BIDDING]: "竞价中",
   [TaskStatus.PENDING_START]: "待启动",
   [TaskStatus.IN_PROGRESS]: "进行中",
-  [TaskStatus.PAUSE_REQUESTED]: "暂停待审批",
   [TaskStatus.PAUSED]: "暂停中",
   [TaskStatus.COMPLETED]: "已完成",
 };
@@ -47,7 +45,6 @@ export const TASK_STATUS_COLORS: Record<TaskStatusType, string> = {
   [TaskStatus.BIDDING]: "orange",
   [TaskStatus.PENDING_START]: "orange",
   [TaskStatus.IN_PROGRESS]: "blue",
-  [TaskStatus.PAUSE_REQUESTED]: "orange",
   [TaskStatus.PAUSED]: "orange",
   [TaskStatus.COMPLETED]: "green",
 };

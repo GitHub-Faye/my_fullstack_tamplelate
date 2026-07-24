@@ -18,8 +18,6 @@ import {
   publishTaskV1TasksTaskIdPublishPost,
   convertToUrgentV1TasksTaskIdConvertUrgentPost,
   convertToConvenientV1TasksTaskIdConvertConvenientPost,
-  pauseApproveTaskV1TasksTaskIdPauseApprovePost,
-  pauseRejectTaskV1TasksTaskIdPauseRejectPost,
   adminRestoreTaskV1TasksTaskIdRestorePost,
   manualSettleBiddingV1TasksTaskIdSettleBiddingPost,
   type TaskPublic,
@@ -111,40 +109,6 @@ export function useConvertToConvenient() {
     },
     "已转换为便捷任务",
     "转换失败",
-  );
-}
-
-/**
- * 审批暂停通过（管理员）
- */
-export function usePauseApproveTask() {
-  return makeAdminMutation(
-    async (taskId: string) => {
-      const response = await pauseApproveTaskV1TasksTaskIdPauseApprovePost({
-        path: { task_id: taskId },
-        throwOnError: true,
-      });
-      return response.data;
-    },
-    "暂停审批通过",
-    "审批失败",
-  );
-}
-
-/**
- * 驳回暂停申请（管理员）
- */
-export function usePauseRejectTask() {
-  return makeAdminMutation(
-    async (taskId: string) => {
-      const response = await pauseRejectTaskV1TasksTaskIdPauseRejectPost({
-        path: { task_id: taskId },
-        throwOnError: true,
-      });
-      return response.data;
-    },
-    "已驳回暂停申请",
-    "驳回失败",
   );
 }
 

@@ -5,8 +5,6 @@ export const ACTION_OPTIONS = [
   { value: "task.publish", label: "发布任务" },
   { value: "task.convert_type", label: "转换类型" },
   { value: "task.reassign", label: "改派任务" },
-  { value: "task.pause_approve", label: "批准暂停" },
-  { value: "task.pause_reject", label: "驳回暂停" },
   { value: "user.create", label: "创建用户" },
   { value: "user.toggle_active", label: "启用/禁用用户" },
   { value: "salary.update", label: "更新工资参数" },
