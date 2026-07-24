@@ -3085,36 +3085,6 @@ export type WithdrawTaskV1TasksTaskIdWithdrawPostResponses = {
 
 export type WithdrawTaskV1TasksTaskIdWithdrawPostResponse = WithdrawTaskV1TasksTaskIdWithdrawPostResponses[keyof WithdrawTaskV1TasksTaskIdWithdrawPostResponses];
 
-export type RejectTaskV1TasksTaskIdRejectPostData = {
-    body?: never;
-    path: {
-        /**
-         * Task Id
-         */
-        task_id: string;
-    };
-    query?: never;
-    url: '/v1/tasks/{task_id}/reject';
-};
-
-export type RejectTaskV1TasksTaskIdRejectPostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RejectTaskV1TasksTaskIdRejectPostError = RejectTaskV1TasksTaskIdRejectPostErrors[keyof RejectTaskV1TasksTaskIdRejectPostErrors];
-
-export type RejectTaskV1TasksTaskIdRejectPostResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskPublic;
-};
-
-export type RejectTaskV1TasksTaskIdRejectPostResponse = RejectTaskV1TasksTaskIdRejectPostResponses[keyof RejectTaskV1TasksTaskIdRejectPostResponses];
-
 export type PublishTaskV1TasksTaskIdPublishPostData = {
     body?: never;
     path: {

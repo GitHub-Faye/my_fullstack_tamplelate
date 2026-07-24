@@ -1,7 +1,7 @@
 """
 Task Admin API 集成测试
 
-测试管理员任务审核与发布功能：审核通过、驳回、发布、类型转换
+测试管理员任务审核与发布功能：审核通过、发布、类型转换
 """
 
 import uuid
@@ -86,8 +86,6 @@ async def test_publish_task_success(client: AsyncClient, db_session: AsyncSessio
     data = response.json()
     assert data["status"] == "bidding"
     assert data["bidding_deadline"] is not None
-
-
 
 
 # ==================== 测试用例：类型转换 ====================
@@ -196,44 +194,5 @@ async def test_convert_already_urgent_fails(client: AsyncClient, db_session: Asy
     )
 
     assert response.status_code == 400
-
-
-# ==================== 测试用例：驳回任务 ====================
-
-@pytest.mark.asyncio
-async def test_reject_task_success(client: AsyncClient, db_session: AsyncSession) -> None:
-    """测试驳回任务"""
-    # 创建管理员和 PM 用户
-    admin = await create_test_admin(db_session)
-    pm = await create_test_pm(db_session)
-
-    # 创建未确认任务
-    task = Task(
-        name="待驳回任务",
-        description="测试任务",
-        task_type=TaskType.NORMAL,
-        status=TaskStatus.UNCONFIRMED,
-        pm_id=pm.id,
-    )
-    db_session.add(task)
-    await db_session.commit()
-    await db_session.refresh(task)
-
-    # 生成管理员 token
-    token = create_access_token(
-        subject=str(admin.id),
-        expires_delta=timedelta(minutes=30),
-    )
-
-    # 驳回任务
-    response = await client.post(
-        f"/v1/tasks/{task.id}/reject",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response.status_code == 200
-    data = response.json()
-    # 驳回后状态保持为 unconfirmed
-    assert data["status"] == "unconfirmed"
 
 

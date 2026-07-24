@@ -95,33 +95,6 @@ async def test_audit_log_on_task_create(client: AsyncClient, db_session: AsyncSe
 
 
 @pytest.mark.asyncio
-async def test_audit_log_on_task_reject(client: AsyncClient, db_session: AsyncSession):
-    """管理员驳回任务时记录审计日志"""
-    admin = await create_admin(db_session)
-    pm = await create_pm(db_session)
-
-    task = Task(name="待驳回任务", status=TaskStatus.UNCONFIRMED, pm_id=pm.id, task_type=TaskType.NORMAL)
-    db_session.add(task)
-    await db_session.commit()
-    await db_session.refresh(task)
-
-    token = _token(admin)
-    response = await client.post(
-        f"/v1/tasks/{task.id}/reject",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    assert response.status_code == 200
-
-    log_response = await client.get(
-        f"/v1/audit-logs/?action=task.reject",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    assert log_response.status_code == 200
-    logs = log_response.json()
-    assert logs["count"] >= 1
-
-
-@pytest.mark.asyncio
 async def test_audit_log_on_task_publish(client: AsyncClient, db_session: AsyncSession):
     """管理员发布任务时记录审计日志"""
     admin = await create_admin(db_session)

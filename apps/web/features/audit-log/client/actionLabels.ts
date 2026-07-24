@@ -2,7 +2,6 @@
 export const ACTION_OPTIONS = [
   { value: "task.create", label: "发布任务" },
   { value: "task.approve", label: "审核通过" },
-  { value: "task.reject", label: "驳回任务" },
   { value: "task.publish", label: "发布任务" },
   { value: "task.convert_type", label: "转换类型" },
   { value: "task.reassign", label: "改派任务" },

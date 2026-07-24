@@ -306,36 +306,6 @@ async def withdraw_task(
 
 
 @router.post(
-    "/{task_id}/reject",
-    response_model=TaskPublic,
-    summary="驳回任务（管理员）",
-    description="管理员驳回任务，状态保持 'unconfirmed'",
-)
-async def reject_task(
-    *,
-    session: SessionDep,
-    current_user: CurrentUser,
-    task_id: uuid.UUID,
-    _: Annotated[None, Depends(require_scope(TaskScope.APPROVE))],
-) -> Any:
-    """驳回任务 — 仅 'unconfirmed' 状态可驳回"""
-    task = await repository.get_task(session=session, task_id=task_id)
-    if not task:
-        raise_task_not_found()
-    if task.status != TaskStatus.UNCONFIRMED:
-        raise BusinessException(
-            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
-            detail=f"Task status '{task.status.value}' cannot be rejected."
-        )
-    await create_audit_log(
-        session=session, user_id=current_user.id, action="task.reject",
-        target_type="task", target_id=str(task_id),
-        details=f"Task rejected by administrator", ip_address=None,
-    )
-    return task
-
-
-@router.post(
     "/{task_id}/publish",
     response_model=TaskPublic,
     summary="发布任务到竞价池（管理员）",

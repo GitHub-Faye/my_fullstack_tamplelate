@@ -45,7 +45,6 @@ import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, Al
 import { useTasks, useTask } from "../api";
 import { useUsers } from "@/features/user";
 import {
-  useRejectTask,
   usePublishTask,
   useConvertToUrgent,
   useConvertToConvenient,
@@ -101,7 +100,6 @@ function getAdminActions(status: TaskStatus) {
     case TaskStatusConst.UNCONFIRMED:
       return [
         { key: "publish", label: "发布到竞价池", icon: Send },
-        { key: "reject", label: "驳回", icon: XCircle },
         { key: "detail", label: "详情", icon: Eye },
       ];
     case TaskStatusConst.BIDDING:
@@ -191,7 +189,6 @@ export function AdminTaskTable() {
   const [workLogTask, setWorkLogTask] = useState<TaskPublic | null>(null);
   const [auditLogTask, setAuditLogTask] = useState<TaskPublic | null>(null);
 
-  const rejectTask = useRejectTask();
   const publishTask = usePublishTask();
   const convertToUrgent = useConvertToUrgent();
   const convertToConvenient = useConvertToConvenient();
@@ -228,13 +225,6 @@ export function AdminTaskTable() {
     switch (action) {
       case "publish":
         setActionDialog({ open: true, task, action: "publish" });
-        break;
-      case "reject":
-        try {
-          await rejectTask.mutateAsync(task.id);
-        } catch {
-          // handled by mutation
-        }
         break;
       case "viewBids":
         setBidLogTask(task);

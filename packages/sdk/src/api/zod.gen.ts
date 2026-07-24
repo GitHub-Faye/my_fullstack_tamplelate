@@ -1210,15 +1210,6 @@ export const zWithdrawTaskV1TasksTaskIdWithdrawPostPath = z.object({
  */
 export const zWithdrawTaskV1TasksTaskIdWithdrawPostResponse = zTaskPublic;
 
-export const zRejectTaskV1TasksTaskIdRejectPostPath = z.object({
-    task_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zRejectTaskV1TasksTaskIdRejectPostResponse = zTaskPublic;
-
 export const zPublishTaskV1TasksTaskIdPublishPostPath = z.object({
     task_id: z.uuid()
 });

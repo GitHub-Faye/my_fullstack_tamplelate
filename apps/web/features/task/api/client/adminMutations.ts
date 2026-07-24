@@ -15,7 +15,6 @@ import {
 import { toast } from "sonner";
 import {
   // SDK functions
-  rejectTaskV1TasksTaskIdRejectPost,
   publishTaskV1TasksTaskIdPublishPost,
   convertToUrgentV1TasksTaskIdConvertUrgentPost,
   convertToConvenientV1TasksTaskIdConvertConvenientPost,
@@ -54,23 +53,6 @@ function makeAdminMutation<T>(
 }
 
 // ==================== Mutations ====================
-
-/**
- * 驳回任务（管理员）
- */
-export function useRejectTask() {
-  return makeAdminMutation(
-    async (taskId: string) => {
-      const response = await rejectTaskV1TasksTaskIdRejectPost({
-        path: { task_id: taskId },
-        throwOnError: true,
-      });
-      return response.data;
-    },
-    "任务已驳回",
-    "驳回失败",
-  );
-}
 
 /**
  * 发布任务到竞价池（管理员）

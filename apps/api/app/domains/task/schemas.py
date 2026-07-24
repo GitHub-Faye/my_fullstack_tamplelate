@@ -74,11 +74,6 @@ class TaskStartRequest(SQLModel):
     pass
 
 
-class TaskRejectRequest(SQLModel):
-    """拒绝任务请求"""
-    reason: Optional[str] = Field(default=None, max_length=500, description="拒绝原因")
-
-
 class TaskPauseRequest(SQLModel):
     """申请暂停请求"""
     reason: Optional[str] = Field(default=None, max_length=500, description="暂停原因")

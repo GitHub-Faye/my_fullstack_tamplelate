@@ -35,7 +35,6 @@ from app.domains.task.schemas import (
 )
 from app.domains.task.schemas import (
     TaskStartRequest,
-    TaskRejectRequest,
     TaskPauseRequest,
     TaskResumeRequest,
     TaskCompleteRequest,
