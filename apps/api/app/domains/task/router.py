@@ -637,6 +637,11 @@ async def decline_task(
     await check_task_status(task, TaskStatus.PENDING_START)
     task.status = TaskStatus.BIDDING
     task.engineer_id = None
+    task.engineer_name = None
+    task.T_reported = None
+    task.T_actual = None
+    task.progress = None
+    task.T_reported_complete_time = None
     task.bidding_deadline = datetime.now(timezone.utc) + timedelta(days=1)
     session.add(task)
     await session.commit()
