@@ -90,7 +90,7 @@ export function DailyReportDialog({
           T_reported: t.T_reported ?? null,
           T_actual: t.T_actual ?? null,
           todayHours: "",
-          currentStage: "development",
+          currentStage: "developing",
           progress: t.progress ?? "",
           notes: "",
         }))
@@ -276,7 +276,7 @@ export function DailyReportDialog({
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="development">开发中</SelectItem>
+                            <SelectItem value="developing">开发中</SelectItem>
                             <SelectItem value="testing">测试中</SelectItem>
                             <SelectItem value="completed">已完成</SelectItem>
                           </SelectContent>
