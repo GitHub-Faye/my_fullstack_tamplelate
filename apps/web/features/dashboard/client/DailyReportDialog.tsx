@@ -88,19 +88,25 @@ export function DailyReportDialog({
   const [entries, setEntries] = useState<DailyReportEntry[]>([]);
 
   useEffect(() => {
-    if (open && taskList.length > 0 && entries.length === 0) {
-      setEntries(
-        taskList.map((t) => ({
-          taskId: t.id,
-          taskName: t.name,
-          T_reported: t.T_reported ?? null,
-          T_actual: t.T_actual ?? null,
-          todayHours: "",
-          currentStage: "developing",
-          progress: t.progress ?? "",
-          notes: "",
-        }))
-      );
+    if (open && taskList.length > 0) {
+      setEntries((prev) => {
+        const prevMap = new Map(prev.map((e) => [e.taskId, e]));
+        const merged = taskList.map((t) => {
+          const existing = prevMap.get(t.id);
+          if (existing) return existing;
+          return {
+            taskId: t.id,
+            taskName: t.name,
+            T_reported: t.T_reported ?? null,
+            T_actual: t.T_actual ?? null,
+            todayHours: "",
+            currentStage: "developing",
+            progress: t.progress ?? "",
+            notes: "",
+          };
+        });
+        return merged;
+      });
     }
     if (!open) {
       setEntries([]);
