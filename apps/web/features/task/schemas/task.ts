@@ -19,6 +19,10 @@ export const taskCreateSchema = z.object({
     .nullable()
     .default(null),
   task_type: z.enum(["normal", "urgent", "convenient"]).default("normal"),
+  expected_online_time: z
+    .string()
+    .nullable()
+    .default(null),
 });
 
 export type TaskCreateFormData = z.input<typeof taskCreateSchema>;
@@ -39,6 +43,10 @@ export const taskUpdateSchema = z.object({
     .nullable()
     .default(null),
   task_type: z.enum(["normal", "urgent", "convenient"]).nullable().default(null),
+  expected_online_time: z
+    .string()
+    .nullable()
+    .default(null),
 });
 
 export type TaskUpdateFormData = z.input<typeof taskUpdateSchema>;

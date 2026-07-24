@@ -21,6 +21,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -30,8 +37,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, Search, RotateCcw } from "lucide-react";
-import Link from "next/link";
+import { Loader2, Plus, Search, RotateCcw, Paperclip } from "lucide-react";
 import { useTasks } from "../api";
 import { useCurrentUser } from "@/features/user";
 import {
@@ -53,6 +59,7 @@ import { BidLogDialog } from "./BidLogDialog";
 import { AuditLogDialog } from "./AuditLogDialog";
 import { WorkLogDialog } from "./WorkLogDialog";
 import { formatDateTime, formatDate } from "@/lib/utils";
+import { TaskCreateForm } from "./TaskCreateForm";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -96,6 +103,7 @@ export function PMTaskTable() {
   const [logTask, setLogTask] = useState<TaskPublic | null>(null);
   const [workLogTask, setWorkLogTask] = useState<TaskPublic | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null });
+  const [createOpen, setCreateOpen] = useState(false);
 
   // 搜索和重置
   const handleSearch = useCallback(() => {
@@ -190,11 +198,9 @@ export function PMTaskTable() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>任务管理</CardTitle>
-            <Button asChild>
-              <Link href="/pm/tasks/new">
-                <Plus className="mr-2 h-4 w-4" />
-                发布任务
-              </Link>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              发布任务
             </Button>
           </div>
         </CardHeader>
@@ -429,6 +435,17 @@ export function PMTaskTable() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 发布任务弹窗 */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>发布任务</DialogTitle>
+            <DialogDescription>填写任务基本信息后提交给管理员审核</DialogDescription>
+          </DialogHeader>
+          <TaskCreateForm onSuccess={() => { setCreateOpen(false); refetch(); }} />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

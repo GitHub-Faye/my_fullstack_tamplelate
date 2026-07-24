@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Paperclip } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -54,6 +54,7 @@ export function TaskEditForm({ taskId }: TaskEditFormProps) {
           name: task.name ?? null,
           description: task.description ?? null,
           task_type: task.task_type ?? null,
+          expected_online_time: task.expected_online_time ?? null,
         }
       : undefined,
   });
@@ -80,6 +81,7 @@ export function TaskEditForm({ taskId }: TaskEditFormProps) {
         name: data.name ?? undefined,
         description: data.description ?? undefined,
         task_type: data.task_type ?? undefined,
+        expected_online_time: data.expected_online_time ?? undefined,
       };
       await updateTask.mutateAsync({ taskId, data: payload });
       router.push(`/pm/tasks/${taskId}`);
@@ -162,6 +164,45 @@ export function TaskEditForm({ taskId }: TaskEditFormProps) {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="expected_online_time"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>预期上线时间</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      {...field}
+                      value={field.value ?? ""}
+                      disabled={updateTask.isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 附件上传骨架 — 后端上传路由就绪后对接 */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">附件</label>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled
+                >
+                  <Paperclip className="mr-1 h-4 w-4" />
+                  选择文件
+                </Button>
+                <span className="text-xs text-muted-foreground">暂未开放，后续版本支持</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                支持上传任务相关文档（PRD、设计稿等）
+              </p>
+            </div>
 
             <div className="flex gap-4">
               <Button

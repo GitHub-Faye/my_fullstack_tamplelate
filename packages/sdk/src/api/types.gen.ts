@@ -99,6 +99,12 @@ export type AdminTaskCreate = {
      */
     task_type?: TaskType;
     /**
+     * Expected Online Time
+     *
+     * 预期上线时间
+     */
+    expected_online_time?: string | null;
+    /**
      * Engineer Id
      *
      * 指派工程师 ID
@@ -1601,6 +1607,12 @@ export type TaskCreate = {
      * 任务类型
      */
     task_type?: TaskType;
+    /**
+     * Expected Online Time
+     *
+     * 预期上线时间
+     */
+    expected_online_time?: string | null;
 };
 
 /**
@@ -1625,6 +1637,12 @@ export type TaskPublic = {
      * 任务类型
      */
     task_type?: TaskType;
+    /**
+     * Expected Online Time
+     *
+     * 预期上线时间
+     */
+    expected_online_time?: string | null;
     /**
      * Id
      */
@@ -1666,10 +1684,6 @@ export type TaskPublic = {
      * Progress
      */
     progress?: string | null;
-    /**
-     * Expected Online Time
-     */
-    expected_online_time?: string | null;
     /**
      * T Reported Complete Time
      */
@@ -1742,6 +1756,12 @@ export type TaskUpdate = {
      * 任务类型
      */
     task_type?: TaskType | null;
+    /**
+     * Expected Online Time
+     *
+     * 预期上线时间
+     */
+    expected_online_time?: string | null;
 };
 
 /**

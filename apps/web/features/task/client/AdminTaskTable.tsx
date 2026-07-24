@@ -313,12 +313,7 @@ export function AdminTaskTable() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>任务管理</CardTitle>
-          <Button asChild>
-            <Link href="/admin/tasks/new">
-              <Plus className="mr-2 h-4 w-4" />
-              发布任务
-            </Link>
-          </Button>
+          {/* 管理员不创建任务，仅审核 — 见 PRD 2.2 功能矩阵 */}
         </div>
       </CardHeader>
       <CardContent>

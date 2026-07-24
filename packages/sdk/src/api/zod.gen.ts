@@ -689,6 +689,7 @@ export const zAdminTaskCreate = z.object({
     name: z.string().min(1).max(255),
     description: z.string().max(2000).nullish(),
     task_type: zTaskType.optional().default('normal'),
+    expected_online_time: z.iso.datetime().nullish(),
     engineer_id: z.uuid()
 });
 
@@ -700,7 +701,8 @@ export const zAdminTaskCreate = z.object({
 export const zTaskCreate = z.object({
     name: z.string().min(1).max(255),
     description: z.string().max(2000).nullish(),
-    task_type: zTaskType.optional().default('normal')
+    task_type: zTaskType.optional().default('normal'),
+    expected_online_time: z.iso.datetime().nullish()
 });
 
 /**
@@ -712,6 +714,7 @@ export const zTaskPublic = z.object({
     name: z.string().min(1).max(255),
     description: z.string().max(2000).nullish(),
     task_type: zTaskType.optional().default('normal'),
+    expected_online_time: z.iso.datetime().nullish(),
     id: z.uuid(),
     pm_id: z.uuid(),
     pm_name: z.string(),
@@ -722,7 +725,6 @@ export const zTaskPublic = z.object({
     T_reported: z.number().nullish(),
     T_actual: z.number().nullish(),
     progress: z.string().nullish(),
-    expected_online_time: z.iso.datetime().nullish(),
     T_reported_complete_time: z.iso.datetime().nullish(),
     created_at: z.iso.datetime().nullish(),
     updated_at: z.iso.datetime().nullish()
@@ -736,7 +738,8 @@ export const zTaskPublic = z.object({
 export const zTaskUpdate = z.object({
     name: z.string().min(1).max(255).nullish(),
     description: z.string().max(2000).nullish(),
-    task_type: zTaskType.nullish()
+    task_type: zTaskType.nullish(),
+    expected_online_time: z.iso.datetime().nullish()
 });
 
 /**
