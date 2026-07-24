@@ -60,6 +60,7 @@ import { AuditLogDialog } from "./AuditLogDialog";
 import { WorkLogDialog } from "./WorkLogDialog";
 import { formatDateTime, formatDate } from "@/lib/utils";
 import { TaskCreateForm } from "./TaskCreateForm";
+import { TaskEditForm } from "./TaskEditForm";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -104,6 +105,7 @@ export function PMTaskTable() {
   const [workLogTask, setWorkLogTask] = useState<TaskPublic | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null });
   const [createOpen, setCreateOpen] = useState(false);
+  const [editTask, setEditTask] = useState<TaskPublic | null>(null);
 
   // 搜索和重置
   const handleSearch = useCallback(() => {
@@ -157,7 +159,7 @@ export function PMTaskTable() {
         setDetailTask(task);
         break;
       case "edit":
-        router.push(`/pm/tasks/${task.id}/edit`);
+        setEditTask(task);
         break;
       case "delete":
         setConfirm({ open: true, action: "delete", task });
@@ -181,6 +183,12 @@ export function PMTaskTable() {
         break;
     }
   }, [router]);
+
+  // 编辑后刷新
+  const handleEditSuccess = useCallback(() => {
+    setEditTask(null);
+    refetch();
+  }, [refetch]);
 
   if (isLoading) {
     return (
@@ -444,6 +452,23 @@ export function PMTaskTable() {
             <DialogDescription>填写任务基本信息后提交给管理员审核</DialogDescription>
           </DialogHeader>
           <TaskCreateForm onSuccess={() => { setCreateOpen(false); refetch(); }} />
+        </DialogContent>
+      </Dialog>
+
+      {/* 编辑任务弹窗 */}
+      <Dialog open={!!editTask} onOpenChange={(open) => { if (!open) setEditTask(null); }}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>编辑任务</DialogTitle>
+            <DialogDescription>修改任务信息</DialogDescription>
+          </DialogHeader>
+          {editTask && (
+            <TaskEditForm
+              taskId={editTask.id}
+              onSuccess={handleEditSuccess}
+              onCancel={() => setEditTask(null)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </>
