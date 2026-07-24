@@ -98,13 +98,15 @@ async def count_bids_by_task(*, session: AsyncSession, task_id: uuid.UUID) -> in
 # ========== 结算逻辑 ==========
 
 
-async def settle_bidding_task_async(session: AsyncSession, task_id: str) -> dict:
+async def settle_bidding_task_async(session: AsyncSession, task_id: str, force: bool = False) -> dict:
     """
     异步执行竞价结算逻辑
 
     Spec §23: 计算所有报价的平均值，选择报价最接近均价的工程师中标。
     - 无人报价 → 回退到 UNCONFIRMED
     - 全部拒绝 → 回退到 UNCONFIRMED，进入下一轮
+
+    force=True 时跳过截止时间检查（管理员手动结算使用）。
     """
     task_uuid = uuid.UUID(task_id)
     task_result = await session.execute(select(Task).where(Task.id == task_uuid))
@@ -116,7 +118,7 @@ async def settle_bidding_task_async(session: AsyncSession, task_id: str) -> dict
     if task.status != TaskStatus.BIDDING:
         return {"task_id": task_id, "winner_id": None, "avg_amount": 0.0, "bid_count": 0, "status": f"invalid_status:{task.status.value}"}
 
-    if task.bidding_deadline:
+    if not force and task.bidding_deadline:
         deadline = task.bidding_deadline
         if deadline.tzinfo is None:
             deadline = deadline.replace(tzinfo=timezone.utc)

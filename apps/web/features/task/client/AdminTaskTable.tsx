@@ -52,6 +52,7 @@ import {
   usePauseApproveTask,
   usePauseRejectTask,
   useAdminRestoreTask,
+  useSettleBidding,
 } from "../api/client/adminMutations";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
@@ -105,6 +106,7 @@ function getAdminActions(status: TaskStatus) {
       ];
     case TaskStatusConst.BIDDING:
       return [
+        { key: "settleBidding", label: "触发竞价结算", icon: CheckCircle },
         { key: "viewBids", label: "查看报价", icon: FileText },
         { key: "convertUrgent", label: "改为紧急", icon: AlertTriangle },
         { key: "convertConvenient", label: "改为便捷", icon: RefreshCw },
@@ -196,6 +198,7 @@ export function AdminTaskTable() {
   const pauseApproveTask = usePauseApproveTask();
   const pauseRejectTask = usePauseRejectTask();
   const adminRestoreTask = useAdminRestoreTask();
+  const settleBidding = useSettleBidding();
 
   if (isLoading) {
     return (
@@ -270,6 +273,13 @@ export function AdminTaskTable() {
       case "adminRestore":
         try {
           await adminRestoreTask.mutateAsync(task.id);
+        } catch {
+          // handled by mutation
+        }
+        break;
+      case "settleBidding":
+        try {
+          await settleBidding.mutateAsync(task.id);
         } catch {
           // handled by mutation
         }

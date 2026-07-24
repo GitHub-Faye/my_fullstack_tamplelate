@@ -22,6 +22,7 @@ import {
   pauseApproveTaskV1TasksTaskIdPauseApprovePost,
   pauseRejectTaskV1TasksTaskIdPauseRejectPost,
   adminRestoreTaskV1TasksTaskIdRestorePost,
+  manualSettleBiddingV1TasksTaskIdSettleBiddingPost,
   type TaskPublic,
 } from "@repo/sdk";
 
@@ -183,5 +184,24 @@ export function useAdminRestoreTask() {
     },
     "任务已恢复",
     "恢复失败",
+  );
+}
+
+/**
+ * 触发竞价结算（管理员）
+ *
+ * 手动对竞价中的任务执行结算，即使竞价截止时间未到也能强制结算。
+ */
+export function useSettleBidding() {
+  return makeAdminMutation(
+    async (taskId: string) => {
+      const response = await manualSettleBiddingV1TasksTaskIdSettleBiddingPost({
+        path: { task_id: taskId },
+        throwOnError: true,
+      });
+      return response.data;
+    },
+    "竞价结算成功",
+    "竞价结算失败",
   );
 }

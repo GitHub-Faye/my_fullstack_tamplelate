@@ -159,7 +159,7 @@ async def manual_settle_bidding(
         raise_task_not_found()
     await check_task_owner_or_admin(session, current_user, task.pm_id)
 
-    result = await repository.settle_bidding_task_async(session, str(task_id))
+    result = await repository.settle_bidding_task_async(session, str(task_id), force=True)
 
     if result["status"] == "success":
         return Message(message=f"Settlement completed. Winner: {result['winner_id']}")
