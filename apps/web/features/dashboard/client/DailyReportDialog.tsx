@@ -70,12 +70,18 @@ export function DailyReportDialog({
   const [submitting, setSubmitting] = useState(false);
   const [submitResults, setSubmitResults] = useState<SubmitResult[] | null>(null);
 
-  const { data: tasks, isLoading } = useTasks({
+  const { data: tasks, isLoading, refetch } = useTasks({
     page: 1,
     page_size: 50,
     engineer_id: user?.id,
     status: TaskStatusConst.IN_PROGRESS,
   } as any);
+
+  useEffect(() => {
+    if (open) {
+      refetch();
+    }
+  }, [open, refetch]);
 
   const taskList = (tasks?.data as TaskPublic[]) || [];
 
