@@ -2990,36 +2990,6 @@ export type ReassignTaskV1TasksTaskIdReassignPostResponses = {
 
 export type ReassignTaskV1TasksTaskIdReassignPostResponse = ReassignTaskV1TasksTaskIdReassignPostResponses[keyof ReassignTaskV1TasksTaskIdReassignPostResponses];
 
-export type AdminRestoreTaskV1TasksTaskIdRestorePostData = {
-    body?: never;
-    path: {
-        /**
-         * Task Id
-         */
-        task_id: string;
-    };
-    query?: never;
-    url: '/v1/tasks/{task_id}/restore';
-};
-
-export type AdminRestoreTaskV1TasksTaskIdRestorePostErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type AdminRestoreTaskV1TasksTaskIdRestorePostError = AdminRestoreTaskV1TasksTaskIdRestorePostErrors[keyof AdminRestoreTaskV1TasksTaskIdRestorePostErrors];
-
-export type AdminRestoreTaskV1TasksTaskIdRestorePostResponses = {
-    /**
-     * Successful Response
-     */
-    200: TaskPublic;
-};
-
-export type AdminRestoreTaskV1TasksTaskIdRestorePostResponse = AdminRestoreTaskV1TasksTaskIdRestorePostResponses[keyof AdminRestoreTaskV1TasksTaskIdRestorePostResponses];
-
 export type AdminCreateTaskV1TasksCreatePostData = {
     body: AdminTaskCreate;
     path?: never;
@@ -3105,7 +3075,7 @@ export type DeclineTaskV1TasksTaskIdDeclinePostResponses = {
 
 export type DeclineTaskV1TasksTaskIdDeclinePostResponse = DeclineTaskV1TasksTaskIdDeclinePostResponses[keyof DeclineTaskV1TasksTaskIdDeclinePostResponses];
 
-export type PauseRequestTaskV1TasksTaskIdPauseRequestPostData = {
+export type PauseRequestTaskV1TasksTaskIdPausePostData = {
     body?: never;
     path: {
         /**
@@ -3114,26 +3084,26 @@ export type PauseRequestTaskV1TasksTaskIdPauseRequestPostData = {
         task_id: string;
     };
     query?: never;
-    url: '/v1/tasks/{task_id}/pause-request';
+    url: '/v1/tasks/{task_id}/pause';
 };
 
-export type PauseRequestTaskV1TasksTaskIdPauseRequestPostErrors = {
+export type PauseRequestTaskV1TasksTaskIdPausePostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type PauseRequestTaskV1TasksTaskIdPauseRequestPostError = PauseRequestTaskV1TasksTaskIdPauseRequestPostErrors[keyof PauseRequestTaskV1TasksTaskIdPauseRequestPostErrors];
+export type PauseRequestTaskV1TasksTaskIdPausePostError = PauseRequestTaskV1TasksTaskIdPausePostErrors[keyof PauseRequestTaskV1TasksTaskIdPausePostErrors];
 
-export type PauseRequestTaskV1TasksTaskIdPauseRequestPostResponses = {
+export type PauseRequestTaskV1TasksTaskIdPausePostResponses = {
     /**
      * Successful Response
      */
     200: TaskPublic;
 };
 
-export type PauseRequestTaskV1TasksTaskIdPauseRequestPostResponse = PauseRequestTaskV1TasksTaskIdPauseRequestPostResponses[keyof PauseRequestTaskV1TasksTaskIdPauseRequestPostResponses];
+export type PauseRequestTaskV1TasksTaskIdPausePostResponse = PauseRequestTaskV1TasksTaskIdPausePostResponses[keyof PauseRequestTaskV1TasksTaskIdPausePostResponses];
 
 export type ResumeTaskV1TasksTaskIdResumePostData = {
     body?: never;

@@ -18,7 +18,6 @@ import {
   publishTaskV1TasksTaskIdPublishPost,
   convertToUrgentV1TasksTaskIdConvertUrgentPost,
   convertToConvenientV1TasksTaskIdConvertConvenientPost,
-  adminRestoreTaskV1TasksTaskIdRestorePost,
   manualSettleBiddingV1TasksTaskIdSettleBiddingPost,
   type TaskPublic,
 } from "@repo/sdk";
@@ -109,23 +108,6 @@ export function useConvertToConvenient() {
     },
     "已转换为便捷任务",
     "转换失败",
-  );
-}
-
-/**
- * 恢复暂停任务（管理员）
- */
-export function useAdminRestoreTask() {
-  return makeAdminMutation(
-    async (taskId: string) => {
-      const response = await adminRestoreTaskV1TasksTaskIdRestorePost({
-        path: { task_id: taskId },
-        throwOnError: true,
-      });
-      return response.data;
-    },
-    "任务已恢复",
-    "恢复失败",
   );
 }
 

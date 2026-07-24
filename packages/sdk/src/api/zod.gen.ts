@@ -1168,15 +1168,6 @@ export const zReassignTaskV1TasksTaskIdReassignPostPath = z.object({
  */
 export const zReassignTaskV1TasksTaskIdReassignPostResponse = zTaskPublic;
 
-export const zAdminRestoreTaskV1TasksTaskIdRestorePostPath = z.object({
-    task_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zAdminRestoreTaskV1TasksTaskIdRestorePostResponse = zTaskPublic;
-
 export const zAdminCreateTaskV1TasksCreatePostBody = zAdminTaskCreate;
 
 /**
@@ -1202,14 +1193,14 @@ export const zDeclineTaskV1TasksTaskIdDeclinePostPath = z.object({
  */
 export const zDeclineTaskV1TasksTaskIdDeclinePostResponse = zTaskPublic;
 
-export const zPauseRequestTaskV1TasksTaskIdPauseRequestPostPath = z.object({
+export const zPauseRequestTaskV1TasksTaskIdPausePostPath = z.object({
     task_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zPauseRequestTaskV1TasksTaskIdPauseRequestPostResponse = zTaskPublic;
+export const zPauseRequestTaskV1TasksTaskIdPausePostResponse = zTaskPublic;
 
 export const zResumeTaskV1TasksTaskIdResumePostPath = z.object({
     task_id: z.uuid()

@@ -43,7 +43,7 @@ import {
 import {
   startTaskV1TasksTaskIdStartPost,
   declineTaskV1TasksTaskIdDeclinePost,
-  pauseRequestTaskV1TasksTaskIdPauseRequestPost,
+  pauseRequestTaskV1TasksTaskIdPausePost,
   resumeTaskV1TasksTaskIdResumePost,
   createBidV1TasksTaskIdBidsPost,
 } from "@repo/sdk";
@@ -158,8 +158,8 @@ export function EngineerTaskTable({
           toast.success("任务已恢复");
           break;
         case "pauseRequest":
-          await pauseRequestTaskV1TasksTaskIdPauseRequestPost({ path: { task_id: taskId } });
-          toast.success("已申请暂停，等待管理员审批");
+          await pauseRequestTaskV1TasksTaskIdPausePost({ path: { task_id: taskId } });
+          toast.success("任务已暂停");
           break;
         case "bid":
           if (!confirm.bidHours || confirm.bidHours <= 0) {
@@ -349,7 +349,7 @@ export function EngineerTaskTable({
                             size="sm"
                             onClick={() => setConfirm({ open: true, action: "pauseRequest", task, bidHours: 0 })}
                           >
-                            申请暂停/顺延
+                            暂停/顺延
                           </Button>
                         )}
                         {task.status === TaskStatusConst.PAUSED && (
@@ -502,13 +502,13 @@ export function EngineerTaskTable({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirm.action === "start" ? "确认启动" : confirm.action === "decline" ? "确认拒绝" : confirm.action === "resume" ? "确认恢复" : confirm.action === "pauseRequest" ? "确认申请暂停" : "报价"}
+              {confirm.action === "start" ? "确认启动" : confirm.action === "decline" ? "确认拒绝" : confirm.action === "resume" ? "确认恢复" : confirm.action === "pauseRequest" ? "确认暂停" : "报价"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirm.action === "start" && "启动后任务将进入进行中状态。"}
               {confirm.action === "decline" && "拒绝后任务将重新进入竞价流程。"}
               {confirm.action === "resume" && "恢复后任务将继续进行中状态。"}
-              {confirm.action === "pauseRequest" && "申请暂停后需等待管理员审批。"}
+              {confirm.action === "pauseRequest" && "暂停后任务将进入暂停状态。"}
               {confirm.action === "bid" && (
                 <div className="space-y-4 mt-2">
                   <div className="text-sm font-medium">{confirm.task?.name}</div>

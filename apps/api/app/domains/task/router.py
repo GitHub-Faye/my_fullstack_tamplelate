@@ -447,36 +447,6 @@ async def reassign_task(
 
 
 @router.post(
-    "/{task_id}/restore",
-    response_model=TaskPublic,
-    summary="恢复任务（管理员）",
-    description="管理员恢复暂停中的任务，状态从 PAUSED 变为 IN_PROGRESS",
-)
-async def admin_restore_task(
-    *,
-    session: SessionDep,
-    current_user: CurrentUser,
-    task_id: uuid.UUID,
-) -> Any:
-    """恢复暂停任务 — 需要管理员权限"""
-    task = await repository.get_task(session=session, task_id=task_id)
-    if not task:
-        raise_task_not_found()
-    await check_admin_scope(session, current_user)
-    await check_task_status(task, TaskStatus.PAUSED)
-    task.status = TaskStatus.IN_PROGRESS
-    session.add(task)
-    await session.commit()
-    await session.refresh(task)
-    await create_audit_log(
-        session=session, user_id=current_user.id, action="task.admin_restore",
-        target_type="task", target_id=str(task_id),
-        details=f"Task restored by administrator", ip_address=None,
-    )
-    return task
-
-
-@router.post(
     "/create",
     response_model=TaskPublic,
     summary="创建任务（管理员）",
@@ -597,10 +567,10 @@ async def decline_task(
 
 
 @router.post(
-    "/{task_id}/pause-request",
+    "/{task_id}/pause",
     response_model=TaskPublic,
-    summary="申请暂停",
-    description="工程师申请暂停正在进行的任务",
+    summary="暂停任务",
+    description="工程师暂停正在进行的任务",
 )
 async def pause_request_task(
     *,
@@ -608,7 +578,7 @@ async def pause_request_task(
     current_user: CurrentUser,
     task_id: uuid.UUID,
 ) -> Any:
-    """申请暂停 — 工程师直接暂停任务"""
+    """暂停任务 — 工程师直接暂停任务"""
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
         raise_task_not_found()

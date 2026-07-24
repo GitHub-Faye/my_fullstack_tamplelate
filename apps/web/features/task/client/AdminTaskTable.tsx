@@ -48,7 +48,6 @@ import {
   usePublishTask,
   useConvertToUrgent,
   useConvertToConvenient,
-  useAdminRestoreTask,
   useSettleBidding,
 } from "../api/client/adminMutations";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
@@ -119,7 +118,6 @@ function getAdminActions(status: TaskStatus) {
       ];
     case TaskStatusConst.PAUSED:
       return [
-        { key: "adminRestore", label: "恢复任务", icon: Play },
         { key: "detail", label: "详情", icon: Eye },
       ];
     case TaskStatusConst.COMPLETED:
@@ -187,7 +185,6 @@ export function AdminTaskTable() {
   const publishTask = usePublishTask();
   const convertToUrgent = useConvertToUrgent();
   const convertToConvenient = useConvertToConvenient();
-  const adminRestoreTask = useAdminRestoreTask();
   const settleBidding = useSettleBidding();
 
   if (isLoading) {
@@ -238,13 +235,6 @@ export function AdminTaskTable() {
         break;
       case "reassign":
         setAssignTask(task);
-        break;
-      case "adminRestore":
-        try {
-          await adminRestoreTask.mutateAsync(task.id);
-        } catch {
-          // handled by mutation
-        }
         break;
       case "settleBidding":
         try {
