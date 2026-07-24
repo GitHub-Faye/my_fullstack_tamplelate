@@ -24,11 +24,7 @@ import {
   manualSettleBiddingV1TasksTaskIdSettleBiddingPost,
   type TaskPublic,
 } from "@repo/sdk";
-
-// 管理端专用查询 key，避免与 PM 端交叉污染
-export const adminTaskKeys = {
-  all: ["admin-tasks"] as const,
-};
+import { taskKeys } from "./queries";
 
 // ==================== 工厂函数 ====================
 
@@ -43,7 +39,7 @@ function makeAdminMutation<T>(
   return useMutation({
     mutationFn,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminTaskKeys.all });
+      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
       toast.success(successMsg);
     },
     onError: (error: Error) => {
@@ -75,7 +71,7 @@ export function usePublishTask() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminTaskKeys.all });
+      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
       toast.success("任务已发布到竞价池");
     },
     onError: (error: Error) => {

@@ -65,14 +65,13 @@ import { TaskEditForm } from "./TaskEditForm";
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
 
-/** 发布人筛选选项 */
-type PublisherFilter = "all" | "mine" | "other";
+/** PM 只能看到自己发布的任务，不需要发布人筛选 */
+type TaskTypeFilter = "all" | "normal" | "urgent" | "convenient";
 
 /** 默认筛选条件 */
 const DEFAULT_FILTERS = {
   status: "all",
-  publisher: "all" as PublisherFilter,
-  taskType: "all",
+  taskType: "all" as TaskTypeFilter,
 };
 
 /** 删除确认弹窗状态 */
@@ -97,8 +96,6 @@ export function PMTaskTable() {
 
   // 筛选条件状态
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
-
-  // 弹窗状态
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
   const [bidLogTask, setBidLogTask] = useState<TaskPublic | null>(null);
   const [logTask, setLogTask] = useState<TaskPublic | null>(null);
@@ -117,21 +114,14 @@ export function PMTaskTable() {
     setPage(1);
   }, []);
 
-  // 构建 API 查询参数
+  // 构建 API 查询参数 — PM 只能查看自己发布的任务
   const queryParams: Record<string, any> = {
     page,
     page_size: 20,
+    pm_id: user?.id,
     status: filters.status !== "all" ? filters.status : undefined,
     task_type: filters.taskType !== "all" ? filters.taskType : undefined,
   };
-
-  // 发布人筛选逻辑
-  if (filters.publisher === "mine" && user?.id) {
-    queryParams.pm_id = user.id;
-  } else if (filters.publisher === "other" && user?.id) {
-    queryParams.pm_id = user.id;
-    queryParams.exclude_pm_id = true;
-  }
 
   const { data: tasks, isLoading, refetch } = useTasks(queryParams as any);
 
@@ -216,26 +206,9 @@ export function PMTaskTable() {
           {/* 筛选栏 */}
           <div className="flex items-center gap-4 mb-4 flex-wrap">
             <Select
-              value={filters.publisher}
-              onValueChange={(v: PublisherFilter) => {
-                setFilters((prev) => ({ ...prev, publisher: v }));
-                setPage(1);
-              }}
-            >
-              <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="发布人" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">全部</SelectItem>
-                <SelectItem value="mine">我发布的</SelectItem>
-                <SelectItem value="other">其他PM</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select
               value={filters.taskType}
               onValueChange={(v) => {
-                setFilters((prev) => ({ ...prev, taskType: v }));
+                setFilters((prev) => ({ ...prev, taskType: v as TaskTypeFilter }));
                 setPage(1);
               }}
             >
@@ -286,7 +259,6 @@ export function PMTaskTable() {
               <TableHeader>
                 <TableRow>
                   <TableHead>任务</TableHead>
-                  <TableHead>发布人</TableHead>
                   <TableHead>类型</TableHead>
                   <TableHead>工程师</TableHead>
                   <TableHead>预期上线</TableHead>
@@ -301,9 +273,6 @@ export function PMTaskTable() {
                   <TableRow key={task.id}>
                     <TableCell className="font-medium max-w-[200px] truncate">
                       {task.name}
-                    </TableCell>
-                    <TableCell className="text-sm">
-                      {(task as any).pm_name ?? (task.pm_id ? task.pm_id.slice(0, 8) : "-")}
                     </TableCell>
                     <TableCell>
                       {task.task_type ? (
@@ -366,7 +335,7 @@ export function PMTaskTable() {
                 ))}
                 {(!taskList || taskList.length === 0) && (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8">
+                    <TableCell colSpan={8} className="text-center py-8">
                       暂无任务数据
                     </TableCell>
                   </TableRow>
