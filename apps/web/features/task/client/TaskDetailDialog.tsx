@@ -63,7 +63,7 @@ export function getPmActions(task: TaskPublic, currentUserId: string | undefined
       actions.push({ label: "撤回", icon: <AlertTriangle className="h-3.5 w-3.5" />, action: "withdraw", variant: "destructive" });
       break;
     case TaskStatusConst.PENDING_START:
-      actions.push({ label: "查看日志", icon: <History className="h-3.5 w-3.5" />, action: "viewLog", variant: "outline" });
+      // 待启动任务没有操作按钮
       break;
     case TaskStatusConst.IN_PROGRESS:
       actions.push({ label: "资料变更", icon: <FileText className="h-3.5 w-3.5" />, action: "changeDoc", variant: "outline" });

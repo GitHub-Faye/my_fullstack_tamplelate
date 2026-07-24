@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { reassignTaskV1TasksTaskIdReassignPost, type EngineerLoad } from "@repo/sdk";
 import { useAdminDashboard } from "@/features/dashboard/api/client/queries";
-import { adminTaskKeys } from "../api/client/adminMutations";
+import { taskKeys } from "../api/client/queries";
 
 interface AdminTaskAssignDialogProps {
   taskId: string;
@@ -65,9 +65,8 @@ export function AdminTaskAssignDialog({
         throwOnError: true,
       });
       toast.success("改派成功");
-      queryClient.invalidateQueries({ queryKey: adminTaskKeys.all });
+      queryClient.invalidateQueries({ queryKey: taskKeys.lists() });
       onOpenChange(false);
-      router.replace(`/admin/tasks/${taskId}`);
     } catch (error: any) {
       toast.error(error.message || "改派失败");
     } finally {
