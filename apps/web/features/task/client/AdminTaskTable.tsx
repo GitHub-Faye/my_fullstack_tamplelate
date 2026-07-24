@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -43,6 +43,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight, Play, Plus, FileText } from "lucide-react";
 import { useTasks, useTask } from "../api";
+import { useUsers } from "@/features/user";
 import {
   useRejectTask,
   usePublishTask,
@@ -165,6 +166,18 @@ export function AdminTaskTable() {
     page_size: 20,
     status: status !== "all" ? (status as TaskStatus) : undefined,
   });
+
+  // 获取用户列表用于姓名映射
+  const { data: usersData } = useUsers({ page: 1, page_size: 1000 });
+  const userMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (usersData?.data) {
+      for (const u of usersData.data as Array<{ id: string; full_name?: string | null }>) {
+        map[u.id] = u.full_name ?? u.id.slice(0, 8);
+      }
+    }
+    return map;
+  }, [usersData]);
 
   // 操作弹窗状态
   const [actionDialog, setActionDialog] = useState<{ open: boolean; task: TaskPublic | null; action: string }>({
@@ -318,7 +331,7 @@ export function AdminTaskTable() {
             <SelectContent>
               <SelectItem value="all">全部工程师</SelectItem>
               {engineerIds.map((id) => (
-                <SelectItem key={id} value={id}>{id.slice(0, 8)}</SelectItem>
+                <SelectItem key={id} value={id}>{userMap[id] || id.slice(0, 8)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -329,7 +342,7 @@ export function AdminTaskTable() {
             <SelectContent>
               <SelectItem value="all">全部PM</SelectItem>
               {pmIds.map((id) => (
-                <SelectItem key={id} value={id}>{id.slice(0, 8)}</SelectItem>
+                <SelectItem key={id} value={id}>{userMap[id] || id.slice(0, 8)}</SelectItem>
               ))}
             </SelectContent>
           </Select>
