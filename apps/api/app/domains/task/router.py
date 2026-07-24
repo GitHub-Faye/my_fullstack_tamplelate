@@ -759,6 +759,7 @@ async def complete_task(
     await check_task_assigned_to_engineer(session, current_user, task)
     await check_task_status(task, TaskStatus.IN_PROGRESS)
     task.status = TaskStatus.COMPLETED
+    task.T_reported_complete_time = datetime.now(timezone.utc)
     session.add(task)
     await session.commit()
     await session.refresh(task)

@@ -194,6 +194,7 @@ async def create_daily_report(
     # 如果日报标记为 completed，则同步任务状态为 COMPLETED 并触发星点计算
     if report_in.current_stage == ReportStage.COMPLETED and task.status == TaskStatus.IN_PROGRESS:
         task.status = TaskStatus.COMPLETED
+        task.T_reported_complete_time = datetime.now(timezone.utc)
         # Spec §27: 阶段选择"已完成"时，进度自动设为 100%
         if not report_in.progress:
             report_in.progress = "100%"
