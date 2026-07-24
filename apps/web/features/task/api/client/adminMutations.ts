@@ -33,13 +33,13 @@ export const adminTaskKeys = {
 
 // ==================== 工厂函数 ====================
 
-type MutationFn<T> = (taskId: string) => Promise<TaskPublic | undefined>;
+type MutationFn<T> = (taskId: string) => Promise<T>;
 
 function makeAdminMutation<T>(
   mutationFn: MutationFn<T>,
   successMsg: string,
   errorMsg: string,
-): UseMutationResult<TaskPublic | undefined, Error, string> {
+): UseMutationResult<T, Error, string> {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,
@@ -50,7 +50,7 @@ function makeAdminMutation<T>(
     onError: (error: Error) => {
       toast.error(error.message || errorMsg);
     },
-  }) as UseMutationResult<TaskPublic | undefined, Error, string>;
+  }) as UseMutationResult<T, Error, string>;
 }
 
 // ==================== Mutations ====================

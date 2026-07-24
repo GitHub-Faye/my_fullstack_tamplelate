@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getNavigationByRole } from "@/config/navigation";
 
