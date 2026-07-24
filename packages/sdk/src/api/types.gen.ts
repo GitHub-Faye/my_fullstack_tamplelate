@@ -1639,9 +1639,21 @@ export type TaskPublic = {
      */
     pm_id: string;
     /**
+     * Pm Name
+     *
+     * 发布任务的PM姓名
+     */
+    pm_name: string;
+    /**
      * Engineer Id
      */
     engineer_id?: string | null;
+    /**
+     * Engineer Name
+     *
+     * 工程师姓名
+     */
+    engineer_name?: string | null;
     status: TaskStatus;
     /**
      * Bidding Deadline

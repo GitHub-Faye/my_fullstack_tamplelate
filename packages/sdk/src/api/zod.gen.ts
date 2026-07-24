@@ -716,7 +716,9 @@ export const zTaskPublic = z.object({
     task_type: zTaskType.optional().default('normal'),
     id: z.uuid(),
     pm_id: z.uuid(),
+    pm_name: z.string(),
     engineer_id: z.uuid().nullish(),
+    engineer_name: z.string().nullish(),
     status: zTaskStatus,
     bidding_deadline: z.iso.datetime().nullish(),
     T_reported: z.number().nullish(),
@@ -1221,7 +1223,7 @@ export const zPublishTaskV1TasksTaskIdPublishPostPath = z.object({
 });
 
 export const zPublishTaskV1TasksTaskIdPublishPostQuery = z.object({
-    bidding_days: z.int().optional().default(3)
+    bidding_days: z.int().optional().default(1)
 });
 
 /**

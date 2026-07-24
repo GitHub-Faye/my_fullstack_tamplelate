@@ -258,8 +258,10 @@ def test_task_public_schema() -> None:
         task_type=TaskType.NORMAL,
         status=TaskStatus.UNCONFIRMED,
         pm_id=pm_id,
+        pm_name="Test PM",
     )
 
     assert task_public.id == task_id
     assert task_public.pm_id == pm_id
+    assert task_public.pm_name == "Test PM"
     assert task_public.status == TaskStatus.UNCONFIRMED

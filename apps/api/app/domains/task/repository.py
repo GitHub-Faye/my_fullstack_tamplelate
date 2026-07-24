@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, Tuple
 
-from sqlalchemy import func, select, and_
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import Task, TaskStatus, TaskType, User
@@ -84,27 +84,55 @@ async def get_tasks(
         order_by=Task.created_at.desc(),
     )
 
-    # 填充所有任务的姓名
-    for task in tasks:
-        await _fill_user_names(session, task)
+    # 填充所有任务的姓名（批量查询）
+    await _batch_fill_user_names(session, tasks)
 
     return tasks, count
 
 
+async def _batch_fill_user_names(session: AsyncSession, tasks: list[Task]) -> None:
+    """
+    批量从关联 User 表填充 pm_name 和 engineer_name
+
+    Args:
+        session: 数据库会话
+        tasks: 任务列表（原地修改）
+    """
+    if not tasks:
+        return
+
+    # 收集所有需要查询的用户 ID
+    pm_ids = {t.pm_id for t in tasks if t.pm_id}
+    engineer_ids = {t.engineer_id for t in tasks if t.engineer_id}
+    all_ids = pm_ids | engineer_ids
+
+    if not all_ids:
+        return
+
+    # 批量查询用户
+    stmt = select(User).where(User.id.in_(all_ids))
+    result = await session.execute(stmt)
+    users = {u.id: u for u in result.scalars().all()}
+
+    # 填充每个 task 的姓名
+    for task in tasks:
+        if task.pm_id:
+            pm = users.get(task.pm_id)
+            task.pm_name = pm.full_name if pm and pm.full_name else str(task.pm_id)[:8]
+        if task.engineer_id:
+            engineer = users.get(task.engineer_id)
+            task.engineer_name = engineer.full_name if engineer and engineer.full_name else str(task.engineer_id)[:8]
+
+
 async def _fill_user_names(session: AsyncSession, task: Task) -> None:
     """
-    从关联 User 表填充 pm_name 和 engineer_name
+    从关联 User 表填充 pm_name 和 engineer_name（单任务版本）
 
     Args:
         session: 数据库会话
         task: 任务对象（原地修改）
     """
-    if task.pm_id:
-        pm = await session.get(User, task.pm_id)
-        task.pm_name = pm.full_name if pm and pm.full_name else str(task.pm_id)[:8]
-    if task.engineer_id:
-        engineer = await session.get(User, task.engineer_id)
-        task.engineer_name = engineer.full_name if engineer and engineer.full_name else str(task.engineer_id)[:8]
+    await _batch_fill_user_names(session, [task])
 
 
 async def create_task(
