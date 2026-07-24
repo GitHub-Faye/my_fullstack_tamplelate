@@ -168,7 +168,7 @@ export function AdminTaskTable() {
   });
 
   // 获取用户列表用于姓名映射
-  const { data: usersData } = useUsers({ page: 1, page_size: 1000 });
+  const { data: usersData } = useUsers({ page: 1, page_size: 100 });
   const userMap = useMemo(() => {
     const map: Record<string, string> = {};
     if (usersData?.data) {
