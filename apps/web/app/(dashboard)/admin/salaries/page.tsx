@@ -5,13 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -21,13 +14,12 @@ import {
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { readSalarySummaryV1SalariesGet, exportSalariesV1SalariesExportPost } from "@repo/sdk";
-import { Loader2, Search, Download } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import { SalaryEditDialog } from "@/features/salary/client/SalaryEditDialog";
 
 export default function AdminSalariesPage() {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
-  const [person, setPerson] = useState("all");
   const [tab, setTab] = useState<"engineer" | "pm">("engineer");
   const [page, setPage] = useState(1);
   const [editUser, setEditUser] = useState<any>(null);
@@ -53,10 +45,6 @@ export default function AdminSalariesPage() {
   const salaries = (data?.data || []) as any[];
   const totalCount = data?.count || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
-
-  const filteredSalaries = person === "all"
-    ? salaries
-    : salaries.filter((s) => s.role === person);
 
   if (isLoading) {
     return (
@@ -84,22 +72,6 @@ export default function AdminSalariesPage() {
                 onChange={(e) => handleMonthChange(e)}
               />
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm">人员</label>
-              <Select value={person} onValueChange={setPerson}>
-                <SelectTrigger className="w-[130px]">
-                  <SelectValue placeholder="全部" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部</SelectItem>
-                  <SelectItem value="engineer">工程师</SelectItem>
-                  <SelectItem value="pm">市场产品PM</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <Button variant="outline" size="sm">
-              <Search className="mr-1 h-4 w-4" />搜索
-            </Button>
             <Button
               variant="default"
               size="sm"
@@ -170,14 +142,14 @@ export default function AdminSalariesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSalaries.filter((s) => s.role === "engineer" || !s.role).length === 0 ? (
+                  {salaries.filter((s) => s.role === "engineer" || !s.role).length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={12} className="text-center h-32">
                         暂无数据
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredSalaries
+                    salaries
                       .filter((s) => s.role === "engineer" || !s.role)
                       .map((s, i) => (
                         <TableRow key={s.user_id || i}>
@@ -216,14 +188,14 @@ export default function AdminSalariesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSalaries.filter((s) => s.role === "pm").length === 0 ? (
+                  {salaries.filter((s) => s.role === "pm").length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center h-32">
                         暂无数据
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredSalaries
+                    salaries
                       .filter((s) => s.role === "pm")
                       .map((s, i) => (
                         <TableRow key={s.user_id || i}>
