@@ -72,7 +72,6 @@ export function UserForm({ user, mode }: UserFormProps) {
           employmentStatus: user?.employment_status || undefined,
           role: user?.role || undefined,
           S0: user?.S0 ?? undefined,
-          H0: user?.H0 ?? undefined,
           TMonthlyPlan: user?.T_monthly_plan ?? undefined,
           SBase: user?.S_base ?? undefined,
           SAssess: user?.S_assess ?? undefined,
@@ -110,7 +109,6 @@ export function UserForm({ user, mode }: UserFormProps) {
           employment_status: data.employmentStatus || null,
           role: data.role || null,
           S0: data.S0 ?? null,
-          H0: data.H0 ?? null,
           T_monthly_plan: data.TMonthlyPlan ?? null,
           S_base: data.SBase ?? null,
           S_assess: data.SAssess ?? null,
@@ -142,7 +140,6 @@ export function UserForm({ user, mode }: UserFormProps) {
             employment_status: createData.employmentStatus || undefined,
             role: createData.role || "engineer",
             S0: createData.S0,
-            H0: createData.H0,
             T_monthly_plan: createData.TMonthlyPlan,
             S_base: createData.SBase,
             S_assess: createData.SAssess,
@@ -384,21 +381,6 @@ export function UserForm({ user, mode }: UserFormProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>S0（工资基数）</FormLabel>
-                        <FormControl>
-                          <Input type="number" min={0} step={0.01} placeholder="0" {...field}
-                            onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
-                            value={field.value ?? ""} disabled={isPending} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="H0"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>H0（基准时薪）</FormLabel>
                         <FormControl>
                           <Input type="number" min={0} step={0.01} placeholder="0" {...field}
                             onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}

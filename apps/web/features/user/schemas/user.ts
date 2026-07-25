@@ -59,7 +59,6 @@ export const userCreateSchema = z.object({
   role: userRoleEnum.optional(),
   // 工程师工资字段
   S0: z.number().min(0).optional(),
-  H0: z.number().min(0).optional(),
   TMonthlyPlan: z.number().min(0).optional(),
   // PM 工资字段
   SBase: z.number().min(0).optional(),
@@ -103,7 +102,6 @@ export const userUpdateSchema = z.object({
   role: userRoleEnum.optional(),
   // 工程师工资字段
   S0: z.number().min(0).optional(),
-  H0: z.number().min(0).optional(),
   TMonthlyPlan: z.number().min(0).optional(),
   // PM 工资字段
   SBase: z.number().min(0).optional(),
