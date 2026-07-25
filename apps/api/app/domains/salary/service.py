@@ -25,19 +25,28 @@ async def calculate_engineer_salary(
     """
     计算工程师工资
 
-    公式：S下 = (S0 - P差额) × K
-    其中 P差额 = H0 × (T实际 - T报价)
+    公式：S下 = max(5000, (S0 - P差额) × K)
+    其中：
+      H0 = S0 ÷ T月计划（自动计算，不再依赖管理员手动设置）
+      P差额 = max(0, T月计划 - T有效) × H0（衡量"本月未完成的工时价值"）
+      T有效 = 已完成任务 min(T实, T报) 之和（由工单 02 写入）
     """
-    T_actual, T_reported = await get_engineer_monthly_hours(
+    T_effective_total, T_reported_total = await get_engineer_monthly_hours(
         session=session,
         engineer_id=engineer.id,
     )
 
     S0 = engineer.S0 or 0.0
-    H0 = engineer.H0 or 0.0
-    P_diff = H0 * (T_actual - T_reported)
-    T_effective = T_actual
-    salary_final = max(0, (S0 - P_diff) * k_coefficient)
+    T_monthly_plan = engineer.T_monthly_plan or 0.0
+
+    # H0 = S0 ÷ T月计划（自动计算）
+    H0 = S0 / T_monthly_plan if T_monthly_plan > 0 else 0.0
+
+    # P差额 = max(0, T月计划 - T有效) × H0
+    P_diff = max(0, T_monthly_plan - T_effective_total) * H0
+
+    # 最终工资 = max(5000, (S0 - P差额) × K)
+    salary_final = max(5000, (S0 - P_diff) * k_coefficient)
 
     return EngineerSalaryDetail(
         user_id=engineer.id,
@@ -45,10 +54,10 @@ async def calculate_engineer_salary(
         role="engineer",
         S0=S0,
         H0=H0,
-        T_monthly_plan=engineer.T_monthly_plan,
-        T_actual_monthly=T_actual,
-        T_reported_monthly=T_reported,
-        T_effective=T_effective,
+        T_monthly_plan=T_monthly_plan,
+        T_actual_monthly=T_effective_total,
+        T_reported_monthly=T_reported_total,
+        T_effective=T_effective_total,
         P_diff=P_diff,
         current_starpoint=engineer.current_starpoint,
         k_coefficient=k_coefficient,

@@ -37,7 +37,6 @@ def create_engineer_user() -> User:
         role=UserRoleType.ENGINEER,
         is_active=True,
         S0=10000.0,
-        H0=50.0,
         T_monthly_plan=160.0,
         current_starpoint=100,
     )
@@ -67,14 +66,13 @@ async def test_calculate_pm_salary(db_session: AsyncSession):
     pm = create_pm_user()
     db_session.add(pm)
     await db_session.commit()
-    result = await calculate_pm_salary(session=db_session, pm=pm)
+    result = await calculate_pm_salary(pm=pm)
 
     assert result.S_base == 8000.0
     assert result.S_assess == 2000.0
     assert result.salary_total == 10000.0
     assert result.role == "pm"
-    assert result.L_actual == 0
-    assert result.L_base == 0
+
 
 
 @pytest.mark.asyncio
@@ -85,7 +83,7 @@ async def test_calculate_pm_salary_zero_values(db_session: AsyncSession):
     pm.S_assess = 0.0
     db_session.add(pm)
     await db_session.commit()
-    result = await calculate_pm_salary(session=db_session, pm=pm)
+    result = await calculate_pm_salary(pm=pm)
 
     assert result.salary_total == 0.0
 
@@ -100,7 +98,7 @@ async def test_calculate_engineer_salary_accurate(db_session: AsyncSession):
     db_session.add(engineer)
     await db_session.commit()
 
-    # 创建本月完成的任务（T实际 = T报价，P差额 = 0）
+    # 创建本月完成的任务（T实际 = T报价 = 10h，T有效 = 10h）
     task = Task(
         name="Test Task",
         pm_id=uuid.uuid4(),
@@ -108,6 +106,7 @@ async def test_calculate_engineer_salary_accurate(db_session: AsyncSession):
         status=TaskStatus.COMPLETED,
         T_actual=10.0,
         T_reported=10.0,
+        T_effective=10.0,
         task_type=TaskType.NORMAL,
     )
     db_session.add(task)
@@ -119,12 +118,18 @@ async def test_calculate_engineer_salary_accurate(db_session: AsyncSession):
         k_coefficient=1.0,
     )
 
+    # H0 = S0 / T月计划 = 10000 / 160 = 62.5
     assert result.S0 == 10000.0
+    assert result.H0 == 62.5
+    assert result.T_monthly_plan == 160.0
     assert result.T_actual_monthly == 10.0
     assert result.T_reported_monthly == 10.0
-    assert result.P_diff == 0.0  # 50 * (10 - 10) = 0
+    assert result.T_effective == 10.0
+    # P差额 = max(0, 160 - 10) * 62.5 = 150 * 62.5 = 9375
+    assert result.P_diff == 9375.0
     assert result.k_coefficient == 1.0
-    assert result.salary_final == 10000.0  # (10000 - 0) * 1.0 = 10000
+    # 工资 = max(5000, (10000 - 9375) * 1.0) = max(5000, 625) = 5000
+    assert result.salary_final == 5000.0
 
 
 @pytest.mark.asyncio
@@ -136,7 +141,7 @@ async def test_calculate_engineer_salary_with_p_diff(db_session: AsyncSession):
     db_session.add(engineer)
     await db_session.commit()
 
-    # T实际 > T报价，P差额为正
+    # T实际 = 12h, T报 = 10h, T有效 = 10h (min)
     task = Task(
         name="Test Task",
         pm_id=uuid.uuid4(),
@@ -144,6 +149,7 @@ async def test_calculate_engineer_salary_with_p_diff(db_session: AsyncSession):
         status=TaskStatus.COMPLETED,
         T_actual=12.0,
         T_reported=10.0,
+        T_effective=10.0,
         task_type=TaskType.NORMAL,
     )
     db_session.add(task)
@@ -155,10 +161,11 @@ async def test_calculate_engineer_salary_with_p_diff(db_session: AsyncSession):
         k_coefficient=1.0,
     )
 
-    # P差额 = 50 * (12 - 10) = 100
-    assert result.P_diff == 100.0
-    # 工资 = (10000 - 100) * 1.0 = 9900
-    assert result.salary_final == 9900.0
+    # H0 = 10000 / 160 = 62.5
+    # P差额 = max(0, 160 - 10) * 62.5 = 9375
+    assert result.P_diff == 9375.0
+    # 工资 = max(5000, (10000 - 9375) * 1.0) = max(5000, 625) = 5000
+    assert result.salary_final == 5000.0
 
 
 @pytest.mark.asyncio
@@ -177,20 +184,23 @@ async def test_calculate_engineer_salary_with_k_coefficient(db_session: AsyncSes
         status=TaskStatus.COMPLETED,
         T_actual=10.0,
         T_reported=10.0,
+        T_effective=10.0,
         task_type=TaskType.NORMAL,
     )
     db_session.add(task)
     await db_session.commit()
 
-    # K = 1.1（前 20%）
+    # K = 1.2（前 20%，按新 PRD 系数）
     result = await calculate_engineer_salary(
         session=db_session,
         engineer=engineer,
-        k_coefficient=1.1,
+        k_coefficient=1.2,
     )
 
-    # 工资 = (10000 - 0) * 1.1 = 11000
-    assert result.salary_final == 11000.0
+    # H0 = 10000 / 160 = 62.5
+    # P差额 = max(0, 160 - 10) * 62.5 = 9375
+    # 工资 = max(5000, (10000 - 9375) * 1.2) = max(5000, 750) = 5000
+    assert result.salary_final == 5000.0
 
 
 @pytest.mark.asyncio
@@ -210,21 +220,23 @@ async def test_calculate_engineer_salary_no_tasks(db_session: AsyncSession):
 
     assert result.T_actual_monthly == 0.0
     assert result.T_reported_monthly == 0.0
-    assert result.P_diff == 0.0
-    # 工资 = (10000 - 0) * 1.0 = 10000
-    assert result.salary_final == 10000.0
+    assert result.T_effective == 0.0
+    # H0 = 10000 / 160 = 62.5
+    # P差额 = max(0, 160 - 0) * 62.5 = 10000
+    # 工资 = max(5000, (10000 - 10000) * 1.0) = max(5000, 0) = 5000
+    assert result.salary_final == 5000.0
 
 
 @pytest.mark.asyncio
 async def test_calculate_engineer_salary_negative_result(db_session: AsyncSession):
-    """测试工程师工资计算：负工资时取 0"""
+    """测试工程师工资计算：低于保底时取 5000"""
     engineer = create_engineer_user()
-    engineer.S0 = 1000.0  # 低基数
-    engineer.H0 = 100.0   # 高时薪
+    engineer.S0 = 8000.0
+    engineer.T_monthly_plan = 160.0
     db_session.add(engineer)
     await db_session.commit()
 
-    # 大量超时
+    # 少量完成
     task = Task(
         name="Test Task",
         pm_id=uuid.uuid4(),
@@ -232,6 +244,7 @@ async def test_calculate_engineer_salary_negative_result(db_session: AsyncSessio
         status=TaskStatus.COMPLETED,
         T_actual=20.0,
         T_reported=5.0,
+        T_effective=5.0,
         task_type=TaskType.NORMAL,
     )
     db_session.add(task)
@@ -243,9 +256,49 @@ async def test_calculate_engineer_salary_negative_result(db_session: AsyncSessio
         k_coefficient=1.0,
     )
 
-    # P差额 = 100 * (20 - 5) = 1500
-    # 工资 = (1000 - 1500) * 1.0 = -500 → 取 0
-    assert result.salary_final == 0.0
+    # H0 = 8000 / 160 = 50
+    # P差额 = max(0, 160 - 5) * 50 = 7750
+    # 工资 = max(5000, (8000 - 7750) * 1.0) = max(5000, 250) = 5000
+    assert result.salary_final == 5000.0
+
+
+@pytest.mark.asyncio
+async def test_calculate_engineer_salary_prd_example(db_session: AsyncSession):
+    """测试 PRD 示例：S0=8000, T月计划=150h, T有效=140h, K=1.0"""
+    engineer = create_engineer_user()
+    engineer.S0 = 8000.0
+    engineer.T_monthly_plan = 150.0
+    engineer.current_starpoint = 100
+    db_session.add(engineer)
+    await db_session.commit()
+
+    task = Task(
+        name="Test Task",
+        pm_id=uuid.uuid4(),
+        engineer_id=engineer.id,
+        status=TaskStatus.COMPLETED,
+        T_actual=150.0,
+        T_reported=140.0,
+        T_effective=140.0,
+        task_type=TaskType.NORMAL,
+    )
+    db_session.add(task)
+    await db_session.commit()
+
+    result = await calculate_engineer_salary(
+        session=db_session,
+        engineer=engineer,
+        k_coefficient=1.0,
+    )
+
+    # H0 = 8000 / 150 ≈ 53.3333
+    assert result.H0 == pytest.approx(8000 / 150, rel=1e-4)
+    # P差额 = max(0, 150 - 140) * 53.3333 ≈ 533.333
+    expected_P_diff = (150 - 140) * (8000 / 150)
+    assert result.P_diff == pytest.approx(expected_P_diff, rel=1e-4)
+    # 工资 = max(5000, (8000 - 533.333) * 1.0) = 7466.67
+    expected_salary = max(5000, (8000 - expected_P_diff) * 1.0)
+    assert result.salary_final == pytest.approx(expected_salary, rel=1e-4)
 
 
 @pytest.mark.asyncio
@@ -284,7 +337,6 @@ async def test_calculate_user_salary_engineer(db_session: AsyncSession):
     """测试 calculate_user_salary 分发工程师工资计算"""
     engineer = create_engineer_user()
     engineer.S0 = 10000.0
-    engineer.H0 = 50.0
     engineer.current_starpoint = 100
     db_session.add(engineer)
     await db_session.commit()
@@ -296,6 +348,7 @@ async def test_calculate_user_salary_engineer(db_session: AsyncSession):
         status=TaskStatus.COMPLETED,
         T_actual=10.0,
         T_reported=10.0,
+        T_effective=10.0,
         task_type=TaskType.NORMAL,
     )
     db_session.add(task)

@@ -19,19 +19,19 @@ async def get_engineer_monthly_hours(
     engineer_id: uuid.UUID,
 ) -> Tuple[float, float]:
     """
-    获取工程师本月完成任务的 T实 和 T报 合计。
+    获取工程师本月完成任务的 T有效、T报价 合计。
 
-    由 salary 和 dashboard 模块共享使用。
+    T_effective 用于工资计算，T_reported 用于统计参考。
 
     Returns:
-        (T_actual_total, T_reported_total) 元组
+        (T_effective_total, T_reported_total) 元组
     """
     now = datetime.now(timezone.utc)
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
     stmt = (
         select(
-            func.coalesce(func.sum(Task.T_actual), 0).label("T_actual_total"),
+            func.coalesce(func.sum(Task.T_effective), 0).label("T_effective_total"),
             func.coalesce(func.sum(Task.T_reported), 0).label("T_reported_total"),
         )
         .where(
@@ -44,7 +44,7 @@ async def get_engineer_monthly_hours(
     )
     result = await session.execute(stmt)
     row = result.one()
-    return float(row.T_actual_total or 0), float(row.T_reported_total or 0)
+    return float(row.T_effective_total or 0), float(row.T_reported_total or 0)
 
 
 async def get_engineer_loads(
@@ -63,19 +63,19 @@ async def get_engineer_loads(
             User.full_name,
             User.T_monthly_plan,
             func.count(Task.id).filter(Task.status == TaskStatus.IN_PROGRESS).label("ongoing_tasks"),
-            func.coalesce(func.sum(Task.T_actual).filter(
+            func.coalesce(func.sum(Task.T_effective).filter(
                 and_(
                     Task.status == TaskStatus.COMPLETED,
                     Task.updated_at >= month_start,
                 )
-            ), 0).label("T_actual_monthly"),
-            func.coalesce(func.sum(Task.T_actual).filter(
+            ), 0).label("T_effective_monthly"),
+            func.coalesce(func.sum(Task.T_effective).filter(
                 and_(
                     Task.status == TaskStatus.COMPLETED,
                     Task.updated_at >= month_start,
                     Task.T_reported > 0,
                 )
-            ), 0).label("T_actual_for_accuracy"),
+            ), 0).label("T_effective_for_accuracy"),
             func.coalesce(func.sum(Task.T_reported).filter(
                 and_(
                     Task.status == TaskStatus.COMPLETED,
