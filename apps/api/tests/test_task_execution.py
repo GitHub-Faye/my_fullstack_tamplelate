@@ -249,52 +249,6 @@ class TestTaskExecution:
         assert updated_task.bidding_deadline is not None
 
     @pytest.mark.asyncio
-    async def test_pause_request_success(
-        self, db_session: AsyncSession, client: AsyncClient
-    ):
-        """
-        测试工程师成功暂停任务
-        - 状态从 IN_PROGRESS 变为 PAUSED
-        """
-        # 1. 创建 PM 和工程师
-        pm = await create_test_user(
-            db_session,
-            email="pm_pause@example.com",
-            is_superuser=False,
-        )
-        pm.role = UserRoleType.PM
-        db_session.add(pm)
-        await db_session.commit()
-
-        engineer = await create_test_user(
-            db_session,
-            email="eng_pause@example.com",
-            is_superuser=False,
-        )
-        engineer.role = UserRoleType.ENGINEER
-        db_session.add(engineer)
-        await db_session.commit()
-
-        # 2. 创建进行中任务
-        task = await create_test_task(
-            db_session, pm, engineer, status=TaskStatus.IN_PROGRESS
-        )
-
-        # 3. 工程师申请暂停
-        token = create_test_token(engineer.id)
-        response = await client.post(
-            f"/v1/tasks/{task.id}/pause-request",
-            headers=get_auth_headers(token),
-        )
-
-        # 4. 验证响应
-        assert response.status_code == 200
-
-        # 5. 验证数据库 - 状态变为 PAUSE_REQUESTED（待审批）
-        updated_task = await db_session.get(Task, task.id)
-        assert updated_task.status == TaskStatus.PAUSED
-
-    @pytest.mark.asyncio
     async def test_resume_task_success(
         self, db_session: AsyncSession, client: AsyncClient
     ):

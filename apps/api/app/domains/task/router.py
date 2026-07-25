@@ -647,6 +647,8 @@ async def complete_task(
     await check_task_status(task, TaskStatus.IN_PROGRESS)
     task.status = TaskStatus.COMPLETED
     task.T_reported_complete_time = datetime.now(timezone.utc)
+    # Ticket 02: 任务完成时写入 T_effective = min(T_actual, T_reported)，用于工资计算
+    task.T_effective = min(task.T_actual or 0, task.T_reported or 0)
     session.add(task)
     await session.commit()
     await session.refresh(task)

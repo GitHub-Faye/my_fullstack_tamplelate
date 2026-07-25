@@ -57,6 +57,7 @@ class TaskPublic(TaskBase):
     bidding_deadline: Optional[datetime] = None
     T_reported: Optional[float] = None
     T_actual: Optional[float] = None
+    T_effective: Optional[float] = None
     progress: Optional[str] = None
     T_reported_complete_time: Optional[datetime] = None
     created_at: Optional[datetime] = None

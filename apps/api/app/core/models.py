@@ -278,6 +278,7 @@ class TaskBase(SQLModel):
     status: TaskStatus = Field(default=TaskStatus.UNCONFIRMED)
     T_reported: Optional[float] = Field(default=None, ge=0, description="T报（工程师填报工时）")
     T_actual: Optional[float] = Field(default=None, ge=0, description="T实（实际结算工时）")
+    T_effective: Optional[float] = Field(default=None, ge=0, description="T有效（任务完成时取 min(T_actual, T_reported)，用于工资计算）")
     expected_online_time: Optional[datetime] = Field(default=None, sa_type=DateTime(timezone=True), description="预期上线时间")
     T_reported_complete_time: Optional[datetime] = Field(default=None, sa_type=DateTime(timezone=True), description="T报完成上报时间")
 

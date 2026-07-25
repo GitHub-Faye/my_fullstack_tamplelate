@@ -1497,6 +1497,10 @@ export type TaskPublic = {
      */
     T_actual?: number | null;
     /**
+     * T Effective
+     */
+    T_effective?: number | null;
+    /**
      * Progress
      */
     progress?: string | null;

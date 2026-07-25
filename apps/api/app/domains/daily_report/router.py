@@ -195,6 +195,8 @@ async def create_daily_report(
     if report_in.current_stage == ReportStage.COMPLETED and task.status == TaskStatus.IN_PROGRESS:
         task.status = TaskStatus.COMPLETED
         task.T_reported_complete_time = datetime.now(timezone.utc)
+        # Ticket 02: 任务完成时写入 T_effective = min(T_actual, T_reported)，用于工资计算
+        task.T_effective = min(task.T_actual or 0, task.T_reported or 0)
         # Spec §27: 阶段选择"已完成"时，进度自动设为 100%
         if not report_in.progress:
             report_in.progress = "100%"
