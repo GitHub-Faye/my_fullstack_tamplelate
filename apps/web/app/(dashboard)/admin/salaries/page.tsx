@@ -106,12 +106,14 @@ export default function AdminSalariesPage() {
                   const response = await exportSalariesV1SalariesExportPost({
                     body: { month },
                   });
-                  // 从 StreamingResponse 中提取 CSV 并下载
-                  const blob = await (response as any).blob();
+                  // SDK 将 xlsx 二进制解析为 blob
+                  const blob = (response as any).data instanceof Blob
+                    ? (response as any).data
+                    : await new Response((response as any).data).blob();
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement("a");
                   a.href = url;
-                  a.download = `salary_export_${month}.csv`;
+                  a.download = `salary_export_${month}.xlsx`;
                   a.click();
                   URL.revokeObjectURL(url);
                   toast.success("工资表已下载");

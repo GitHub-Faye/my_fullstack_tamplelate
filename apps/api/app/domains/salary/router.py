@@ -5,17 +5,18 @@
 - 查看自己的工资试算
 - 管理员查看全员工资汇总
 - 管理员设置工资参数
-- 管理员导出工资表（CSV）
+- 管理员导出工资表（Excel）
 """
 
-import csv
-import io
 import uuid
 from datetime import datetime, timezone
+from io import BytesIO
 from typing import Annotated, Any, Optional
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
 
 from app.core.dependencies import (
     CurrentUser,
@@ -198,42 +199,83 @@ async def export_salaries(
             limit=count,
         )
 
-    # 计算每个员工的工资并生成 CSV
+    # 计算每个员工的工资并生成 Excel
     result_salaries = await calculate_all_salaries_detail(
         session=session, users=users, month=request.month,
     )
-    rows = []
+
+    # 按角色分组
+    engineer_rows = []
+    pm_rows = []
     for s in result_salaries:
         if isinstance(s, EngineerSalarySummary):
-            rows.append({
-                "user_id": str(s.user_id),
-                "full_name": s.full_name or "",
-                "role": s.role,
-                "salary": round(s.salary_final, 2),
-            })
+            engineer_rows.append([
+                s.full_name or "",
+                s.S0,
+                round(s.H0, 2) if s.H0 else "",
+                s.T_monthly_plan or "",
+                s.T_effective or "",
+                s.T_actual_monthly or "",
+                s.T_reported_monthly or "",
+                round(s.P_diff, 2) if s.P_diff else "",
+                s.k_coefficient or "",
+                s.current_starpoint or "",
+                round(s.salary_final, 2),
+            ])
         else:
-            rows.append({
-                "user_id": str(s.user_id),
-                "full_name": s.full_name or "",
-                "role": s.role,
-                "salary": round(s.salary_total, 2),
-            })
+            pm_rows.append([
+                s.full_name or "",
+                s.S_base,
+                s.S_assess,
+                s.R_base or "",
+                s.R_assess or "",
+                round(s.salary_total, 2),
+            ])
 
-    # 生成 CSV
+    # 生成 Excel
+    wb = Workbook()
+    header_font = Font(bold=True, color="FFFFFF")
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    thin_border = Border(
+        left=Side(style="thin"),
+        right=Side(style="thin"),
+        top=Side(style="thin"),
+        bottom=Side(style="thin"),
+    )
+
+    def write_sheet(ws, title, headers, data_rows):
+        ws.title = title
+        for col_idx, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_idx, value=header)
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = Alignment(horizontal="center")
+            cell.border = thin_border
+        for row_idx, row_data in enumerate(data_rows, 2):
+            for col_idx, value in enumerate(row_data, 1):
+                cell = ws.cell(row=row_idx, column=col_idx, value=value)
+                cell.border = thin_border
+        for col_idx in range(1, len(headers) + 1):
+            ws.column_dimensions[chr(64 + col_idx)].width = 16
+
+    # 工程师表
+    ws_eng = wb.active
+    write_sheet(ws_eng, "工程师", ["姓名", "S0", "H0", "T月计划", "T有效", "本月实际工时", "本月报价工时", "P差额", "K系数", "当前星点", "最终工资"], engineer_rows)
+
+    # PM 表
+    ws_pm = wb.create_sheet()
+    write_sheet(ws_pm, "市场产品PM", ["姓名", "S底", "S考", "R底", "R考", "总工资"], pm_rows)
+
+    # 写入 BytesIO
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
     month = request.month or datetime.now(timezone.utc).strftime("%Y-%m")
-    filename = f"salary_export_{month}.csv"
+    filename = f"salary_export_{month}.xlsx"
 
-    output = io.StringIO()
-    writer = csv.DictWriter(output, fieldnames=["user_id", "full_name", "role", "salary"])
-    writer.writeheader()
-    writer.writerows(rows)
-    csv_content = output.getvalue()
-
-    headers = {
-        "Content-Disposition": f"attachment; filename=\"{filename}\"",
-    }
     return StreamingResponse(
-        iter([csv_content]),
-        media_type="text/csv",
-        headers=headers,
+        iter([output.getvalue()]),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename=\"{filename}\""},
     )

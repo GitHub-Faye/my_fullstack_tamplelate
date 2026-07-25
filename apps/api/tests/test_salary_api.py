@@ -276,6 +276,21 @@ class TestSalaryAPIs:
     async def test_export_salaries(self, client: AsyncClient, db_session: AsyncSession):
         """测试导出工资表"""
         admin = await create_test_admin(db_session)
+        await create_test_engineer(db_session)  # 确保至少有一个工程师
+        # 创建 PM 用户，验证 PM 工资也能导出
+        pm_user = User(
+            email=f"pm_salary_api_{uuid.uuid4()}@test.com",
+            hashed_password=get_password_hash("testpassword"),
+            full_name="Test PM",
+            role=UserRoleType.PM,
+            is_active=True,
+            S_base=8000.0,
+            S_assess=2000.0,
+            R_base=1.0,
+            R_assess=1.0,
+        )
+        db_session.add(pm_user)
+        await db_session.commit()
 
         token = create_access_token(
             subject=str(admin.id),
@@ -291,6 +306,23 @@ class TestSalaryAPIs:
         )
 
         assert response.status_code == 200
-        assert response.headers["content-type"].startswith("text/csv")
+        assert response.headers["content-type"].startswith(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
         assert "Content-Disposition" in response.headers
         assert "salary_export" in response.headers["content-disposition"]
+        assert ".xlsx" in response.headers["content-disposition"]
+
+        # 验证 Excel 内容包含工程师和 PM 两个 sheet
+        from io import BytesIO
+        from openpyxl import load_workbook
+        wb = load_workbook(BytesIO(response.content))
+        assert "工程师" in wb.sheetnames
+        assert "市场产品PM" in wb.sheetnames
+        pm_sheet = wb["市场产品PM"]
+        # 表头: 姓名, S底, S考, R底, R考, 总工资
+        assert pm_sheet.cell(1, 1).value == "姓名"
+        assert pm_sheet.cell(1, 2).value == "S底"
+        # 第二行是数据行，验证 PM 用户出现在表格中
+        pm_names = [pm_sheet.cell(r, 1).value for r in range(2, pm_sheet.max_row + 1)]
+        assert "Test PM" in pm_names, f"PM 'Test PM' not found in export: {pm_names}"
