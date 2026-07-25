@@ -317,15 +317,15 @@ export function EngineerTaskTable({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">
-                        <Button
-                          variant="link"
-                          size="sm"
-                          onClick={() => setDetailTask(task)}
-                        >
-                          详情
-                        </Button>
                         {task.status === TaskStatusConst.PENDING_START && (
                           <>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              onClick={() => setDetailTask(task)}
+                            >
+                              详情
+                            </Button>
                             <Button
                               variant="link"
                               size="sm"
@@ -344,22 +344,40 @@ export function EngineerTaskTable({
                           </>
                         )}
                         {task.status === TaskStatusConst.IN_PROGRESS && (
-                          <Button
-                            variant="link"
-                            size="sm"
-                            onClick={() => setConfirm({ open: true, action: "pauseRequest", task, bidHours: 0 })}
-                          >
-                            暂停/顺延
-                          </Button>
+                          <>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              onClick={() => setDetailTask(task)}
+                            >
+                              详情
+                            </Button>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              onClick={() => setConfirm({ open: true, action: "pauseRequest", task, bidHours: 0 })}
+                            >
+                              暂停/顺延
+                            </Button>
+                          </>
                         )}
                         {task.status === TaskStatusConst.PAUSED && (
-                          <Button
-                            variant="link"
-                            size="sm"
-                            onClick={() => setConfirm({ open: true, action: "resume", task, bidHours: 0 })}
-                          >
-                            恢复
-                          </Button>
+                          <>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              onClick={() => setDetailTask(task)}
+                            >
+                              详情
+                            </Button>
+                            <Button
+                              variant="link"
+                              size="sm"
+                              onClick={() => setConfirm({ open: true, action: "resume", task, bidHours: 0 })}
+                            >
+                              恢复
+                            </Button>
+                          </>
                         )}
                         {task.status === TaskStatusConst.COMPLETED && (
                           <Button
