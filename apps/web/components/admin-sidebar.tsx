@@ -21,7 +21,6 @@ const adminNavItems: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "角色管理", href: "/admin/roles", icon: Shield },
   { label: "账号管理", href: "/admin/users", icon: Users },
   { label: "规则配置", href: "/admin/rules", icon: ScrollText },
-  { label: "操作日志", href: "/admin/logs", icon: FileText },
 ];
 
 export function AdminSidebar() {
