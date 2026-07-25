@@ -31,11 +31,17 @@ export default function AdminSalariesPage() {
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
+  // 月份变化时重置到第一页
+  const handleMonthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMonth(e.target.value);
+    setPage(1);
+  };
+
   const { data, isLoading } = useQuery({
-    queryKey: ["salary-summary", { page, page_size: pageSize }],
+    queryKey: ["salary-summary", { page, page_size: pageSize, month }],
     queryFn: async () => {
       const response = await readSalarySummaryV1SalariesGet({
-        query: { page, page_size: pageSize },
+        query: { page, page_size: pageSize, month },
         throwOnError: true,
       });
       return response.data;
@@ -73,7 +79,7 @@ export default function AdminSalariesPage() {
                 type="month"
                 className="w-[160px]"
                 value={month}
-                onChange={(e) => setMonth(e.target.value)}
+                onChange={(e) => handleMonthChange(e)}
               />
             </div>
             <div className="flex items-center gap-2">
@@ -97,11 +103,18 @@ export default function AdminSalariesPage() {
               size="sm"
               onClick={async () => {
                 try {
-                  await exportSalariesV1SalariesExportPost({
+                  const response = await exportSalariesV1SalariesExportPost({
                     body: { month },
-                    throwOnError: true,
                   });
-                  toast.success("工资表导出请求已提交");
+                  // 从 StreamingResponse 中提取 CSV 并下载
+                  const blob = await (response as any).blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `salary_export_${month}.csv`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("工资表已下载");
                 } catch {
                   toast.error("导出失败");
                 }
@@ -142,17 +155,20 @@ export default function AdminSalariesPage() {
                     <TableHead>S0</TableHead>
                     <TableHead>H0</TableHead>
                     <TableHead>T月计划</TableHead>
+                    <TableHead>T有效</TableHead>
                     <TableHead>本月实际工时</TableHead>
                     <TableHead>本月报价工时</TableHead>
                     <TableHead>P差额</TableHead>
                     <TableHead>K系数</TableHead>
+                    <TableHead>当前星点</TableHead>
                     <TableHead className="text-right">最终工资</TableHead>
+                    <TableHead className="w-[80px]">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredSalaries.filter((s) => s.role === "engineer" || !s.role).length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center h-32">
+                      <TableCell colSpan={12} className="text-center h-32">
                         暂无数据
                       </TableCell>
                     </TableRow>
@@ -163,14 +179,19 @@ export default function AdminSalariesPage() {
                         <TableRow key={s.user_id || i}>
                           <TableCell>{s.full_name || "-"}</TableCell>
                           <TableCell>{s.S0 ?? "-"}</TableCell>
-                          <TableCell>{s.H0 ?? "-"}</TableCell>
+                          <TableCell>{s.H0?.toFixed(2) ?? "-"}</TableCell>
                           <TableCell>{s.T_monthly_plan ?? "-"}</TableCell>
+                          <TableCell>{s.T_effective ?? "-"}</TableCell>
                           <TableCell>{s.T_actual_monthly ?? "-"}</TableCell>
                           <TableCell>{s.T_reported_monthly ?? "-"}</TableCell>
                           <TableCell>{s.P_diff ?? "-"}</TableCell>
                           <TableCell>{s.k_coefficient ?? "-"}</TableCell>
+                          <TableCell>{s.current_starpoint ?? "-"}</TableCell>
                           <TableCell className="text-right font-medium">
                             {s.salary_final != null ? `¥${s.salary_final.toLocaleString()}` : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="sm">编辑</Button>
                           </TableCell>
                         </TableRow>
                       ))
@@ -187,12 +208,13 @@ export default function AdminSalariesPage() {
                     <TableHead>R底</TableHead>
                     <TableHead>R考</TableHead>
                     <TableHead className="text-right">总工资</TableHead>
+                    <TableHead className="w-[80px]">操作</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredSalaries.filter((s) => s.role === "pm").length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center h-32">
+                      <TableCell colSpan={7} className="text-center h-32">
                         暂无数据
                       </TableCell>
                     </TableRow>
@@ -208,6 +230,9 @@ export default function AdminSalariesPage() {
                           <TableCell>{s.R_assess ?? "-"}</TableCell>
                           <TableCell className="text-right font-medium">
                             {s.salary_total != null ? `¥${s.salary_total.toLocaleString()}` : "-"}
+                          </TableCell>
+                          <TableCell>
+                            <Button variant="ghost" size="sm">编辑</Button>
                           </TableCell>
                         </TableRow>
                       ))
