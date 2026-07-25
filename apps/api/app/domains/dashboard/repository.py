@@ -90,7 +90,8 @@ async def get_engineer_dashboard(
         T_remaining=T_remaining,
         salary_preview=salary_preview,
         accuracy_rate=round(accuracy_rate, 2),
-        H0=engineer.H0,
+        # H0 运行时计算：S0 ÷ T月计划，与工资计算逻辑一致
+        H0=(engineer.S0 or 0.0) / T_monthly_plan if T_monthly_plan > 0 else 0.0,
     )
 
 

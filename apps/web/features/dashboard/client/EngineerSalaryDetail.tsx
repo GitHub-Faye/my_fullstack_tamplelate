@@ -66,6 +66,17 @@ export function EngineerSalaryDetail({
                     </td>
                   </tr>
                   <tr className="border-b">
+                    <td className="px-3 py-2 text-muted-foreground">H0（基准时薪）</td>
+                    <td className="px-3 py-2 font-medium">
+                      {(salary as any)?.H0 != null
+                        ? `¥${Number((salary as any).H0).toFixed(2)}`
+                        : "-"}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-muted-foreground">
+                      自动计算：S0 ÷ T月计划
+                    </td>
+                  </tr>
+                  <tr className="border-b">
                     <td className="px-3 py-2 text-muted-foreground">
                       个人月计划工时
                     </td>
@@ -76,6 +87,17 @@ export function EngineerSalaryDetail({
                     </td>
                     <td className="px-3 py-2 text-xs text-muted-foreground">
                       按当月工作日计算
+                    </td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="px-3 py-2 text-muted-foreground">T有效（有效工时）</td>
+                    <td className="px-3 py-2 font-medium">
+                      {(salary as any)?.T_effective != null
+                        ? `${(salary as any).T_effective}h`
+                        : "-"}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-muted-foreground">
+                      已完成任务 min(T实, T报) 之和
                     </td>
                   </tr>
                   <tr className="border-b">
@@ -90,9 +112,20 @@ export function EngineerSalaryDetail({
                     </td>
                   </tr>
                   <tr className="border-b">
+                    <td className="px-3 py-2 text-muted-foreground">P差额（工时扣减）</td>
+                    <td className="px-3 py-2 font-medium">
+                      {(salary as any)?.P_diff != null
+                        ? `¥${Number((salary as any).P_diff).toLocaleString()}`
+                        : "-"}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-muted-foreground">
+                      max(0, T月计划 - T有效) × H0
+                    </td>
+                  </tr>
+                  <tr className="border-b">
                     <td className="px-3 py-2 text-muted-foreground">K系数</td>
                     <td className="px-3 py-2 font-medium">
-                      {(salary as any)?.K != null ? (salary as any).K : "-"}
+                      {(salary as any)?.k_coefficient != null ? (salary as any).k_coefficient : "-"}
                     </td>
                     <td className="px-3 py-2 text-xs text-muted-foreground">
                       星点排名系数

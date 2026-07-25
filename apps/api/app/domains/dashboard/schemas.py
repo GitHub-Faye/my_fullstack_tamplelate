@@ -34,8 +34,8 @@ class EngineerDashboard(SQLModel):
     # 准确率
     accuracy_rate: float = Field(description="T报准确率（%）")
 
-    # 基准时薪
-    H0: Optional[float] = Field(description="H0（基准时薪），由管理员设置")
+    # 基准时薪（运行时计算：S0 ÷ T月计划）
+    H0: Optional[float] = Field(description="H0（基准时薪，自动计算 S0 / T月计划）")
 
 
 # ==================== PM 指标 ====================
