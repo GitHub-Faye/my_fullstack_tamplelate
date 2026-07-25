@@ -147,12 +147,12 @@ export function EngineerSalaryDetail({
                   <tr>
                     <td className="px-3 py-2 text-muted-foreground">收入试算</td>
                     <td className="px-3 py-2 font-bold text-lg text-green-600">
-                      {dashboard?.salary_preview != null
-                        ? `¥${dashboard.salary_preview.toLocaleString()}`
+                      {(salary as any)?.salary_final != null
+                        ? `¥${Number((salary as any).salary_final).toLocaleString()}`
                         : "-"}
                     </td>
                     <td className="px-3 py-2 text-xs text-muted-foreground">
-                      月度试算，最终以管理员确认为准
+                      公式：max(5000, (S0 - P差额) × K)
                     </td>
                   </tr>
                 </tbody>
