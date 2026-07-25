@@ -23,12 +23,14 @@ import { useQuery } from "@tanstack/react-query";
 import { readSalarySummaryV1SalariesGet, exportSalariesV1SalariesExportPost } from "@repo/sdk";
 import { Loader2, Search, Download } from "lucide-react";
 import { toast } from "sonner";
+import { SalaryEditDialog } from "@/features/salary/client/SalaryEditDialog";
 
 export default function AdminSalariesPage() {
   const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
   const [person, setPerson] = useState("all");
   const [tab, setTab] = useState<"engineer" | "pm">("engineer");
   const [page, setPage] = useState(1);
+  const [editUser, setEditUser] = useState<any>(null);
   const pageSize = 20;
 
   // 月份变化时重置到第一页
@@ -37,7 +39,7 @@ export default function AdminSalariesPage() {
     setPage(1);
   };
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, refetch } = useQuery({
     queryKey: ["salary-summary", { page, page_size: pageSize, month }],
     queryFn: async () => {
       const response = await readSalarySummaryV1SalariesGet({
@@ -193,7 +195,7 @@ export default function AdminSalariesPage() {
                             {s.salary_final != null ? `¥${s.salary_final.toLocaleString()}` : "-"}
                           </TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="sm">编辑</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setEditUser(s)}>编辑</Button>
                           </TableCell>
                         </TableRow>
                       ))
@@ -234,7 +236,7 @@ export default function AdminSalariesPage() {
                             {s.salary_total != null ? `¥${s.salary_total.toLocaleString()}` : "-"}
                           </TableCell>
                           <TableCell>
-                            <Button variant="ghost" size="sm">编辑</Button>
+                            <Button variant="ghost" size="sm" onClick={() => setEditUser(s)}>编辑</Button>
                           </TableCell>
                         </TableRow>
                       ))
@@ -256,6 +258,14 @@ export default function AdminSalariesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* 编辑工资参数弹窗 */}
+      <SalaryEditDialog
+        user={editUser}
+        open={!!editUser}
+        onOpenChange={(open) => { if (!open) setEditUser(null); }}
+        onSuccess={() => refetch()}
+      />
     </div>
   );
 }
