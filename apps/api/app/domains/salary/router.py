@@ -12,7 +12,7 @@ import csv
 import io
 import uuid
 from datetime import datetime, timezone
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
@@ -31,31 +31,17 @@ from app.domains.salary import repository
 from app.domains.salary.schemas import (
     SalaryParamsUpdate,
     EngineerSalaryDetail,
+    EngineerSalarySummary,
     PMSalaryDetail,
-    SalarySummary,
+    PMSalarySummary,
     SalarySummaryList,
     SalaryExportRequest,
 )
-from app.domains.salary.service import calculate_all_salaries, calculate_user_salary
+from app.domains.salary.service import calculate_all_salaries_detail, calculate_user_salary
 from app.domains.audit.repository import create_audit_log
 
 
 router = APIRouter()
-
-
-# ==================== 辅助函数 ====================
-
-async def _calculate_salaries(
-    session: SessionDep,
-    users: list[User],
-) -> list[SalarySummary]:
-    """
-    批量计算用户工资，返回 SalarySummary 列表
-
-    使用 service 层 calculate_all_salaries 实现，仅取 summary 部分。
-    """
-    summaries, _, _, _ = await calculate_all_salaries(session=session, users=users)
-    return summaries
 
 
 # ==================== 工程师/PM 端点：工资试算 ====================
@@ -99,6 +85,7 @@ async def read_salary_summary(
     current_user: CurrentUser,
     page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
     page_size: Annotated[int, Query(ge=1, le=100, description="每页数量，默认20")] = 20,
+    month: Annotated[Optional[str], Query(pattern=r"^\d{4}-\d{2}$", description="月份 YYYY-MM，默认当前月")] = None,
     _: Annotated[None, Depends(require_scope(SalaryScope.ADMIN))] = None,
 ) -> Any:
     """
@@ -115,8 +102,10 @@ async def read_salary_summary(
         limit=page_size,
     )
 
-    # 计算工资
-    result_salaries = await _calculate_salaries(session, users)
+    # 计算工资明细
+    result_salaries = await calculate_all_salaries_detail(
+        session=session, users=users, month=month,
+    )
 
     return SalarySummaryList(
         data=result_salaries,
@@ -210,15 +199,25 @@ async def export_salaries(
         )
 
     # 计算每个员工的工资并生成 CSV
-    result_salaries = await _calculate_salaries(session, users)
+    result_salaries = await calculate_all_salaries_detail(
+        session=session, users=users, month=request.month,
+    )
     rows = []
     for s in result_salaries:
-        rows.append({
-            "user_id": str(s.user_id),
-            "full_name": s.full_name or "",
-            "role": s.role,
-            "salary": round(s.salary, 2),
-        })
+        if isinstance(s, EngineerSalarySummary):
+            rows.append({
+                "user_id": str(s.user_id),
+                "full_name": s.full_name or "",
+                "role": s.role,
+                "salary": round(s.salary_final, 2),
+            })
+        else:
+            rows.append({
+                "user_id": str(s.user_id),
+                "full_name": s.full_name or "",
+                "role": s.role,
+                "salary": round(s.salary_total, 2),
+            })
 
     # 生成 CSV
     month = request.month or datetime.now(timezone.utc).strftime("%Y-%m")

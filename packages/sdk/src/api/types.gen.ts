@@ -529,7 +529,7 @@ export type EngineerDashboard = {
     /**
      * H0
      *
-     * H0（基准时薪），由管理员设置
+     * H0（基准时薪，自动计算 S0 / T月计划）
      */
     H0: number | null;
 };
@@ -655,6 +655,86 @@ export type EngineerSalaryDetail = {
 };
 
 /**
+ * EngineerSalarySummary
+ *
+ * 工程师工资汇总（管理员查看）
+ */
+export type EngineerSalarySummary = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Role
+     */
+    role?: string;
+    /**
+     * S0
+     *
+     * 月度工资基数
+     */
+    S0: number;
+    /**
+     * H0
+     *
+     * H0（基准时薪，自动计算 S0 / T月计划）
+     */
+    H0?: number | null;
+    /**
+     * T Monthly Plan
+     *
+     * T月计划
+     */
+    T_monthly_plan?: number | null;
+    /**
+     * T Effective
+     *
+     * T有效（有效工时）
+     */
+    T_effective?: number;
+    /**
+     * T Actual Monthly
+     *
+     * 本月实际工时
+     */
+    T_actual_monthly?: number;
+    /**
+     * T Reported Monthly
+     *
+     * 本月报价工时
+     */
+    T_reported_monthly?: number;
+    /**
+     * P Diff
+     *
+     * P差额（工时扣减）
+     */
+    P_diff?: number;
+    /**
+     * K Coefficient
+     *
+     * K系数
+     */
+    k_coefficient?: number;
+    /**
+     * Current Starpoint
+     *
+     * 当前星点
+     */
+    current_starpoint?: number;
+    /**
+     * Salary Final
+     *
+     * 最终工资 S下 = max(5000, (S0 - P差额) × K)
+     */
+    salary_final: number;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -757,6 +837,56 @@ export type PmDashboard = {
  * PM 工资试算详情
  */
 export type PmSalaryDetail = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Role
+     */
+    role?: string;
+    /**
+     * S Base
+     *
+     * S底（底薪）
+     */
+    S_base: number;
+    /**
+     * S Assess
+     *
+     * S考（考核部分）
+     */
+    S_assess: number;
+    /**
+     * R Base
+     *
+     * R底（底薪比例）
+     */
+    R_base?: number | null;
+    /**
+     * R Assess
+     *
+     * R考（考核比例）
+     */
+    R_assess?: number | null;
+    /**
+     * Salary Total
+     *
+     * 总工资 S总 = S底 + S考
+     */
+    salary_total: number;
+};
+
+/**
+ * PMSalarySummary
+ *
+ * PM 工资汇总（管理员查看）
+ */
+export type PmSalarySummary = {
     /**
      * User Id
      */
@@ -1027,7 +1157,7 @@ export type SalarySummaryList = {
     /**
      * Data
      */
-    data: Array<unknown>;
+    data?: Array<EngineerSalarySummary | PmSalarySummary>;
     /**
      * Count
      */
@@ -3635,6 +3765,12 @@ export type ReadSalarySummaryV1SalariesGetData = {
          * 每页数量，默认20
          */
         page_size?: number;
+        /**
+         * Month
+         *
+         * 月份 YYYY-MM，默认当前月
+         */
+        month?: string | null;
     };
     url: '/v1/salaries';
 };

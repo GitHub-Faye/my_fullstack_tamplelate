@@ -159,6 +159,27 @@ export const zEngineerSalaryDetail = z.object({
 });
 
 /**
+ * EngineerSalarySummary
+ *
+ * 工程师工资汇总（管理员查看）
+ */
+export const zEngineerSalarySummary = z.object({
+    user_id: z.uuid(),
+    full_name: z.string().nullish(),
+    role: z.string().optional().default('engineer'),
+    S0: z.number(),
+    H0: z.number().nullish(),
+    T_monthly_plan: z.number().nullish(),
+    T_effective: z.number().optional().default(0),
+    T_actual_monthly: z.number().optional().default(0),
+    T_reported_monthly: z.number().optional().default(0),
+    P_diff: z.number().optional().default(0),
+    k_coefficient: z.number().optional().default(1),
+    current_starpoint: z.int().optional().default(0),
+    salary_final: z.number()
+});
+
+/**
  * JudgmentType
  *
  * 星点判定类型枚举
@@ -206,6 +227,22 @@ export const zPmDashboard = z.object({
  * PM 工资试算详情
  */
 export const zPmSalaryDetail = z.object({
+    user_id: z.uuid(),
+    full_name: z.string().nullish(),
+    role: z.string().optional().default('pm'),
+    S_base: z.number(),
+    S_assess: z.number(),
+    R_base: z.number().nullish(),
+    R_assess: z.number().nullish(),
+    salary_total: z.number()
+});
+
+/**
+ * PMSalarySummary
+ *
+ * PM 工资汇总（管理员查看）
+ */
+export const zPmSalarySummary = z.object({
     user_id: z.uuid(),
     full_name: z.string().nullish(),
     role: z.string().optional().default('pm'),
@@ -393,7 +430,7 @@ export const zSalaryParamsUpdate = z.object({
  * 工资汇总列表
  */
 export const zSalarySummaryList = z.object({
-    data: z.array(z.unknown()),
+    data: z.array(z.union([zEngineerSalarySummary, zPmSalarySummary])).optional(),
     count: z.int(),
     page: z.int().nullish(),
     page_size: z.int().nullish(),
@@ -1360,7 +1397,8 @@ export const zReadMySalaryV1SalariesMyGetResponse = z.union([
 
 export const zReadSalarySummaryV1SalariesGetQuery = z.object({
     page: z.int().gte(1).optional().default(1),
-    page_size: z.int().gte(1).lte(100).optional().default(20)
+    page_size: z.int().gte(1).lte(100).optional().default(20),
+    month: z.string().regex(/^\d{4}-\d{2}$/).nullish()
 });
 
 /**

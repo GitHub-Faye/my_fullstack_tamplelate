@@ -5,7 +5,7 @@
 """
 import uuid
 from datetime import datetime, timezone
-from typing import Tuple
+from typing import Optional, Tuple
 
 from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,30 +17,51 @@ async def get_engineer_monthly_hours(
     *,
     session: AsyncSession,
     engineer_id: uuid.UUID,
+    month: Optional[str] = None,
 ) -> Tuple[float, float]:
     """
-    获取工程师本月完成任务的 T有效、T报价 合计。
+    获取工程师某月完成任务的 T有效、T报价 合计。
 
     T_effective 用于工资计算，T_reported 用于统计参考。
+
+    Args:
+        month: 月份 YYYY-MM，默认当前月
 
     Returns:
         (T_effective_total, T_reported_total) 元组
     """
-    now = datetime.now(timezone.utc)
-    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    if month:
+        month_start = datetime.strptime(month, "%Y-%m").replace(tzinfo=timezone.utc)
+    else:
+        now = datetime.now(timezone.utc)
+        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    if month:
+        # 计算下个月第一天作为结束
+        year, mon = map(int, month.split("-"))
+        if mon == 12:
+            month_end = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+        else:
+            month_end = datetime(year, mon + 1, 1, tzinfo=timezone.utc)
+        conditions = [
+            Task.engineer_id == engineer_id,
+            Task.status == TaskStatus.COMPLETED,
+            Task.updated_at >= month_start,
+            Task.updated_at < month_end,
+        ]
+    else:
+        conditions = [
+            Task.engineer_id == engineer_id,
+            Task.status == TaskStatus.COMPLETED,
+            Task.updated_at >= month_start,
+        ]
 
     stmt = (
         select(
             func.coalesce(func.sum(Task.T_effective), 0).label("T_effective_total"),
             func.coalesce(func.sum(Task.T_reported), 0).label("T_reported_total"),
         )
-        .where(
-            and_(
-                Task.engineer_id == engineer_id,
-                Task.status == TaskStatus.COMPLETED,
-                Task.updated_at >= month_start,
-            )
-        )
+        .where(and_(*conditions))
     )
     result = await session.execute(stmt)
     row = result.one()

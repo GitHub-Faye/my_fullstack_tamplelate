@@ -3,6 +3,8 @@
 
 封装工资公式计算和批量编排逻辑。
 """
+from typing import Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import User, UserRoleType
@@ -10,7 +12,9 @@ from app.core.errors import BusinessException, ErrorCode
 from app.domains.starpoint import repository as starpoint_repo
 from app.domains.salary.schemas import (
     EngineerSalaryDetail,
+    EngineerSalarySummary,
     PMSalaryDetail,
+    PMSalarySummary,
     SalarySummary,
 )
 from app.domains.shared.queries import get_engineer_monthly_hours
@@ -21,6 +25,7 @@ async def calculate_engineer_salary(
     session: AsyncSession,
     engineer: User,
     k_coefficient: float,
+    month: Optional[str] = None,
 ) -> EngineerSalaryDetail:
     """
     计算工程师工资
@@ -34,6 +39,7 @@ async def calculate_engineer_salary(
     T_effective_total, T_reported_total = await get_engineer_monthly_hours(
         session=session,
         engineer_id=engineer.id,
+        month=month,
     )
 
     S0 = engineer.S0 or 0.0
@@ -65,6 +71,34 @@ async def calculate_engineer_salary(
     )
 
 
+async def calculate_engineer_salary_summary(
+    *,
+    session: AsyncSession,
+    engineer: User,
+    k_coefficient: float,
+    month: Optional[str] = None,
+) -> EngineerSalarySummary:
+    """计算工程师工资，返回管理员汇总视图"""
+    detail = await calculate_engineer_salary(
+        session=session, engineer=engineer, k_coefficient=k_coefficient, month=month,
+    )
+    return EngineerSalarySummary(
+        user_id=detail.user_id,
+        full_name=detail.full_name,
+        role="engineer",
+        S0=detail.S0,
+        H0=detail.H0,
+        T_monthly_plan=detail.T_monthly_plan,
+        T_effective=detail.T_effective,
+        T_actual_monthly=detail.T_actual_monthly,
+        T_reported_monthly=detail.T_reported_monthly,
+        P_diff=detail.P_diff,
+        k_coefficient=detail.k_coefficient,
+        current_starpoint=detail.current_starpoint,
+        salary_final=detail.salary_final,
+    )
+
+
 async def calculate_pm_salary(
     *,
     pm: User,
@@ -86,10 +120,29 @@ async def calculate_pm_salary(
     )
 
 
+async def calculate_pm_salary_summary(
+    *,
+    pm: User,
+) -> PMSalarySummary:
+    """计算 PM 工资，返回管理员汇总视图"""
+    detail = await calculate_pm_salary(pm=pm)
+    return PMSalarySummary(
+        user_id=detail.user_id,
+        full_name=detail.full_name,
+        role="pm",
+        S_base=detail.S_base,
+        S_assess=detail.S_assess,
+        R_base=detail.R_base,
+        R_assess=detail.R_assess,
+        salary_total=detail.salary_total,
+    )
+
+
 async def calculate_user_salary(
     *,
     session: AsyncSession,
     user: User,
+    month: Optional[str] = None,
 ) -> EngineerSalaryDetail | PMSalaryDetail:
     """计算单个用户工资（工程师或 PM）"""
     if user.role == UserRoleType.ENGINEER:
@@ -101,6 +154,7 @@ async def calculate_user_salary(
             session=session,
             engineer=user,
             k_coefficient=k_coefficient,
+            month=month,
         )
     elif user.role == UserRoleType.PM:
         return await calculate_pm_salary(pm=user)
@@ -111,12 +165,42 @@ async def calculate_user_salary(
         )
 
 
+async def calculate_all_salaries_detail(
+    *,
+    session: AsyncSession,
+    users: list[User],
+    month: Optional[str] = None,
+) -> list[EngineerSalarySummary | PMSalarySummary]:
+    """批量计算所有用户工资，返回明细汇总视图（用于管理员页面）"""
+    result: list[EngineerSalarySummary | PMSalarySummary] = []
+
+    for user in users:
+        try:
+            if user.role == UserRoleType.ENGINEER:
+                k_coefficient = await starpoint_repo.calculate_k_coefficient(
+                    session=session,
+                    engineer_id=user.id,
+                )
+                summary = await calculate_engineer_salary_summary(
+                    session=session, engineer=user, k_coefficient=k_coefficient, month=month,
+                )
+            elif user.role == UserRoleType.PM:
+                summary = await calculate_pm_salary_summary(pm=user)
+            else:
+                continue
+            result.append(summary)
+        except BusinessException:
+            continue
+
+    return result
+
+
 async def calculate_all_salaries(
     *,
     session: AsyncSession,
     users: list[User],
 ) -> tuple[list[SalarySummary], float, float, float]:
-    """批量计算所有用户工资，返回汇总数据"""
+    """批量计算所有用户工资，返回汇总数据（旧版，供 dashboard 使用）"""
     salary_summaries: list[SalarySummary] = []
     engineer_cost = 0.0
     pm_cost = 0.0
