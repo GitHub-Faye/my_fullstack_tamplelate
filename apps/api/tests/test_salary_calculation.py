@@ -190,7 +190,7 @@ async def test_calculate_engineer_salary_with_k_coefficient(db_session: AsyncSes
     db_session.add(task)
     await db_session.commit()
 
-    # K = 1.2（前 20%，按新 PRD 系数）
+    # K = 1.2（前 20%）
     result = await calculate_engineer_salary(
         session=db_session,
         engineer=engineer,

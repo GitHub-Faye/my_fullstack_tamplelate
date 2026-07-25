@@ -58,19 +58,19 @@ async def get_engineer_dashboard(
     _, _, month_start = _get_time_bounds()
 
     # 本月实际工时 + T报准确率（共享查询）
-    T_actual_monthly, T_reported_monthly = await get_engineer_monthly_hours(
+    T_effective_total, T_reported_monthly = await get_engineer_monthly_hours(
         session=session,
         engineer_id=engineer.id,
     )
 
     if T_reported_monthly > 0:
-        accuracy_rate = min(T_actual_monthly / T_reported_monthly * 100, 100.0)
+        accuracy_rate = min(T_effective_total / T_reported_monthly * 100, 100.0)
     else:
         accuracy_rate = 100.0
 
-    # 剩余工时 = 月度计划 - 本月实际
+    # 剩余工时 = 月度计划 - 本月有效工时
     T_monthly_plan = engineer.T_monthly_plan or 0.0
-    T_remaining = max(0, T_monthly_plan - T_actual_monthly)
+    T_remaining = max(0, T_monthly_plan - T_effective_total)
 
     # 进行中任务数
     in_progress_stmt = select(func.count()).select_from(Task).where(
@@ -86,7 +86,7 @@ async def get_engineer_dashboard(
         current_starpoint=engineer.current_starpoint or 0,
         in_progress_task_count=in_progress_task_count,
         T_monthly_plan=T_monthly_plan,
-        T_actual_monthly=T_actual_monthly,
+        T_actual_monthly=T_effective_total,
         T_remaining=T_remaining,
         salary_preview=salary_preview,
         accuracy_rate=round(accuracy_rate, 2),
@@ -177,10 +177,10 @@ async def get_admin_dashboard(
     engineer_loads = []
     for row in rows:
         T_monthly_plan = float(row.T_monthly_plan or 0)
-        T_actual_monthly = float(row.T_actual_monthly or 0)
+        T_actual_monthly = float(row.T_effective_monthly or 0)
         T_remaining = max(0, T_monthly_plan - T_actual_monthly)
 
-        T_actual_acc = float(row.T_actual_for_accuracy or 0)
+        T_actual_acc = float(row.T_effective_for_accuracy or 0)
         T_reported_acc = float(row.T_reported_for_accuracy or 0)
         accuracy_rate = min(T_actual_acc / T_reported_acc * 100, 100.0) if T_reported_acc > 0 else 100.0
 

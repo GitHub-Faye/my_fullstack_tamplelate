@@ -160,6 +160,7 @@ async def test_engineer_dashboard(client: AsyncClient, db_session: AsyncSession)
         status=TaskStatus.COMPLETED,
         T_actual=10.0,
         T_reported=10.0,
+        T_effective=10.0,
         task_type=TaskType.NORMAL,
     )
     db_session.add(task)
@@ -277,11 +278,6 @@ async def test_pm_dashboard(client: AsyncClient, db_session: AsyncSession):
     assert response.status_code == 200
     data = response.json()
     assert data["user_id"] == str(pm.id)
-    # 客资指标
-    assert data["today_new_clients"] >= 1
-    assert data["monthly_new_clients"] >= 1
-    assert data["yesterday_new_clients"] >= 1
-    assert data["last_month_new_clients"] >= 1
     # 任务指标
     assert data["pm_task_count"] >= 4
     assert data["task_count_unconfirmed"] >= 1

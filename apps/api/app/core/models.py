@@ -219,7 +219,7 @@ class User(UserBase, table=True):
     # T_monthly_plan: 月度计划工时
     T_monthly_plan: Optional[float] = Field(default=None, ge=0)
     # current_starpoint: 当前星点总数
-    current_starpoint: int = Field(default=0)
+    current_starpoint: int = Field(default=100)
 
     # ==================== PM 工资字段 ====================
     # S_base: 底薪

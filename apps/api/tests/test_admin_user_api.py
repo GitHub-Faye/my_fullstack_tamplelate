@@ -137,7 +137,7 @@ async def test_admin_create_engineer(client: AsyncClient, db_session: AsyncSessi
     assert data["S0"] == 10000.0
     assert data["H0"] == 50.0
     assert data["T_monthly_plan"] == 160.0
-    assert data["current_starpoint"] == 0
+    assert data["current_starpoint"] == 100
 
 
 @pytest.mark.asyncio

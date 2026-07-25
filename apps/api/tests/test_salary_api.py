@@ -118,7 +118,8 @@ class TestSalaryAPIs:
         data = response.json()
         assert data["role"] == "engineer"
         assert data["S0"] == 10000.0
-        assert data["H0"] == 50.0
+        # H0 现在是自动计算 = S0 / T_monthly_plan = 10000 / 160 = 62.5
+        assert data["H0"] == 62.5
         assert data["current_starpoint"] == 100
         assert "salary_final" in data
 

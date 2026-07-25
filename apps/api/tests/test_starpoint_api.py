@@ -197,11 +197,11 @@ class TestStarPointAPIs:
 
         assert response.status_code == 200
         data = response.json()
-        assert data["total_starpoints"] == 10
+        assert data["total_starpoints"] == 110
         assert data["current_month_earned"] == 10
         assert "rank" in data
-        # 单个工程师在排行榜前20%，K = 1.1
-        assert data["k_coefficient"] == 1.1
+        # 单个工程师在排行榜前20%，K = 1.2
+        assert data["k_coefficient"] == 1.2
 
     @pytest.mark.asyncio
     async def test_leaderboard(self, client: AsyncClient, db_session: AsyncSession):
@@ -264,9 +264,9 @@ class TestStarPointAPIs:
         assert data["reason"] == "Excellent performance bonus"
         assert data["judgment_type"] == JudgmentType.MANUAL.value
 
-        # 验证工程师的星点已更新
+        # 验证工程师的星点已更新（默认100 + 调整50 = 150）
         updated_engineer = await db_session.get(User, engineer.id)
-        assert updated_engineer.current_starpoint == 50
+        assert updated_engineer.current_starpoint == 150
 
     @pytest.mark.asyncio
     async def test_non_admin_cannot_adjust_starpoint(self, client: AsyncClient, db_session: AsyncSession):

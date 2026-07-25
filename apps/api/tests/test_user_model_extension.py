@@ -51,22 +51,20 @@ def test_user_pm_salary_fields():
         S_assess=3000.0,
         R_base=0.6,
         R_assess=0.4,
-        baseline_client_count=100,
     )
     assert user.S_base == 5000.0
     assert user.S_assess == 3000.0
     assert user.R_base == 0.6
     assert user.R_assess == 0.4
-    assert user.baseline_client_count == 100
 
 
 def test_user_default_starpoint():
-    """测试用户默认星点为 0"""
+    """测试用户默认星点为 100"""
     user = User(
         email="test@example.com",
         hashed_password="hashed",
     )
-    assert user.current_starpoint == 0
+    assert user.current_starpoint == 100
 
 
 def test_user_role_can_be_changed():

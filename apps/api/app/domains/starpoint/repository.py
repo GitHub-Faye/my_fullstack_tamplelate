@@ -190,9 +190,9 @@ async def calculate_k_coefficient(
     计算工程师的 K 系数
 
     规则：
-    - 前 20%：K = 1.1
+    - 前 20%：K = 1.2
     - 中间 60%：K = 1.0
-    - 后 20%：K = 0.9
+    - 后 20%：K = 0.7
 
     Args:
         session: 数据库会话
@@ -221,9 +221,9 @@ async def calculate_k_coefficient(
         if row.id == engineer_id:
             # 排名从 0 开始
             if i < top_20_count:
-                return 1.1
+                return 1.2
             elif i >= total - bottom_20_count:
-                return 0.9
+                return 0.7
             else:
                 return 1.0
 

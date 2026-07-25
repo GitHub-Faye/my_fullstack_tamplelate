@@ -114,15 +114,11 @@ async def get_admin_summary(
 
         # 计算超额完成率
         performance_rate = None
-        if pm.baseline_client_count and record_count > 0:
-            total_baseline = pm.baseline_client_count * record_count
-            if total_baseline > 0:
-                performance_rate = round((total_actual - total_baseline) / total_baseline, 4)
 
         summaries.append({
             "pm_id": pm.id,
             "pm_name": pm.full_name or pm.email,
-            "baseline_count": pm.baseline_client_count,
+            "baseline_count": None,
             "total_actual": total_actual,
             "avg_actual": avg_actual,
             "record_count": record_count,
