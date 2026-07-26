@@ -12,6 +12,8 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Annotated, Any
 
+from datetime import date as date_type
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 
@@ -104,6 +106,8 @@ async def read_tasks(
     engineer_id: Annotated[str | None, Query(description="按工程师ID过滤")] = None,
     pm_id: Annotated[str | None, Query(description="按发布人(PM)ID过滤")] = None,
     exclude_pm_id: Annotated[bool | None, Query(description="排除当前用户的任务，与 pm_id 配合使用")] = None,
+    start_date: Annotated[date_type | None, Query(description="按创建时间起始日期过滤（含）")] = None,
+    end_date: Annotated[date_type | None, Query(description="按创建时间结束日期过滤（含）")] = None,
     page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
     page_size: Annotated[int, Query(ge=1, le=100, description="每页数量，默认20，最大100")] = 20,
 ) -> Any:
@@ -162,6 +166,8 @@ async def read_tasks(
         status=status_filter,
         task_type=type_filter,
         engineer_id=engineer_uuid,
+        start_date=start_date,
+        end_date=end_date,
         skip=offset,
         limit=page_size,
     )

@@ -5,7 +5,7 @@ Task 模块数据访问层（Repository）
 """
 
 import uuid
-from datetime import datetime, timezone
+from datetime import date as date_type, datetime, timezone
 from typing import Optional, Tuple
 
 from sqlalchemy import func, select
@@ -43,11 +43,13 @@ async def get_tasks(
     status: Optional[TaskStatus] = None,
     task_type: Optional[TaskType] = None,
     engineer_id: Optional[uuid.UUID] = None,
+    start_date: Optional[date_type] = None,
+    end_date: Optional[date_type] = None,
     skip: int = 0,
     limit: int = 100,
 ) -> Tuple[list[Task], int]:
     """
-    获取任务列表（分页），支持按 PM、状态、类型和工程师过滤
+    获取任务列表（分页），支持按 PM、状态、类型、工程师和时间过滤
 
     Args:
         session: 数据库会话
@@ -56,6 +58,8 @@ async def get_tasks(
         status: 任务状态过滤（None 表示不过滤）
         task_type: 任务类型过滤（None 表示不过滤）
         engineer_id: 工程师 ID 过滤（None 表示不过滤）
+        start_date: 创建时间起始日期（含）（None 表示不过滤）
+        end_date: 创建时间结束日期（含）（None 表示不过滤）
         skip: 跳过记录数
         limit: 返回记录数上限
 
@@ -74,6 +78,10 @@ async def get_tasks(
         conditions.append(Task.task_type == task_type)
     if engineer_id:
         conditions.append(Task.engineer_id == engineer_id)
+    if start_date:
+        conditions.append(Task.created_at >= datetime.combine(start_date, datetime.min.time(), tzinfo=timezone.utc))
+    if end_date:
+        conditions.append(Task.created_at <= datetime.combine(end_date, datetime.max.time(), tzinfo=timezone.utc))
 
     tasks, count = await paginated_query(
         session=session,

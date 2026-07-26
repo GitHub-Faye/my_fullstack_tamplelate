@@ -2973,6 +2973,18 @@ export type ReadTasksV1TasksGetData = {
          */
         exclude_pm_id?: boolean | null;
         /**
+         * Start Date
+         *
+         * 按创建时间起始日期过滤（含）
+         */
+        start_date?: string | null;
+        /**
+         * End Date
+         *
+         * 按创建时间结束日期过滤（含）
+         */
+        end_date?: string | null;
+        /**
          * Page
          *
          * 页码，从1开始

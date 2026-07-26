@@ -37,7 +37,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, Search, RotateCcw, Paperclip } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2, Plus, Search, RotateCcw, Paperclip, Calendar } from "lucide-react";
 import { useTasks } from "../api";
 import { useCurrentUser } from "@/features/user";
 import {
@@ -96,6 +97,8 @@ export function PMTaskTable() {
 
   // 筛选条件状态
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
   const [bidLogTask, setBidLogTask] = useState<TaskPublic | null>(null);
   const [logTask, setLogTask] = useState<TaskPublic | null>(null);
@@ -121,6 +124,8 @@ export function PMTaskTable() {
     pm_id: user?.id,
     status: filters.status !== "all" ? filters.status : undefined,
     task_type: filters.taskType !== "all" ? filters.taskType : undefined,
+    start_date: startDate || undefined,
+    end_date: endDate || undefined,
   };
 
   const { data: tasks, isLoading, refetch } = useTasks(queryParams as any);
@@ -207,6 +212,22 @@ export function PMTaskTable() {
         <CardContent>
           {/* 筛选栏 */}
           <div className="flex items-center gap-4 mb-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <Input
+                type="date"
+                className="w-[140px]"
+                value={startDate}
+                onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+              />
+              <span className="text-muted-foreground text-sm">至</span>
+              <Input
+                type="date"
+                className="w-[140px]"
+                value={endDate}
+                onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+              />
+            </div>
             <Select
               value={filters.taskType}
               onValueChange={(v) => {

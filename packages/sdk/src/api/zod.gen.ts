@@ -1158,6 +1158,8 @@ export const zReadTasksV1TasksGetQuery = z.object({
     engineer_id: z.string().nullish(),
     pm_id: z.string().nullish(),
     exclude_pm_id: z.boolean().nullish(),
+    start_date: z.iso.date().nullish(),
+    end_date: z.iso.date().nullish(),
     page: z.int().gte(1).optional().default(1),
     page_size: z.int().gte(1).lte(100).optional().default(20)
 });

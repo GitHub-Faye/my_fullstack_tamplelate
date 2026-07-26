@@ -29,7 +29,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Loader2, Calendar } from "lucide-react";
 import { useTasks } from "../api";
 import { useCurrentUser } from "@/features/user";
 import { useEngineerDashboard } from "@/features/dashboard";
@@ -97,6 +98,8 @@ export function EngineerTaskTable({
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("all");
   const [taskTypeFilter, setTaskTypeFilter] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const user = useCurrentUser();
   const { data: dashboard } = useEngineerDashboard();
@@ -109,6 +112,8 @@ export function EngineerTaskTable({
     page_size: 20,
     status: statusFilter !== "all" ? statusFilter : undefined,
     task_type: taskTypeFilter !== "all" ? taskTypeFilter : undefined,
+    start_date: startDate || undefined,
+    end_date: endDate || undefined,
   };
 
   // 我的任务：按工程师 ID 过滤
@@ -225,6 +230,22 @@ export function EngineerTaskTable({
           {/* 筛选栏 — 仅我的任务展示 */}
           {tab === "mine" && (
             <div className="flex items-center gap-4 mb-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="date"
+                  className="w-[140px]"
+                  value={startDate}
+                  onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+                />
+                <span className="text-muted-foreground text-sm">至</span>
+                <Input
+                  type="date"
+                  className="w-[140px]"
+                  value={endDate}
+                  onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+                />
+              </div>
               <Select
                 value={taskTypeFilter}
                 onValueChange={(v) => { setTaskTypeFilter(v); setPage(1); }}

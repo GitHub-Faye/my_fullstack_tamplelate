@@ -41,7 +41,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight, Play, Plus, FileText } from "lucide-react";
+import { Loader2, MoreHorizontal, Eye, CheckCircle, XCircle, Send, RefreshCw, AlertTriangle, ArrowLeftRight, Play, Plus, FileText, Calendar } from "lucide-react";
 import { useTasks, useTask } from "../api";
 import { useUsers } from "@/features/user";
 import {
@@ -143,6 +143,8 @@ export function AdminTaskTable() {
   const [status, setStatus] = useState("all");
   const [engineerFilter, setEngineerFilter] = useState("all");
   const [pmFilter, setPmFilter] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   // 每秒递增的 ticker，用于驱动报价倒计时刷新
   const [now, setNow] = useState(Date.now());
 
@@ -158,6 +160,8 @@ export function AdminTaskTable() {
     page,
     page_size: 20,
     status: status !== "all" ? (status as TaskStatus) : undefined,
+    start_date: startDate || undefined,
+    end_date: endDate || undefined,
   });
 
   // 获取用户列表用于姓名映射
@@ -278,6 +282,22 @@ export function AdminTaskTable() {
       <CardContent>
         {/* 筛选栏 */}
         <div className="flex items-center gap-4 mb-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Input
+              type="date"
+              className="w-[140px]"
+              value={startDate}
+              onChange={(e) => { setStartDate(e.target.value); setPage(1); }}
+            />
+            <span className="text-muted-foreground text-sm">至</span>
+            <Input
+              type="date"
+              className="w-[140px]"
+              value={endDate}
+              onChange={(e) => { setEndDate(e.target.value); setPage(1); }}
+            />
+          </div>
           <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="任务状态" />
