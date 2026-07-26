@@ -31,7 +31,6 @@ from app.domains.daily_report import repository
 from app.domains.daily_report.schemas import (
     DailyReportCreate,
     DailyReportPublic,
-    DailyReportsPublic,
     DailyReportUpdate,
     RemindResult,
     DailyReportWithTaskName,
@@ -265,7 +264,7 @@ async def read_daily_reports(
         limit=page_size,
     )
 
-    return DailyReportsPublic(
+    return DailyReportsWithTaskNamePublic(
         data=[DailyReportWithTaskName(**r) for r in reports],
         count=count,
         page=page,

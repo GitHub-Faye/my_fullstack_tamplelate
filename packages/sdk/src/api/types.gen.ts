@@ -431,15 +431,107 @@ export type DailyReportUpdate = {
 };
 
 /**
+ * DailyReportWithTaskName
+ *
+ * 日报响应（含任务名称及任务的 T报/T实）
+ */
+export type DailyReportWithTaskName = {
+    /**
+     * Today Hours
+     *
+     * 今日工作时长（小时）
+     */
+    today_hours: number;
+    /**
+     * 当前阶段
+     */
+    current_stage: ReportStage;
+    /**
+     * Progress
+     *
+     * 进度描述
+     */
+    progress?: string | null;
+    /**
+     * Completion Judgment
+     *
+     * 完成判定说明
+     */
+    completion_judgment?: string | null;
+    /**
+     * Starpoint Change
+     *
+     * 星点变化量
+     */
+    starpoint_change?: number | null;
+    /**
+     * Notes
+     *
+     * 备注说明
+     */
+    notes?: string | null;
+    /**
+     * Summary
+     *
+     * 工作总结
+     */
+    summary?: string | null;
+    /**
+     * Has Blocker
+     *
+     * 是否有阻塞问题
+     */
+    has_blocker?: boolean;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Engineer Id
+     */
+    engineer_id: string;
+    /**
+     * Task Id
+     */
+    task_id: string;
+    /**
+     * Report Date
+     */
+    report_date: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Task Name
+     *
+     * 任务名称
+     */
+    task_name?: string | null;
+    /**
+     * T Reported
+     *
+     * T报（工程师报价工时）
+     */
+    T_reported?: number | null;
+    /**
+     * T Actual
+     *
+     * T实（实际结算工时）
+     */
+    T_actual?: number | null;
+};
+
+/**
  * DailyReportsWithTaskNamePublic
  *
- * 日报列表分页响应（含任务名称）
+ * 日报列表分页响应（含任务名称及 T报/T实）
  */
 export type DailyReportsWithTaskNamePublic = {
     /**
      * Data
      */
-    data: Array<unknown>;
+    data: Array<DailyReportWithTaskName>;
     /**
      * Count
      */

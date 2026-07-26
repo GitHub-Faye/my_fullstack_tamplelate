@@ -112,9 +112,14 @@ async def get_daily_reports(
     result = await session.execute(count_statement)
     count = result.scalar_one()
 
-    # 构建查询（LEFT JOIN Task 获取任务名称）
+    # 构建查询（LEFT JOIN Task 获取任务名称 + T报/T实）
     statement = (
-        select(DailyReport, Task.name.label("task_name"))
+        select(
+            DailyReport,
+            Task.name.label("task_name"),
+            Task.T_reported.label("T_reported"),
+            Task.T_actual.label("T_actual"),
+        )
         .outerjoin(Task, DailyReport.task_id == Task.id)
         .order_by(DailyReport.created_at.desc())
     )
@@ -130,16 +135,20 @@ async def get_daily_reports(
     result = await session.execute(statement)
     rows = result.all()
 
-    # 将 ORM 对象转为 dict 并注入 task_name
+    # 将 ORM 对象转为 dict 并注入 task_name / T_reported / T_actual
     reports = []
     for row in rows:
         report = row[0]
         task_name = row[1]
+        T_reported_val = row[2]
+        T_actual_val = row[3]
         report_dict = {
             col.name: getattr(report, col.name)
             for col in report.__table__.columns
         }
         report_dict["task_name"] = task_name
+        report_dict["T_reported"] = T_reported_val
+        report_dict["T_actual"] = T_actual_val
         reports.append(report_dict)
 
     return reports, count

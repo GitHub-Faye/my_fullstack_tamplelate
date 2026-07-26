@@ -65,13 +65,19 @@ class DailyReportsPublic(PaginatedResponse[DailyReportPublic]):
 
 
 class DailyReportWithTaskName(DailyReportPublic):
-    """日报响应（含任务名称）"""
+    """日报响应（含任务名称及任务的 T报/T实）"""
     task_name: Optional[str] = Field(default=None, description="任务名称")
+    T_reported: Optional[float] = Field(default=None, ge=0, description="T报（工程师报价工时）")
+    T_actual: Optional[float] = Field(default=None, ge=0, description="T实（实际结算工时）")
 
 
-class DailyReportsWithTaskNamePublic(PaginatedResponse[DailyReportWithTaskName]):
-    """日报列表分页响应（含任务名称）"""
-    pass
+class DailyReportsWithTaskNamePublic(SQLModel):
+    """日报列表分页响应（含任务名称及 T报/T实）"""
+    data: list[DailyReportWithTaskName]
+    count: int
+    page: int | None = None
+    page_size: int | None = None
+    total_pages: int | None = None
 
 
 # ==================== 提醒模型 ====================

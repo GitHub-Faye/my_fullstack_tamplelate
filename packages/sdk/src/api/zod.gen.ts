@@ -76,19 +76,6 @@ export const zBodyLoginAccessTokenV1LoginAccessTokenPost = z.object({
 });
 
 /**
- * DailyReportsWithTaskNamePublic
- *
- * 日报列表分页响应（含任务名称）
- */
-export const zDailyReportsWithTaskNamePublic = z.object({
-    data: z.array(z.unknown()),
-    count: z.int(),
-    page: z.int().nullish(),
-    page_size: z.int().nullish(),
-    total_pages: z.int().nullish()
-});
-
-/**
  * EmploymentStatus
  *
  * 在岗状态枚举
@@ -335,6 +322,43 @@ export const zDailyReportUpdate = z.object({
     notes: z.string().max(1000).nullish(),
     summary: z.string().max(1000).nullish(),
     has_blocker: z.boolean().nullish()
+});
+
+/**
+ * DailyReportWithTaskName
+ *
+ * 日报响应（含任务名称及任务的 T报/T实）
+ */
+export const zDailyReportWithTaskName = z.object({
+    today_hours: z.number().gte(0),
+    current_stage: zReportStage,
+    progress: z.string().max(500).nullish(),
+    completion_judgment: z.string().max(500).nullish(),
+    starpoint_change: z.int().nullish().default(0),
+    notes: z.string().max(1000).nullish(),
+    summary: z.string().max(1000).nullish(),
+    has_blocker: z.boolean().optional().default(false),
+    id: z.uuid(),
+    engineer_id: z.uuid(),
+    task_id: z.uuid(),
+    report_date: z.iso.datetime(),
+    created_at: z.iso.datetime().nullish(),
+    task_name: z.string().nullish(),
+    T_reported: z.number().gte(0).nullish(),
+    T_actual: z.number().gte(0).nullish()
+});
+
+/**
+ * DailyReportsWithTaskNamePublic
+ *
+ * 日报列表分页响应（含任务名称及 T报/T实）
+ */
+export const zDailyReportsWithTaskNamePublic = z.object({
+    data: z.array(zDailyReportWithTaskName),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
 });
 
 /**

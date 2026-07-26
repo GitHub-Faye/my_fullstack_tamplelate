@@ -116,7 +116,8 @@ export function DailyReportDialog({
       setSummary("");
       setSubmitResults(null);
     }
-  }, [open, taskList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, tasks?.data]);
 
   const updateEntry = (taskId: string, field: keyof DailyReportEntry, value: string) => {
     setEntries((prev) =>
