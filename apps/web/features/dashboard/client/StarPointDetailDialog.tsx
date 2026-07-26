@@ -27,17 +27,23 @@ import { formatDateTime } from "@/lib/utils";
 /**
  * 星点明细弹窗
  *
- * 查看当前工程师的星点变化记录和汇总信息
+ * 查看工程师的星点变化记录和汇总信息
  * 支持：时间筛选（起止日期）、类型筛选（全部/增加/扣减）
  * 表格：时间、任务、规则、T报、T实、完成比例、星点变化、说明
  * 底部汇总：本月增加、本月扣减、净变化、当前排名
+ *
+ * 可选 engineerId 参数：管理员可查看指定工程师的星点明细
  */
 export function StarPointDetailDialog({
   open,
   onOpenChange,
+  engineerId,
+  engineerName,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  engineerId?: string;
+  engineerName?: string;
 }) {
   const [records, setRecords] = useState<any[] | null>(null);
   const [summary, setSummary] = useState<any | null>(null);
@@ -50,10 +56,16 @@ export function StarPointDetailDialog({
     if (open) {
       setLoading(true);
       Promise.all([
-        readMyStarpointsV1StarpointsMyGet({ throwOnError: true }).then((r) =>
+        readMyStarpointsV1StarpointsMyGet({
+          throwOnError: true,
+          query: engineerId ? { engineer_id: engineerId } : undefined,
+        }).then((r) =>
           setRecords(r.data?.data ?? [])
         ),
-        readMyStarpointSummaryV1StarpointsMySummaryGet({ throwOnError: true }).then(
+        readMyStarpointSummaryV1StarpointsMySummaryGet({
+          throwOnError: true,
+          query: engineerId ? { engineer_id: engineerId } : undefined,
+        }).then(
           (r) => setSummary(r.data)
         ),
       ])
@@ -63,7 +75,7 @@ export function StarPointDetailDialog({
         })
         .finally(() => setLoading(false));
     }
-  }, [open]);
+  }, [open, engineerId]);
 
   const filteredRecords = records?.filter((r) => {
     if (typeFilter === "increase" && r.change_amount <= 0) return false;

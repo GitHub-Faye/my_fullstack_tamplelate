@@ -6,10 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { TodayLogDialog } from "@/features/dashboard/client/TodayLogDialog";
+import { StarPointDetailDialog } from "@/features/dashboard/client/StarPointDetailDialog";
 
 export default function AdminOverviewPage() {
   const { data: dashboard, isLoading } = useAdminDashboard();
   const [todayLogDialogOpen, setTodayLogDialogOpen] = useState(false);
+  const [starPointDialogOpen, setStarPointDialogOpen] = useState(false);
+  const [starPointTargetId, setStarPointTargetId] = useState<string | null>(null);
+  const [starPointTargetName, setStarPointTargetName] = useState<string>("");
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>;
@@ -55,7 +59,48 @@ export default function AdminOverviewPage() {
         </Card>
         <Card>
           <CardHeader><CardTitle>工程师星点排行榜</CardTitle></CardHeader>
-          <CardContent><p className="text-sm text-muted-foreground">工程师星点排名数据将在后续版本中展示</p></CardContent>
+          <CardContent>
+            {dashboard?.starpoint_ranks && dashboard.starpoint_ranks.length > 0 ? (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-muted-foreground">
+                    <th className="text-left py-2">排名</th>
+                    <th className="text-left py-2">工程师</th>
+                    <th className="text-left py-2">星点</th>
+                    <th className="text-left py-2">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dashboard.starpoint_ranks.map((eng: any, i: number) => (
+                    <tr key={eng.user_id ?? i} className="border-b last:border-0">
+                      <td className="py-2">{i + 1}</td>
+                      <td className="py-2 font-medium">{eng.full_name ?? "-"}</td>
+                      <td className="py-2">
+                        <span className={eng.current_starpoint > 0 ? "text-green-600 font-medium" : ""}>
+                          {eng.current_starpoint ?? 0}
+                        </span>
+                      </td>
+                      <td className="py-2">
+                        <Button
+                          variant="link"
+                          className="h-auto p-0 text-sm"
+                          onClick={() => {
+                            setStarPointTargetId(eng.user_id);
+                            setStarPointTargetName(eng.full_name ?? "");
+                            setStarPointDialogOpen(true);
+                          }}
+                        >
+                          查看明细
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-sm text-muted-foreground">暂无数据</p>
+            )}
+          </CardContent>
         </Card>
       </div>
       <div className="grid grid-cols-2 gap-6">
@@ -71,6 +116,14 @@ export default function AdminOverviewPage() {
 
       {/* 今日提交日志弹窗 */}
       <TodayLogDialog open={todayLogDialogOpen} onOpenChange={setTodayLogDialogOpen} />
+
+      {/* 星点明细弹窗 */}
+      <StarPointDetailDialog
+        open={starPointDialogOpen}
+        onOpenChange={setStarPointDialogOpen}
+        engineerId={starPointTargetId ?? undefined}
+        engineerName={starPointTargetName}
+      />
     </div>
   );
 }

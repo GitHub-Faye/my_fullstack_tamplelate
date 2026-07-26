@@ -43,19 +43,21 @@ router = APIRouter()
 @router.get(
     "/my",
     response_model=StarPointRecordsPublic,
-    summary="查看我的星点记录",
-    description="工程师查看自己的星点变化明细记录"
+    summary="查看星点记录",
+    description="查看星点变化明细记录（管理员可指定 engineer_id 查看特定工程师的记录）"
 )
 async def read_my_starpoints(
     session: SessionDep,
     current_user: CurrentUser,
+    engineer_id: Annotated[uuid.UUID | None, Query(description="工程师ID（管理员可指定，普通用户忽略）")] = None,
     page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
     page_size: Annotated[int, Query(ge=1, le=100, description="每页数量，默认20，最大100")] = 20,
 ) -> Any:
     """
-    获取当前用户的星点记录
+    获取星点记录
 
     权限：工程师或 PM（需 starpoint:read 权限）
+    管理员可通过 engineer_id 参数查看指定工程师的记录
     """
     # 检查用户是否有 starpoint:read 权限
     user_scopes = await get_user_scopes(session, current_user)
@@ -65,11 +67,22 @@ async def read_my_starpoints(
             detail="You don't have permission to view starpoints"
         )
 
+    # 确定目标工程师
+    target_engineer_id = current_user.id
+    if engineer_id:
+        is_admin = StarPointScope.ADMIN.value in user_scopes
+        if not is_admin:
+            raise BusinessException(
+                code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
+                detail="Only admins can view other engineers' starpoints"
+            )
+        target_engineer_id = engineer_id
+
     offset = (page - 1) * page_size
 
     records, count = await repository.get_starpoint_records(
         session=session,
-        engineer_id=current_user.id,
+        engineer_id=target_engineer_id,
         skip=offset,
         limit=page_size,
     )
@@ -86,36 +99,49 @@ async def read_my_starpoints(
 @router.get(
     "/my/summary",
     response_model=StarPointSummary,
-    summary="查看我的星点汇总",
-    description="工程师查看自己的星点汇总信息（总数、排名、K系数）"
+    summary="查看星点汇总",
+    description="查看星点汇总信息（总数、排名、K系数，管理员可指定 engineer_id）"
 )
 async def read_my_starpoint_summary(
     session: SessionDep,
     current_user: CurrentUser,
+    engineer_id: Annotated[uuid.UUID | None, Query(description="工程师ID（管理员可指定，普通用户忽略）")] = None,
 ) -> Any:
     """
-    获取当前用户的星点汇总
+    获取星点汇总
 
     包括星点总数、本月获得、排名、K系数
+    管理员可通过 engineer_id 参数查看指定工程师的汇总
     """
+    target_engineer_id = current_user.id
+    if engineer_id:
+        user_scopes = await get_user_scopes(session, current_user)
+        is_admin = StarPointScope.ADMIN.value in user_scopes
+        if not is_admin:
+            raise BusinessException(
+                code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
+                detail="Only admins can view other engineers' starpoints"
+            )
+        target_engineer_id = engineer_id
+
     total_starpoints = await repository.get_total_starpoints(
         session=session,
-        engineer_id=current_user.id,
+        engineer_id=target_engineer_id,
     )
 
     current_month_earned = await repository.get_current_month_earned(
         session=session,
-        engineer_id=current_user.id,
+        engineer_id=target_engineer_id,
     )
 
     rank = await repository.get_engineer_rank(
         session=session,
-        engineer_id=current_user.id,
+        engineer_id=target_engineer_id,
     )
 
     k_coefficient = await repository.calculate_k_coefficient(
         session=session,
-        engineer_id=current_user.id,
+        engineer_id=target_engineer_id,
     )
 
     return StarPointSummary(

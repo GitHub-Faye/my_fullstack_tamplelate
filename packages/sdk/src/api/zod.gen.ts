@@ -1414,6 +1414,7 @@ export const zUpdateDailyReportV1DailyReportsReportIdPutPath = z.object({
 export const zUpdateDailyReportV1DailyReportsReportIdPutResponse = zDailyReportPublic;
 
 export const zReadMyStarpointsV1StarpointsMyGetQuery = z.object({
+    engineer_id: z.uuid().nullish(),
     page: z.int().gte(1).optional().default(1),
     page_size: z.int().gte(1).lte(100).optional().default(20)
 });
@@ -1422,6 +1423,10 @@ export const zReadMyStarpointsV1StarpointsMyGetQuery = z.object({
  * Successful Response
  */
 export const zReadMyStarpointsV1StarpointsMyGetResponse = zStarPointRecordsPublic;
+
+export const zReadMyStarpointSummaryV1StarpointsMySummaryGetQuery = z.object({
+    engineer_id: z.uuid().nullish()
+});
 
 /**
  * Successful Response

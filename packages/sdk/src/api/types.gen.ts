@@ -3821,6 +3821,12 @@ export type ReadMyStarpointsV1StarpointsMyGetData = {
     path?: never;
     query?: {
         /**
+         * Engineer Id
+         *
+         * 工程师ID（管理员可指定，普通用户忽略）
+         */
+        engineer_id?: string | null;
+        /**
          * Page
          *
          * 页码，从1开始
@@ -3857,9 +3863,25 @@ export type ReadMyStarpointsV1StarpointsMyGetResponse = ReadMyStarpointsV1Starpo
 export type ReadMyStarpointSummaryV1StarpointsMySummaryGetData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Engineer Id
+         *
+         * 工程师ID（管理员可指定，普通用户忽略）
+         */
+        engineer_id?: string | null;
+    };
     url: '/v1/starpoints/my/summary';
 };
+
+export type ReadMyStarpointSummaryV1StarpointsMySummaryGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadMyStarpointSummaryV1StarpointsMySummaryGetError = ReadMyStarpointSummaryV1StarpointsMySummaryGetErrors[keyof ReadMyStarpointSummaryV1StarpointsMySummaryGetErrors];
 
 export type ReadMyStarpointSummaryV1StarpointsMySummaryGetResponses = {
     /**
