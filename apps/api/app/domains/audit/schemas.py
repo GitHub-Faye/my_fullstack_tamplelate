@@ -23,6 +23,7 @@ class AuditLogPublic(SQLModel):
     ip_address: str | None = None
     created_at: datetime | None = None
     operator_name: str | None = None
+    affected_name: str | None = None  # 影响人姓名（仅 target_type="user" 时有值）
 
 
 class AuditLogList(PaginatedResponse[AuditLogPublic]):

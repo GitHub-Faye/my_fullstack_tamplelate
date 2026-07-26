@@ -3,7 +3,7 @@
  */
 "use client";
 
-import { useCallback, useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import {
   readAuditLogsV1AuditLogsGet,
@@ -44,45 +44,36 @@ export function useAuditLogs(
 }
 
 /**
- * 通用的审计日志筛选状态管理 hook
- * 封装 filters/activeFilters 双状态、分页、handleSearch/handleReset 逻辑
+ * 审计日志筛选状态管理 hook（自动搜索，无按钮）
+ * 筛选条件变化即自动触发查询
  */
 export function useFilteredAuditLogs(initialPageSize = 20) {
-  const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<AuditLogFiltersState>(DEFAULT_AUDIT_LOG_FILTERS);
-  const [activeFilters, setActiveFilters] = useState<AuditLogFiltersState>(DEFAULT_AUDIT_LOG_FILTERS);
+  const [page, setPage] = useState(1);
 
   const query = useAuditLogs({
     page,
     page_size: initialPageSize,
-    start_time: activeFilters.start_time || undefined,
-    end_time: activeFilters.end_time || undefined,
-    action: activeFilters.action !== "all" ? activeFilters.action : undefined,
+    start_time: filters.start_time || undefined,
+    end_time: filters.end_time || undefined,
+    user_id: filters.user_id || undefined,
   });
 
   const logs = (query.data?.data || []) as AuditLogItem[];
   const count = query.data?.count || 0;
 
-  const handleSearch = useCallback(() => {
-    setActiveFilters(filters);
+  const handleFilterChange = (newFilters: AuditLogFiltersState) => {
+    setFilters(newFilters);
     setPage(1);
-  }, [filters]);
-
-  const handleReset = useCallback(() => {
-    setFilters(DEFAULT_AUDIT_LOG_FILTERS);
-    setActiveFilters(DEFAULT_AUDIT_LOG_FILTERS);
-    setPage(1);
-  }, []);
+  };
 
   return {
     filters,
-    setFilters,
+    setFilters: handleFilterChange,
     page,
     setPage,
     logs,
     count,
     isLoading: query.isLoading,
-    handleSearch,
-    handleReset,
   };
 }

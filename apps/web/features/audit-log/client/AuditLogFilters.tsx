@@ -1,7 +1,6 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -9,42 +8,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, RotateCcw } from "lucide-react";
-import { ACTION_OPTIONS } from "./actionLabels";
 
 /** 审计日志筛选状态 */
 export interface AuditLogFiltersState {
   start_time: string;
   end_time: string;
-  action: string;
+  user_id: string;
 }
 
 /** 默认筛选条件 */
 export const DEFAULT_AUDIT_LOG_FILTERS: AuditLogFiltersState = {
   start_time: "",
   end_time: "",
-  action: "all",
+  user_id: "",
 };
-
-export { ACTION_OPTIONS };
 
 export interface AuditLogFiltersProps {
   filters: AuditLogFiltersState;
   onChange: (filters: AuditLogFiltersState) => void;
-  onSearch: () => void;
-  onReset: () => void;
+  users: Array<{ id: string; full_name?: string | null }>;
 }
 
 /**
  * 审计日志筛选栏
  *
- * 支持：日期范围（start_time / end_time）、操作类型（action）、搜索与重置
+ * 支持：开始时间、结束时间、操作人 三个筛选条件，自动搜索无按钮
  */
 export function AuditLogFilters({
   filters,
   onChange,
-  onSearch,
-  onReset,
+  users = [],
 }: AuditLogFiltersProps) {
   return (
     <div className="flex items-center gap-4 mb-4 flex-wrap">
@@ -70,37 +63,25 @@ export function AuditLogFilters({
         placeholder="结束时间"
       />
 
-      {/* 操作类型 */}
+      {/* 操作人 */}
       <Select
-        value={filters.action}
+        value={filters.user_id}
         onValueChange={(v) =>
-          onChange({ ...filters, action: v })
+          onChange({ ...filters, user_id: v === "all" ? "" : v })
         }
       >
         <SelectTrigger className="w-[160px]">
-          <SelectValue placeholder="操作类型" />
+          <SelectValue placeholder="全部操作人" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">全部操作</SelectItem>
-          {ACTION_OPTIONS.map((opt) => (
-            <SelectItem key={opt.value} value={opt.value}>
-              {opt.label}
+          <SelectItem value="all">全部操作人</SelectItem>
+          {users.map((u) => (
+            <SelectItem key={u.id} value={u.id}>
+              {u.full_name || u.id.slice(0, 8)}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-
-      {/* 搜索 */}
-      <Button variant="outline" size="sm" onClick={onSearch}>
-        <Search className="mr-1 h-4 w-4" />
-        搜索
-      </Button>
-
-      {/* 重置 */}
-      <Button variant="ghost" size="sm" onClick={onReset}>
-        <RotateCcw className="mr-1 h-4 w-4" />
-        重置
-      </Button>
     </div>
   );
 }

@@ -11,12 +11,14 @@ from datetime import datetime
 
 from fastapi import APIRouter, Query
 from fastapi.exceptions import RequestValidationError
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.dependencies import (
     CurrentUser,
     SessionDep,
 )
-from app.core.models import UserRoleType
+from app.core.models import UserRoleType, User
 from app.domains.audit.schemas import AuditLogList, AuditLogPublic
 from app.domains.audit import repository
 
@@ -37,6 +39,27 @@ def _parse_iso_datetime(value: str | None, param_name: str) -> datetime | None:
                 "type": "value_error",
             }
         ])
+
+
+async def _batch_fetch_affected_names(
+    session: AsyncSession,
+    logs: list,
+) -> dict[str, str | None]:
+    """批量查询 target_type="user" 的 target_id 对应的 full_name"""
+    user_ids = set()
+    for log in logs:
+        if log.target_type == "user" and log.target_id:
+            try:
+                user_ids.add(uuid.UUID(log.target_id))
+            except (ValueError, TypeError):
+                pass
+    if not user_ids:
+        return {}
+
+    stmt = select(User).where(User.id.in_(user_ids))
+    result = await session.execute(stmt)
+    users = result.scalars().all()
+    return {str(u.id): u.full_name or str(u.id)[:8] for u in users}
 
 
 @router.get(
@@ -89,10 +112,16 @@ async def read_audit_logs(
         end_time=end_dt,
     )
 
+    # 批量查询影响人姓名
+    affected_names = await _batch_fetch_affected_names(session, logs)
+
     # 将 AuditLog ORM 对象转换为 AuditLogPublic schema
-    # operator_name 是 @property，需要手动提取
     data = []
     for log in logs:
+        affected_name = None
+        if log.target_type == "user" and log.target_id:
+            affected_name = affected_names.get(log.target_id)
+
         log_dict = {
             "id": log.id,
             "user_id": log.user_id,
@@ -103,6 +132,7 @@ async def read_audit_logs(
             "ip_address": log.ip_address,
             "created_at": log.created_at,
             "operator_name": log.operator_name,
+            "affected_name": affected_name,
         }
         data.append(AuditLogPublic(**log_dict))
 

@@ -11,7 +11,7 @@ from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.core.models import AuditLog
+from app.core.models import AuditLog, User
 from app.core.db_utils import paginated_query
 
 
@@ -78,3 +78,23 @@ async def get_audit_logs(
     )
 
     return tasks, count
+
+
+async def get_affected_user_name(
+    session: AsyncSession,
+    target_type: str | None,
+    target_id: str | None,
+) -> str | None:
+    """根据 target_type 和 target_id 获取影响人姓名"""
+    if target_type != "user" or not target_id:
+        return None
+    try:
+        user_uuid = uuid.UUID(target_id)
+    except (ValueError, TypeError):
+        return None
+    stmt = select(User).where(User.id == user_uuid)
+    result = await session.execute(stmt)
+    user = result.scalar_one_or_none()
+    if user:
+        return user.full_name or str(user.id)[:8]
+    return None

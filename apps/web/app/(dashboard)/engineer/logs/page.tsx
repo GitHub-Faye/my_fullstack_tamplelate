@@ -1,44 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useAuditLogs } from "@/features/audit-log/api";
-import { AuditLogTable, type AuditLogItem } from "@/features/audit-log/client";
-import { AuditLogFilters, DEFAULT_AUDIT_LOG_FILTERS, type AuditLogFiltersState } from "@/features/audit-log/client";
+import { useFilteredAuditLogs } from "@/features/audit-log/api";
+import {
+  AuditLogTable,
+  AuditLogDateFilters,
+  type AuditLogDateFiltersState,
+} from "@/features/audit-log/client";
 import { Pagination } from "@/components/ui/pagination";
 
 /**
  * 工程师操作日志页面
  *
  * 调用 GET /v1/audit-logs 查看当前用户的操作日志
- * 支持按日期范围、操作类型筛选
+ * 工程师只能看见自己的操作，所以没有操作人筛选，仅日期范围筛选
  */
 export default function EngineerLogsPage() {
-  const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<AuditLogFiltersState>(DEFAULT_AUDIT_LOG_FILTERS);
-  const [appliedFilters, setAppliedFilters] = useState<AuditLogFiltersState>(DEFAULT_AUDIT_LOG_FILTERS);
+  const { filters, setFilters, page, setPage, logs, count, isLoading } = useFilteredAuditLogs();
 
-  const queryParams: Record<string, any> = {
-    page,
-    page_size: 20,
-  };
-  if (appliedFilters.start_time) queryParams.start_time = appliedFilters.start_time;
-  if (appliedFilters.end_time) queryParams.end_time = appliedFilters.end_time;
-  if (appliedFilters.action && appliedFilters.action !== "all") queryParams.action = appliedFilters.action;
-
-  const { data, isLoading } = useAuditLogs(queryParams);
-
-  const logs = (data?.data || []) as AuditLogItem[];
-  const count = data?.count || 0;
-
-  const handleSearch = () => {
-    setAppliedFilters({ ...filters });
-    setPage(1);
-  };
-
-  const handleReset = () => {
-    setFilters(DEFAULT_AUDIT_LOG_FILTERS);
-    setAppliedFilters(DEFAULT_AUDIT_LOG_FILTERS);
-    setPage(1);
+  const handleDateFilterChange = (dateFilters: AuditLogDateFiltersState) => {
+    setFilters({ start_time: dateFilters.start_time, end_time: dateFilters.end_time, user_id: "" });
   };
 
   return (
@@ -48,12 +28,9 @@ export default function EngineerLogsPage() {
         <p className="text-muted-foreground">查看您的操作记录</p>
       </div>
 
-      {/* 筛选栏 */}
-      <AuditLogFilters
-        filters={filters}
-        onChange={setFilters}
-        onSearch={handleSearch}
-        onReset={handleReset}
+      <AuditLogDateFilters
+        filters={{ start_time: filters.start_time, end_time: filters.end_time }}
+        onChange={handleDateFilterChange}
       />
 
       <AuditLogTable

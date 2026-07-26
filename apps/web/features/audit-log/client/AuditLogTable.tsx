@@ -25,6 +25,7 @@ export interface AuditLogItem {
   target_id?: string | null;
   details?: string | null;
   operator_name?: string | null;
+  affected_name?: string | null;
 }
 
 interface AuditLogTableProps {
@@ -40,13 +41,6 @@ function formatDateTime(dateStr: string | null | undefined): string {
     ? "-"
     : `${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")} ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
 }
-
-const TARGET_TYPE_LABELS: Record<string, string> = {
-  task: "任务",
-  user: "用户",
-  salary: "工资",
-  system_rule: "系统规则",
-};
 
 export function AuditLogTable({ logs, isLoading, title = "操作日志" }: AuditLogTableProps) {
   if (isLoading) {
@@ -68,8 +62,10 @@ export function AuditLogTable({ logs, isLoading, title = "操作日志" }: Audit
             <TableHeader>
               <TableRow>
                 <TableHead>时间</TableHead>
-                <TableHead>类型</TableHead>
+                <TableHead>操作人</TableHead>
+                <TableHead>操作类型</TableHead>
                 <TableHead>内容</TableHead>
+                <TableHead>影响人</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -78,19 +74,19 @@ export function AuditLogTable({ logs, isLoading, title = "操作日志" }: Audit
                   <TableCell className="text-sm text-muted-foreground">
                     {formatDateTime(log.created_at)}
                   </TableCell>
+                  <TableCell>{log.operator_name || "-"}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
                       {ACTION_LABELS[log.action] || log.action}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm">
-                    {log.details || `${TARGET_TYPE_LABELS[log.target_type] || log.target_type} ${log.target_id?.slice(0, 8) || ""}`}
-                  </TableCell>
+                  <TableCell className="text-sm">{log.details || "-"}</TableCell>
+                  <TableCell className="text-sm">{log.affected_name || "-"}</TableCell>
                 </TableRow>
               ))}
               {(!logs || logs.length === 0) && (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8">
+                  <TableCell colSpan={5} className="text-center py-8">
                     暂无操作日志
                   </TableCell>
                 </TableRow>
