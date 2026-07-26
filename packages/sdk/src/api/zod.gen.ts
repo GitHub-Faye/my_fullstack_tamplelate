@@ -76,6 +76,13 @@ export const zBodyLoginAccessTokenV1LoginAccessTokenPost = z.object({
 });
 
 /**
+ * Body_upload_attachment_v1_tasks__task_id__attachments_post
+ */
+export const zBodyUploadAttachmentV1TasksTaskIdAttachmentsPost = z.object({
+    file: z.string()
+});
+
+/**
  * EmploymentStatus
  *
  * 在岗状态枚举
@@ -1309,6 +1316,24 @@ export const zCompleteTaskV1TasksTaskIdCompletePostPath = z.object({
  * Successful Response
  */
 export const zCompleteTaskV1TasksTaskIdCompletePostResponse = zTaskPublic;
+
+export const zListAttachmentsV1TasksTaskIdAttachmentsGetPath = z.object({
+    task_id: z.uuid()
+});
+
+export const zUploadAttachmentV1TasksTaskIdAttachmentsPostBody = zBodyUploadAttachmentV1TasksTaskIdAttachmentsPost;
+
+export const zUploadAttachmentV1TasksTaskIdAttachmentsPostPath = z.object({
+    task_id: z.uuid()
+});
+
+export const zDownloadAttachmentV1TasksAttachmentsAttachmentIdDownloadGetPath = z.object({
+    attachment_id: z.uuid()
+});
+
+export const zDeleteAttachmentV1TasksAttachmentsAttachmentIdDeletePath = z.object({
+    attachment_id: z.uuid()
+});
 
 export const zReadBidsByTaskV1TasksTaskIdBidsGetPath = z.object({
     task_id: z.uuid()

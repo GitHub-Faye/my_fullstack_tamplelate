@@ -188,6 +188,10 @@ class Settings(BaseSettings):
     BIND: str | None = None  # Gunicorn 绑定地址（可通过环境变量覆盖）
     WORKERS: int | None = None  # Gunicorn worker 数量（可通过
 
+    # ======================== 文件上传配置 ========================
+    UPLOAD_DIR: str = "uploads"  # 文件上传存储根目录
+    MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 单文件最大 10MB
+
     # ======================== 安全检查方法 ========================
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         """

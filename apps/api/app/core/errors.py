@@ -77,6 +77,11 @@ class ErrorCode(str, Enum):
     # ==================== 规则配置相关错误 (RULE) ====================
     RULE_NOT_FOUND = "RULE_NOT_FOUND"
 
+    # ==================== 附件相关错误 (ATTACHMENT) ====================
+    ATTACHMENT_NOT_FOUND = "ATTACHMENT_NOT_FOUND"
+    ATTACHMENT_TOO_LARGE = "ATTACHMENT_TOO_LARGE"
+    ATTACHMENT_INVALID_TYPE = "ATTACHMENT_INVALID_TYPE"
+
     # ==================== 角色相关错误 (ROLE) ====================
     ROLE_ALREADY_EXISTS = "ROLE_ALREADY_EXISTS"
 
@@ -125,6 +130,13 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     ErrorCode.USER_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     ErrorCode.USER_EMAIL_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     ErrorCode.ROLE_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
+
+    # 404 Not Found — 附件
+    ErrorCode.ATTACHMENT_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+
+    # 413 Payload Too Large
+    ErrorCode.ATTACHMENT_TOO_LARGE: status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+    ErrorCode.ATTACHMENT_INVALID_TYPE: status.HTTP_400_BAD_REQUEST,
 
     # 422 Unprocessable Entity
     ErrorCode.SALARY_PARAM_NOT_SET: status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -184,6 +196,10 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.SYSTEM_RATE_LIMIT: "Too many requests",
     ErrorCode.RULE_NOT_FOUND: "Rule not found",
     ErrorCode.ROLE_ALREADY_EXISTS: "Role with this name already exists",
+
+    ErrorCode.ATTACHMENT_NOT_FOUND: "Attachment not found",
+    ErrorCode.ATTACHMENT_TOO_LARGE: "File too large",
+    ErrorCode.ATTACHMENT_INVALID_TYPE: "Invalid file type",
 }
 
 

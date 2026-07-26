@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.domains.user.router import login_router, user_router, admin_router
 from app.domains.item.router import router as item_router
 from app.domains.task.router import router as task_router
+from app.domains.task.attachment_router import router as task_attachment_router
 from app.domains.bidding.router import router as bidding_router
 from app.domains.daily_report.router import router as daily_report_router
 from app.domains.starpoint.router import router as starpoint_router
@@ -24,6 +25,9 @@ router.include_router(admin_router, prefix="/admin", tags=["admin-users"])
 
 # 任务相关路由（统一 router，包含 PM CRUD + 管理员操作 + 工程师执行）
 router.include_router(task_router, prefix="/tasks", tags=["tasks"])
+
+# 附件路由（在 tasks 前缀下，但下载/删除独立路径）
+router.include_router(task_attachment_router, prefix="/tasks", tags=["tasks"])
 
 # 竞价相关路由（报价 + 结算）
 router.include_router(bidding_router, tags=["bidding"])

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2 } from "lucide-react";
+import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip } from "lucide-react";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -19,7 +19,7 @@ import {
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 import { formatDateTime, formatDate } from "@/lib/utils";
-import { readDailyReportsV1DailyReportsGet } from "@repo/sdk";
+import { readDailyReportsV1DailyReportsGet, listAttachmentsV1TasksTaskIdAttachmentsGet } from "@repo/sdk";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -102,19 +102,52 @@ export function TaskDetailDialog({
   const [recentReports, setRecentReports] = useState<any[] | null>(null);
   const [reportsLoading, setReportsLoading] = useState(false);
 
+  // 附件列表
+  const [attachments, setAttachments] = useState<any[]>([]);
+  const [attachmentsLoading, setAttachmentsLoading] = useState(false);
+
   useEffect(() => {
-    if (open && task && isStarted) {
-      setReportsLoading(true);
-      readDailyReportsV1DailyReportsGet({
-        query: { task_id: task.id, page: 1, page_size: 5 },
+    if (open && task) {
+      // 加载工作日志
+      if (isStarted) {
+        setReportsLoading(true);
+        readDailyReportsV1DailyReportsGet({
+          query: { task_id: task.id, page: 1, page_size: 5 },
+        })
+          .then((res) => setRecentReports(res.data?.data ?? []))
+          .catch(() => setRecentReports([]))
+          .finally(() => setReportsLoading(false));
+      }
+      // 加载附件列表
+      setAttachmentsLoading(true);
+      listAttachmentsV1TasksTaskIdAttachmentsGet({
+        path: { task_id: task.id },
       })
-        .then((res) => setRecentReports(res.data?.data ?? []))
-        .catch(() => setRecentReports([]))
-        .finally(() => setReportsLoading(false));
+        .then((res) => setAttachments((res.data as any[]) ?? []))
+        .catch(() => setAttachments([]))
+        .finally(() => setAttachmentsLoading(false));
     } else if (!open) {
       setRecentReports(null);
+      setAttachments([]);
     }
   }, [open, task]);
+
+  // 下载附件
+  const handleDownload = useCallback((attachmentId: string, fileName: string) => {
+    const baseUrl = "/v1";
+    const url = `${baseUrl}/tasks/attachments/${attachmentId}/download`;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+  }, []);
+
+  // 格式化文件大小
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes}B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -181,26 +214,40 @@ export function TaskDetailDialog({
             </div>
           )}
 
-          {/* 附件表格（后端功能尚未实现） */}
+          {/* 附件列表 */}
           <div className="border rounded-md">
             <div className="px-3 py-2 text-sm font-medium border-b bg-muted/50">附件/截图</div>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-muted-foreground">
-                  <th className="text-left px-3 py-2 font-medium">文件</th>
-                  <th className="text-left px-3 py-2 font-medium">类型</th>
-                  <th className="text-left px-3 py-2 font-medium">状态</th>
-                  <th className="text-left px-3 py-2 font-medium">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colSpan={4} className="px-3 py-6 text-center text-muted-foreground">
-                    暂无附件
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            {attachmentsLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-5 w-5 animate-spin" />
+              </div>
+            ) : attachments.length > 0 ? (
+              <div className="divide-y">
+                {attachments.map((att: any) => (
+                  <div key={att.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <Paperclip className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{att.file_name}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {formatSize(att.file_size)}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => handleDownload(att.id, att.file_name)}
+                    >
+                      <Download className="h-3.5 w-3.5 mr-1" />
+                      下载
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center py-4 text-sm text-muted-foreground">暂无附件</p>
+            )}
           </div>
 
           {/* 最近工作日志 */}

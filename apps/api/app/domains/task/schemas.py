@@ -95,6 +95,19 @@ class TaskReassignRequest(SQLModel):
     new_engineer_id: uuid.UUID = Field(description="新工程师ID")
     T_reported: Optional[float] = Field(default=None, ge=0, description="T报（管理员改派时重新给定）")
 
+
+# ==================== 附件响应模型 ====================
+
+class AttachmentPublic(SQLModel):
+    """附件响应模型"""
+    id: uuid.UUID
+    task_id: uuid.UUID
+    file_name: str
+    file_size: int
+    uploaded_by: uuid.UUID
+    created_at: Optional[datetime] = None
+
+
 # ==================== 通用 DTO ====================
 
 # Message 从 app.core.schemas 导入

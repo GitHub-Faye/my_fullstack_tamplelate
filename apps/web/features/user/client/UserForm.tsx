@@ -77,7 +77,6 @@ export function UserForm({ user, mode }: UserFormProps) {
           SAssess: user?.S_assess ?? undefined,
           RBase: user?.R_base ?? undefined,
           RAssess: user?.R_assess ?? undefined,
-          baselineClientCount: user?.baseline_client_count ?? undefined,
         }
       : {
           email: "",
@@ -114,7 +113,6 @@ export function UserForm({ user, mode }: UserFormProps) {
           S_assess: data.SAssess ?? null,
           R_base: data.RBase ?? null,
           R_assess: data.RAssess ?? null,
-          baseline_client_count: data.baselineClientCount ?? null,
         };
         // 编辑时如果填了密码则一起提交
         if (data.password) {
@@ -145,7 +143,6 @@ export function UserForm({ user, mode }: UserFormProps) {
             S_assess: createData.SAssess,
             R_base: createData.RBase,
             R_assess: createData.RAssess,
-            baseline_client_count: createData.baselineClientCount,
           },
           url: '/v1/admin/users',
         });

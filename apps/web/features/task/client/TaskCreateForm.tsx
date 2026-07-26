@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Paperclip, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -145,26 +145,6 @@ export function TaskCreateForm({ onSuccess }: { onSuccess?: () => void }) {
             </FormItem>
           )}
         />
-
-        {/* 附件上传骨架 — 后端上传路由就绪后对接 */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">附件</label>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled
-            >
-              <Paperclip className="mr-1 h-4 w-4" />
-              选择文件
-            </Button>
-            <span className="text-xs text-muted-foreground">暂未开放，后续版本支持</span>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            支持上传任务相关文档（PRD、设计稿等）
-          </p>
-        </div>
 
         <Button type="submit" className="w-full" disabled={createTask.isPending}>
           {createTask.isPending ? (

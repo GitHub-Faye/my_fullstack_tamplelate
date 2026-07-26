@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
 
 from app.api import router as api_router
 
@@ -61,6 +62,13 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+
+# 挂载上传文件目录用于直接预览
+from app.core.config import get_settings
+settings = get_settings()
+if Path(settings.UPLOAD_DIR).exists():
+    from fastapi.staticfiles import StaticFiles
+    app.mount(f"/{settings.UPLOAD_DIR}", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
 # @app.get("/sentry-debug")
 # async def trigger_error():

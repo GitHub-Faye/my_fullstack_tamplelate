@@ -237,6 +237,18 @@ export type BodyLoginAccessTokenV1LoginAccessTokenPost = {
 };
 
 /**
+ * Body_upload_attachment_v1_tasks__task_id__attachments_post
+ */
+export type BodyUploadAttachmentV1TasksTaskIdAttachmentsPost = {
+    /**
+     * File
+     *
+     * 附件文件
+     */
+    file: Blob | File;
+};
+
+/**
  * DailyReportCreate
  *
  * 创建日报请求
@@ -3462,6 +3474,126 @@ export type CompleteTaskV1TasksTaskIdCompletePostResponses = {
 };
 
 export type CompleteTaskV1TasksTaskIdCompletePostResponse = CompleteTaskV1TasksTaskIdCompletePostResponses[keyof CompleteTaskV1TasksTaskIdCompletePostResponses];
+
+export type ListAttachmentsV1TasksTaskIdAttachmentsGetData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/attachments';
+};
+
+export type ListAttachmentsV1TasksTaskIdAttachmentsGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ListAttachmentsV1TasksTaskIdAttachmentsGetError = ListAttachmentsV1TasksTaskIdAttachmentsGetErrors[keyof ListAttachmentsV1TasksTaskIdAttachmentsGetErrors];
+
+export type ListAttachmentsV1TasksTaskIdAttachmentsGetResponses = {
+    /**
+     * Response List Attachments V1 Tasks  Task Id  Attachments Get
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type UploadAttachmentV1TasksTaskIdAttachmentsPostData = {
+    body: BodyUploadAttachmentV1TasksTaskIdAttachmentsPost;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/attachments';
+};
+
+export type UploadAttachmentV1TasksTaskIdAttachmentsPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UploadAttachmentV1TasksTaskIdAttachmentsPostError = UploadAttachmentV1TasksTaskIdAttachmentsPostErrors[keyof UploadAttachmentV1TasksTaskIdAttachmentsPostErrors];
+
+export type UploadAttachmentV1TasksTaskIdAttachmentsPostResponses = {
+    /**
+     * Response Upload Attachment V1 Tasks  Task Id  Attachments Post
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type DownloadAttachmentV1TasksAttachmentsAttachmentIdDownloadGetData = {
+    body?: never;
+    path: {
+        /**
+         * Attachment Id
+         */
+        attachment_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/attachments/{attachment_id}/download';
+};
+
+export type DownloadAttachmentV1TasksAttachmentsAttachmentIdDownloadGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DownloadAttachmentV1TasksAttachmentsAttachmentIdDownloadGetError = DownloadAttachmentV1TasksAttachmentsAttachmentIdDownloadGetErrors[keyof DownloadAttachmentV1TasksAttachmentsAttachmentIdDownloadGetErrors];
+
+export type DownloadAttachmentV1TasksAttachmentsAttachmentIdDownloadGetResponses = {
+    /**
+     * Response Download Attachment V1 Tasks Attachments  Attachment Id  Download Get
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type DeleteAttachmentV1TasksAttachmentsAttachmentIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * Attachment Id
+         */
+        attachment_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/attachments/{attachment_id}';
+};
+
+export type DeleteAttachmentV1TasksAttachmentsAttachmentIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteAttachmentV1TasksAttachmentsAttachmentIdDeleteError = DeleteAttachmentV1TasksAttachmentsAttachmentIdDeleteErrors[keyof DeleteAttachmentV1TasksAttachmentsAttachmentIdDeleteErrors];
+
+export type DeleteAttachmentV1TasksAttachmentsAttachmentIdDeleteResponses = {
+    /**
+     * Response Delete Attachment V1 Tasks Attachments  Attachment Id  Delete
+     *
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type ReadBidsByTaskV1TasksTaskIdBidsGetData = {
     body?: never;
