@@ -1841,6 +1841,66 @@ export type TasksPublic = {
 };
 
 /**
+ * TodayReportSummaryItem
+ *
+ * 今日提交日志汇总条目
+ */
+export type TodayReportSummaryItem = {
+    /**
+     * Engineer Id
+     *
+     * 工程师ID
+     */
+    engineer_id: string;
+    /**
+     * Engineer Name
+     *
+     * 工程师姓名
+     */
+    engineer_name?: string | null;
+    /**
+     * Today Hours
+     *
+     * 今日工作时长
+     */
+    today_hours: number;
+    /**
+     * Submitted At
+     *
+     * 提交时间
+     */
+    submitted_at?: string | null;
+    /**
+     * Task Count
+     *
+     * 任务量
+     */
+    task_count: number;
+    /**
+     * Status
+     *
+     * 状态: submitted / not_submitted
+     */
+    status: string;
+};
+
+/**
+ * TodayReportSummaryResponse
+ *
+ * 今日提交日志汇总响应
+ */
+export type TodayReportSummaryResponse = {
+    /**
+     * Data
+     */
+    data: Array<TodayReportSummaryItem>;
+    /**
+     * Total Engineers
+     */
+    total_engineers: number;
+};
+
+/**
  * Token
  */
 export type Token = {
@@ -3542,6 +3602,12 @@ export type ReadDailyReportsV1DailyReportsGetData = {
          */
         task_id?: string | null;
         /**
+         * Engineer Id
+         *
+         * 按工程师过滤（管理员用）
+         */
+        engineer_id?: string | null;
+        /**
          * Report Date
          *
          * 按日期过滤
@@ -3605,6 +3671,44 @@ export type CreateDailyReportV1DailyReportsPostResponses = {
 };
 
 export type CreateDailyReportV1DailyReportsPostResponse = CreateDailyReportV1DailyReportsPostResponses[keyof CreateDailyReportV1DailyReportsPostResponses];
+
+export type GetTodayReportSummaryV1DailyReportsTodaySummaryGetData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Report Date
+         *
+         * 报告日期，默认今天
+         */
+        report_date?: string | null;
+        /**
+         * Engineer Id
+         *
+         * 按工程师过滤
+         */
+        engineer_id?: string | null;
+    };
+    url: '/v1/daily-reports/today-summary';
+};
+
+export type GetTodayReportSummaryV1DailyReportsTodaySummaryGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetTodayReportSummaryV1DailyReportsTodaySummaryGetError = GetTodayReportSummaryV1DailyReportsTodaySummaryGetErrors[keyof GetTodayReportSummaryV1DailyReportsTodaySummaryGetErrors];
+
+export type GetTodayReportSummaryV1DailyReportsTodaySummaryGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: TodayReportSummaryResponse;
+};
+
+export type GetTodayReportSummaryV1DailyReportsTodaySummaryGetResponse = GetTodayReportSummaryV1DailyReportsTodaySummaryGetResponses[keyof GetTodayReportSummaryV1DailyReportsTodaySummaryGetResponses];
 
 export type GetRemindReportV1DailyReportsRemindGetData = {
     body?: never;

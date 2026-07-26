@@ -1,16 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useAdminDashboard } from "@/features/dashboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { TodayLogDialog } from "@/features/dashboard/client/TodayLogDialog";
 
 export default function AdminOverviewPage() {
   const { data: dashboard, isLoading } = useAdminDashboard();
-
-  const metrics = [
-    { label: "今日提交日志量", value: dashboard?.today_submitted_reports ?? "-", desc: "工程师提交的工作日志", color: "cyan" },
-    { label: "进行中任务", value: dashboard?.ongoing_tasks ?? "-", desc: "当前进行中的任务总数", color: "blue" },
-  ];
+  const [todayLogDialogOpen, setTodayLogDialogOpen] = useState(false);
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>;
@@ -20,12 +19,21 @@ export default function AdminOverviewPage() {
     <div className="space-y-6">
       <div><h1 className="text-3xl font-bold">数据概览</h1><p className="text-muted-foreground">系统整体运营数据</p></div>
       <div className="grid grid-cols-2 gap-4">
-        {metrics.map((metric) => (
-          <Card key={metric.label} className={`border-l-4 border-l-${metric.color}-500`}>
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">{metric.label}</CardTitle></CardHeader>
-            <CardContent><div className="text-2xl font-bold">{metric.value}</div><p className="text-xs text-muted-foreground mt-1">{metric.desc}</p></CardContent>
-          </Card>
-        ))}
+        <Card className="border-l-4 border-l-cyan-500">
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">今日提交日志量</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{dashboard?.today_submitted_reports ?? "-"}</div>
+            <div className="mt-2">
+              <Button variant="outline" size="sm" onClick={() => setTodayLogDialogOpen(true)}>
+                查看详情
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-l-4 border-l-blue-500">
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">进行中任务</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-bold">{dashboard?.ongoing_tasks ?? "-"}</div><p className="text-xs text-muted-foreground mt-1">当前进行中的任务总数</p></CardContent>
+        </Card>
       </div>
       <div className="grid grid-cols-2 gap-6">
         <Card>
@@ -60,6 +68,9 @@ export default function AdminOverviewPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 今日提交日志弹窗 */}
+      <TodayLogDialog open={todayLogDialogOpen} onOpenChange={setTodayLogDialogOpen} />
     </div>
   );
 }

@@ -271,4 +271,90 @@ async def check_report_exists_for_date(
     )
     result = await session.execute(statement)
     count = result.scalar_one()
-    return count > 0
+    return count
+
+
+async def get_today_report_summary(
+    *,
+    session: AsyncSession,
+    report_date: date,
+    engineer_id: Optional[uuid.UUID] = None,
+) -> tuple[list[dict], int]:
+    """
+    获取今日提交日志汇总（已提交 + 未提交）
+
+    联合 User（所有工程师）和 DailyReport（当日日报）数据，
+    返回每个工程师的今日汇总：工时、提交时间、任务量、状态。
+
+    Args:
+        session: 数据库会话
+        report_date: 报告日期
+        engineer_id: 可选，按工程师过滤
+
+    Returns:
+        (汇总条目列表, 工程师总数)
+    """
+    from app.core.models import User, UserRoleType
+
+    start_datetime = datetime.combine(report_date, datetime.min.time())
+    end_datetime = datetime.combine(report_date, datetime.max.time())
+
+    # 1. 查询所有工程师
+    engineer_stmt = select(User).where(User.role == UserRoleType.ENGINEER)
+    if engineer_id:
+        engineer_stmt = engineer_stmt.where(User.id == engineer_id)
+    engineer_result = await session.execute(engineer_stmt)
+    all_engineers = engineer_result.scalars().all()
+
+    # 2. 查询今日已提交日报的汇总（按工程师聚合）
+    submitted_stmt = (
+        select(
+            DailyReport.engineer_id,
+            func.sum(DailyReport.today_hours).label("total_hours"),
+            func.max(DailyReport.created_at).label("last_submitted_at"),
+            func.count(DailyReport.id).label("report_count"),
+        )
+        .where(
+            and_(
+                DailyReport.report_date >= start_datetime,
+                DailyReport.report_date <= end_datetime,
+            )
+        )
+        .group_by(DailyReport.engineer_id)
+    )
+    if engineer_id:
+        submitted_stmt = submitted_stmt.where(DailyReport.engineer_id == engineer_id)
+
+    submitted_result = await session.execute(submitted_stmt)
+    submitted_map = {}
+    for row in submitted_result:
+        submitted_map[row.engineer_id] = {
+            "total_hours": float(row.total_hours or 0),
+            "last_submitted_at": row.last_submitted_at,
+            "report_count": row.report_count or 0,
+        }
+
+    # 3. 合并已提交 + 未提交
+    items = []
+    for eng in all_engineers:
+        sub = submitted_map.get(eng.id)
+        if sub:
+            items.append({
+                "engineer_id": eng.id,
+                "engineer_name": eng.full_name or eng.email,
+                "today_hours": sub["total_hours"],
+                "submitted_at": sub["last_submitted_at"],
+                "task_count": sub["report_count"],
+                "status": "submitted",
+            })
+        else:
+            items.append({
+                "engineer_id": eng.id,
+                "engineer_name": eng.full_name or eng.email,
+                "today_hours": 0.0,
+                "submitted_at": None,
+                "task_count": 0,
+                "status": "not_submitted",
+            })
+
+    return items, len(all_engineers)

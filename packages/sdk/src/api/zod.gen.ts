@@ -748,6 +748,30 @@ export const zTasksPublic = z.object({
 });
 
 /**
+ * TodayReportSummaryItem
+ *
+ * 今日提交日志汇总条目
+ */
+export const zTodayReportSummaryItem = z.object({
+    engineer_id: z.uuid(),
+    engineer_name: z.string().nullish(),
+    today_hours: z.number(),
+    submitted_at: z.iso.datetime().nullish(),
+    task_count: z.int(),
+    status: z.string()
+});
+
+/**
+ * TodayReportSummaryResponse
+ *
+ * 今日提交日志汇总响应
+ */
+export const zTodayReportSummaryResponse = z.object({
+    data: z.array(zTodayReportSummaryItem),
+    total_engineers: z.int()
+});
+
+/**
  * Token
  */
 export const zToken = z.object({
@@ -1327,6 +1351,7 @@ export const zManualSettleBiddingV1TasksTaskIdSettleBiddingPostPath = z.object({
 
 export const zReadDailyReportsV1DailyReportsGetQuery = z.object({
     task_id: z.uuid().nullish(),
+    engineer_id: z.uuid().nullish(),
     report_date: z.iso.date().nullish(),
     page: z.int().gte(1).optional().default(1),
     page_size: z.int().gte(1).lte(100).optional().default(20)
@@ -1343,6 +1368,16 @@ export const zCreateDailyReportV1DailyReportsPostBody = zDailyReportCreate;
  * Successful Response
  */
 export const zCreateDailyReportV1DailyReportsPostResponse = zDailyReportPublic;
+
+export const zGetTodayReportSummaryV1DailyReportsTodaySummaryGetQuery = z.object({
+    report_date: z.iso.date().nullish(),
+    engineer_id: z.uuid().nullish()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetTodayReportSummaryV1DailyReportsTodaySummaryGetResponse = zTodayReportSummaryResponse;
 
 /**
  * Successful Response

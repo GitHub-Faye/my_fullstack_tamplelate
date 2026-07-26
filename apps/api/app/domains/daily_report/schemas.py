@@ -80,6 +80,24 @@ class DailyReportsWithTaskNamePublic(SQLModel):
     total_pages: int | None = None
 
 
+# ==================== 今日提交日志汇总模型 ====================
+
+class TodayReportSummaryItem(SQLModel):
+    """今日提交日志汇总条目"""
+    engineer_id: uuid.UUID = Field(description="工程师ID")
+    engineer_name: Optional[str] = Field(default=None, description="工程师姓名")
+    today_hours: float = Field(description="今日工作时长")
+    submitted_at: Optional[datetime] = Field(default=None, description="提交时间")
+    task_count: int = Field(description="任务量")
+    status: str = Field(description="状态: submitted / not_submitted")
+
+
+class TodayReportSummaryResponse(SQLModel):
+    """今日提交日志汇总响应"""
+    data: list[TodayReportSummaryItem]
+    total_engineers: int
+
+
 # ==================== 提醒模型 ====================
 
 class RemindResult(SQLModel):

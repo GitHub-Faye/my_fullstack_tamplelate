@@ -35,6 +35,8 @@ from app.domains.daily_report.schemas import (
     RemindResult,
     DailyReportWithTaskName,
     DailyReportsWithTaskNamePublic,
+    TodayReportSummaryItem,
+    TodayReportSummaryResponse,
 )
 
 
@@ -233,6 +235,7 @@ async def read_daily_reports(
     session: SessionDep,
     current_user: CurrentUser,
     task_id: Annotated[uuid.UUID | None, Query(description="按任务过滤")] = None,
+    engineer_id: Annotated[uuid.UUID | None, Query(description="按工程师过滤（管理员用）")] = None,
     report_date: Annotated[date | None, Query(description="按日期过滤")] = None,
     page: Annotated[int, Query(ge=1, description="页码，从1开始")] = 1,
     page_size: Annotated[int, Query(ge=1, le=100, description="每页数量，默认20，最大100")] = 20,
@@ -242,22 +245,25 @@ async def read_daily_reports(
 
     - 工程师只能看自己的日报
     - PM/管理员可看所有日报
-    - 支持按任务、日期过滤
+    - 支持按任务、工程师、日期过滤
+    - 管理员可通过 engineer_id 参数查看指定工程师的日报
     """
     user_scopes = await get_user_scopes(session, current_user)
     is_admin = ReportScope.ADMIN.value in user_scopes
 
     # 工程师只能查看自己的日报
     # PM 可查看所有日报（用于跟踪任务进度）
-    # 管理员可查看所有日报
-    engineer_id = None if (is_admin or current_user.role == UserRoleType.PM) else current_user.id
+    # 管理员可查看所有日报，并可指定 engineer_id
+    resolved_engineer_id = engineer_id
+    if not is_admin and current_user.role != UserRoleType.PM:
+        resolved_engineer_id = current_user.id
 
     # 计算offset
     offset = (page - 1) * page_size
 
     reports, count = await repository.get_daily_reports(
         session=session,
-        engineer_id=engineer_id,
+        engineer_id=resolved_engineer_id,
         task_id=task_id,
         report_date=report_date,
         skip=offset,
@@ -270,6 +276,42 @@ async def read_daily_reports(
         page=page,
         page_size=page_size,
         total_pages=(count + page_size - 1) // page_size if count > 0 else 0,
+    )
+
+
+@router.get(
+    "/today-summary",
+    response_model=TodayReportSummaryResponse,
+    summary="查看今日提交日志汇总（管理员）",
+    description="管理员查看今日所有工程师的日志提交情况，含已提交和未提交的工程师"
+)
+async def get_today_report_summary(
+    session: SessionDep,
+    current_user: CurrentUser,
+    report_date: Annotated[date | None, Query(description="报告日期，默认今天")] = None,
+    engineer_id: Annotated[uuid.UUID | None, Query(description="按工程师过滤")] = None,
+    _: Annotated[None, Depends(require_scope(ReportScope.ADMIN))] = None,
+) -> Any:
+    """
+    获取今日提交日志汇总
+
+    权限：管理员（需 report:admin 权限）
+
+    返回所有工程师的今日日志提交情况：
+    - 已提交：今日工作时长、提交时间、任务量
+    - 未提交：不显示查看详情按钮
+    """
+    report_date = report_date or date.today()
+
+    items, total = await repository.get_today_report_summary(
+        session=session,
+        report_date=report_date,
+        engineer_id=engineer_id,
+    )
+
+    return TodayReportSummaryResponse(
+        data=[TodayReportSummaryItem(**item) for item in items],
+        total_engineers=total,
     )
 
 
