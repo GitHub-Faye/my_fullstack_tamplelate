@@ -34,7 +34,40 @@ services:
       timeout: 3s
       retries: 3
 
-  # ==================== 新增：RabbitMQ（作为 Celery Broker） ====================
+  # ==================== API 后端服务 ====================
+  api:
+    build: .
+    container_name: app-api
+    restart: unless-stopped
+    command: gunicorn -c gunicorn.conf.py main:app
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_data:/app/uploads
+    env_file:
+      - .env
+    environment:
+      POSTGRES_SERVER: postgres
+      POSTGRES_PORT: 5432
+      REDIS_URL: redis://:redis123@redis:6379/0
+      CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
+      CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
+      ENVIRONMENT: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # ==================== RabbitMQ（作为 Celery Broker） ====================
   rabbitmq:
     image: rabbitmq:4-management   # 带 Web 管理界面（推荐）
     container_name: app-rabbitmq
@@ -125,4 +158,5 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  rabbitmq_data:     # 新增 RabbitMQ 数据持久化卷
+  rabbitmq_data:
+  uploads_data:

@@ -8,25 +8,19 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# 安装系统依赖（PostgreSQL、Celery 等常用依赖）
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
 # 先复制 requirements.txt，利用 Docker 层缓存加速后续构建
 COPY requirements.txt .
 
-# 安装 Python 依赖（推荐使用缓存挂载，构建更快）
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip && \
+# 安装 Python 依赖
+RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
-# 复制整个项目代码（开发时会被 docker-compose volume 覆盖）
+# 复制整个项目代码
 COPY . .
 
-# ==================== 可选：添加健康检查脚本（推荐） ====================
-# 如果你想让 celery-worker 有更好的健康检查，可以后续再加
+# 健康检查（无需 curl，使用 Python 内置方式）
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"
 
-# 默认 CMD（会被 docker-compose 中的 command 覆盖，所以不用太在意）
+# 默认 CMD（会被 docker-compose 中的 command 覆盖）
 CMD ["fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]
