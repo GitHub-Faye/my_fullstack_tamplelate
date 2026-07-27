@@ -82,6 +82,14 @@ class RuleScope(str, Enum):
     """规则配置的权限范围"""
 
     ADMIN = "rule:admin"  # 管理规则配置
+    READ = "rule:read"    # 读取规则配置
+
+
+class SystemScope(str, Enum):
+    """系统管理的权限范围"""
+
+    ADMIN = "system:admin"  # 系统管理
+    READ = "system:read"    # 系统配置读取
 
 
 class DashboardScope(str, Enum):
@@ -103,31 +111,17 @@ ALL_SALARY_SCOPES = list(SalaryScope)
 ALL_CLIENT_RESOURCE_SCOPES = list(ClientResourceScope)
 ALL_RULE_SCOPES = list(RuleScope)
 ALL_DASHBOARD_SCOPES = list(DashboardScope)
+ALL_SYSTEM_SCOPES = list(SystemScope)
 
 
 # 预定义角色对应的 scopes
 DEFAULT_ROLE_SCOPES = {
-    "viewer": [
-        ItemScope.READ,
-    ],
-    "editor": [
-        ItemScope.READ,
-        ItemScope.CREATE,
-        ItemScope.UPDATE,
-        ItemScope.DELETE,
-    ],
-    "admin": [
-        ItemScope.READ,
-        ItemScope.CREATE,
-        ItemScope.UPDATE,
-        ItemScope.DELETE,
-        ItemScope.ADMIN,
-    ],
     # 工程师角色权限
     "engineer": [
         TaskScope.READ,
         BidScope.CREATE,
         BidScope.UPDATE,
+        BidScope.READ,
         ReportScope.CREATE,
         ReportScope.READ,
         StarPointScope.READ,
@@ -140,12 +134,27 @@ DEFAULT_ROLE_SCOPES = {
         TaskScope.CREATE,
         TaskScope.UPDATE,
         TaskScope.DELETE,
+        TaskScope.ADMIN,
+        TaskScope.APPROVE,
+        TaskScope.CONVERT,
         ReportScope.READ,
+        ReportScope.CREATE,
+        ReportScope.ADMIN,
+        ClientResourceScope.READ,
+        ClientResourceScope.CREATE,
         SalaryScope.READ,
+        SalaryScope.ADMIN,
+        StarPointScope.READ,
+        StarPointScope.ADMIN,
         DashboardScope.PM,
+        BidScope.READ,
     ],
     # 管理员角色权限
     "admin": [
+        UserScope.CREATE,
+        UserScope.UPDATE,
+        UserScope.DELETE,
+        UserScope.ADMIN,
         TaskScope.READ,
         TaskScope.CREATE,
         TaskScope.UPDATE,
@@ -154,19 +163,23 @@ DEFAULT_ROLE_SCOPES = {
         TaskScope.APPROVE,
         TaskScope.CONVERT,
         TaskScope.REASSIGN,
-        BidScope.READ,
-        ReportScope.READ,
-        ReportScope.ADMIN,
         StarPointScope.READ,
         StarPointScope.ADMIN,
         SalaryScope.READ,
         SalaryScope.ADMIN,
-        UserScope.READ,
-        UserScope.CREATE,
-        UserScope.UPDATE,
-        UserScope.DELETE,
-        UserScope.ADMIN,
-        RuleScope.ADMIN,
         DashboardScope.ADMIN,
+        SystemScope.ADMIN,
+        SystemScope.READ,
+        RuleScope.ADMIN,
+        RuleScope.READ,
+        ClientResourceScope.CREATE,
+        ClientResourceScope.READ,
+        ReportScope.ADMIN,
+        ReportScope.CREATE,
+        ReportScope.READ,
+        BidScope.READ,
+        BidScope.UPDATE,
+        BidScope.CREATE,
+        UserScope.READ,
     ],
 }

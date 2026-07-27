@@ -11,7 +11,7 @@ from app.core.config import get_settings
 from app.core.database import init_db
 from app.core.logging import configure_logging, get_logger
 
-import sentry_sdk
+# import sentry_sdk
 
 # 首先配置日志系统（在应用启动前）
 configure_logging()
@@ -77,4 +77,4 @@ if Path(settings.UPLOAD_DIR).exists():
     
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8111)
