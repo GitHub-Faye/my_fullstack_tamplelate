@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Standalone output for Docker deployment
+  output: 'standalone',
+
   // 启用 source map 以便调试
   productionBrowserSourceMaps: true,
 

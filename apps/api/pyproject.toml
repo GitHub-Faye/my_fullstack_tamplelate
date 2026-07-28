@@ -28,6 +28,8 @@ dependencies = [
     "pydantic[email]>=2.13.4",
     "pydantic-settings>=2.14.2",
     "typer>=0.20.0",
+    ### === Infra (celery 需要 redis client) ===
+    "redis>=6.4.0",
 ]
 
 [dependency-groups]
@@ -59,7 +61,6 @@ dev = [
     "tenacity>=9.1.0",
 
     # === Infra Tools ===
-    "redis>=6.4.0",
     "flower>=2.0.1",
     "sentry-sdk>=2.57.0",
 

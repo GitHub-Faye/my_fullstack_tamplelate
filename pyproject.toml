@@ -27,6 +27,7 @@ dependencies = [
     # === Validation & Config ===
     "pydantic[email]>=2.13.4",
     "pydantic-settings>=2.14.2",
+    "typer>=0.20.0",
 ]
 
 [dependency-groups]

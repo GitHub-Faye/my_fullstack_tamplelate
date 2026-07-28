@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres123
-      POSTGRES_DB: appdb
+      POSTGRES_DB: my_fullstack
     ports:
       - "5432:5432"
     volumes:
@@ -47,13 +47,18 @@ services:
     env_file:
       - .env
     environment:
+      PROJECT_NAME: "MY FIRST FULL STACK TEMPLATE"
       POSTGRES_SERVER: postgres
       POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: my_fullstack
+      FIRST_SUPERUSER: admin@example.com
+      FIRST_SUPERUSER_PASSWORD: admin123
       REDIS_URL: redis://:redis123@redis:6379/0
       CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
       CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
       ENVIRONMENT: production
-      FIRST_SUPERUSER_PASSWORD: admin123
     depends_on:
       postgres:
         condition: service_healthy
@@ -102,6 +107,14 @@ services:
       redis:
         condition: service_healthy
     environment:
+      PROJECT_NAME: "MY FIRST FULL STACK TEMPLATE"
+      POSTGRES_SERVER: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: my_fullstack
+      FIRST_SUPERUSER: admin@example.com
+      FIRST_SUPERUSER_PASSWORD: admin123
       REDIS_URL: redis://:redis123@redis:6379/0
       CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
       CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
@@ -143,6 +156,21 @@ services:
   #   environment:
   #     ADMINER_DEFAULT_SERVER: postgres
   #     ADMINER_DEFAULT_DB: appdb
+
+  # ==================== 前端 Web 服务 ====================
+  web:
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://82.157.96.215:8111
+    container_name: app-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_started
 
 volumes:
   postgres_data:

@@ -275,56 +275,7 @@ export const ALL_SCOPES: ScopeType[] = [
  * 预定义角色对应的 Scopes
  */
 export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
-  /** 只读用户 */
-  viewer: [ItemScope.READ, UserScope.READ],
 
-  /** 编辑者 */
-  editor: [
-    ItemScope.READ,
-    ItemScope.CREATE,
-    ItemScope.UPDATE,
-    ItemScope.DELETE,
-    UserScope.READ,
-  ],
-
-  /** 管理员 */
-  admin: [
-    ItemScope.READ,
-    ItemScope.CREATE,
-    ItemScope.UPDATE,
-    ItemScope.DELETE,
-    ItemScope.ADMIN,
-    UserScope.READ,
-    UserScope.CREATE,
-    UserScope.UPDATE,
-    UserScope.DELETE,
-    UserScope.ADMIN,
-    SystemScope.READ,
-  ],
-
-  /** 工程师 */
-  engineer: [
-    TaskScope.READ,
-    BidScope.CREATE,
-    BidScope.UPDATE,
-    ReportScope.CREATE,
-    ReportScope.READ,
-    StarPointScope.READ,
-    SalaryScope.READ,
-    DashboardScope.ENGINEER,
-  ],
-
-  /** PM */
-  pm: [
-    TaskScope.READ,
-    TaskScope.CREATE,
-    TaskScope.UPDATE,
-    ReportScope.READ,
-    ClientResourceScope.READ,
-    ClientResourceScope.CREATE,
-    SalaryScope.READ,
-    DashboardScope.PM,
-  ],
 
   /** 管理员角色 */
   admin: [
@@ -352,6 +303,32 @@ export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
     RuleScope.ADMIN,
     DashboardScope.ADMIN,
   ],
+
+  /** 工程师 */
+  engineer: [
+    TaskScope.READ,
+    BidScope.CREATE,
+    BidScope.UPDATE,
+    ReportScope.CREATE,
+    ReportScope.READ,
+    StarPointScope.READ,
+    SalaryScope.READ,
+    DashboardScope.ENGINEER,
+  ],
+
+  /** PM */
+  pm: [
+    TaskScope.READ,
+    TaskScope.CREATE,
+    TaskScope.UPDATE,
+    ReportScope.READ,
+    ClientResourceScope.READ,
+    ClientResourceScope.CREATE,
+    SalaryScope.READ,
+    DashboardScope.PM,
+  ],
+
+
 
   /** 超级管理员 */
   superuser: [...ALL_SCOPES],
