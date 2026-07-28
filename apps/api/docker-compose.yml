@@ -39,9 +39,9 @@ services:
     build: .
     container_name: app-api
     restart: unless-stopped
-    command: gunicorn -c gunicorn.conf.py main:app
+    command: fastapi run main.py --host 0.0.0.0 --port 8111
     ports:
-      - "8000:8000"
+      - "8111:8111"
     volumes:
       - uploads_data:/app/uploads
     env_file:
@@ -53,6 +53,7 @@ services:
       CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
       CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
       ENVIRONMENT: production
+      FIRST_SUPERUSER_PASSWORD: admin123
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,7 +62,7 @@ services:
       rabbitmq:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/docs"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8111/docs')"]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -94,66 +95,54 @@ services:
     build: .
     container_name: app-celery-worker
     restart: unless-stopped
-    command: >
-      sh -c "pip install --no-deps -r requirements.txt &&
-             celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4 --pool=prefork"
-    volumes:
-      - .:/app
-    env_file:
-      - .env
+    command: /app/.venv/bin/celery -A app.tasks.celery_app worker --loglevel=info --concurrency=4 --pool=prefork
     depends_on:
       rabbitmq:
         condition: service_healthy
       redis:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
     environment:
       REDIS_URL: redis://:redis123@redis:6379/0
       CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
       CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
-      PYTHONPATH: /app
+      ENVIRONMENT: production
 
   # ==================== Flower（Celery 监控） ====================
-  flower:
-    build: .
-    container_name: app-flower
-    restart: unless-stopped
-    command: >
-      sh -c "pip install --no-deps -r requirements.txt &&
-             celery -A app.tasks.celery_app flower --port=5555 --broker=amqp://celery_user:celery123@rabbitmq:5672/celery_vhost"
-    ports:
-      - "5555:5555"
-    volumes:
-      - .:/app
-    env_file:
-      - .env
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      celery-worker:
-        condition: service_started
-    environment:
-      REDIS_URL: redis://:redis123@redis:6379/0
-      CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
-      CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
-      PYTHONPATH: /app
+  # flower:
+  #   build: .
+  #   container_name: app-flower
+  #   restart: unless-stopped
+  #   command: celery -A app.tasks.celery_app flower --port=5555 --broker=amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
+  #   ports:
+  #     - "5555:5555"
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+  #     redis:
+  #       condition: service_healthy
+  #     celery-worker:
+  #       condition: service_started
+  #   environment:
+  #     REDIS_URL: redis://:redis123@redis:6379/0
+  #     CELERY_BROKER_URL: amqp://celery_user:celery123@rabbitmq:5672/celery_vhost
+  #     CELERY_RESULT_BACKEND: redis://:redis123@redis:6379/1
+  #     ENVIRONMENT: production
 
   # ==================== Adminer（数据库可视化） ====================
-  adminer:
-    image: adminer:latest
-    container_name: app-adminer
-    restart: unless-stopped
-    ports:
-      - "8088:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      ADMINER_DEFAULT_SERVER: postgres
-      ADMINER_DEFAULT_DB: appdb
+  # adminer:
+  #   image: adminer:latest
+  #   container_name: app-adminer
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8088:8080"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   environment:
+  #     ADMINER_DEFAULT_SERVER: postgres
+  #     ADMINER_DEFAULT_DB: appdb
 
 volumes:
   postgres_data:

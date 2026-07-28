@@ -1,34 +1,33 @@
 # syntax=docker/dockerfile:1
 FROM python:3.11-slim
 
-# 安装 uv 包管理器（比 pip 快 10-100 倍）
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN sed -i 's|http://deb.debian.org/debian|https://mirrors.tuna.tsinghua.edu.cn/debian|g' /etc/apt/sources.list.d/debian.sources && \
+    sed -i 's|http://security.debian.org/debian-security|https://mirrors.tuna.tsinghua.edu.cn/debian-security|g' /etc/apt/sources.list.d/debian.sources
 
-# 设置环境变量
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple uv
+
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app \
     UV_COMPILE_BYTECODE=1 \
-    UV_LINK_MODE=copy
-    UV_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+    UV_LINK_MODE=copy \
+    UV_INDEX_URL=https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple \
+    PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
-# 先复制依赖锁定文件，利用 Docker 层缓存
 COPY pyproject.toml uv.lock ./
+RUN uv sync --no-dev --frozen --no-install-project
 
-# 安装生产依赖（不安装 dev 依赖，减小镜像体积）
-RUN uv sync --no-dev --locked --no-install-project
-
-# 复制整个项目代码
 COPY . .
+RUN uv sync --no-dev --frozen
 
-# 安装项目自身
-RUN uv sync --no-dev --locked
-
-# 健康检查（使用 Python 内置方式，无需 curl）
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/docs')"
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8111/docs')"
 
-# 默认 CMD（会被 docker-compose 中的 command 覆盖）
-CMD ["fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["fastapi", "run", "main.py", "--host", "0.0.0.0", "--port", "8111"]
