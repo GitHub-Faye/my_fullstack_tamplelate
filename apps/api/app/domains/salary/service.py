@@ -3,13 +3,15 @@
 
 封装工资公式计算和批量编排逻辑。
 """
+import json
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import User, UserRoleType
+from app.core.models import User, UserRoleType, RuleCategory
 from app.core.errors import BusinessException, ErrorCode
 from app.domains.starpoint import repository as starpoint_repo
+from app.domains.system_rule import repository as rule_repo
 from app.domains.salary.schemas import (
     EngineerSalaryDetail,
     EngineerSalarySummary,
@@ -18,6 +20,33 @@ from app.domains.salary.schemas import (
     SalarySummary,
 )
 from app.domains.shared.queries import get_engineer_monthly_hours
+
+
+# ====================== 默认工资配置 ======================
+_DEFAULT_SALARY_CONFIG = {
+    "min_salary": 5000,
+}
+
+
+async def _load_salary_config(session: AsyncSession) -> dict:
+    """
+    从 system_param 分类加载工资相关参数。
+    """
+    config = _DEFAULT_SALARY_CONFIG.copy()
+    rules, _ = await rule_repo.get_rules(
+        session=session,
+        category=RuleCategory.SYSTEM_PARAM,
+        skip=0,
+        limit=100,
+    )
+    for rule in rules:
+        if rule.is_active:
+            try:
+                values = json.loads(rule.value)
+                config.update(values)
+            except (json.JSONDecodeError, TypeError):
+                continue
+    return config
 
 
 async def calculate_engineer_salary(
@@ -51,8 +80,12 @@ async def calculate_engineer_salary(
     # P差额 = max(0, T月计划 - T有效) × H0
     P_diff = max(0, T_monthly_plan - T_effective_total) * H0
 
-    # 最终工资 = max(5000, (S0 - P差额) × K)
-    salary_final = max(5000, (S0 - P_diff) * k_coefficient)
+    # 从数据库加载最低工资下限
+    salary_config = await _load_salary_config(session)
+    min_salary = salary_config.get("min_salary", 5000)
+
+    # 最终工资 = max(min_salary, (S0 - P差额) × K)
+    salary_final = max(min_salary, (S0 - P_diff) * k_coefficient)
 
     return EngineerSalaryDetail(
         user_id=engineer.id,

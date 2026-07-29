@@ -136,28 +136,52 @@ async def delete_rule(
 # 无需重复定义，在 router 中调用时传入 target_type="system_rule" 即可
 
 DEFAULT_RULES = [
-    # 星点奖励规则
+    # 星点奖励规则 — 键名与 calculation.py 的 DEFAULT_STARPOINT_RULES 对齐
     SystemRuleCreate(
         category=RuleCategory.STARPOINT_REWARD,
-        name="准确预估奖励",
+        name="提前完成奖励",
         applies_to="engineer",
-        value='{"accuracy_bonus": 10, "accuracy_threshold_high": 1.1, "accuracy_threshold_low": 0.9}',
+        value='{"early_finish_points": 5}',
         is_public=True,
         is_active=True,
     ),
     SystemRuleCreate(
         category=RuleCategory.STARPOINT_REWARD,
-        name="稍微偏差奖励",
+        name="按时完成奖励",
         applies_to="engineer",
-        value='{"slight_deviation": 5, "deviation_threshold_high": 1.2, "deviation_threshold_low": 0.8}',
+        value='{"on_time_points": 3}',
         is_public=True,
         is_active=True,
     ),
     SystemRuleCreate(
         category=RuleCategory.STARPOINT_REWARD,
-        name="偏差较大扣分",
+        name="轻微超时扣分",
         applies_to="engineer",
-        value='{"major_deviation": -5}',
+        value='{"slight_overtime_points": -5}',
+        is_public=True,
+        is_active=True,
+    ),
+    SystemRuleCreate(
+        category=RuleCategory.STARPOINT_REWARD,
+        name="显著超时扣分",
+        applies_to="engineer",
+        value='{"moderate_overtime_points": -10}',
+        is_public=True,
+        is_active=True,
+    ),
+    SystemRuleCreate(
+        category=RuleCategory.STARPOINT_REWARD,
+        name="严重超时扣分",
+        applies_to="engineer",
+        value='{"severe_overtime_points": -20}',
+        is_public=True,
+        is_active=True,
+    ),
+    SystemRuleCreate(
+        category=RuleCategory.STARPOINT_REWARD,
+        name="极端超时扣分",
+        applies_to="engineer",
+        value='{"extreme_overtime_points": -30}',
         is_public=True,
         is_active=True,
     ),
@@ -169,16 +193,16 @@ DEFAULT_RULES = [
         is_public=True,
         is_active=True,
     ),
-    # 完成判定规则
+    # 完成判定阈值 — 键名与 calculation.py 的 DEFAULT_STARPOINT_RULES 对齐
     SystemRuleCreate(
         category=RuleCategory.COMPLETION_JUDGMENT,
         name="完成判定阈值",
         applies_to="engineer",
-        value='{"accuracy_threshold_high": 1.1, "accuracy_threshold_low": 0.9, "deviation_threshold_high": 1.2, "deviation_threshold_low": 0.8}',
+        value='{"early_finish_ratio": 0.8, "on_time_ratio": 1.0, "slight_overtime_ratio": 1.2, "moderate_overtime_ratio": 1.5, "severe_overtime_ratio": 2.0}',
         is_public=False,
         is_active=True,
     ),
-    # 工资公式参数
+    # 工资公式参数 — 保留描述性信息（实际公式逻辑不来自规则）
     SystemRuleCreate(
         category=RuleCategory.SALARY_FORMULA,
         name="工程师工资公式",
@@ -195,12 +219,20 @@ DEFAULT_RULES = [
         is_public=True,
         is_active=True,
     ),
-    # 系统参数
+    # 系统参数 — 键名与 starpoint/repository.py 的 calculate_k_coefficient 对齐
     SystemRuleCreate(
         category=RuleCategory.SYSTEM_PARAM,
         name="星点系数分段",
         applies_to="engineer",
-        value='{"top_20_percent": 1.1, "middle_60_percent": 1.0, "bottom_20_percent": 0.9}',
+        value='{"top_k": 1.2, "middle_k": 1.0, "bottom_k": 0.7, "top_ratio": 0.2, "bottom_ratio": 0.2}',
+        is_public=False,
+        is_active=True,
+    ),
+    SystemRuleCreate(
+        category=RuleCategory.SYSTEM_PARAM,
+        name="最低工资下限",
+        applies_to="engineer",
+        value='{"min_salary": 5000}',
         is_public=False,
         is_active=True,
     ),

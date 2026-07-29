@@ -514,3 +514,122 @@ class TestSystemRuleAPI:
             headers={"Authorization": f"Bearer {pm_token}"},
         )
         assert response.status_code == 403
+
+    # ==================== 规则值影响业务逻辑 ====================
+
+    async def test_starpoint_rules_influence_calculation(
+        self, client: AsyncClient, admin_token: str, db_session: AsyncSession
+    ):
+        """修改规则值后，星点计算结果随之变化"""
+        # 准备规则数据
+        from app.core.models import SystemRule, RuleCategory
+        from app.domains.starpoint.calculation import load_starpoint_rules, calculate_task_starpoints
+        from app.core.models import Task, TaskType, TaskStatus
+
+        r1 = SystemRule(
+            category=RuleCategory.STARPOINT_REWARD,
+            name="提前完成奖励",
+            value='{"early_finish_points": 10}',
+            is_active=True,
+        )
+        r2 = SystemRule(
+            category=RuleCategory.COMPLETION_JUDGMENT,
+            name="完成判定阈值",
+            value='{"early_finish_ratio": 0.9}',
+            is_active=True,
+        )
+        db_session.add_all([r1, r2])
+        await db_session.commit()
+
+        # 加载规则
+        rules = await load_starpoint_rules(db_session)
+        assert rules["early_finish_points"] == 10
+        assert rules["early_finish_ratio"] == 0.9
+
+        # 验证计算结果受规则值影响
+        task = Task(
+            title="test",
+            task_type=TaskType.NORMAL,
+            status=TaskStatus.COMPLETED,
+            T_actual=8,
+            T_reported=10,
+        )
+        result = await calculate_task_starpoints(task, 8, 10, rules)
+        # ratio = 8/10 = 0.8 <= 0.9(early_finish_ratio) => 提前完成，points = 10
+        assert result["change_amount"] == 10
+        assert "Early finish" in result["reason"]
+
+    async def test_k_coefficient_from_system_param(
+        self, client: AsyncClient, admin_token: str, db_session: AsyncSession
+    ):
+        """K 系数从 system_param 规则读取"""
+        from app.core.models import SystemRule, RuleCategory
+        from app.domains.starpoint.repository import calculate_k_coefficient
+
+        # 插入自定义的 K 系数分段
+        rule = SystemRule(
+            category=RuleCategory.SYSTEM_PARAM,
+            name="星点系数分段",
+            value='{"top_k": 2.0, "middle_k": 1.5, "bottom_k": 0.5, "top_ratio": 0.3, "bottom_ratio": 0.3}',
+            is_active=True,
+        )
+        db_session.add(rule)
+        # 还需要工程师数据才能计算
+        from app.core.models import User, UserRoleType
+        engineers = []
+        for i in range(10):
+            eng = User(
+                email=f"eng_k_{i}_{uuid.uuid4()}@test.com",
+                hashed_password="x",
+                full_name=f"Eng {i}",
+                role=UserRoleType.ENGINEER,
+                is_active=True,
+                current_starpoint=100 - i * 10,
+            )
+            db_session.add(eng)
+            engineers.append(eng)
+        await db_session.commit()
+
+        # 排名第 1（前 30%）= 2.0
+        k = await calculate_k_coefficient(session=db_session, engineer_id=engineers[0].id)
+        assert k == 2.0
+
+    async def test_salary_min_salary_from_system_param(
+        self, client: AsyncClient, admin_token: str, db_session: AsyncSession
+    ):
+        """工资最低下限从 system_param 规则读取"""
+        from app.core.models import SystemRule, RuleCategory, User, UserRoleType
+        from app.domains.salary.service import _load_salary_config
+
+        # 插入自定义最低工资
+        rule = SystemRule(
+            category=RuleCategory.SYSTEM_PARAM,
+            name="最低工资下限",
+            value='{"min_salary": 8000}',
+            is_active=True,
+        )
+        db_session.add(rule)
+        await db_session.commit()
+
+        config = await _load_salary_config(db_session)
+        assert config["min_salary"] == 8000
+
+    async def test_disabled_rule_falls_back_to_default(
+        self, client: AsyncClient, admin_token: str, db_session: AsyncSession
+    ):
+        """is_active=False 的规则不生效，应回退到默认值"""
+        from app.core.models import SystemRule, RuleCategory
+        from app.domains.starpoint.calculation import load_starpoint_rules
+
+        rule = SystemRule(
+            category=RuleCategory.STARPOINT_REWARD,
+            name="提前完成奖励",
+            value='{"early_finish_points": 100}',
+            is_active=False,  # 禁用
+        )
+        db_session.add(rule)
+        await db_session.commit()
+
+        rules = await load_starpoint_rules(db_session)
+        # 100 没有被应用，应仍为默认 5
+        assert rules["early_finish_points"] == 5

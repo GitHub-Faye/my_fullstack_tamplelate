@@ -4,6 +4,7 @@
 负责星点相关的数据库操作：CRUD、查询、统计等。
 """
 
+import json
 import uuid
 from datetime import datetime, timezone
 from typing import Optional, Tuple
@@ -11,8 +12,18 @@ from typing import Optional, Tuple
 from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import StarPointRecord, User, JudgmentType
+from app.core.models import StarPointRecord, User, JudgmentType, RuleCategory
 from app.core.db_utils import paginated_query
+from app.domains.system_rule import repository as rule_repo
+
+# ====================== 默认 K 系数配置 ======================
+_DEFAULT_K_CONFIG = {
+    "top_k": 1.2,
+    "middle_k": 1.0,
+    "bottom_k": 0.7,
+    "top_ratio": 0.2,
+    "bottom_ratio": 0.2,
+}
 
 
 # ============================== StarPointRecord CRUD ==============================
@@ -189,10 +200,12 @@ async def calculate_k_coefficient(
     """
     计算工程师的 K 系数
 
-    规则：
-    - 前 20%：K = 1.2
-    - 中间 60%：K = 1.0
-    - 后 20%：K = 0.7
+    从 system_param 分类的活跃规则读取分段阈值：
+    - top_k: 前 top_ratio 的 K 值
+    - middle_k: 中间段的 K 值
+    - bottom_k: 后 bottom_ratio 的 K 值
+    - top_ratio: 前百分之几（默认 0.2）
+    - bottom_ratio: 后百分之几（默认 0.2）
 
     Args:
         session: 数据库会话
@@ -201,6 +214,28 @@ async def calculate_k_coefficient(
     Returns:
         K 系数（默认 1.0）
     """
+    # 从数据库加载 K 系数配置
+    k_config = _DEFAULT_K_CONFIG.copy()
+    rules, _ = await rule_repo.get_rules(
+        session=session,
+        category=RuleCategory.SYSTEM_PARAM,
+        skip=0,
+        limit=100,
+    )
+    for rule in rules:
+        if rule.is_active:
+            try:
+                values = json.loads(rule.value)
+                k_config.update(values)
+            except (json.JSONDecodeError, TypeError):
+                continue
+
+    top_k = k_config.get("top_k", 1.2)
+    middle_k = k_config.get("middle_k", 1.0)
+    bottom_k = k_config.get("bottom_k", 0.7)
+    top_ratio = k_config.get("top_ratio", 0.2)
+    bottom_ratio = k_config.get("bottom_ratio", 0.2)
+
     # 获取所有工程师的排名
     stmt = (
         select(User.id, User.current_starpoint)
@@ -211,23 +246,22 @@ async def calculate_k_coefficient(
     all_engineers = list(result.all())
 
     if not all_engineers:
-        return 1.0
+        return middle_k
 
     total = len(all_engineers)
-    top_20_count = max(1, int(total * 0.2))
-    bottom_20_count = max(1, int(total * 0.2))
+    top_count = max(1, int(total * top_ratio))
+    bottom_count = max(1, int(total * bottom_ratio))
 
     for i, row in enumerate(all_engineers):
         if row.id == engineer_id:
-            # 排名从 0 开始
-            if i < top_20_count:
-                return 1.2
-            elif i >= total - bottom_20_count:
-                return 0.7
+            if i < top_count:
+                return top_k
+            elif i >= total - bottom_count:
+                return bottom_k
             else:
-                return 1.0
+                return middle_k
 
-    return 1.0
+    return middle_k
 
 
 async def get_engineer_rank(

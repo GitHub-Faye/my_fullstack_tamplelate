@@ -6,11 +6,13 @@
 - 紧急任务额外星点奖励
 """
 
+import json
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import Task, TaskType, JudgmentType, StarPointRecord
+from app.core.models import Task, TaskType, JudgmentType, StarPointRecord, RuleCategory
+from app.domains.system_rule import repository as rule_repo
 from app.domains.starpoint import repository as starpoint_repo
 
 
@@ -38,6 +40,36 @@ DEFAULT_STARPOINT_RULES = {
     # 紧急任务额外奖励
     "urgent_bonus": 15,
 }
+
+
+async def load_starpoint_rules(session: AsyncSession) -> dict:
+    """
+    从数据库加载活跃的星点计算规则，合并为平层 dict。
+
+    读取两个分类的规则：
+    - starpoint_reward：各区间分值（points、bonus）
+    - completion_judgment：各区间阈值（ratio）
+
+    数据库未配置时回退到 DEFAULT_STARPOINT_RULES。
+    """
+    result = DEFAULT_STARPOINT_RULES.copy()
+
+    for category in (RuleCategory.STARPOINT_REWARD, RuleCategory.COMPLETION_JUDGMENT):
+        rules, _ = await rule_repo.get_rules(
+            session=session,
+            category=category,
+            skip=0,
+            limit=100,
+        )
+        for rule in rules:
+            if rule.is_active:
+                try:
+                    values = json.loads(rule.value)
+                    result.update(values)
+                except (json.JSONDecodeError, TypeError):
+                    continue
+
+    return result
 
 
 async def calculate_task_starpoints(
@@ -163,10 +195,12 @@ async def trigger_starpoint_calculation(
     T_reported = task.T_reported or 0.0
 
     # 计算星点
+    db_rules = await load_starpoint_rules(session)
     result = await calculate_task_starpoints(
         task=task,
         T_actual=T_actual,
         T_reported=T_reported,
+        rules=db_rules,
     )
 
     # 创建星点记录
