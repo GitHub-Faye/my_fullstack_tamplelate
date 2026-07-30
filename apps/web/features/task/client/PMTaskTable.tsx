@@ -132,11 +132,10 @@ export function PMTaskTable() {
     setPage(1);
   }, []);
 
-  // 构建 API 查询参数 — PM 默认查看自己发布的任务，也可筛选其他 PM
+  // 构建 API 查询参数 — 不传 pm_id 拉取全部任务，客户端筛选
   const queryParams: Record<string, any> = {
     page,
     page_size: 20,
-    pm_id: pmFilter !== "all" ? pmFilter : user?.id,
     status: filters.status !== "all" ? filters.status : undefined,
     task_type: filters.taskType !== "all" ? filters.taskType : undefined,
     start_date: startDate || undefined,
@@ -211,6 +210,13 @@ export function PMTaskTable() {
     if (!taskList) return [];
     return [...new Set(taskList.map((t) => t.pm_id).filter(Boolean))] as string[];
   }, [taskList]);
+
+  // 客户端过滤 — 同 AdminTaskTable 方式
+  const filteredTaskList = useMemo(() => {
+    if (!taskList) return undefined;
+    if (pmFilter === "all") return taskList;
+    return taskList.filter((t) => t.pm_id === pmFilter);
+  }, [taskList, pmFilter]);
 
   if (isLoading) {
     return (
@@ -320,7 +326,7 @@ export function PMTaskTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {taskList?.map((task: TaskPublic) => (
+                {filteredTaskList?.map((task: TaskPublic) => (
                   <TableRow key={task.id}>
                     <TableCell className="font-medium max-w-[200px] truncate">
                       {task.name}
@@ -384,7 +390,7 @@ export function PMTaskTable() {
                     </TableCell>
                   </TableRow>
                 ))}
-                {(!taskList || taskList.length === 0) && (
+                {(!filteredTaskList || filteredTaskList.length === 0) && (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8">
                       暂无任务数据
