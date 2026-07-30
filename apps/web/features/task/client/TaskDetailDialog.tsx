@@ -19,7 +19,8 @@ import {
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 import { formatDateTime, formatDate } from "@/lib/utils";
-import { readDailyReportsV1DailyReportsGet, listAttachmentsV1TasksTaskIdAttachmentsGet } from "@repo/sdk";
+import { readDailyReportsV1DailyReportsGet, listAttachmentsV1TasksTaskIdAttachmentsGet, client } from "@repo/sdk";
+import { getAuthToken } from "@/lib/api-sdk";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -132,14 +133,28 @@ export function TaskDetailDialog({
     }
   }, [open, task]);
 
-  // 下载附件
-  const handleDownload = useCallback((attachmentId: string, fileName: string) => {
-    const baseUrl = "/v1";
-    const url = `${baseUrl}/tasks/attachments/${attachmentId}/download`;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    a.click();
+  // 下载附件（使用 SDK 的 auth token）
+  const handleDownload = useCallback(async (attachmentId: string, fileName: string) => {
+    const token = getAuthToken();
+    if (!token) return;
+    const baseUrl = client.getConfig().baseUrl;
+    const url = `${baseUrl}/v1/tasks/attachments/${attachmentId}/download`;
+
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error(`下载失败 (${response.status})`);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(blobUrl);
+    } catch (err: any) {
+      // 静默处理
+    }
   }, []);
 
   // 格式化文件大小

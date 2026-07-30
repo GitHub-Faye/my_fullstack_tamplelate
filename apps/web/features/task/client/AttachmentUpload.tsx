@@ -7,9 +7,11 @@ import {
   uploadAttachmentV1TasksTaskIdAttachmentsPost,
   listAttachmentsV1TasksTaskIdAttachmentsGet,
   deleteAttachmentV1TasksAttachmentsAttachmentIdDelete,
+  client,
 } from "@repo/sdk";
 import { toast } from "sonner";
 import { formatDateTime } from "@/lib/utils";
+import { getAuthToken } from "@/lib/api-sdk";
 
 interface Attachment {
   id: string;
@@ -113,18 +115,34 @@ export function AttachmentUpload({
     [loadAttachments]
   );
 
-  // 下载附件
+  // 下载附件（使用 SDK 的 auth token）
   const handleDownload = useCallback(
-    (attachmentId: string, fileName: string) => {
-      const baseUrl =
-        (typeof window !== "undefined"
-          ? window.location.origin
-          : "http://localhost:8000") + "/v1";
-      const url = `${baseUrl}/tasks/attachments/${attachmentId}/download`;
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      a.click();
+    async (attachmentId: string, fileName: string) => {
+      const token = getAuthToken();
+      if (!token) {
+        toast.error("未登录，无法下载");
+        return;
+      }
+      const baseUrl = client.getConfig().baseUrl;
+      const url = `${baseUrl}/v1/tasks/attachments/${attachmentId}/download`;
+
+      try {
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+          throw new Error(`下载失败 (${response.status})`);
+        }
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(blobUrl);
+      } catch (err: any) {
+        toast.error(err.message || "下载失败");
+      }
     },
     []
   );

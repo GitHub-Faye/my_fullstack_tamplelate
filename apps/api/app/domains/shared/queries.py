@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional, Tuple
 
-from sqlalchemy import func, select, and_
+from sqlalchemy import func, select, and_, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import Task, TaskStatus, User, UserRoleType
@@ -83,27 +83,30 @@ async def get_engineer_loads(
             User.id,
             User.full_name,
             User.T_monthly_plan,
-            func.count(Task.id).filter(Task.status == TaskStatus.IN_PROGRESS).label("ongoing_tasks"),
-            func.coalesce(func.sum(Task.T_effective).filter(
-                and_(
+            func.count(case((Task.status == TaskStatus.IN_PROGRESS, 1))).label("ongoing_tasks"),
+            func.coalesce(func.sum(case(
+                (and_(
                     Task.status == TaskStatus.COMPLETED,
                     Task.updated_at >= month_start,
-                )
-            ), 0).label("T_effective_monthly"),
-            func.coalesce(func.sum(Task.T_effective).filter(
-                and_(
-                    Task.status == TaskStatus.COMPLETED,
-                    Task.updated_at >= month_start,
-                    Task.T_reported > 0,
-                )
-            ), 0).label("T_effective_for_accuracy"),
-            func.coalesce(func.sum(Task.T_reported).filter(
-                and_(
+                ), Task.T_effective),
+                else_=0,
+            )), 0).label("T_effective_monthly"),
+            func.coalesce(func.sum(case(
+                (and_(
                     Task.status == TaskStatus.COMPLETED,
                     Task.updated_at >= month_start,
                     Task.T_reported > 0,
-                )
-            ), 0).label("T_reported_for_accuracy"),
+                ), Task.T_effective),
+                else_=0,
+            )), 0).label("T_effective_for_accuracy"),
+            func.coalesce(func.sum(case(
+                (and_(
+                    Task.status == TaskStatus.COMPLETED,
+                    Task.updated_at >= month_start,
+                    Task.T_reported > 0,
+                ), Task.T_reported),
+                else_=0,
+            )), 0).label("T_reported_for_accuracy"),
         )
         .select_from(User)
         .outerjoin(Task, Task.engineer_id == User.id)
