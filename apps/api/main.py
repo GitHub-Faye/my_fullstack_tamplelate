@@ -11,21 +11,11 @@ from app.core.config import get_settings
 from app.core.database import init_db
 from app.core.logging import configure_logging, get_logger
 
-# import sentry_sdk
-
 # 首先配置日志系统（在应用启动前）
 configure_logging()
 
 settings = get_settings()
 logger = get_logger(__name__)
-
-# ================== Sentry 集成（可选） ==================
-# sentry_sdk.init(
-#     dsn="https://b3de48eedad92f89c06ef7f45c6bd58f@o4511178754686976.ingest.us.sentry.io/4511178758029312",
-#     # Add data like request headers and IP for users,
-#     # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-#     send_default_pii=True,
-# )
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -64,17 +54,11 @@ app.add_middleware(
 app.include_router(api_router)
 
 # 挂载上传文件目录用于直接预览
-from app.core.config import get_settings
 settings = get_settings()
 if Path(settings.UPLOAD_DIR).exists():
     from fastapi.staticfiles import StaticFiles
     app.mount(f"/{settings.UPLOAD_DIR}", StaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
 
-# @app.get("/sentry-debug")
-# async def trigger_error():
-#     division_by_zero = 1 / 0
-
-    
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)

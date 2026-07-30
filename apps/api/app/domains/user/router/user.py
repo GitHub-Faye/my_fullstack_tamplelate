@@ -40,8 +40,6 @@ from app.domains.user.schemas import (
     UserUpdateMe,
 )
 
-from app.tasks.user_tasks import process_user_signup_task
-
 settings = get_settings()
 # ======================== APIRouter 创建 ========================
 router = APIRouter()
@@ -408,13 +406,6 @@ async def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     # 将 UserRegister 转换为 UserCreate（Pydantic v2 用法）
     user_create = UserCreate.model_validate(user_in)
     user = await repository.create_user(session=session, user_create=user_create)
-    
-    # 异步处理用户注册后续任务
-    process_user_signup_task.delay(
-        user_id=str(user.id),
-        email=user.email,
-        full_name=user.full_name
-    )
     
     return user
 

@@ -149,14 +149,6 @@ export function LoginForm() {
                   </FormItem>
                 )}
               />
-              <Button
-                variant="link"
-                className="px-0 font-normal"
-                type="button"
-                onClick={() => router.push("/recover-password")}
-              >
-                忘记密码？
-              </Button>
             </div>
 
             <Button
@@ -176,16 +168,6 @@ export function LoginForm() {
           </form>
         </Form>
 
-        <div className="mt-4 text-center text-sm">
-          还没有账户？{" "}
-          <Button
-            variant="link"
-            className="px-0 font-normal"
-            onClick={() => router.push("/signup")}
-          >
-            立即注册
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );

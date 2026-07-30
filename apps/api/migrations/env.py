@@ -39,7 +39,7 @@ target_metadata = SQLModel.metadata
 from app.core.config import get_settings  # noqa: E402
 
 settings = get_settings()
-config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 
 def run_migrations_offline() -> None:

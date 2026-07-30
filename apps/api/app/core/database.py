@@ -18,11 +18,12 @@ from app.core.security import get_password_hash
 
 settings = get_settings()
 
-# 创建异步引擎
+# 创建异步引擎（SQLite + aiosqlite）
 engine = create_async_engine(
-    settings.SQLALCHEMY_DATABASE_URI,
-    echo=settings.DEBUG,  # 调试模式下打印 SQL
-    poolclass=NullPool,  # 开发环境使用 NullPool，生产环境可改为 QueuePool
+    settings.DATABASE_URL,
+    echo=settings.DEBUG,
+    connect_args={"check_same_thread": False},  # SQLite 多线程支持
+    poolclass=NullPool,
     future=True,
 )
 
@@ -48,12 +49,6 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 async def sync_roles_scopes(session: AsyncSession) -> dict[str, list[str]]:
     """
     同步所有已存在角色的 scopes 到 DEFAULT_ROLE_SCOPES 的最新定义。
-
-    遍历所有已存在的角色，将 DEFAULT_ROLE_SCOPES 中新增的 scope 补充进去，
-    已有的 scope 保持不变。
-
-    Returns:
-        dict[str, list[str]]: 每个角色新增的 scope 列表
     """
     from app.core.scopes import DEFAULT_ROLE_SCOPES
     from app.core.models import Role, RoleScope
@@ -67,13 +62,11 @@ async def sync_roles_scopes(session: AsyncSession) -> dict[str, list[str]]:
         if role.name not in DEFAULT_ROLE_SCOPES:
             continue
 
-        # 获取该角色已有的 scope
         scope_result = await session.execute(
             select(RoleScope.scope).where(RoleScope.role_id == role.id)
         )
         existing_scopes = {row[0] for row in scope_result.all()}
 
-        # 获取 DEFAULT_ROLE_SCOPES 中定义的 scope 值
         expected_scopes = {s.value for s in DEFAULT_ROLE_SCOPES[role.name]}
         missing_scopes = expected_scopes - existing_scopes
 
@@ -90,66 +83,45 @@ async def sync_roles_scopes(session: AsyncSession) -> dict[str, list[str]]:
 
 
 async def init_roles_and_scopes(session: AsyncSession) -> None:
-    """
-    初始化默认角色和权限范围。
-    
-    创建以下默认角色：
-    - viewer: 只读权限 (item:read)
-    - editor: 完全权限 (item:read, item:create, item:update, item:delete)
-    - admin: 管理权限 (所有 item 权限)
-    """
+    """初始化默认角色和权限范围。"""
     for role_name, scopes in DEFAULT_ROLE_SCOPES.items():
-        # 检查角色是否已存在
         result = await session.execute(
             select(Role).where(Role.name == role_name)
         )
         existing_role = result.scalar_one_or_none()
-        
+
         if existing_role:
-            # 角色已存在，跳过
             continue
-        
-        # 创建新角色
+
         role = Role(name=role_name)
         session.add(role)
-        await session.flush()  # 获取 role.id
-        
-        # 创建角色的 scopes
+        await session.flush()
+
         for scope_value in scopes:
             role_scope = RoleScope(role_id=role.id, scope=scope_value)
             session.add(role_scope)
-        
+
         print(f"Created role: {role_name} with scopes: {[s.value for s in scopes]}")
-    
+
     await session.commit()
 
 
 async def init_default_admin(session: AsyncSession) -> None:
-    """
-    如果系统中没有任何用户，创建一个默认 admin 用户。
-    
-    默认管理员账号：
-    - 邮箱: admin@admin.com
-    - 密码: admin
-    - 角色: admin（拥有所有 item 权限）+ superuser
-    """
-    # 检查是否已有用户
+    """如果系统中没有任何用户，创建一个默认 admin 用户。"""
     result = await session.execute(select(func.count()).select_from(User))
     user_count = result.scalar_one()
-    
+
     if user_count > 0:
         print("Users already exist, skipping default admin creation.")
         return
-    
-    # 查找 admin 角色
+
     result = await session.execute(select(Role).where(Role.name == "admin"))
     admin_role = result.scalar_one_or_none()
-    
+
     if not admin_role:
         print("Admin role not found, skipping default admin creation.")
         return
-    
-    # 创建默认 admin 用户
+
     admin_user = User(
         email="1@qq.com",
         hashed_password=get_password_hash("11111111"),
@@ -159,21 +131,19 @@ async def init_default_admin(session: AsyncSession) -> None:
     )
     session.add(admin_user)
     await session.flush()
-    
-    # 分配 admin 角色
+
     user_role = UserRole(user_id=admin_user.id, role_id=admin_role.id)
     session.add(user_role)
-    
+
     await session.commit()
-    print("Created default admin user (email: admin@admin.com, password: admin)")
+    print("Created default admin user (email: 1@qq.com, password: 11111111)")
 
 
 async def init_db():
     """初始化数据库（创建所有表，并添加默认角色和权限）"""
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
-    
-    # 初始化默认角色和 scopes
+
     async with AsyncSessionLocal() as session:
         await init_roles_and_scopes(session)
         await init_default_admin(session)
