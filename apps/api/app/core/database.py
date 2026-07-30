@@ -18,11 +18,10 @@ from app.core.security import get_password_hash
 
 settings = get_settings()
 
-# 创建异步引擎（SQLite + aiosqlite）
+# 创建异步引擎
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,
-    connect_args={"check_same_thread": False},  # SQLite 多线程支持
     poolclass=NullPool,
     future=True,
 )

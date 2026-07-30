@@ -29,6 +29,7 @@ dependencies = [
     "pydantic-settings>=2.14.2",
     "typer>=0.20.0",
     "aiosqlite>=0.22.1",
+    "asyncmy>=0.2.11",
 ]
 
 [dependency-groups]

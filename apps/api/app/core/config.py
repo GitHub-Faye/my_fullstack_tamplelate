@@ -62,8 +62,8 @@ class Settings(BaseSettings):
     SENTRY_DSN: HttpUrl | None = None
     DEBUG: bool = True
 
-    # ======================== SQLite 数据库配置 ========================
-    DATABASE_URL: str = "sqlite+aiosqlite:///./data.db"
+    # ======================== MySQL 数据库配置 ========================
+    DATABASE_URL: str = "mysql+asyncmy://hjc:hjc.123654@43.137.99.117:63697/xingdian"
 
     # ======================== SMTP 邮件配置 ========================
     SMTP_TLS: bool = True
