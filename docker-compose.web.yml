@@ -1,0 +1,12 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        # 后端地址，改成你服务器上后端实际运行的地址和端口
+        NEXT_PUBLIC_API_URL: http://82.157.96.215:8111
+    container_name: app-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
