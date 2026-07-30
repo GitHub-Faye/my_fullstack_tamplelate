@@ -205,6 +205,13 @@ export function PMTaskTable() {
     refetch();
   }, [refetch]);
 
+  // 提取 PM ID 列表用于筛选（必须在 early return 之前）
+  const taskList = tasks?.data as TaskPublic[] | undefined;
+  const pmIds = useMemo(() => {
+    if (!taskList) return [];
+    return [...new Set(taskList.map((t) => t.pm_id).filter(Boolean))] as string[];
+  }, [taskList]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -212,14 +219,6 @@ export function PMTaskTable() {
       </div>
     );
   }
-
-  const taskList = tasks?.data as TaskPublic[] | undefined;
-
-  // 提取 PM ID 列表用于筛选
-  const pmIds = useMemo(() => {
-    if (!taskList) return [];
-    return [...new Set(taskList.map((t) => t.pm_id).filter(Boolean))] as string[];
-  }, [taskList]);
 
   return (
     <>
