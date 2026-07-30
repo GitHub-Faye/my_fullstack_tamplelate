@@ -59,6 +59,7 @@ import { TaskDetailDialog, getPmActions } from "./TaskDetailDialog";
 import { BidLogDialog } from "./BidLogDialog";
 import { AuditLogDialog } from "./AuditLogDialog";
 import { WorkLogDialog } from "./WorkLogDialog";
+import { StarPointReviewDialog } from "./StarPointReviewDialog";
 import { formatDateTime, formatDate } from "@/lib/utils";
 import { TaskCreateForm } from "./TaskCreateForm";
 import { TaskEditForm } from "./TaskEditForm";
@@ -106,6 +107,7 @@ export function PMTaskTable() {
   const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null });
   const [createOpen, setCreateOpen] = useState(false);
   const [editTask, setEditTask] = useState<TaskPublic | null>(null);
+  const [reviewTask, setReviewTask] = useState<TaskPublic | null>(null);
 
   // 搜索和重置
   const handleSearch = useCallback(() => {
@@ -177,6 +179,9 @@ export function PMTaskTable() {
         break;
       case "changeDoc":
         router.push(`/pm/tasks/${task.id}/edit`);
+        break;
+      case "review":
+        setReviewTask(task);
         break;
     }
   }, [router]);
@@ -454,6 +459,16 @@ export function PMTaskTable() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* 星点评分弹窗 */}
+      {reviewTask && (
+        <StarPointReviewDialog
+          task={reviewTask}
+          open={!!reviewTask}
+          onOpenChange={(open) => { if (!open) setReviewTask(null); }}
+          onSuccess={refetch}
+        />
+      )}
     </>
   );
 }

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip } from "lucide-react";
+import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip, Star } from "lucide-react";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -74,6 +74,7 @@ export function getPmActions(task: TaskPublic, currentUserId: string | undefined
       actions.push({ label: "暂停记录", icon: <History className="h-3.5 w-3.5" />, action: "pauseLog", variant: "outline" });
       break;
     case TaskStatusConst.COMPLETED:
+      actions.push({ label: "评价", icon: <Star className="h-3.5 w-3.5" />, action: "review", variant: "default" });
       actions.push({ label: "归档日志", icon: <Archive className="h-3.5 w-3.5" />, action: "archiveLog", variant: "outline" });
       break;
   }
