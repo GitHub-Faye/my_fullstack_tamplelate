@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -38,9 +38,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Search, RotateCcw, Paperclip, Calendar } from "lucide-react";
+import { Loader2, Plus, Search, RotateCcw, Paperclip, Calendar, User } from "lucide-react";
 import { useTasks } from "../api";
-import { useCurrentUser } from "@/features/user";
+import { useCurrentUser, useUsers } from "@/features/user";
 import {
   withdrawTaskV1TasksTaskIdWithdrawPost,
   deleteTaskV1TasksTaskIdDelete,
@@ -96,10 +96,23 @@ export function PMTaskTable() {
   // 当前用户信息
   const user = useCurrentUser();
 
+  // 获取用户列表用于 PM 姓名映射
+  const { data: usersData } = useUsers({ page: 1, page_size: 100 });
+  const userMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (usersData?.data) {
+      for (const u of usersData.data as Array<{ id: string; full_name?: string | null }>) {
+        map[u.id] = u.full_name ?? u.id.slice(0, 8);
+      }
+    }
+    return map;
+  }, [usersData]);
+
   // 筛选条件状态
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [pmFilter, setPmFilter] = useState("all");
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
   const [bidLogTask, setBidLogTask] = useState<TaskPublic | null>(null);
   const [logTask, setLogTask] = useState<TaskPublic | null>(null);
@@ -119,11 +132,11 @@ export function PMTaskTable() {
     setPage(1);
   }, []);
 
-  // 构建 API 查询参数 — PM 只能查看自己发布的任务
+  // 构建 API 查询参数 — PM 默认查看自己发布的任务，也可筛选其他 PM
   const queryParams: Record<string, any> = {
     page,
     page_size: 20,
-    pm_id: user?.id,
+    pm_id: pmFilter !== "all" ? pmFilter : user?.id,
     status: filters.status !== "all" ? filters.status : undefined,
     task_type: filters.taskType !== "all" ? filters.taskType : undefined,
     start_date: startDate || undefined,
@@ -202,6 +215,12 @@ export function PMTaskTable() {
 
   const taskList = tasks?.data as TaskPublic[] | undefined;
 
+  // 提取 PM ID 列表用于筛选
+  const pmIds = useMemo(() => {
+    if (!taskList) return [];
+    return [...new Set(taskList.map((t) => t.pm_id).filter(Boolean))] as string[];
+  }, [taskList]);
+
   return (
     <>
       <Card>
@@ -269,6 +288,20 @@ export function PMTaskTable() {
                 <SelectItem value="in_progress">进行中</SelectItem>
                 <SelectItem value="paused">暂停中</SelectItem>
                 <SelectItem value="completed">已完成</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* PM 筛选 */}
+            <Select value={pmFilter} onValueChange={(v) => { setPmFilter(v); setPage(1); }}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="全部PM" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部任务</SelectItem>
+                <SelectItem value={user?.id ?? ""}>我的任务</SelectItem>
+                {pmIds.filter((id) => id !== user?.id).map((id) => (
+                  <SelectItem key={id} value={id}>{userMap[id] || id.slice(0, 8)}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
