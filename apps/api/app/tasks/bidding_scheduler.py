@@ -8,9 +8,13 @@
 - 无人报价 → 自动重新发布（生成新的 bidding_deadline，重新倒计时竞价）
 
 Celery 已移除，改用轻量的 asyncio 后台任务。
+
+时区约定：bidding_deadline 在 MySQL 中存储为本地（服务器 +08:00）时间，
+读回后为 naive datetime。调度器统一使用 naive local 时间做比较，避免
+aware/naive 不一致导致的误判。
 """
 import asyncio
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 
 from sqlalchemy import select, and_
 
@@ -26,9 +30,14 @@ logger = get_logger(__name__)
 DEFAULT_REPUBLISH_DAYS = 1
 
 
+def _now_local() -> datetime:
+    """返回服务器本地时间（naive），用于与 DB 中 naive deadline 对比。"""
+    return datetime.now()
+
+
 async def settle_overdue_bidding_tasks() -> None:
     """扫描所有已过截止时间但仍处于 BIDDING 状态的任务并结算"""
-    now = datetime.now(timezone.utc)
+    now = _now_local()
 
     async with AsyncSessionLocal() as session:
         stmt = select(Task).where(and_(Task.status == TaskStatus.BIDDING))
@@ -39,9 +48,7 @@ async def settle_overdue_bidding_tasks() -> None:
             deadline = task.bidding_deadline
             if not deadline:
                 continue
-            if deadline.tzinfo is None:
-                deadline = deadline.replace(tzinfo=timezone.utc)
-                task.bidding_deadline = deadline
+            # deadline 在 DB 中为 naive local 时间，直接与 now 比较
             if now < deadline:
                 continue  # 截止时间未到，跳过
 
@@ -66,7 +73,7 @@ async def settle_overdue_bidding_tasks() -> None:
 
 async def _republish(session, task: Task) -> None:
     """无人竞价：重新发布，重置竞价截止时间"""
-    task.bidding_deadline = datetime.now(timezone.utc) + timedelta(days=DEFAULT_REPUBLISH_DAYS)
+    task.bidding_deadline = datetime.now() + timedelta(days=DEFAULT_REPUBLISH_DAYS)
     task.status = TaskStatus.BIDDING
     session.add(task)
     await session.commit()

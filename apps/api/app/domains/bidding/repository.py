@@ -119,10 +119,10 @@ async def settle_bidding_task_async(session: AsyncSession, task_id: str, force: 
         return {"task_id": task_id, "winner_id": None, "avg_amount": 0.0, "bid_count": 0, "status": f"invalid_status:{task.status.value}"}
 
     if not force and task.bidding_deadline:
-        deadline = task.bidding_deadline
-        if deadline.tzinfo is None:
-            deadline = deadline.replace(tzinfo=timezone.utc)
-        if datetime.now(timezone.utc) < deadline:
+        # bidding_deadline 存储为 naive local 时间（服务器 +08:00）
+        # 直接用 naive local 当前时间比较，避免 aware/naive 不一致
+        from datetime import datetime as _dt
+        if _dt.now() < task.bidding_deadline:
             return {"task_id": task_id, "winner_id": None, "avg_amount": 0.0, "bid_count": 0, "status": "deadline_not_reached"}
 
     # 查询所有报价

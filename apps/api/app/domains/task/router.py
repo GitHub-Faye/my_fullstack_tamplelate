@@ -335,7 +335,7 @@ async def publish_task(
             detail=f"Task status '{task.status.value}' cannot be published."
         )
     task.status = TaskStatus.BIDDING
-    task.bidding_deadline = datetime.now(timezone.utc) + timedelta(days=bidding_days)
+    task.bidding_deadline = datetime.now() + timedelta(days=bidding_days)
     session.add(task)
     await session.commit()
     await session.refresh(task)
@@ -560,7 +560,7 @@ async def decline_task(
     task.T_actual = None
     task.progress = None
     task.T_reported_complete_time = None
-    task.bidding_deadline = datetime.now(timezone.utc) + timedelta(days=1)
+    task.bidding_deadline = datetime.now() + timedelta(days=1)
     session.add(task)
     await session.commit()
     await session.refresh(task)

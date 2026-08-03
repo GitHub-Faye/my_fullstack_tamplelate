@@ -7,12 +7,12 @@
 - 未过截止时间 → 不做任何处理
 """
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
-from app.core.models import Task, TaskStatus, User, UserRoleType, Bid
+from app.core.models import Task, TaskStatus, TaskType, User, UserRoleType, Bid
 import app.tasks.bidding_scheduler as scheduler_mod
 
 
@@ -29,7 +29,7 @@ async def create_task(session, pm, status=TaskStatus.BIDDING, deadline=None) -> 
         name=f"Task {uuid.uuid4().hex[:8]}",
         status=status,
         pm_id=pm.id,
-        task_type="normal",
+        task_type=TaskType.NORMAL,
         bidding_deadline=deadline,
     )
     session.add(task)
@@ -59,7 +59,7 @@ class TestBiddingScheduler:
         e1 = await create_user(db_session, UserRoleType.ENGINEER, f"e1_{uuid.uuid4().hex[:6]}@t.com")
         e2 = await create_user(db_session, UserRoleType.ENGINEER, f"e2_{uuid.uuid4().hex[:6]}@t.com")
 
-        deadline = datetime.now(timezone.utc) - timedelta(hours=1)
+        deadline = datetime.now() - timedelta(hours=1)  # naive local time
         task = await create_task(db_session, pm, deadline=deadline)
         db_session.add(Bid(task_id=task.id, engineer_id=e1.id, T_reported=8.0, amount=800.0))
         db_session.add(Bid(task_id=task.id, engineer_id=e2.id, T_reported=12.0, amount=1200.0))
@@ -68,11 +68,6 @@ class TestBiddingScheduler:
         await scheduler_mod.settle_overdue_bidding_tasks()
 
         # 调度器内部使用自己的 session 并 commit，所以需要重新查询
-        # 强制让 db_session 的过期缓存失效
-        await db_session.close()
-        async with db_session.bind.connect() as conn:
-            pass  # 让 db_session 下次 get 时重新查询
-        # 用新会话查结果
         new_session_factory = async_sessionmaker(
             db_session.bind,
             class_=AsyncSession,
@@ -86,7 +81,7 @@ class TestBiddingScheduler:
     async def test_overdue_no_bids_republishes(self, db_session):
         """过截止 + 无人报价 → 自动重新发布，状态保持 BIDDING 且 deadline 被重置为未来"""
         pm = await create_user(db_session, UserRoleType.PM, f"pm_{uuid.uuid4().hex[:6]}@t.com")
-        past_deadline = datetime.now(timezone.utc) - timedelta(hours=1)
+        past_deadline = datetime.now() - timedelta(hours=1)  # naive local time
         task = await create_task(db_session, pm, deadline=past_deadline)
 
         await scheduler_mod.settle_overdue_bidding_tasks()
@@ -103,17 +98,14 @@ class TestBiddingScheduler:
             # 调度器的 _republish 再将其重置为 BIDDING + 新 deadline
             assert updated.status == TaskStatus.BIDDING, f"Expected BIDDING, got {updated.status}"
             assert updated.bidding_deadline is not None
-            # deadline 存储为 naive UTC，转成 aware 后应与当前 UTC 比较
-            deadline = updated.bidding_deadline
-            if deadline.tzinfo is None:
-                deadline = deadline.replace(tzinfo=timezone.utc)
-            assert deadline > datetime.now(timezone.utc)
+            # deadline 现在是 naive local 时间，直接比较
+            assert updated.bidding_deadline > datetime.now()
 
     @pytest.mark.asyncio
     async def test_not_yet_deadline_left_untouched(self, db_session):
         """未过截止时间 → 不处理"""
         pm = await create_user(db_session, UserRoleType.PM, f"pm_{uuid.uuid4().hex[:6]}@t.com")
-        future_deadline = datetime.now(timezone.utc) + timedelta(hours=1)
+        future_deadline = datetime.now() + timedelta(hours=1)  # naive local time
         task = await create_task(db_session, pm, deadline=future_deadline)
 
         await scheduler_mod.settle_overdue_bidding_tasks()
@@ -127,9 +119,6 @@ class TestBiddingScheduler:
             updated = await new_session.get(Task, task.id)
             assert updated is not None
             assert updated.status == TaskStatus.BIDDING
-            deadline = updated.bidding_deadline
-            assert deadline is not None
-            # deadline 可能是 naive UTC，转成 aware 后与当前 UTC 比较
-            if deadline.tzinfo is None:
-                deadline = deadline.replace(tzinfo=timezone.utc)
-            assert deadline > datetime.now(timezone.utc)
+            assert updated.bidding_deadline is not None
+            # naive local 时间直接比较
+            assert updated.bidding_deadline > datetime.now()

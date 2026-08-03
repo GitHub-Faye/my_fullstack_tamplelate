@@ -8,7 +8,7 @@
 """
 
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 
 import pytest
 from sqlmodel import select
@@ -97,7 +97,7 @@ class TestBiddingSettlement:
         engineer3 = await create_test_user(db_session, UserRoleType.ENGINEER, "eng3@test.com")
 
         # 2. 创建竞价任务（已过截止时间）
-        deadline = datetime.now(timezone.utc) - timedelta(hours=1)
+        deadline = datetime.now() - timedelta(hours=1)
         task = await create_test_task(
             db_session,
             pm,
@@ -140,7 +140,7 @@ class TestBiddingSettlement:
         pm = await create_test_user(db_session, UserRoleType.PM, "pm2@test.com")
 
         # 2. 创建竞价任务（已过截止时间）
-        deadline = datetime.now(timezone.utc) - timedelta(hours=1)
+        deadline = datetime.now() - timedelta(hours=1)
         task = await create_test_task(
             db_session,
             pm,
@@ -172,7 +172,7 @@ class TestBiddingSettlement:
         engineer = await create_test_user(db_session, UserRoleType.ENGINEER, "eng4@test.com")
 
         # 2. 创建竞价任务（已过截止时间）
-        deadline = datetime.now(timezone.utc) - timedelta(hours=1)
+        deadline = datetime.now() - timedelta(hours=1)
         task = await create_test_task(
             db_session,
             pm,
@@ -229,7 +229,7 @@ class TestBiddingSettlement:
         pm = await create_test_user(db_session, UserRoleType.PM, "pm5@test.com")
 
         # 2. 创建竞价任务（截止时间未到）
-        deadline = datetime.now(timezone.utc) + timedelta(hours=1)
+        deadline = datetime.now() + timedelta(hours=1)
         task = await create_test_task(
             db_session,
             pm,
@@ -257,7 +257,7 @@ class TestBiddingSettlement:
         ]
 
         # 2. 创建竞价任务
-        deadline = datetime.now(timezone.utc) - timedelta(hours=1)
+        deadline = datetime.now() - timedelta(hours=1)
         task = await create_test_task(
             db_session,
             pm,

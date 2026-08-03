@@ -3,7 +3,7 @@
 
 提供竞价报价相关的检查函数。
 """
-from datetime import datetime, timezone
+from datetime import datetime
 
 from app.core.models import Task, TaskStatus, User, UserRoleType
 from app.core.errors import BusinessException, ErrorCode
@@ -21,10 +21,10 @@ def check_task_bidding(*, task: Task) -> None:
 def check_bidding_deadline(*, task: Task) -> None:
     """检查是否在竞价截止时间前"""
     if task.bidding_deadline:
-        deadline = task.bidding_deadline
-        if deadline.tzinfo is None:
-            deadline = deadline.replace(tzinfo=timezone.utc)
-        if datetime.now(timezone.utc) > deadline:
+        # bidding_deadline 存储为 naive local 时间（服务器 +08:00）
+        # 直接用 naive local 当前时间比较
+        from datetime import datetime as _dt
+        if _dt.now() > task.bidding_deadline:
             raise BusinessException(
                 code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
                 detail=f"Bidding deadline has passed.",
