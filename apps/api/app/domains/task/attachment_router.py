@@ -25,7 +25,7 @@ ALLOWED_EXTENSIONS = {
     ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
     ".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg",
     ".zip", ".rar", ".7z",
-    ".txt", ".md", ".csv",
+    ".txt", ".md", ".csv", ".html",
 }
 
 
