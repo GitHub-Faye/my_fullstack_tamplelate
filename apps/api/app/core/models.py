@@ -11,8 +11,8 @@ from sqlmodel import Field, Relationship, SQLModel
 
 
 def get_datetime_utc() -> datetime:
-    """返回 UTC 时间，用于默认 created_at 字段。"""
-    return datetime.now(timezone.utc)
+    """返回 UTC 时间（naive，不含时区），用于默认 created_at 字段。"""
+    return datetime.utcnow()
 
 
 # ==================================== 任务状态枚举 ====================================

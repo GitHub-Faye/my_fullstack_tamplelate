@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -10,6 +11,7 @@ from app.core.middleware import ProcessTimeMiddleware
 from app.core.config import get_settings
 from app.core.database import init_db
 from app.core.logging import configure_logging, get_logger
+from app.tasks.bidding_scheduler import bidding_scheduler_loop
 
 # 首先配置日志系统（在应用启动前）
 configure_logging()
@@ -30,9 +32,17 @@ async def lifespan(app: FastAPI):
     await init_db()  # 创建表（开发环境）或初始化连接池
     logger.info("database_initialized")
 
+    # 启动竞价后台自动结算调度协程
+    scheduler_task = asyncio.create_task(bidding_scheduler_loop())
+
     yield  # ← 这里之后应用才开始接收请求
 
     # 关闭时执行（Shutdown）
+    scheduler_task.cancel()
+    try:
+        await scheduler_task
+    except asyncio.CancelledError:
+        pass
     logger.info("application_shutting_down")
 
 
