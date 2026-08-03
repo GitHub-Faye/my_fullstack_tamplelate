@@ -54,6 +54,8 @@ import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
+  TASK_STATUS_COLORS,
+  TASK_TYPE_COLORS,
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 import { Pagination } from "@/components/ui/pagination";
@@ -66,6 +68,8 @@ import { AuditLogDialog } from "./AuditLogDialog";
 import { AdminTaskAssignDialog } from "./AdminTaskAssignDialog";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
+const STATUS_COLORS: Record<TaskStatus, string> = TASK_STATUS_COLORS;
+const TYPE_COLORS: Record<TaskType, string> = TASK_TYPE_COLORS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
 
 /** 审核管理关注的状态列表 */
@@ -365,14 +369,16 @@ export function AdminTaskTable() {
                     <TableRow key={task.id}>
                       <TableCell className="font-medium max-w-[200px] truncate">{task.name}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant={TYPE_COLORS[task.task_type ?? "normal"] as never} className="text-xs">
                           {task.task_type ? TYPE_LABELS[task.task_type] : "正常"}
                         </Badge>
                       </TableCell>
                       <TableCell>{(task as any).pm_name ?? (task.pm_id?.slice(0, 8) || "-")}</TableCell>
                       <TableCell>{(task as any).engineer_name ?? (task.engineer_id?.slice(0, 8) || "-")}</TableCell>
                       <TableCell>
-                        <Badge>{STATUS_LABELS[task.status]}</Badge>
+                        <Badge variant={STATUS_COLORS[task.status] as never}>
+                          {STATUS_LABELS[task.status]}
+                        </Badge>
                       </TableCell>
                       <TableCell>{task.T_reported != null ? `${task.T_reported}h` : "-"}</TableCell>
                       <TableCell>{task.T_actual != null ? `${task.T_actual}h` : "-"}</TableCell>

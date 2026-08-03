@@ -51,6 +51,8 @@ import {
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
+  TASK_STATUS_COLORS,
+  TASK_TYPE_COLORS,
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 import { toast } from "sonner";
@@ -66,6 +68,8 @@ import { TaskEditForm } from "./TaskEditForm";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
+const STATUS_COLORS_MAP: Record<TaskStatus, string> = TASK_STATUS_COLORS;
+const TYPE_COLORS_MAP: Record<TaskType, string> = TASK_TYPE_COLORS;
 
 /** PM 只能看到自己发布的任务，不需要发布人筛选 */
 type TaskTypeFilter = "all" | "normal" | "urgent" | "convenient";
@@ -334,13 +338,7 @@ export function PMTaskTable() {
                     <TableCell>
                       {task.task_type ? (
                         <Badge
-                          variant={
-                            task.task_type === "urgent"
-                              ? "destructive"
-                              : task.task_type === "convenient"
-                                ? "secondary"
-                                : "default"
-                          }
+                          variant={TYPE_COLORS_MAP[task.task_type] as never}
                         >
                           {TYPE_LABELS[task.task_type]}
                         </Badge>
@@ -362,15 +360,7 @@ export function PMTaskTable() {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={
-                          task.status === "completed"
-                            ? "default"
-                            : task.status === "in_progress"
-                              ? "default"
-                              : task.status === "bidding" || task.status === "pending_start"
-                                ? "secondary"
-                                : "outline"
-                        }
+                        variant={STATUS_COLORS_MAP[task.status] as never}
                       >
                         {STATUS_LABELS[task.status]}
                       </Badge>

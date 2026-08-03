@@ -39,14 +39,16 @@ export const TASK_STATUS_LABELS: Record<TaskStatusType, string> = {
 
 /**
  * TaskStatus 对应的样式/颜色映射
+ *
+ * 与 Badge 组件的 variant 对应，保证每个状态颜色可区分。
  */
 export const TASK_STATUS_COLORS: Record<TaskStatusType, string> = {
   [TaskStatus.UNCONFIRMED]: "gray",
-  [TaskStatus.BIDDING]: "orange",
-  [TaskStatus.PENDING_START]: "orange",
-  [TaskStatus.IN_PROGRESS]: "blue",
-  [TaskStatus.PAUSED]: "orange",
-  [TaskStatus.COMPLETED]: "green",
+  [TaskStatus.BIDDING]: "warning",
+  [TaskStatus.PENDING_START]: "info",
+  [TaskStatus.IN_PROGRESS]: "violet",
+  [TaskStatus.PAUSED]: "cyan",
+  [TaskStatus.COMPLETED]: "success",
 };
 
 // ==================== 任务类型枚举 ====================
@@ -66,9 +68,9 @@ export const TASK_TYPE_LABELS: Record<TaskTypeType, string> = {
 };
 
 export const TASK_TYPE_COLORS: Record<TaskTypeType, string> = {
-  [TaskType.NORMAL]: "blue",
-  [TaskType.URGENT]: "red",
-  [TaskType.CONVENIENT]: "green",
+  [TaskType.NORMAL]: "info",
+  [TaskType.URGENT]: "danger",
+  [TaskType.CONVENIENT]: "teal",
 };
 
 // ==================== 表单验证 Schema ====================

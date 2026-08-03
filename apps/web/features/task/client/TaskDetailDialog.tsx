@@ -15,6 +15,8 @@ import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
+  TASK_STATUS_COLORS,
+  TASK_TYPE_COLORS,
   PM_EDITABLE_STATUSES,
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
@@ -24,6 +26,8 @@ import { getAuthToken } from "@/lib/api-sdk";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
+const STATUS_COLORS: Record<TaskStatus, string> = TASK_STATUS_COLORS;
+const TYPE_COLORS: Record<TaskType, string> = TASK_TYPE_COLORS;
 
 export interface PmAction {
   label: string;
@@ -182,7 +186,7 @@ export function TaskDetailDialog({
             </div>
             <div className="flex gap-1">
               <span className="text-muted-foreground shrink-0">状态</span>
-              <Badge variant="outline">{statusText}</Badge>
+              <Badge variant={STATUS_COLORS[task.status] as never}>{statusText}</Badge>
             </div>
             <div className="flex gap-1">
               <span className="text-muted-foreground shrink-0">发布人</span>

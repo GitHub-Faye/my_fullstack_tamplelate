@@ -39,6 +39,8 @@ import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
+  TASK_STATUS_COLORS,
+  TASK_TYPE_COLORS,
   TaskStatus as TaskStatusConst,
 } from "@repo/contracts";
 import {
@@ -54,6 +56,8 @@ import { toast } from "sonner";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
+const STATUS_COLORS: Record<TaskStatus, string> = TASK_STATUS_COLORS;
+const TYPE_COLORS: Record<TaskType, string> = TASK_TYPE_COLORS;
 
 /** 工程师任务状态筛选选项 */
 const ENGINEER_TASK_STATUSES = [
@@ -302,13 +306,7 @@ export function EngineerTaskTable({
                       <TableCell>
                         {task.task_type ? (
                           <Badge
-                            variant={
-                              task.task_type === "urgent"
-                                ? "destructive"
-                                : task.task_type === "convenient"
-                                  ? "secondary"
-                                  : "default"
-                            }
+                            variant={TYPE_COLORS[task.task_type] as never}
                           >
                             {TYPE_LABELS[task.task_type]}
                           </Badge>
@@ -323,17 +321,7 @@ export function EngineerTaskTable({
                         {task.progress ?? "-"}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={
-                            task.status === "completed"
-                              ? "default"
-                              : task.status === "in_progress"
-                                ? "default"
-                                : task.status === "bidding" || task.status === "pending_start"
-                                  ? "secondary"
-                                  : "outline"
-                          }
-                        >
+                        <Badge variant={STATUS_COLORS[task.status] as never}>
                           {STATUS_LABELS[task.status]}
                         </Badge>
                       </TableCell>
@@ -457,13 +445,7 @@ export function EngineerTaskTable({
                       <TableCell>
                         {task.task_type ? (
                           <Badge
-                            variant={
-                              task.task_type === "urgent"
-                                ? "destructive"
-                                : task.task_type === "convenient"
-                                  ? "secondary"
-                                  : "default"
-                            }
+                            variant={TYPE_COLORS[task.task_type] as never}
                           >
                             {TYPE_LABELS[task.task_type]}
                           </Badge>
@@ -481,7 +463,7 @@ export function EngineerTaskTable({
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary">
+                        <Badge variant={STATUS_COLORS[task.status] as never}>
                           {STATUS_LABELS[task.status]}
                         </Badge>
                       </TableCell>

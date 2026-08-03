@@ -18,19 +18,13 @@ import type { TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
+  TASK_STATUS_COLORS,
   PM_EDITABLE_STATUSES,
 } from "@repo/contracts";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 
-const STATUS_COLORS: Record<TaskStatus, string> = {
-  unconfirmed: "secondary",
-  bidding: "default",
-  pending_start: "default",
-  in_progress: "default",
-  paused: "default",
-  completed: "default",
-} as const;
+const STATUS_COLORS: Record<TaskStatus, string> = TASK_STATUS_COLORS;
 
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
 
@@ -93,7 +87,7 @@ export function TaskDetail({ taskId }: TaskDetailProps) {
               <CardTitle className="text-xl">{task.name}</CardTitle>
               <CardDescription>任务详情</CardDescription>
             </div>
-            <Badge variant={STATUS_COLORS[task.status] as "default" | "secondary"}>
+            <Badge variant={STATUS_COLORS[task.status] as never}>
               {STATUS_LABELS[task.status]}
             </Badge>
           </div>

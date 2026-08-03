@@ -28,13 +28,16 @@ import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
+  TASK_STATUS_COLORS,
+  TASK_TYPE_COLORS,
   PM_EDITABLE_STATUSES,
 } from "@repo/contracts";
 import { Pagination } from "@/components/ui/pagination";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
-
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
+const STATUS_COLORS: Record<TaskStatus, string> = TASK_STATUS_COLORS;
+const TYPE_COLORS: Record<TaskType, string> = TASK_TYPE_COLORS;
 
 /** 发布人筛选选项 */
 type PublisherFilter = "all" | "mine" | "other";
@@ -228,13 +231,7 @@ export function TaskTable() {
                   <TableCell>
                     {task.task_type ? (
                       <Badge
-                        variant={
-                          task.task_type === "urgent"
-                            ? "destructive"
-                            : task.task_type === "convenient"
-                              ? "secondary"
-                              : "default"
-                        }
+                        variant={TYPE_COLORS[task.task_type] as never}
                       >
                         {TYPE_LABELS[task.task_type]}
                       </Badge>
@@ -256,15 +253,7 @@ export function TaskTable() {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={
-                        task.status === "completed"
-                          ? "default"
-                          : task.status === "in_progress"
-                            ? "default"
-                            : task.status === "bidding" || task.status === "pending_start"
-                              ? "secondary"
-                              : "outline"
-                      }
+                      variant={STATUS_COLORS[task.status] as never}
                     >
                       {STATUS_LABELS[task.status]}
                     </Badge>
