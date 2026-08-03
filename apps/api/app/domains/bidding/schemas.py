@@ -25,6 +25,7 @@ class BidPublic(SQLModel):
     id: uuid.UUID
     task_id: uuid.UUID
     engineer_id: uuid.UUID
+    engineer_name: Optional[str] = Field(default=None, description="工程师姓名")
     T_reported: float
     amount: float
     created_at: Optional[datetime] = None

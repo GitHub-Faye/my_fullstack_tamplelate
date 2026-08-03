@@ -295,6 +295,8 @@ async def test_read_bids_by_task(client: AsyncClient, db_session: AsyncSession) 
     data = response.json()
     assert data["count"] == 1
     assert len(data["data"]) == 1
+    # engineer_name 应从 User.full_name 填充，而非显示 id
+    assert data["data"][0]["engineer_name"] == "Test Engineer"
 
 
 @pytest.mark.asyncio

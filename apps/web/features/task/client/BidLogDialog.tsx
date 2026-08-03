@@ -61,7 +61,7 @@ export function BidLogDialog({
             <tbody>
               {bids.map((bid) => (
                 <tr key={bid.id} className="border-b last:border-0">
-                  <td className="px-3 py-2">{bid.engineer_id?.slice(0, 8) ?? "-"}</td>
+                  <td className="px-3 py-2">{bid.engineer_name ?? bid.engineer_id?.slice(0, 8) ?? "-"}</td>
                   <td className="px-3 py-2">{bid.T_reported != null ? `${bid.T_reported}h` : "-"}</td>
                   <td className="px-3 py-2">¥{bid.amount?.toLocaleString() ?? "-"}</td>
                   <td className="px-3 py-2 text-muted-foreground">{formatDateTime(bid.created_at)}</td>

@@ -38,6 +38,7 @@ export const zBidPublic = z.object({
     id: z.uuid(),
     task_id: z.uuid(),
     engineer_id: z.uuid(),
+    engineer_name: z.string().nullish(),
     T_reported: z.number(),
     amount: z.number(),
     created_at: z.iso.datetime().nullish(),

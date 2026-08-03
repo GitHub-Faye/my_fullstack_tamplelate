@@ -119,7 +119,9 @@ async def read_bids_by_task(
     if not task:
         raise_task_not_found()
     bids = await repository.get_bids_by_task(session=session, task_id=task_id)
-    return BidsPublic(data=bids, count=len(bids))
+    bid_publics = [BidPublic.model_validate(b) for b in bids]
+    await repository._fill_engineer_names(session, bid_publics)
+    return BidsPublic(data=bid_publics, count=len(bid_publics))
 
 
 @router.get(
@@ -135,7 +137,9 @@ async def read_my_bids(
     _: Annotated[None, Depends(require_scope(BidScope.READ))],
 ) -> Any:
     bids = await repository.get_bids_by_engineer(session=session, engineer_id=current_user.id)
-    return BidsPublic(data=bids, count=len(bids))
+    bid_publics = [BidPublic.model_validate(b) for b in bids]
+    await repository._fill_engineer_names(session, bid_publics)
+    return BidsPublic(data=bid_publics, count=len(bid_publics))
 
 
 # ========== 管理员：结算 ==========

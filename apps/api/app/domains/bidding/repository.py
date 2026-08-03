@@ -11,6 +11,7 @@ from sqlalchemy import func, select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.models import Bid, Task, TaskStatus, User, UserRoleType
+from app.domains.bidding.schemas import BidPublic
 
 
 # ========== 报价 CRUD ==========
@@ -93,6 +94,24 @@ async def count_bids_by_task(*, session: AsyncSession, task_id: uuid.UUID) -> in
     stmt = select(func.count()).select_from(Bid).where(Bid.task_id == task_id)
     result = await session.execute(stmt)
     return result.scalar_one()
+
+
+async def _fill_engineer_names(session: AsyncSession, bid_publics: List[BidPublic]) -> None:
+    """从关联 User 表批量填充每个 BidPublic 的 engineer_name（原地修改）"""
+    if not bid_publics:
+        return
+
+    engineer_ids = {b.engineer_id for b in bid_publics if b.engineer_id}
+    if not engineer_ids:
+        return
+
+    stmt = select(User).where(User.id.in_(engineer_ids))
+    result = await session.execute(stmt)
+    users = {u.id: u for u in result.scalars().all()}
+
+    for bp in bid_publics:
+        engineer = users.get(bp.engineer_id)
+        bp.engineer_name = engineer.full_name if engineer and engineer.full_name else str(bp.engineer_id)[:8]
 
 
 # ========== 结算逻辑 ==========

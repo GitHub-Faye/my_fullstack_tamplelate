@@ -159,6 +159,12 @@ export type BidPublic = {
      */
     engineer_id: string;
     /**
+     * Engineer Name
+     *
+     * 工程师姓名
+     */
+    engineer_name?: string | null;
+    /**
      * T Reported
      */
     T_reported: number;
