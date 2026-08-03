@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -110,6 +110,13 @@ export function EngineerTaskTable({
 
   const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null, bidHours: 0 });
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
+  // 每秒递增的 ticker，用于驱动报价倒计时刷新
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   const queryParams: Record<string, any> = {
     page,
@@ -136,11 +143,10 @@ export function EngineerTaskTable({
   const count = tasks?.count || 0;
 
   /** 报价倒计时 */
-  function countdown(deadline: string | null | undefined): string {
+  function countdown(deadline: string | null | undefined, nowTs: number): string {
     if (!deadline) return "-";
-    const now = new Date();
-    const end = new Date(deadline);
-    const diff = end.getTime() - now.getTime();
+    const end = new Date(deadline).getTime();
+    const diff = end - nowTs;
     if (diff <= 0) return "已截止";
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
@@ -459,7 +465,9 @@ export function EngineerTaskTable({
                       </TableCell>
                       <TableCell>
                         <span className="font-mono text-sm text-orange-600">
-                          {countdown(task.bidding_deadline)}
+                          {task.status === TaskStatusConst.BIDDING
+                            ? countdown(task.bidding_deadline, now)
+                            : "-"}
                         </span>
                       </TableCell>
                       <TableCell>

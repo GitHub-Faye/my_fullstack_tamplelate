@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useMemo } from "react";
+import { useCallback, useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Table,
@@ -71,6 +71,18 @@ const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
 const STATUS_COLORS_MAP: Record<TaskStatus, string> = TASK_STATUS_COLORS;
 const TYPE_COLORS_MAP: Record<TaskType, string> = TASK_TYPE_COLORS;
 
+/** 报价倒计时函数（纯函数，由组件层每秒触发的 now 驱动重新渲染） */
+function formatCountdown(deadline: string | null | undefined, now: number): string {
+  if (!deadline) return "-";
+  const end = new Date(deadline).getTime();
+  const diff = end - now;
+  if (diff <= 0) return "已截止";
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+}
+
 /** PM 只能看到自己发布的任务，不需要发布人筛选 */
 type TaskTypeFilter = "all" | "normal" | "urgent" | "convenient";
 
@@ -125,6 +137,13 @@ export function PMTaskTable() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editTask, setEditTask] = useState<TaskPublic | null>(null);
   const [reviewTask, setReviewTask] = useState<TaskPublic | null>(null);
+  // 每秒递增的 ticker，用于驱动报价倒计时刷新
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // 搜索和重置
   const handleSearch = useCallback(() => {
@@ -323,6 +342,7 @@ export function PMTaskTable() {
                   <TableHead>类型</TableHead>
                   <TableHead>工程师</TableHead>
                   <TableHead>预期上线</TableHead>
+                  <TableHead>报价倒计时</TableHead>
                   <TableHead>T报完成时间</TableHead>
                   <TableHead>当前阶段/进度</TableHead>
                   <TableHead>状态</TableHead>
@@ -351,6 +371,11 @@ export function PMTaskTable() {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {formatDateTime(task.expected_online_time)}
+                    </TableCell>
+                    <TableCell>
+                      {task.status === TaskStatusConst.BIDDING
+                        ? <span className="font-mono text-xs text-orange-600">{formatCountdown(task.bidding_deadline, now)}</span>
+                        : "-"}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {formatDate(task.T_reported_complete_time)}
@@ -382,7 +407,7 @@ export function PMTaskTable() {
                 ))}
                 {(!filteredTaskList || filteredTaskList.length === 0) && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
+                    <TableCell colSpan={9} className="text-center py-8">
                       暂无任务数据
                     </TableCell>
                   </TableRow>
