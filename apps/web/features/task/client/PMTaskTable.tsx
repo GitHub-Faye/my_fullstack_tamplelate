@@ -44,6 +44,7 @@ import { useCurrentUser, useUsers } from "@/features/user";
 import {
   withdrawTaskV1TasksTaskIdWithdrawPost,
   deleteTaskV1TasksTaskIdDelete,
+  publishTaskV1TasksTaskIdPublishPost,
   type TaskPublic,
   type TaskStatus,
   type TaskType,
@@ -95,7 +96,7 @@ const DEFAULT_FILTERS = {
 /** 删除确认弹窗状态 */
 interface ConfirmState {
   open: boolean;
-  action: "delete" | "withdraw" | null;
+  action: "delete" | "withdraw" | "publish" | null;
   task: TaskPublic | null;
 }
 
@@ -176,6 +177,9 @@ export function PMTaskTable() {
       } else if (confirm.action === "withdraw") {
         await withdrawTaskV1TasksTaskIdWithdrawPost({ path: { task_id: confirm.task.id } });
         toast.success("任务已撤回");
+      } else if (confirm.action === "publish") {
+        await publishTaskV1TasksTaskIdPublishPost({ path: { task_id: confirm.task.id }, query: { bidding_days: 3 } });
+        toast.success("任务已发布到竞价池");
       }
       refetch();
     } catch (e: any) {
@@ -189,6 +193,9 @@ export function PMTaskTable() {
     switch (action) {
       case "detail":
         setDetailTask(task);
+        break;
+      case "publish":
+        setConfirm({ open: true, action: "publish", task });
         break;
       case "edit":
         setEditTask(task);
@@ -468,12 +475,16 @@ export function PMTaskTable() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirm.action === "delete" ? "确认删除" : "确认撤回"}
+              {confirm.action === "publish"
+                ? "确认发布到竞价池"
+                : confirm.action === "delete" ? "确认删除" : "确认撤回"}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {confirm.action === "delete"
-                ? "此操作不可撤销，任务将被永久删除。"
-                : "撤回后任务将回到「未确认」状态。"}
+              {confirm.action === "publish"
+                ? "将任务发布到竞价池后，工程师将可以看到并进行报价。"
+                : confirm.action === "delete"
+                  ? "此操作不可撤销，任务将被永久删除。"
+                  : "撤回后任务将回到「未确认」状态。"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip, Star } from "lucide-react";
+import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip, Star, Send } from "lucide-react";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -57,6 +57,8 @@ export function getPmActions(task: TaskPublic, currentUserId: string | undefined
 
   switch (status) {
     case TaskStatusConst.UNCONFIRMED:
+      // PM 拥有 task:approve 权限，可自行将未确认任务审核通过并发布到竞价池（与管理员一致）
+      actions.push({ label: "发布到竞价池", icon: <Send className="h-3.5 w-3.5" />, action: "publish", variant: "default" });
       actions.push({ label: "编辑", icon: <Edit className="h-3.5 w-3.5" />, action: "edit", variant: "outline" });
       actions.push({ label: "删除", icon: <Trash2 className="h-3.5 w-3.5" />, action: "delete", variant: "destructive" });
       break;
