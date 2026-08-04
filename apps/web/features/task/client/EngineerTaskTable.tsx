@@ -30,12 +30,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { Loader2, Calendar } from "lucide-react";
+import { Loader2, Calendar, FileText } from "lucide-react";
 import { useTasks } from "../api";
 import { useCurrentUser } from "@/features/user";
 import { useEngineerDashboard } from "@/features/dashboard";
 import { TaskDetailDialog } from "./TaskDetailDialog";
 import { BidLogDialog } from "./BidLogDialog";
+import { SingleTaskReportDialog } from "./SingleTaskReportDialog";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -112,6 +113,7 @@ export function EngineerTaskTable({
   const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null, bidHours: 0 });
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
   const [bidLogTask, setBidLogTask] = useState<TaskPublic | null>(null);
+  const [reportTask, setReportTask] = useState<TaskPublic | null>(null);
   // 每秒递增的 ticker，用于驱动报价倒计时刷新
   const [now, setNow] = useState(Date.now());
 
@@ -372,6 +374,13 @@ export function EngineerTaskTable({
                             <Button
                               variant="link"
                               size="sm"
+                              onClick={() => setReportTask(task)}
+                            >
+                              日报
+                            </Button>
+                            <Button
+                              variant="link"
+                              size="sm"
                               onClick={() => setConfirm({ open: true, action: "pauseRequest", task, bidHours: 0 })}
                             >
                               暂停/顺延
@@ -541,6 +550,16 @@ export function EngineerTaskTable({
           task={bidLogTask}
           open={!!bidLogTask}
           onOpenChange={(open) => { if (!open) setBidLogTask(null); }}
+        />
+      )}
+
+      {/* 单任务日报弹窗 */}
+      {reportTask && (
+        <SingleTaskReportDialog
+          task={reportTask}
+          open={!!reportTask}
+          onOpenChange={(open) => { if (!open) setReportTask(null); }}
+          onSuccess={refetch}
         />
       )}
 

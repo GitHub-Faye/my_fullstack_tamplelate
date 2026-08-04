@@ -115,10 +115,12 @@ async def create_daily_report(
     业务流程：
     1. 检查用户是否是工程师
     2. 检查任务是否存在
-    3. 检查是否已有当日该任务的日报
-    4. 创建日报
-    5. 累加任务的 T_actual（根据今日投入工时）
-    6. 同步任务状态（根据日报的 current_stage）
+    3. 创建日报
+    4. 累加任务的 T_actual（根据今日投入工时）
+    5. 同步任务状态（根据日报的 current_stage）
+
+    说明：同一任务在同一日期允许多次提交日报（每次录入独立的工作投入），
+    因此不再拦截重复提交；每次提交都会按本次 today_hours 累加任务 T_actual。
     """
     # 1. 检查用户是否是工程师
     await check_engineer_role(session, current_user)
@@ -139,21 +141,7 @@ async def create_daily_report(
             detail="Task is not assigned to you"
         )
 
-    # 3. 检查是否已有当日该任务的日报
-    report_date = report_in.report_date or date.today()
-    exists = await repository.check_report_exists_for_date(
-        session=session,
-        engineer_id=current_user.id,
-        task_id=report_in.task_id,
-        report_date=report_date,
-    )
-    if exists:
-        raise BusinessException(
-            code=ErrorCode.REPORT_ALREADY_SUBMITTED,
-            detail=f"Daily report already submitted for task {report_in.task_id} on {report_date}"
-        )
-
-    # 4. 创建日报
+    # 3. 创建日报
     report = await repository.create_daily_report(
         session=session,
         report_in=report_in,
