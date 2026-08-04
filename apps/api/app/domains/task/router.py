@@ -26,7 +26,7 @@ from app.core.dependencies import (
 )
 from app.core.scopes import TaskScope
 from app.core.schemas import Message
-from app.core.errors import BusinessException, ErrorCode, raise_task_not_found
+from app.core.errors import BusinessException, ErrorCode, raise_task_not_found, raise_permission_denied
 from app.core.models import Task, TaskStatus, TaskType, UserRoleType, User
 
 from app.domains.task import repository
@@ -668,4 +668,109 @@ async def complete_task(
         details=f"Task completed, T_reported={task.T_reported}", ip_address=None,
     )
     await session.refresh(task)
+    return task
+
+
+# ==================== PM 自领任务 ====================
+
+
+@router.post(
+    "/{task_id}/self-assign",
+    response_model=TaskPublic,
+    summary="PM 接手竞价任务为执行人",
+    description="PM 将自己发布的竞价中任务直接接管执行，跳过竞价流程。任务状态变为进行中，不参与星点/薪资计算。",
+)
+async def self_assign_task(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    task_id: uuid.UUID,
+) -> Any:
+    """PM 自领竞价任务 — PM 自己作为执行人，直接进入进行中状态，不触发星点/工时逻辑"""
+    # 仅 PM 角色可操作
+    if current_user.role != UserRoleType.PM:
+        raise_permission_denied("Only PM can perform this action")
+
+    task = await repository.get_task(session=session, task_id=task_id)
+    if not task:
+        raise_task_not_found()
+
+    # 必须是自己发布的任务
+    if task.pm_id != current_user.id:
+        raise BusinessException(
+            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
+            detail="Only the task owner PM can self-assign"
+        )
+
+    # 仅竞价中状态可自领
+    if task.status != TaskStatus.BIDDING:
+        raise BusinessException(
+            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
+            detail=f"Task status '{task.status.value}' cannot be self-assigned. Only 'bidding' tasks can be taken over."
+        )
+
+    # PM 自己作为执行人，直接进入进行中状态
+    task.engineer_id = current_user.id
+    task.status = TaskStatus.IN_PROGRESS
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+    await repository._fill_user_names(session, task)
+
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="task.self_assign",
+        target_type="task", target_id=str(task_id),
+        details="PM self-assigned task, bypassing bidding", ip_address=None,
+    )
+    return task
+
+
+@router.post(
+    "/{task_id}/self-complete",
+    response_model=TaskPublic,
+    summary="PM 完成自领任务",
+    description="PM 标记自领任务为完成。该任务不参与星点/薪资计算。",
+)
+async def self_complete_task(
+    *,
+    session: SessionDep,
+    current_user: CurrentUser,
+    task_id: uuid.UUID,
+) -> Any:
+    """PM 自行完成自领任务 — 跳过星点计算"""
+    # 仅 PM 角色可操作
+    if current_user.role != UserRoleType.PM:
+        raise_permission_denied("Only PM can perform this action")
+
+    task = await repository.get_task(session=session, task_id=task_id)
+    if not task:
+        raise_task_not_found()
+
+    # 必须是自己发布且自己是执行人（自领任务）
+    if task.pm_id != current_user.id or task.engineer_id != current_user.id:
+        raise BusinessException(
+            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
+            detail="Task is not self-assigned by you"
+        )
+
+    # 仅进行中状态可完成
+    if task.status != TaskStatus.IN_PROGRESS:
+        raise BusinessException(
+            code=ErrorCode.TASK_INVALID_STATUS_TRANSITION,
+            detail=f"Task status '{task.status.value}' cannot be completed. Only 'in_progress' tasks can be completed."
+        )
+
+    # 完成任务，不触发星点/工时逻辑（与工程师体系完全脱钩）
+    task.status = TaskStatus.COMPLETED
+    task.T_reported_complete_time = datetime.now(timezone.utc)
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+    await repository._fill_user_names(session, task)
+
+    await create_audit_log(
+        session=session, user_id=current_user.id, action="task.self_complete",
+        target_type="task", target_id=str(task_id),
+        details="PM self-assigned task completed, no starpoints involved", ip_address=None,
+    )
     return task

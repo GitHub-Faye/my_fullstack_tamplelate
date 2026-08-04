@@ -1318,6 +1318,24 @@ export const zCompleteTaskV1TasksTaskIdCompletePostPath = z.object({
  */
 export const zCompleteTaskV1TasksTaskIdCompletePostResponse = zTaskPublic;
 
+export const zSelfAssignTaskV1TasksTaskIdSelfAssignPostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSelfAssignTaskV1TasksTaskIdSelfAssignPostResponse = zTaskPublic;
+
+export const zSelfCompleteTaskV1TasksTaskIdSelfCompletePostPath = z.object({
+    task_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zSelfCompleteTaskV1TasksTaskIdSelfCompletePostResponse = zTaskPublic;
+
 export const zListAttachmentsV1TasksTaskIdAttachmentsGetPath = z.object({
     task_id: z.uuid()
 });

@@ -3481,6 +3481,66 @@ export type CompleteTaskV1TasksTaskIdCompletePostResponses = {
 
 export type CompleteTaskV1TasksTaskIdCompletePostResponse = CompleteTaskV1TasksTaskIdCompletePostResponses[keyof CompleteTaskV1TasksTaskIdCompletePostResponses];
 
+export type SelfAssignTaskV1TasksTaskIdSelfAssignPostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/self-assign';
+};
+
+export type SelfAssignTaskV1TasksTaskIdSelfAssignPostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SelfAssignTaskV1TasksTaskIdSelfAssignPostError = SelfAssignTaskV1TasksTaskIdSelfAssignPostErrors[keyof SelfAssignTaskV1TasksTaskIdSelfAssignPostErrors];
+
+export type SelfAssignTaskV1TasksTaskIdSelfAssignPostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type SelfAssignTaskV1TasksTaskIdSelfAssignPostResponse = SelfAssignTaskV1TasksTaskIdSelfAssignPostResponses[keyof SelfAssignTaskV1TasksTaskIdSelfAssignPostResponses];
+
+export type SelfCompleteTaskV1TasksTaskIdSelfCompletePostData = {
+    body?: never;
+    path: {
+        /**
+         * Task Id
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/v1/tasks/{task_id}/self-complete';
+};
+
+export type SelfCompleteTaskV1TasksTaskIdSelfCompletePostErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SelfCompleteTaskV1TasksTaskIdSelfCompletePostError = SelfCompleteTaskV1TasksTaskIdSelfCompletePostErrors[keyof SelfCompleteTaskV1TasksTaskIdSelfCompletePostErrors];
+
+export type SelfCompleteTaskV1TasksTaskIdSelfCompletePostResponses = {
+    /**
+     * Successful Response
+     */
+    200: TaskPublic;
+};
+
+export type SelfCompleteTaskV1TasksTaskIdSelfCompletePostResponse = SelfCompleteTaskV1TasksTaskIdSelfCompletePostResponses[keyof SelfCompleteTaskV1TasksTaskIdSelfCompletePostResponses];
+
 export type ListAttachmentsV1TasksTaskIdAttachmentsGetData = {
     body?: never;
     path: {

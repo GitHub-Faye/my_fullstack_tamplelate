@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip, Star, Send, UserPlus } from "lucide-react";
+import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip, Star, Send, UserPlus, User, CheckCircle2 } from "lucide-react";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -42,6 +42,8 @@ export interface PmAction {
 export function getPmActions(task: TaskPublic, currentUserId: string | undefined): PmAction[] {
   const status = task.status as string;
   const isOwner = currentUserId != null && task.pm_id === currentUserId;
+  // 被 PM 自己接管的执行人（自领任务）
+  const isSelfAssigned = currentUserId != null && task.engineer_id === currentUserId;
   const actions: PmAction[] = [];
 
   // 详情 — 所有任务都有
@@ -65,6 +67,8 @@ export function getPmActions(task: TaskPublic, currentUserId: string | undefined
     case TaskStatusConst.BIDDING:
       // PM 可跳过竞价流程直接指派工程师（同管理员的改派能力）
       actions.push({ label: "直接指派", icon: <UserPlus className="h-3.5 w-3.5" />, action: "assign", variant: "default" });
+      // PM 可自己接手竞价任务作为执行人
+      actions.push({ label: "自己接手", icon: <User className="h-3.5 w-3.5" />, action: "selfAssign", variant: "default" });
       if (PM_EDITABLE_STATUSES.includes(status as any)) {
         actions.push({ label: "编辑", icon: <Edit className="h-3.5 w-3.5" />, action: "edit", variant: "outline" });
       }
@@ -75,6 +79,10 @@ export function getPmActions(task: TaskPublic, currentUserId: string | undefined
       // 待启动任务没有操作按钮
       break;
     case TaskStatusConst.IN_PROGRESS:
+      // 已完成的工程师任务提供评价、日志操作；PM 自领任务可标记完成
+      if (isSelfAssigned) {
+        actions.push({ label: "完成任务", icon: <CheckCircle2 className="h-3.5 w-3.5" />, action: "selfComplete", variant: "default" });
+      }
       actions.push({ label: "资料变更", icon: <FileText className="h-3.5 w-3.5" />, action: "changeDoc", variant: "outline" });
       actions.push({ label: "工作日志", icon: <History className="h-3.5 w-3.5" />, action: "workLog", variant: "outline" });
       break;

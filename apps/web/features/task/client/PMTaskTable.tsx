@@ -45,6 +45,8 @@ import {
   withdrawTaskV1TasksTaskIdWithdrawPost,
   deleteTaskV1TasksTaskIdDelete,
   publishTaskV1TasksTaskIdPublishPost,
+  selfAssignTaskV1TasksTaskIdSelfAssignPost,
+  selfCompleteTaskV1TasksTaskIdSelfCompletePost,
   type TaskPublic,
   type TaskStatus,
   type TaskType,
@@ -97,7 +99,7 @@ const DEFAULT_FILTERS = {
 /** 删除确认弹窗状态 */
 interface ConfirmState {
   open: boolean;
-  action: "delete" | "withdraw" | "publish" | null;
+  action: "delete" | "withdraw" | "publish" | "selfAssign" | "selfComplete" | null;
   task: TaskPublic | null;
 }
 
@@ -182,6 +184,12 @@ export function PMTaskTable() {
       } else if (confirm.action === "publish") {
         await publishTaskV1TasksTaskIdPublishPost({ path: { task_id: confirm.task.id }, query: { bidding_days: 3 } });
         toast.success("任务已发布到竞价池");
+      } else if (confirm.action === "selfAssign") {
+        await selfAssignTaskV1TasksTaskIdSelfAssignPost({ path: { task_id: confirm.task.id } });
+        toast.success("已接手任务，任务进入进行中状态");
+      } else if (confirm.action === "selfComplete") {
+        await selfCompleteTaskV1TasksTaskIdSelfCompletePost({ path: { task_id: confirm.task.id } });
+        toast.success("任务已完成");
       }
       refetch();
     } catch (e: any) {
@@ -213,6 +221,12 @@ export function PMTaskTable() {
         break;
       case "assign":
         setAssignTask(task);
+        break;
+      case "selfAssign":
+        setConfirm({ open: true, action: "selfAssign", task });
+        break;
+      case "selfComplete":
+        setConfirm({ open: true, action: "selfComplete", task });
         break;
       case "viewLog":
       case "pauseLog":
@@ -491,14 +505,22 @@ export function PMTaskTable() {
             <AlertDialogTitle>
               {confirm.action === "publish"
                 ? "确认发布到竞价池"
-                : confirm.action === "delete" ? "确认删除" : "确认撤回"}
+                : confirm.action === "selfAssign"
+                  ? "确认自己接手任务"
+                  : confirm.action === "selfComplete"
+                    ? "确认完成任务"
+                    : confirm.action === "delete" ? "确认删除" : "确认撤回"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirm.action === "publish"
                 ? "将任务发布到竞价池后，工程师将可以看到并进行报价。"
-                : confirm.action === "delete"
-                  ? "此操作不可撤销，任务将被永久删除。"
-                  : "撤回后任务将回到「未确认」状态。"}
+                : confirm.action === "selfAssign"
+                  ? "你将作为执行人接手该任务，任务状态将变为进行中，且不参与星点/薪资计算。"
+                  : confirm.action === "selfComplete"
+                    ? "将任务标记为完成，该任务不涉及星点计算。"
+                    : confirm.action === "delete"
+                      ? "此操作不可撤销，任务将被永久删除。"
+                      : "撤回后任务将回到「未确认」状态。"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
