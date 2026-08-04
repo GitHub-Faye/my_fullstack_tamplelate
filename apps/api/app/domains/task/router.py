@@ -427,11 +427,13 @@ async def reassign_task(
     task_id: uuid.UUID,
     request: TaskReassignRequest,
 ) -> Any:
-    """改派任务 — 需要管理员权限"""
+    """改派任务 — 管理员或 PM 可操作"""
     task = await repository.get_task(session=session, task_id=task_id)
     if not task:
         raise_task_not_found()
-    await check_admin_scope(session, current_user)
+    # 管理员用 task:admin scope；PM 用 task:reassign 或任意 PM 角色均可
+    if current_user.role != UserRoleType.PM:
+        await check_admin_scope(session, current_user)
     new_engineer = await session.get(User, request.new_engineer_id)
     if not new_engineer:
         raise BusinessException(code=ErrorCode.USER_NOT_FOUND, detail=f"Engineer not found")
@@ -695,13 +697,7 @@ async def self_assign_task(
     if not task:
         raise_task_not_found()
 
-    # 必须是自己发布的任务
-    if task.pm_id != current_user.id:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
-            detail="Only the task owner PM can self-assign"
-        )
-
+    # 任务在 PM 间共享 — 任意 PM 均可接手（不限于任务所有者 PM）
     # 仅竞价中状态可自领
     if task.status != TaskStatus.BIDDING:
         raise BusinessException(
@@ -746,8 +742,9 @@ async def self_complete_task(
     if not task:
         raise_task_not_found()
 
-    # 必须是自己发布且自己是执行人（自领任务）
-    if task.pm_id != current_user.id or task.engineer_id != current_user.id:
+    # 任务在 PM 间共享 — 任意 PM 均可完成自领任务
+    # 校验该任务确实是「执行人为自己」的自领任务（PM 而非工程师），避免完成非自领任务
+    if current_user.role != UserRoleType.PM or task.engineer_id != current_user.id:
         raise BusinessException(
             code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
             detail="Task is not self-assigned by you"

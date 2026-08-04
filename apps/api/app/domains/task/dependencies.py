@@ -64,13 +64,17 @@ async def require_task_owner(
     current_user: CurrentUser,
     task: Task = Depends(get_task_or_404),
 ) -> Task:
-    """要求当前用户是任务所有者或管理员"""
-    if task.pm_id != current_user.id and current_user.role != UserRoleType.ADMIN:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
-            detail="Only the task owner can perform this action"
-        )
-    return task
+    """要求当前用户是任务所有者、任何 PM，或管理员"""
+    # 任务所有者本身
+    if task.pm_id == current_user.id:
+        return task
+    # 任意 PM（任务在 PM 间共享）或管理员
+    if current_user.role in (UserRoleType.PM, UserRoleType.ADMIN):
+        return task
+    raise BusinessException(
+        code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,
+        detail="Only a PM or admin can perform this action"
+    )
 
 
 TaskOwnerOrAdmin = Annotated[Task, Depends(require_task_owner)]
@@ -99,9 +103,8 @@ async def check_task_owner_or_admin(
     if task_pm_id == current_user.id:
         return True
 
-    # 检查是否有 task:admin 权限
-    user_scopes = await get_user_scopes(session, current_user)
-    if TaskScope.ADMIN.value in user_scopes:
+    # 任意 PM（任务在 PM 间共享）或管理员
+    if current_user.role in (UserRoleType.PM, UserRoleType.ADMIN):
         return True
 
     raise_permission_denied("Not enough permissions")

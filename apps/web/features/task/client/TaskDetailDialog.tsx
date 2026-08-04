@@ -41,7 +41,8 @@ export interface PmAction {
  */
 export function getPmActions(task: TaskPublic, currentUserId: string | undefined): PmAction[] {
   const status = task.status as string;
-  const isOwner = currentUserId != null && task.pm_id === currentUserId;
+  // 是否是自己发布的任务（用于个别 owner 展示，如自领任务的完成按钮）
+  const isMyTask = currentUserId != null && task.pm_id === currentUserId;
   // 被 PM 自己接管的执行人（自领任务）
   const isSelfAssigned = currentUserId != null && task.engineer_id === currentUserId;
   const actions: PmAction[] = [];
@@ -54,9 +55,8 @@ export function getPmActions(task: TaskPublic, currentUserId: string | undefined
     variant: "outline",
   });
 
-  // 非自己发布的任务，只有详情按钮
-  if (!isOwner) return actions;
-
+  // PM 任务在 PM 间共享，所有 PM 都可对任意任务操作
+  // （任务详情/发布/指派/自领/改资料/日志/评价等不再区分任务归属）
   switch (status) {
     case TaskStatusConst.UNCONFIRMED:
       // PM 拥有 task:approve 权限，可自行将未确认任务审核通过并发布到竞价池（与管理员一致）
