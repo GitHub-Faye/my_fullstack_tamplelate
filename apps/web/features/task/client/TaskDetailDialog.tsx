@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip, Star, Send } from "lucide-react";
+import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip, Star, Send, UserPlus } from "lucide-react";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -63,6 +63,8 @@ export function getPmActions(task: TaskPublic, currentUserId: string | undefined
       actions.push({ label: "删除", icon: <Trash2 className="h-3.5 w-3.5" />, action: "delete", variant: "destructive" });
       break;
     case TaskStatusConst.BIDDING:
+      // PM 可跳过竞价流程直接指派工程师（同管理员的改派能力）
+      actions.push({ label: "直接指派", icon: <UserPlus className="h-3.5 w-3.5" />, action: "assign", variant: "default" });
       if (PM_EDITABLE_STATUSES.includes(status as any)) {
         actions.push({ label: "编辑", icon: <Edit className="h-3.5 w-3.5" />, action: "edit", variant: "outline" });
       }

@@ -66,6 +66,7 @@ import { StarPointReviewDialog } from "./StarPointReviewDialog";
 import { formatDateTime, formatDate } from "@/lib/utils";
 import { TaskCreateForm } from "./TaskCreateForm";
 import { TaskEditForm } from "./TaskEditForm";
+import { PmTaskAssignDialog } from "./PmTaskAssignDialog";
 
 const STATUS_LABELS: Record<TaskStatus, string> = TASK_STATUS_LABELS;
 const TYPE_LABELS: Record<TaskType, string> = TASK_TYPE_LABELS;
@@ -132,6 +133,7 @@ export function PMTaskTable() {
   const [pmFilter, setPmFilter] = useState("all");
   const [detailTask, setDetailTask] = useState<TaskPublic | null>(null);
   const [bidLogTask, setBidLogTask] = useState<TaskPublic | null>(null);
+  const [assignTask, setAssignTask] = useState<TaskPublic | null>(null);
   const [logTask, setLogTask] = useState<TaskPublic | null>(null);
   const [workLogTask, setWorkLogTask] = useState<TaskPublic | null>(null);
   const [confirm, setConfirm] = useState<ConfirmState>({ open: false, action: null, task: null });
@@ -208,6 +210,9 @@ export function PMTaskTable() {
         break;
       case "bidLog":
         setBidLogTask(task);
+        break;
+      case "assign":
+        setAssignTask(task);
         break;
       case "viewLog":
       case "pauseLog":
@@ -449,6 +454,15 @@ export function PMTaskTable() {
           task={bidLogTask}
           open={!!bidLogTask}
           onOpenChange={(open) => { if (!open) setBidLogTask(null); }}
+        />
+      )}
+
+      {/* 直接指派工程师弹窗 */}
+      {assignTask && (
+        <PmTaskAssignDialog
+          taskId={assignTask.id}
+          open={!!assignTask}
+          onOpenChange={(open) => { if (!open) setAssignTask(null); }}
         />
       )}
 
