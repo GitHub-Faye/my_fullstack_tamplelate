@@ -49,6 +49,7 @@ export function TaskEditForm({ taskId, onSuccess, onCancel }: TaskEditFormProps)
           description: task.description ?? null,
           task_type: task.task_type ?? null,
           expected_online_time: task.expected_online_time ?? null,
+          T_estimate: task.T_estimate ?? null,
         }
       : undefined,
   });
@@ -76,6 +77,7 @@ export function TaskEditForm({ taskId, onSuccess, onCancel }: TaskEditFormProps)
         description: data.description ?? undefined,
         task_type: data.task_type ?? undefined,
         expected_online_time: data.expected_online_time ?? undefined,
+        T_estimate: data.T_estimate != null ? Number(data.T_estimate) : undefined,
       };
       await updateTask.mutateAsync({ taskId, data: payload });
       onSuccess?.();
@@ -148,6 +150,28 @@ export function TaskEditForm({ taskId, onSuccess, onCancel }: TaskEditFormProps)
                   <SelectItem value="convenient">便捷任务</SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="T_estimate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>T估（预计完成工时，小时）</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.5"
+                  placeholder="例如：8"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  disabled={updateTask.isPending}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

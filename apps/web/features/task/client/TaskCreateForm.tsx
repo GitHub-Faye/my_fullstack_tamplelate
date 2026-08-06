@@ -40,6 +40,7 @@ export function TaskCreateForm({ onSuccess }: { onSuccess?: () => void }) {
       description: null,
       task_type: "normal",
       expected_online_time: null,
+      T_estimate: null,
     },
   });
 
@@ -50,6 +51,7 @@ export function TaskCreateForm({ onSuccess }: { onSuccess?: () => void }) {
         description: data.description ?? undefined,
         task_type: data.task_type,
         expected_online_time: data.expected_online_time ?? undefined,
+        T_estimate: data.T_estimate != null ? Number(data.T_estimate) : undefined,
       };
       await createTask.mutateAsync(payload);
       form.reset();
@@ -122,6 +124,28 @@ export function TaskCreateForm({ onSuccess }: { onSuccess?: () => void }) {
                   <SelectItem value="convenient">便捷任务</SelectItem>
                 </SelectContent>
               </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="T_estimate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>T估（预计完成工时，小时）</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.5"
+                  placeholder="例如：8"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  disabled={createTask.isPending}
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}

@@ -689,6 +689,7 @@ export const zAdminTaskCreate = z.object({
     description: z.string().max(2000).nullish(),
     task_type: zTaskType.optional().default('normal'),
     expected_online_time: z.iso.datetime().nullish(),
+    T_estimate: z.number().gte(0).nullish(),
     engineer_id: z.uuid()
 });
 
@@ -701,7 +702,8 @@ export const zTaskCreate = z.object({
     name: z.string().min(1).max(255),
     description: z.string().max(2000).nullish(),
     task_type: zTaskType.optional().default('normal'),
-    expected_online_time: z.iso.datetime().nullish()
+    expected_online_time: z.iso.datetime().nullish(),
+    T_estimate: z.number().gte(0).nullish()
 });
 
 /**
@@ -714,6 +716,7 @@ export const zTaskPublic = z.object({
     description: z.string().max(2000).nullish(),
     task_type: zTaskType.optional().default('normal'),
     expected_online_time: z.iso.datetime().nullish(),
+    T_estimate: z.number().gte(0).nullish(),
     id: z.uuid(),
     pm_id: z.uuid(),
     pm_name: z.string(),
@@ -739,7 +742,8 @@ export const zTaskUpdate = z.object({
     name: z.string().min(1).max(255).nullish(),
     description: z.string().max(2000).nullish(),
     task_type: zTaskType.nullish(),
-    expected_online_time: z.iso.datetime().nullish()
+    expected_online_time: z.iso.datetime().nullish(),
+    T_estimate: z.number().gte(0).nullish()
 });
 
 /**

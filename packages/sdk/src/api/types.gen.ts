@@ -93,6 +93,12 @@ export type AdminTaskCreate = {
      */
     expected_online_time?: string | null;
     /**
+     * T Estimate
+     *
+     * T估（PM预估完成工时）
+     */
+    T_estimate?: number | null;
+    /**
      * Engineer Id
      *
      * 指派工程师 ID
@@ -1669,6 +1675,12 @@ export type TaskCreate = {
      * 预期上线时间
      */
     expected_online_time?: string | null;
+    /**
+     * T Estimate
+     *
+     * T估（PM预估完成工时）
+     */
+    T_estimate?: number | null;
 };
 
 /**
@@ -1699,6 +1711,12 @@ export type TaskPublic = {
      * 预期上线时间
      */
     expected_online_time?: string | null;
+    /**
+     * T Estimate
+     *
+     * T估（PM预估完成工时）
+     */
+    T_estimate?: number | null;
     /**
      * Id
      */
@@ -1828,6 +1846,12 @@ export type TaskUpdate = {
      * 预期上线时间
      */
     expected_online_time?: string | null;
+    /**
+     * T Estimate
+     *
+     * T估（PM预估完成工时）
+     */
+    T_estimate?: number | null;
 };
 
 /**

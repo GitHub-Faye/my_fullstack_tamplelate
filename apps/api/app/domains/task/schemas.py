@@ -22,6 +22,7 @@ class TaskBase(SQLModel):
     description: Optional[str] = Field(default=None, max_length=2000, description="任务描述")
     task_type: TaskType = Field(default=TaskType.NORMAL, description="任务类型")
     expected_online_time: Optional[datetime] = Field(default=None, description="预期上线时间")
+    T_estimate: Optional[float] = Field(default=None, ge=0, description="T估（PM预估完成工时）")
 
 
 # ==================== API 请求模型（Request DTO） ====================
@@ -42,6 +43,7 @@ class TaskUpdate(SQLModel):
     description: Optional[str] = Field(default=None, max_length=2000, description="任务描述")
     task_type: Optional[TaskType] = Field(default=None, description="任务类型")
     expected_online_time: Optional[datetime] = Field(default=None, description="预期上线时间")
+    T_estimate: Optional[float] = Field(default=None, ge=0, description="T估（PM预估完成工时）")
 
 
 # ==================== API 响应模型（Response DTO） ====================

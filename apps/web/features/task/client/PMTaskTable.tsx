@@ -368,6 +368,7 @@ export function PMTaskTable() {
                   <TableHead>类型</TableHead>
                   <TableHead>工程师</TableHead>
                   <TableHead>预期上线</TableHead>
+                  <TableHead>T估</TableHead>
                   <TableHead>报价倒计时/T报</TableHead>
                   <TableHead>T报完成时间/T实</TableHead>
                   <TableHead>当前阶段/进度</TableHead>
@@ -397,6 +398,9 @@ export function PMTaskTable() {
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {formatDateTime(task.expected_online_time)}
+                    </TableCell>
+                    <TableCell className="text-sm">
+                      {task.T_estimate != null ? `${task.T_estimate}h` : "-"}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {task.status === TaskStatusConst.BIDDING
@@ -435,7 +439,7 @@ export function PMTaskTable() {
                 ))}
                 {(!filteredTaskList || filteredTaskList.length === 0) && (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8">
+                    <TableCell colSpan={10} className="text-center py-8">
                       暂无任务数据
                     </TableCell>
                   </TableRow>

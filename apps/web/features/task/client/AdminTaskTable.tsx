@@ -345,6 +345,7 @@ export function AdminTaskTable() {
                 <TableHead>发布人</TableHead>
                 <TableHead>工程师</TableHead>
                 <TableHead>状态</TableHead>
+                <TableHead>T估</TableHead>
                 <TableHead>T报</TableHead>
                 <TableHead>T实</TableHead>
                 <TableHead>报价倒计时</TableHead>
@@ -358,7 +359,7 @@ export function AdminTaskTable() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="text-center py-8">
+                  <TableCell colSpan={13} className="text-center py-8">
                     暂无任务数据
                   </TableCell>
                 </TableRow>
@@ -380,6 +381,7 @@ export function AdminTaskTable() {
                           {STATUS_LABELS[task.status]}
                         </Badge>
                       </TableCell>
+                      <TableCell>{task.T_estimate != null ? `${task.T_estimate}h` : "-"}</TableCell>
                       <TableCell>{task.T_reported != null ? `${task.T_reported}h` : "-"}</TableCell>
                       <TableCell>{task.T_actual != null ? `${task.T_actual}h` : "-"}</TableCell>
                       <TableCell>

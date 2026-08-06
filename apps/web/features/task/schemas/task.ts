@@ -23,6 +23,15 @@ export const taskCreateSchema = z.object({
     .string()
     .nullable()
     .default(null),
+  T_estimate: z
+    .union([z.string(), z.number()])
+    .transform((v) => {
+      if (v === null || v === undefined || v === "") return null;
+      const n = Number(v);
+      return isNaN(n) ? null : n;
+    })
+    .nullable()
+    .default(null),
 });
 
 export type TaskCreateFormData = z.input<typeof taskCreateSchema>;
@@ -45,6 +54,15 @@ export const taskUpdateSchema = z.object({
   task_type: z.enum(["normal", "urgent", "convenient"]).nullable().default(null),
   expected_online_time: z
     .string()
+    .nullable()
+    .default(null),
+  T_estimate: z
+    .union([z.string(), z.number(), z.null()])
+    .transform((v) => {
+      if (v === null || v === undefined || v === "") return null;
+      const n = Number(v);
+      return isNaN(n) ? null : n;
+    })
     .nullable()
     .default(null),
 });

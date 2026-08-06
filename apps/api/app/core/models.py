@@ -276,6 +276,7 @@ class TaskBase(SQLModel):
     progress: Optional[str] = Field(default=None, max_length=5000, description="工程师日报进度描述（与 description 分离，不污染 PM 原始描述）")
     task_type: TaskType = Field(default=TaskType.NORMAL)
     status: TaskStatus = Field(default=TaskStatus.UNCONFIRMED)
+    T_estimate: Optional[float] = Field(default=None, ge=0, description="T估（PM发布任务时预估的完成工时）")
     T_reported: Optional[float] = Field(default=None, ge=0, description="T报（工程师填报工时）")
     T_actual: Optional[float] = Field(default=None, ge=0, description="T实（实际结算工时）")
     T_effective: Optional[float] = Field(default=None, ge=0, description="T有效（任务完成时取 min(T_actual, T_reported)，用于工资计算）")
