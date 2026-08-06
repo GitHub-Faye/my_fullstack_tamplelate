@@ -392,7 +392,7 @@ export function PMTaskTable() {
               <TableBody>
                 {filteredTaskList?.map((task: TaskPublic) => (
                   <TableRow key={task.id}>
-                    <TableCell className="font-medium max-w-[200px] truncate">
+                    <TableCell className={"font-medium max-w-[200px] truncate" + (task.T_reported != null && task.T_actual != null && Math.abs(task.T_reported - task.T_actual) > 2 ? " text-red-600 font-semibold" : "")}>
                       {task.name}
                     </TableCell>
                     <TableCell>
