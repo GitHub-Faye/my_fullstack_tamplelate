@@ -368,8 +368,8 @@ export function PMTaskTable() {
                   <TableHead>类型</TableHead>
                   <TableHead>工程师</TableHead>
                   <TableHead>预期上线</TableHead>
-                  <TableHead>报价倒计时</TableHead>
-                  <TableHead>T报完成时间</TableHead>
+                  <TableHead>报价倒计时/T报</TableHead>
+                  <TableHead>T报完成时间/T实</TableHead>
                   <TableHead>当前阶段/进度</TableHead>
                   <TableHead>状态</TableHead>
                   <TableHead className="text-right">操作</TableHead>
@@ -398,13 +398,15 @@ export function PMTaskTable() {
                     <TableCell className="text-sm text-muted-foreground">
                       {formatDateTime(task.expected_online_time)}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
                       {task.status === TaskStatusConst.BIDDING
                         ? <span className="font-mono text-xs text-orange-600">{formatCountdown(task.bidding_deadline, now)}</span>
-                        : "-"}
+                        : task.T_reported != null ? `${task.T_reported}h` : "-"}
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
-                      {formatDate(task.T_reported_complete_time)}
+                      {task.status === TaskStatusConst.BIDDING
+                        ? (formatDate(task.T_reported_complete_time))
+                        : task.T_actual != null ? `${task.T_actual}h` : "-"}
                     </TableCell>
                     <TableCell className="text-sm">
                       {task.progress ?? "-"}
