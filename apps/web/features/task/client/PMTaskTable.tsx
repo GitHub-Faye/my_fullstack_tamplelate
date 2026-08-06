@@ -34,11 +34,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Search, RotateCcw, Paperclip, Calendar, User } from "lucide-react";
+import { Loader2, Plus, Search, RotateCcw, Paperclip, Calendar, User, MoreHorizontal } from "lucide-react";
 import { useTasks } from "../api";
 import { useCurrentUser, useUsers } from "@/features/user";
 import {
@@ -423,17 +429,24 @@ export function PMTaskTable() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap">
-                      {getPmActions(task, user?.id).map((act) => (
-                        <Button
-                          key={act.action}
-                          variant={act.variant || "link"}
-                          size="sm"
-                          onClick={() => handleAction(act.action, task)}
-                          className={act.action === "detail" ? "" : "ml-1"}
-                        >
-                          {act.label}
-                        </Button>
-                      ))}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {getPmActions(task, user?.id).map((act) => (
+                            <DropdownMenuItem
+                              key={act.action}
+                              onClick={() => handleAction(act.action, task)}
+                            >
+                              {act.icon}
+                              {act.label}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))}

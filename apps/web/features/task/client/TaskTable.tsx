@@ -20,10 +20,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Plus, Search, RotateCcw } from "lucide-react";
+import { Loader2, Plus, Search, RotateCcw, MoreHorizontal, Eye, Edit } from "lucide-react";
 import Link from "next/link";
 import { useTasks } from "../api";
 import { useCurrentUser } from "@/features/user";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -259,22 +265,25 @@ export function TaskTable() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right whitespace-nowrap">
-                    <Button
-                      variant="link"
-                      size="sm"
-                      onClick={() => router.push(`/pm/tasks/${task.id}`)}
-                    >
-                      详情
-                    </Button>
-                    {PM_EDITABLE_STATUSES.includes(task.status as any) && (
-                      <Button
-                        variant="link"
-                        size="sm"
-                        onClick={() => router.push(`/pm/tasks/${task.id}/edit`)}
-                      >
-                        编辑
-                      </Button>
-                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => router.push(`/pm/tasks/${task.id}`)}>
+                          <Eye className="h-3.5 w-3.5" />
+                          详情
+                        </DropdownMenuItem>
+                        {PM_EDITABLE_STATUSES.includes(task.status as any) && (
+                          <DropdownMenuItem onClick={() => router.push(`/pm/tasks/${task.id}/edit`)}>
+                            <Edit className="h-3.5 w-3.5" />
+                            编辑
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))}

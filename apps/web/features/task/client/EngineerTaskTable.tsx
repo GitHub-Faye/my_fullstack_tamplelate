@@ -30,13 +30,19 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { Loader2, Calendar, FileText } from "lucide-react";
+import { Loader2, Calendar, FileText, MoreHorizontal, Eye, Play, XCircle, Pause, DollarSign } from "lucide-react";
 import { useTasks } from "../api";
 import { useCurrentUser } from "@/features/user";
 import { useEngineerDashboard } from "@/features/dashboard";
 import { TaskDetailDialog } from "./TaskDetailDialog";
 import { BidLogDialog } from "./BidLogDialog";
 import { SingleTaskReportDialog } from "./SingleTaskReportDialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -336,93 +342,55 @@ export function EngineerTaskTable({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">
-                        {task.status === TaskStatusConst.PENDING_START && (
-                          <>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              onClick={() => setDetailTask(task)}
-                            >
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setDetailTask(task)}>
+                              <Eye className="h-3.5 w-3.5" />
                               详情
-                            </Button>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              onClick={() => setConfirm({ open: true, action: "start", task, bidHours: 0 })}
-                            >
-                              启动
-                            </Button>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              className="text-red-600"
-                              onClick={() => setConfirm({ open: true, action: "decline", task, bidHours: 0 })}
-                            >
-                              拒绝
-                            </Button>
-                          </>
-                        )}
-                        {task.status === TaskStatusConst.IN_PROGRESS && (
-                          <>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              onClick={() => setDetailTask(task)}
-                            >
-                              详情
-                            </Button>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              onClick={() => setReportTask(task)}
-                            >
-                              日报
-                            </Button>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              onClick={() => setConfirm({ open: true, action: "pauseRequest", task, bidHours: 0 })}
-                            >
-                              暂停/顺延
-                            </Button>
-                          </>
-                        )}
-                        {task.status === TaskStatusConst.PAUSED && (
-                          <>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              onClick={() => setDetailTask(task)}
-                            >
-                              详情
-                            </Button>
-                            <Button
-                              variant="link"
-                              size="sm"
-                              onClick={() => setConfirm({ open: true, action: "resume", task, bidHours: 0 })}
-                            >
-                              恢复
-                            </Button>
-                          </>
-                        )}
-                        {task.status === TaskStatusConst.COMPLETED && (
-                          <Button
-                            variant="link"
-                            size="sm"
-                            onClick={() => setDetailTask(task)}
-                          >
-                            详情
-                          </Button>
-                        )}
-                        {task.status === TaskStatusConst.BIDDING && (
-                          <Button
-                            variant="link"
-                            size="sm"
-                            onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: 0 })}
-                          >
-                            报价
-                          </Button>
-                        )}
+                            </DropdownMenuItem>
+                            {task.status === TaskStatusConst.PENDING_START && (
+                              <>
+                                <DropdownMenuItem onClick={() => setConfirm({ open: true, action: "start", task, bidHours: 0 })}>
+                                  <Play className="h-3.5 w-3.5" />
+                                  启动
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setConfirm({ open: true, action: "decline", task, bidHours: 0 })}>
+                                  <XCircle className="h-3.5 w-3.5" />
+                                  拒绝
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            {task.status === TaskStatusConst.IN_PROGRESS && (
+                              <>
+                                <DropdownMenuItem onClick={() => setReportTask(task)}>
+                                  <FileText className="h-3.5 w-3.5" />
+                                  日报
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setConfirm({ open: true, action: "pauseRequest", task, bidHours: 0 })}>
+                                  <Pause className="h-3.5 w-3.5" />
+                                  暂停/顺延
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            {task.status === TaskStatusConst.PAUSED && (
+                              <DropdownMenuItem onClick={() => setConfirm({ open: true, action: "resume", task, bidHours: 0 })}>
+                                <Play className="h-3.5 w-3.5" />
+                                恢复
+                              </DropdownMenuItem>
+                            )}
+                            {task.status === TaskStatusConst.BIDDING && (
+                              <DropdownMenuItem onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: 0 })}>
+                                <DollarSign className="h-3.5 w-3.5" />
+                                报价
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -487,27 +455,27 @@ export function EngineerTaskTable({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right whitespace-nowrap">
-                        <Button
-                          variant="link"
-                          size="sm"
-                          onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: 0 })}
-                        >
-                          报价
-                        </Button>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          onClick={() => setBidLogTask(task)}
-                        >
-                          报价记录
-                        </Button>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          onClick={() => setDetailTask(task)}
-                        >
-                          详情
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setConfirm({ open: true, action: "bid", task, bidHours: 0 })}>
+                              <DollarSign className="h-3.5 w-3.5" />
+                              报价
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setBidLogTask(task)}>
+                              <FileText className="h-3.5 w-3.5" />
+                              报价记录
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setDetailTask(task)}>
+                              <Eye className="h-3.5 w-3.5" />
+                              详情
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
