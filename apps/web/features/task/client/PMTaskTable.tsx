@@ -123,17 +123,8 @@ export function PMTaskTable() {
   // 当前用户信息
   const user = useCurrentUser();
 
-  // 获取用户列表用于 PM 姓名映射
+  // 获取用户列表用于 PM 下拉筛选（全量 PM 角色用户）
   const { data: usersData } = useUsers({ page: 1, page_size: 100 });
-  const userMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    if (usersData?.data) {
-      for (const u of usersData.data as Array<{ id: string; full_name?: string | null }>) {
-        map[u.id] = u.full_name ?? u.id.slice(0, 8);
-      }
-    }
-    return map;
-  }, [usersData]);
 
   // 筛选条件状态
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
@@ -168,12 +159,13 @@ export function PMTaskTable() {
     setPage(1);
   }, []);
 
-  // 构建 API 查询参数 — 不传 pm_id 拉取全部任务，客户端筛选
+  // 构建 API 查询参数 — 由后端按 pm_id 过滤，确保分页与 total 正确
   const queryParams: Record<string, any> = {
     page,
     page_size: 20,
     status: filters.status !== "all" ? filters.status : undefined,
     task_type: filters.taskType !== "all" ? filters.taskType : undefined,
+    pm_id: pmFilter !== "all" ? pmFilter : undefined,
     start_date: startDate || undefined,
     end_date: endDate || undefined,
   };
@@ -266,19 +258,17 @@ export function PMTaskTable() {
     refetch();
   }, [refetch]);
 
-  // 提取 PM ID 列表用于筛选（必须在 early return 之前）
-  const taskList = tasks?.data as TaskPublic[] | undefined;
-  const pmIds = useMemo(() => {
-    if (!taskList) return [];
-    return [...new Set(taskList.map((t) => t.pm_id).filter(Boolean))] as string[];
-  }, [taskList]);
+  // 提取 PM 列表用于下拉筛选 — 从全量用户中取 PM 角色，避免依赖当前页数据
+  const pmUsers = useMemo(() => {
+    if (!usersData?.data) return [];
+    return usersData.data.filter(
+      (u: any) => (u as { role?: string }).role === "pm"
+    );
+  }, [usersData]);
 
-  // 客户端过滤 — 同 AdminTaskTable 方式
-  const filteredTaskList = useMemo(() => {
-    if (!taskList) return undefined;
-    if (pmFilter === "all") return taskList;
-    return taskList.filter((t) => t.pm_id === pmFilter);
-  }, [taskList, pmFilter]);
+  // 数据已由后端按 pm_id 过滤，无需客户端二次过滤
+  const taskList = tasks?.data as TaskPublic[] | undefined;
+  const filteredTaskList = taskList;
 
   if (isLoading) {
     return (
@@ -366,9 +356,11 @@ export function PMTaskTable() {
               <SelectContent>
                 <SelectItem value="all">全部任务</SelectItem>
                 <SelectItem value={user?.id ?? ""}>我的任务</SelectItem>
-                {pmIds.filter((id) => id !== user?.id).map((id) => (
-                  <SelectItem key={id} value={id}>{userMap[id] || id.slice(0, 8)}</SelectItem>
-                ))}
+                {pmUsers
+                  .filter((u: any) => u.id !== user?.id)
+                  .map((u: any) => (
+                    <SelectItem key={u.id} value={u.id}>{u.full_name || u.id.slice(0, 8)}</SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
