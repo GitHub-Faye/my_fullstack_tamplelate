@@ -69,6 +69,8 @@ export function getPmActions(task: TaskPublic, currentUserId: string | undefined
       actions.push({ label: "直接指派", icon: <UserPlus className="h-3.5 w-3.5" />, action: "assign", variant: "default" });
       // PM 可自己接手竞价任务作为执行人
       actions.push({ label: "自己接手", icon: <User className="h-3.5 w-3.5" />, action: "selfAssign", variant: "default" });
+      // PM 可手动触发竞价结算（同管理员的结算能力）
+      actions.push({ label: "触发竞价结算", icon: <CheckCircle2 className="h-3.5 w-3.5" />, action: "settleBidding", variant: "default" });
       if (PM_EDITABLE_STATUSES.includes(status as any)) {
         actions.push({ label: "编辑", icon: <Edit className="h-3.5 w-3.5" />, action: "edit", variant: "outline" });
       }

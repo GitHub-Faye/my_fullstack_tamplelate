@@ -47,6 +47,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Plus, Search, RotateCcw, Paperclip, Calendar, User, MoreHorizontal } from "lucide-react";
 import { useTasks } from "../api";
 import { useCurrentUser, useUsers } from "@/features/user";
+import { useSettleBidding } from "../api/client/adminMutations";
 import {
   withdrawTaskV1TasksTaskIdWithdrawPost,
   deleteTaskV1TasksTaskIdDelete,
@@ -105,7 +106,7 @@ const DEFAULT_FILTERS = {
 /** 删除确认弹窗状态 */
 interface ConfirmState {
   open: boolean;
-  action: "delete" | "withdraw" | "publish" | "selfAssign" | "selfComplete" | null;
+  action: "delete" | "withdraw" | "publish" | "selfAssign" | "selfComplete" | "settle" | null;
   task: TaskPublic | null;
 }
 
@@ -148,6 +149,7 @@ export function PMTaskTable() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editTask, setEditTask] = useState<TaskPublic | null>(null);
   const [reviewTask, setReviewTask] = useState<TaskPublic | null>(null);
+  const settleBidding = useSettleBidding();
   // 每秒递增的 ticker，用于驱动报价倒计时刷新
   const [now, setNow] = useState(Date.now());
 
@@ -196,6 +198,8 @@ export function PMTaskTable() {
       } else if (confirm.action === "selfComplete") {
         await selfCompleteTaskV1TasksTaskIdSelfCompletePost({ path: { task_id: confirm.task.id } });
         toast.success("任务已完成");
+      } else if (confirm.action === "settle") {
+        await settleBidding.mutateAsync(confirm.task.id);
       }
       refetch();
     } catch (e: any) {
@@ -221,6 +225,9 @@ export function PMTaskTable() {
         break;
       case "withdraw":
         setConfirm({ open: true, action: "withdraw", task });
+        break;
+      case "settleBidding":
+        setConfirm({ open: true, action: "settle", task });
         break;
       case "bidLog":
         setBidLogTask(task);
@@ -528,7 +535,7 @@ export function PMTaskTable() {
                   ? "确认自己接手任务"
                   : confirm.action === "selfComplete"
                     ? "确认完成任务"
-                    : confirm.action === "delete" ? "确认删除" : "确认撤回"}
+                    : confirm.action === "delete" ? "确认删除" : confirm.action === "settle" ? "确认触发竞价结算" : "确认撤回"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirm.action === "publish"
@@ -539,7 +546,9 @@ export function PMTaskTable() {
                     ? "将任务标记为完成，该任务不涉及星点计算。"
                     : confirm.action === "delete"
                       ? "此操作不可撤销，任务将被永久删除。"
-                      : "撤回后任务将回到「未确认」状态。"}
+                      : confirm.action === "settle"
+                        ? "立即结束竞价并按最优报价选中中标工程师，即使报价截止时间未到。"
+                        : "撤回后任务将回到「未确认」状态。"}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
