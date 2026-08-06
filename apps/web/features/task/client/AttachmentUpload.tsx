@@ -1,8 +1,20 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Paperclip, X, Loader2, FileText, Download } from "lucide-react";
+import {
+  Paperclip,
+  X,
+  Loader2,
+  FileText,
+  Download,
+  Eye,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   uploadAttachmentV1TasksTaskIdAttachmentsPost,
   listAttachmentsV1TasksTaskIdAttachmentsGet,
@@ -20,6 +32,9 @@ interface Attachment {
   uploaded_by: string;
   created_at?: string | null;
 }
+
+// 图片扩展名 → 是否可在线预览
+const IMAGE_EXT = /\.(png|jpe?g|gif|bmp|svg)$/i;
 
 /**
  * 附件上传组件
@@ -147,6 +162,47 @@ export function AttachmentUpload({
     []
   );
 
+  // 预览图片：带 Authorization 请求并以内联 blob 展示（token 不暴露在 URL）
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewName, setPreviewName] = useState("");
+
+  const handlePreview = useCallback(
+    async (attachmentId: string, fileName: string) => {
+      const token = getAuthToken();
+      if (!token) {
+        toast.error("未登录，无法预览");
+        return;
+      }
+      const baseUrl = client.getConfig().baseUrl;
+      const url = `${baseUrl}/v1/tasks/attachments/${attachmentId}/download`;
+
+      try {
+        const response = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) {
+          throw new Error(`预览失败 (${response.status})`);
+        }
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        setPreviewUrl(blobUrl);
+        setPreviewName(fileName);
+      } catch (err: any) {
+        toast.error(err.message || "预览失败");
+      }
+    },
+    []
+  );
+
+  const closePreview = useCallback(() => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setPreviewName("");
+  }, [previewUrl]);
+
+  // 判断是否为可预览图片
+  const isImage = (fileName: string) => IMAGE_EXT.test(fileName);
+
   // 格式化文件大小
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes}B`;
@@ -212,6 +268,18 @@ export function AttachmentUpload({
                 </span>
               </div>
               <div className="flex items-center gap-1 shrink-0 ml-2">
+                {isImage(att.file_name) && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => handlePreview(att.id, att.file_name)}
+                    title="预览"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="ghost"
@@ -243,6 +311,20 @@ export function AttachmentUpload({
           暂无附件，点击上方按钮选择文件上传
         </p>
       )}
+
+      {/* 图片预览弹窗 */}
+      <Dialog open={!!previewUrl} onOpenChange={(open) => !open && closePreview()}>
+        <DialogContent className="max-w-3xl">
+          <DialogTitle className="pr-8">{previewName}</DialogTitle>
+          {previewUrl && (
+            <img
+              src={previewUrl}
+              alt={previewName}
+              className="max-h-[70vh] w-full rounded-md object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

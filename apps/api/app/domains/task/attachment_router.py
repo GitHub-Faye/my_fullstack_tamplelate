@@ -28,6 +28,16 @@ ALLOWED_EXTENSIONS = {
     ".txt", ".md", ".csv", ".html",
 }
 
+# 图片扩展名 → 真实 MIME 类型映射（用于内联预览）
+IMAGE_MEDIA_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".bmp": "image/bmp",
+    ".svg": "image/svg+xml",
+}
+
 
 @router.post(
     "/{task_id}/attachments",
@@ -135,10 +145,17 @@ async def download_attachment(
             detail="File not found on disk",
         )
 
+    # 图片类型使用真实 MIME 并内联展示（浏览器可直接打开预览）
+    # 其余类型强制下载
+    ext = file_path.suffix.lower()
+    media_type = IMAGE_MEDIA_TYPES.get(ext, "application/octet-stream")
+    disposition = "inline" if ext in IMAGE_MEDIA_TYPES else "attachment"
+
     return FileResponse(
         path=str(file_path),
         filename=attachment.file_name,
-        media_type="application/octet-stream",
+        media_type=media_type,
+        content_disposition_type=disposition,
     )
 
 
