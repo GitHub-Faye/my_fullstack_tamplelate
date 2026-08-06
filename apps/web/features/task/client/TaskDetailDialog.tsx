@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip, Star, Send, UserPlus, User, CheckCircle2 } from "lucide-react";
+import { Eye, Edit, Trash2, FileText, AlertTriangle, History, Archive, Loader2, Download, Paperclip, EyeIcon, Star, Send, UserPlus, User, CheckCircle2 } from "lucide-react";
 import type { TaskPublic, TaskStatus, TaskType } from "@repo/sdk";
 import {
   TASK_STATUS_LABELS,
@@ -174,6 +174,39 @@ export function TaskDetailDialog({
     }
   }, []);
 
+  // 图片预览弹窗
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewName, setPreviewName] = useState("");
+  const closePreview = useCallback(() => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setPreviewName("");
+  }, [previewUrl]);
+
+  // 预览图片：带 Authorization 请求并以内联 blob 展示（token 不暴露在 URL）
+  const handlePreview = useCallback(async (attachmentId: string, fileName: string) => {
+    const token = getAuthToken();
+    if (!token) return;
+    const baseUrl = client.getConfig().baseUrl;
+    const url = `${baseUrl}/v1/tasks/attachments/${attachmentId}/download`;
+
+    try {
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error(`预览失败 (${response.status})`);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setPreviewUrl(blobUrl);
+      setPreviewName(fileName);
+    } catch (err: any) {
+      // 静默处理
+    }
+  }, []);
+
+  // 判断是否为可预览图片
+  const isImage = (fileName: string) => /\.(png|jpe?g|gif|bmp|svg)$/i.test(fileName);
+
   // 格式化文件大小
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes}B`;
@@ -182,15 +215,16 @@ export function TaskDetailDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl">{task.name}</DialogTitle>
-          <DialogDescription>任务详情</DialogDescription>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">{task.name}</DialogTitle>
+            <DialogDescription>任务详情</DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-6">
-          {/* 任务基本信息 */}
+          <div className="space-y-6">
+            {/* 任务基本信息 */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
             <div className="flex gap-1">
               <span className="text-muted-foreground shrink-0">任务类型</span>
@@ -264,16 +298,30 @@ export function TaskDetailDialog({
                         {formatSize(att.file_size)}
                       </span>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="shrink-0"
-                      onClick={() => handleDownload(att.id, att.file_name)}
-                    >
-                      <Download className="h-3.5 w-3.5 mr-1" />
-                      下载
-                    </Button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      {isImage(att.file_name) && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="shrink-0"
+                          onClick={() => handlePreview(att.id, att.file_name)}
+                        >
+                          <EyeIcon className="h-3.5 w-3.5 mr-1" />
+                          预览
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="shrink-0"
+                        onClick={() => handleDownload(att.id, att.file_name)}
+                      >
+                        <Download className="h-3.5 w-3.5 mr-1" />
+                        下载
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -326,5 +374,22 @@ export function TaskDetailDialog({
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* 图片预览弹窗 */}
+    <Dialog open={!!previewUrl} onOpenChange={(open) => !open && closePreview()}>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle className="pr-8">{previewName}</DialogTitle>
+        </DialogHeader>
+        {previewUrl && (
+          <img
+            src={previewUrl}
+            alt={previewName}
+            className="max-h-[70vh] w-full rounded-md object-contain"
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  </>
   );
 }
