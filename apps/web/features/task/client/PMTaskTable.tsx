@@ -44,7 +44,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Search, RotateCcw, Paperclip, Calendar, User, MoreHorizontal } from "lucide-react";
+import { Loader2, Plus, Search, RotateCcw, Paperclip, Calendar, User, MoreHorizontal, Users } from "lucide-react";
 import { useTasks } from "../api";
 import { useCurrentUser, useUsers } from "@/features/user";
 import { useSettleBidding } from "../api/client/adminMutations";
@@ -397,6 +397,14 @@ export function PMTaskTable() {
                       ) : (
                         "-"
                       )}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {task.status === TaskStatusConst.BIDDING
+                        ? <span className="inline-flex items-center gap-1 font-medium text-orange-600">
+                            <Users className="h-3.5 w-3.5" />
+                            {task.bid_count ?? 0} 人
+                          </span>
+                        : "-"}
                     </TableCell>
                     <TableCell className="text-sm">
                       {(task as any).engineer_name ?? (task.engineer_id ? task.engineer_id.slice(0, 8) : "-")}

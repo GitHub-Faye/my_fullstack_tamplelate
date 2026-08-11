@@ -62,6 +62,7 @@ class TaskPublic(TaskBase):
     T_effective: Optional[float] = None
     progress: Optional[str] = None
     T_reported_complete_time: Optional[datetime] = None
+    bid_count: int = Field(default=0, description="竞价人数（当前任务收到的报价数量）")
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

@@ -11,7 +11,7 @@ from typing import Optional, Tuple
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import Task, TaskStatus, TaskType, User
+from app.core.models import Task, TaskStatus, TaskType, User, Bid
 from app.domains.task.schemas import TaskCreate, TaskUpdate
 from app.core.db_utils import paginated_query
 
@@ -94,8 +94,36 @@ async def get_tasks(
 
     # 填充所有任务的姓名（批量查询）
     await _batch_fill_user_names(session, tasks)
+    # 填充所有任务的竞价人数（批量查询）
+    await _batch_fill_bid_counts(session, tasks)
 
     return tasks, count
+
+
+async def _batch_fill_bid_counts(session: AsyncSession, tasks: list[Task]) -> None:
+    """
+    批量从 Bid 表填充每个任务的竞价人数（原地修改 task.bid_count）
+
+    Args:
+        session: 数据库会话
+        tasks: 任务列表（原地修改）
+    """
+    if not tasks:
+        return
+
+    task_ids = [t.id for t in tasks if t.id]
+
+    # 通过关联 Bid 表批量统计，避免 N+1
+    stmt = (
+        select(Bid.task_id, func.count(Bid.id))
+        .where(Bid.task_id.in_(task_ids))
+        .group_by(Bid.task_id)
+    )
+    result = await session.execute(stmt)
+    bid_counts = {task_id: count for task_id, count in result.all()}
+
+    for task in tasks:
+        task.bid_count = bid_counts.get(task.id, 0)
 
 
 async def _batch_fill_user_names(session: AsyncSession, tasks: list[Task]) -> None:
