@@ -63,12 +63,12 @@ class TaskPublic(TaskBase):
     progress: Optional[str] = None
     T_reported_complete_time: Optional[datetime] = None
     bid_count: int = Field(default=0, description="竞价人数（当前任务收到的报价数量）")
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
+
+# ==================== 任务列表响应模型 ====================
 
 class TasksPublic(PaginatedResponse[TaskPublic]):
-    """任务列表分页响应"""
+    """任务列表分页响应，data 元素为响应视图，需手动映射才能填充 bid_count"""
     pass
 
 

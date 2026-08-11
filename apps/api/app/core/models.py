@@ -338,9 +338,6 @@ class Task(TaskBase, table=True):
     bids: List["Bid"] = Relationship(back_populates="task", cascade_delete=True)
     attachments: List["Attachment"] = Relationship(back_populates="task", cascade_delete=True)
 
-    # 竞价人数（非持久化字段，由 repository 批量填充，用于列表展示）
-    bid_count: int = 0
-
 
 # ==================================== Bid ====================================
 class BidBase(SQLModel):

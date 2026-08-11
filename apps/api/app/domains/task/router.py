@@ -172,8 +172,18 @@ async def read_tasks(
         limit=page_size,
     )
 
+    # 填充竞价人数：Task 是数据库表模型，动态赋值无法被 SQLModel 严格模式读取，
+    # 需在响应视图上显式写入，避免 SQLAlchemy 将 bid_count 误当列查询导致 1054 报错。
+    views = [TaskPublic.model_validate(t) for t in tasks]
+    if tasks:
+        bid_counts = await repository.get_task_bid_counts(
+            session=session, task_ids=[t.id for t in tasks]
+        )
+        for view, task in zip(views, tasks):
+            view.bid_count = bid_counts.get(task.id, 0)
+
     return TasksPublic(
-        data=tasks,
+        data=views,
         count=count,
         page=page,
         page_size=page_size,

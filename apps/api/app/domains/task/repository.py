@@ -94,36 +94,35 @@ async def get_tasks(
 
     # 填充所有任务的姓名（批量查询）
     await _batch_fill_user_names(session, tasks)
-    # 填充所有任务的竞价人数（批量查询）
-    await _batch_fill_bid_counts(session, tasks)
 
     return tasks, count
 
 
-async def _batch_fill_bid_counts(session: AsyncSession, tasks: list[Task]) -> None:
+async def get_task_bid_counts(
+    *,
+    session: AsyncSession,
+    task_ids: list[uuid.UUID],
+) -> dict[uuid.UUID, int]:
     """
-    批量从 Bid 表填充每个任务的竞价人数（原地修改 task.bid_count）
+    批量统计一批任务的竞价人数（报价数量）。
 
     Args:
         session: 数据库会话
-        tasks: 任务列表（原地修改）
+        task_ids: 任务 UUID 列表
+
+    Returns:
+        {task_id: bid_count} 映射
     """
-    if not tasks:
-        return
+    if not task_ids:
+        return {}
 
-    task_ids = [t.id for t in tasks if t.id]
-
-    # 通过关联 Bid 表批量统计，避免 N+1
     stmt = (
         select(Bid.task_id, func.count(Bid.id))
         .where(Bid.task_id.in_(task_ids))
         .group_by(Bid.task_id)
     )
     result = await session.execute(stmt)
-    bid_counts = {task_id: count for task_id, count in result.all()}
-
-    for task in tasks:
-        task.bid_count = bid_counts.get(task.id, 0)
+    return {task_id: count for task_id, count in result.all()}
 
 
 async def _batch_fill_user_names(session: AsyncSession, tasks: list[Task]) -> None:
