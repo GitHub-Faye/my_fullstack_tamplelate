@@ -40,8 +40,8 @@ export function StarPointReviewDialog({
 
   const handleSubmit = async () => {
     const amount = parseInt(changeAmount, 10);
-    if (isNaN(amount) || amount === 0) {
-      toast.error("请输入有效的星点值（正数加分，负数扣减）");
+    if (isNaN(amount)) {
+      toast.error("请输入有效的星点值（正数加分，负数扣减，允许填0）");
       return;
     }
     if (!reason.trim()) {
