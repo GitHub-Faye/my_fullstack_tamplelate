@@ -371,12 +371,12 @@ export function PMTaskTable() {
                 <TableRow>
                   <TableHead>任务</TableHead>
                   <TableHead>类型</TableHead>
+                  <TableHead>竞价</TableHead>
                   <TableHead>工程师</TableHead>
                   <TableHead>预期上线</TableHead>
-                  <TableHead>T估</TableHead>
-                  <TableHead>报价倒计时/T报</TableHead>
-                  <TableHead>T报完成时间/T实</TableHead>
-                  <TableHead>当前阶段/进度</TableHead>
+                  <TableHead>T估/T报</TableHead>
+                  <TableHead>完成时间/T实</TableHead>
+                  <TableHead>进度</TableHead>
                   <TableHead>状态</TableHead>
                   <TableHead className="text-right">操作</TableHead>
                 </TableRow>
