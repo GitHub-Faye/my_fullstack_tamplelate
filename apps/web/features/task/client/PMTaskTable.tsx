@@ -374,7 +374,8 @@ export function PMTaskTable() {
                   <TableHead>竞价</TableHead>
                   <TableHead>工程师</TableHead>
                   <TableHead>预期上线</TableHead>
-                  <TableHead>T估/T报</TableHead>
+                  <TableHead>T估</TableHead>
+                  <TableHead>T报/倒计时</TableHead>
                   <TableHead>完成时间/T实</TableHead>
                   <TableHead>进度</TableHead>
                   <TableHead>状态</TableHead>
