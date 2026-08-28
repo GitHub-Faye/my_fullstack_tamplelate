@@ -89,11 +89,6 @@ def configure_logging() -> None:
                 "level": "WARNING",
                 "propagate": False,
             },
-            "celery": {
-                "handlers": handlers,
-                "level": "INFO",
-                "propagate": False,
-            },
         },
     }
     

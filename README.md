@@ -1,6 +1,6 @@
 # My Fullstack Template
 
-全栈开发模板，基于 **FastAPI + Next.js + PostgreSQL + TanStack Query** 的现代化 Monorepo 架构。
+全栈开发模板，基于 **FastAPI + Next.js + SQLite + TanStack Query** 的现代化 Monorepo 架构。
 
 ## 📋 项目架构总览
 
@@ -21,14 +21,14 @@ my_fullstack_tamplelate/
 
 | 层 | 技术栈 | 路径 |
 |----|--------|------|
-| **后端** | FastAPI + SQLModel + PostgreSQL + Celery | [`apps/api/`](apps/api/) |
+| **后端** | FastAPI + SQLModel + SQLite | [`apps/api/`](apps/api/) |
 | **前端** | Next.js 16 + React 19 + TanStack Query + shadcn/ui | [`apps/web/`](apps/web/) |
 | **SDK** | OpenAPI 自动生成客户端 + React Query Hooks | [`packages/sdk/`](packages/sdk/sdk.md) |
 | **契约** | 共享错误码/Scope/分页协议 | [`packages/contracts/`](packages/contracts/contracts.md) |
 | **UI** | 共享 React 组件 | [`packages/ui/`](packages/ui/) |
 | **文档** | Next.js 文档站 | [`apps/docs/`](apps/docs/) |
 
-**数据流：** `前端 (Next.js)` → `SDK (@repo/sdk)` → `API (FastAPI)` → `PostgreSQL`
+**数据流：** `前端 (Next.js)` → `SDK (@repo/sdk)` → `API (FastAPI)` → `SQLite`
 
 ---
 
@@ -45,24 +45,20 @@ uv venv --python 3.11.15
 uv sync 
 ```
 
-### 2. 启动基础设施（Docker）
+### 2. 准备数据库
 
-```bash
-cd apps/api
-docker compose up -d postgres redis rabbitmq
-```
+本项目默认使用 **SQLite**（文件数据库），无需 Docker 或外部数据库服务。
+启动时如数据库文件不存在会自动创建（迁移见第 3 步）。
 
-| 服务 | 端口 | 用途 |
-|------|------|------|
-| **PostgreSQL** | `5432` | 主数据库（配置见 [`apps/api/.env`](apps/api/.env)） |
-| **Redis** | `6379` | 缓存/Celery Backend |
-| **RabbitMQ** | `5672` / `15672` | Celery 消息队列 |
+> 如需使用 MySQL / PostgreSQL，在 [`apps/api/.env`](apps/api/.env) 中设置 `DATABASE_URL` 即可，例如：
+> `DATABASE_URL=mysql+asyncmy://user:pass@host:3306/dbname`
+> `DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/dbname`
 
 ### 3. 数据库迁移
 
 ```bash
 cd apps/api
-alembic upgrade head
+uv run alembic upgrade head
 ```
 
 迁移配置在 [`migrations/env.py`](apps/api/migrations/env.py)，模型定义在 [`app/core/models.py`](apps/api/app/core/database.py)。
@@ -274,7 +270,7 @@ export async function getCategories(accessToken: string) {
 | **错误处理** | 使用 [`app/core/errors.py`](apps/api/app/core/errors.py) 中的统一错误函数 |
 | **异步优先** | 所有数据库操作使用 SQLModel 异步接口 |
 | **自动迁移** | 模型修改后运行 `alembic revision --autogenerate` |
-| **Celery 任务** | 耗时任务放到 `app/tasks/`，用 `@celery_app.task` 装饰 |
+| **定时/后台任务** | 暂未接入（Celery/RabbitMQ 已移除），后续需要可重新引入 |
 
 ### 前端约定
 
@@ -593,9 +589,9 @@ function OrderList() {
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  │
 │         └────────┬────────┘────────┬────────┘          │
 │                  ▼                 ▼                    │
-│          ┌────────────┐   ┌────────────┐              │
-│          │ PostgreSQL │   │   Redis    │              │
-│          └────────────┘   └────────────┘              │
+│                ┌──────┐                                 │
+│                │SQLite│                                 │
+│                └──────┘                                 │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -620,9 +616,9 @@ function OrderList() {
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  │
 │         └────────┬────────┘────────┬────────┘          │
 │                  ▼                 ▼                    │
-│          ┌────────────┐   ┌────────────┐              │
-│          │ PostgreSQL │   │   Redis    │              │
-│          └────────────┘   └────────────┘              │
+│                ┌──────┐                                 │
+│                │SQLite│                                 │
+│                └──────┘                                 │
 └─────────────────────────────────────────────────────────┘
 ```
 

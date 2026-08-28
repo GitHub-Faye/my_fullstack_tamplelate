@@ -4,7 +4,6 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Query
 
 from app.core.dependencies import (
-    CurrentActiveSuperuser,
     CurrentUser,
     SessionDep,
     require_scope,
@@ -59,7 +58,7 @@ async def read_items(
         )
     
     return ItemsPublic(
-        data=items,
+        data=[ItemPublic.model_validate(i) for i in items],
         count=count,
         page=pagination.page,
         page_size=pagination.page_size,
@@ -138,10 +137,10 @@ async def update_item(
     item = await repository.get_item(session=session, item_id=item_id)
     if not item:
         raise_item_not_found()
-    
+
     # Check permission (owner or admin)
     await check_item_owner_or_admin(session, current_user, item.owner_id)
-    
+
     item = await repository.update_item(
         session=session,
         db_item=item,
@@ -153,22 +152,22 @@ async def update_item(
 @router.delete("/{item_id}")
 async def delete_item(
     session: SessionDep,
-    current_user: CurrentActiveSuperuser,
+    current_user: CurrentUser,
     item_id: uuid.UUID,
     _: Annotated[None, Depends(require_any_scope(ItemScope.DELETE, ItemScope.ADMIN))],
 ) -> Message:
     """
     Delete an item.
-    
+
     - Regular users can only delete their own items (requires item:delete permission)
     - Users with item:admin permission can delete any item
     """
     item = await repository.get_item(session=session, item_id=item_id)
     if not item:
         raise_item_not_found()
-    
+
     # Check permission (owner or admin)
     await check_item_owner_or_admin(session, current_user, item.owner_id)
-    
+
     await repository.delete_item(session=session, db_item=item)
     return Message(message="Item deleted successfully")

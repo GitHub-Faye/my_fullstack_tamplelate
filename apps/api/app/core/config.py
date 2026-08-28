@@ -7,7 +7,6 @@ from pydantic import (
     BeforeValidator,
     EmailStr,
     HttpUrl,
-    PostgresDsn,
     computed_field,
     model_validator,
 )
@@ -109,41 +108,37 @@ class Settings(BaseSettings):
 
     DEBUG: bool = True  # 调试模式开关（生产环境应设置为 False）
 
-    # ======================== PostgreSQL 数据库配置 ========================
-    POSTGRES_SERVER: str  # 数据库服务器地址
+    # ======================== 数据库配置 ========================
+    # 优先使用 DATABASE_URL（支持任意 SQLAlchemy 异步方言，如 SQLite / MySQL / PostgreSQL）
+    # 未设置 DATABASE_URL 时，回退到 PostgreSQL 环境变量；两者都未配置则默认本地 SQLite 文件库
+    DATABASE_URL: str | None = None
+
+    # PostgreSQL 配置（可选：仅在未设置 DATABASE_URL 时生效）
+    POSTGRES_SERVER: str | None = None  # 数据库服务器地址
     POSTGRES_PORT: int = 5432  # 数据库端口（默认 5432）
-    POSTGRES_USER: str  # 数据库用户名
-    POSTGRES_PASSWORD: str = ""  # 数据库密码（⚠️ 生产必改）
-    POSTGRES_DB: str = ""  # 数据库名称
+    POSTGRES_USER: str | None = None  # 数据库用户名
+    POSTGRES_PASSWORD: str | None = None  # 数据库密码（⚠️ 生产必改）
+    POSTGRES_DB: str | None = None  # 数据库名称
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
         """
         Pydantic v2 计算属性：生成 SQLAlchemy 数据库连接 URI。
-        
-        格式：postgresql+asyncpg://user:password@host:port/dbname
-        
-        使用 asyncpg。
-        """
-        return PostgresDsn.build(
-            scheme="postgresql+asyncpg",
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            host=self.POSTGRES_SERVER,
-            port=self.POSTGRES_PORT,
-            path=self.POSTGRES_DB,
-        ).unicode_string() 
 
-    # ======================== Redis 配置 ========================
-    REDIS_PASSWORD: str = ""
-    REDIS_PORT: int = 6379
-    REDIS_URL: str | None = None
-    
-    # ======================== Celery 配置 ========================
-    CELERY_BROKER_URL: str | None = None
-    CELERY_RESULT_BACKEND: str | None = None
-    
+        优先级：
+        1. DATABASE_URL（.env 中显式指定，例如 sqlite+aiosqlite:///./app.db）
+        2. PostgreSQL 环境变量（postgresql+asyncpg://user:password@host:port/dbname）
+        3. 默认本地 SQLite 文件库（无需外部数据库即可启动）
+        """
+        if self.DATABASE_URL:
+            return self.DATABASE_URL
+
+        if self.POSTGRES_SERVER and self.POSTGRES_USER and self.POSTGRES_DB:
+            return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD or ''}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+
+        return f"sqlite+aiosqlite:///{BASE_DIR / 'app.db'}"
+
     # ======================== SMTP 邮件配置 ========================
     SMTP_TLS: bool = True  # 是否使用 STARTTLS（通常为 True）
     SMTP_SSL: bool = False  # 是否使用 SSL/TLS 加密连接（通常为 False）

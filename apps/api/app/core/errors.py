@@ -6,7 +6,7 @@
 """
 
 from enum import Enum
-from typing import Any
+from typing import Any, NoReturn
 
 from fastapi import HTTPException, status
 
@@ -52,13 +52,13 @@ class ErrorCode(str, Enum):
 ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     # 400 Bad Request
     ErrorCode.AUTH_INVALID_CREDENTIALS: status.HTTP_400_BAD_REQUEST,
-    ErrorCode.AUTH_INVALID_TOKEN: status.HTTP_400_BAD_REQUEST,
     ErrorCode.AUTH_INACTIVE_USER: status.HTTP_400_BAD_REQUEST,
     ErrorCode.USER_INVALID_PASSWORD: status.HTTP_400_BAD_REQUEST,
     ErrorCode.USER_PASSWORD_SAME_AS_OLD: status.HTTP_400_BAD_REQUEST,
     ErrorCode.SYSTEM_VALIDATION_ERROR: status.HTTP_400_BAD_REQUEST,
-    
+
     # 401 Unauthorized
+    ErrorCode.AUTH_INVALID_TOKEN: status.HTTP_401_UNAUTHORIZED,
     ErrorCode.AUTH_EXPIRED_TOKEN: status.HTTP_401_UNAUTHORIZED,
     
     # 403 Forbidden
@@ -142,7 +142,7 @@ class BusinessException(HTTPException):
     
     def to_dict(self) -> dict[str, Any]:
         """转换为字典格式，用于响应"""
-        result = {
+        result: dict[str, Any] = {
             "detail": self.detail,
             "code": self.code.value,
         }
@@ -161,12 +161,12 @@ def raise_auth_error(
     raise BusinessException(code=code, detail=detail)
 
 
-def raise_user_not_found(detail: str | None = None) -> None:
+def raise_user_not_found(detail: str | None = None) -> NoReturn:
     """抛出用户不存在错误"""
     raise BusinessException(code=ErrorCode.USER_NOT_FOUND, detail=detail)
 
 
-def raise_user_already_exists(detail: str | None = None) -> None:
+def raise_user_already_exists(detail: str | None = None) -> NoReturn:
     """抛出用户已存在错误"""
     raise BusinessException(
         code=ErrorCode.USER_EMAIL_ALREADY_EXISTS,
@@ -174,12 +174,12 @@ def raise_user_already_exists(detail: str | None = None) -> None:
     )
 
 
-def raise_item_not_found(detail: str | None = None) -> None:
+def raise_item_not_found(detail: str | None = None) -> NoReturn:
     """抛出物品不存在错误"""
     raise BusinessException(code=ErrorCode.ITEM_NOT_FOUND, detail=detail)
 
 
-def raise_permission_denied(detail: str | None = None) -> None:
+def raise_permission_denied(detail: str | None = None) -> NoReturn:
     """抛出权限不足错误"""
     raise BusinessException(
         code=ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS,

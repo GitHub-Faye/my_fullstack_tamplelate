@@ -55,7 +55,8 @@ async def test_register_user_duplicate_email(client: AsyncClient, test_user: Use
         },
     )
     
-    assert response.status_code == 400
+    # 邮箱唯一性冲突返回 409（与 USER_EMAIL_ALREADY_EXISTS → 409 的约定一致）
+    assert response.status_code == 409
     data = response.json()
     assert "already exists" in data["detail"]
 
@@ -335,7 +336,8 @@ async def test_create_user_duplicate_email_superuser(
         },
     )
     
-    assert response.status_code == 400
+    # 邮箱唯一性冲突返回 409（与 USER_EMAIL_ALREADY_EXISTS → 409 的约定一致）
+    assert response.status_code == 409
     data = response.json()
     assert "already exists" in data["detail"]
 

@@ -1,18 +1,19 @@
-"""init
+"""init sqlite
 
-Revision ID: db14db305daa
+Revision ID: 3110d5473bd1
 Revises: 
-Create Date: 2026-07-09 18:49:51.100797
+Create Date: 2026-08-28 10:50:52.627455
 
 """
 from typing import Sequence, Union
-import sqlmodel
+
 from alembic import op
 import sqlalchemy as sa
+import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'db14db305daa'
+revision: str = '3110d5473bd1'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

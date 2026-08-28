@@ -146,26 +146,12 @@ async def test_test_token_invalid_token(client: AsyncClient):
     client.headers["Authorization"] = "Bearer invalid_token"
     response = await client.post("/v1/login/test-token")
     
-    assert response.status_code == 403
+    assert response.status_code == 401
     data = response.json()
     assert "Could not validate credentials" in data["detail"]
 
 
 # ======================== 密码重置测试 ========================
 
-@pytest.mark.asyncio
-async def test_reset_password_invalid_token(client: AsyncClient):
-    """
-    测试使用无效的令牌重置密码失败。
-    """
-    response = await client.post(
-        "/v1/reset-password/",
-        json={
-            "token": "invalid_token",
-            "new_password": "newpassword123",
-        },
-    )
-    
-    assert response.status_code == 400
-    data = response.json()
-    assert "Invalid token" in data["detail"]
+# 注：当前应用未实现密码重置（/v1/reset-password/）功能，原模板遗留的
+# test_reset_password_invalid_token 已随功能移除而删除。

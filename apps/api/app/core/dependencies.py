@@ -102,6 +102,7 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
         raise BusinessException(
             code=ErrorCode.AUTH_INVALID_TOKEN,
             detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
         )
     
     # 从数据库查询用户
@@ -185,7 +186,7 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
     
     # 查询用户的所有角色及其 scopes
     stmt = (
-        select(RoleScope.scope)
+        select(RoleScope.scope)  # type: ignore[call-overload,arg-type]
         .join(Role, RoleScope.role_id == Role.id)
         .join(UserRole, Role.id == UserRole.role_id)
         .where(UserRole.user_id == user.id)

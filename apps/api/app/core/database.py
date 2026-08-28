@@ -8,6 +8,7 @@ from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import NullPool
 from sqlalchemy import select, func
+from sqlalchemy import event
 
 from typing import AsyncGenerator
 
@@ -25,6 +26,20 @@ engine = create_async_engine(
     poolclass=NullPool,  # 开发环境使用 NullPool，生产环境可改为 QueuePool
     future=True,
 )
+
+
+# SQLite 特殊处理：默认关闭外键约束，需在每次连接时显式开启（保证级联删除生效）
+def _is_sqlite() -> bool:
+    return settings.SQLALCHEMY_DATABASE_URI.startswith("sqlite")
+
+
+if _is_sqlite():
+
+    @event.listens_for(engine.sync_engine, "connect")
+    def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:  # noqa: ANN001
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
 
 # 创建异步会话工厂
 AsyncSessionLocal = async_sessionmaker(

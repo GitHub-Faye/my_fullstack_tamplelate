@@ -57,8 +57,8 @@ async def test_read_items_pagination(
     await db_session.commit()
     
     # 测试分页
-    response = await authorized_client.get("/v1/items/?skip=0&limit=3")
-    
+    response = await authorized_client.get("/v1/items/?page=1&page_size=3")
+
     assert response.status_code == 200
     data = response.json()
     assert data["count"] == 5  # 5 new items created in this test

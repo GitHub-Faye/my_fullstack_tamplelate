@@ -7,7 +7,7 @@ from sqlmodel import select
 
 from app.core.security import get_password_hash, verify_password
 from app.domains.user.schemas import UserCreate, UserUpdate, UserUpdateMe, UpdatePassword
-from app.core.models import User, Item
+from app.core.models import User, Item, Role, UserRole
 
 # ============================== 用户 CRUD 操作 ==============================
 async def get_user(*, session: AsyncSession, user_id: uuid.UUID) -> User | None:
@@ -65,12 +65,21 @@ async def create_user(*, session: AsyncSession, user_create: UserCreate) -> User
     创建新用户。
     - 调用 get_password_hash 对明文密码进行哈希
     - 使用 model_validate 转换请求 DTO 为数据库模型
+    - 默认分配 viewer 角色（item:read），保证新用户具备基础读取权限
     - 插入数据库并返回完整的用户对象
     """
     db_obj = User.model_validate(
         user_create, update={"hashed_password": get_password_hash(user_create.password)}
     )
     session.add(db_obj)
+    await session.flush()
+
+    # 默认分配 viewer 角色（若角色已初始化存在）
+    role_result = await session.execute(select(Role).where(Role.name == "viewer"))
+    viewer_role = role_result.scalar_one_or_none()
+    if viewer_role:
+        session.add(UserRole(user_id=db_obj.id, role_id=viewer_role.id))
+
     await session.commit()
     await session.refresh(db_obj)
     return db_obj

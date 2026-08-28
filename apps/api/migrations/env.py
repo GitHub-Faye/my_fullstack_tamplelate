@@ -4,6 +4,7 @@ from logging.config import fileConfig
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy import event
 
 from alembic import context
 
@@ -79,6 +80,15 @@ async def run_async_migrations() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+
+    # SQLite：迁移时开启外键约束，使 alembic batch_alter_table 与模型一致
+    if settings.SQLALCHEMY_DATABASE_URI.startswith("sqlite"):
+
+        @event.listens_for(connectable.sync_engine, "connect")
+        def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:  # noqa: ANN001
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON")
+            cursor.close()
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

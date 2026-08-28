@@ -17,6 +17,7 @@ import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlmodel import SQLModel
 
@@ -24,9 +25,10 @@ from sqlmodel import SQLModel
 from main import app as fastapi_app
 from app.core.config import get_settings, Settings
 from app.core.database import get_db
-from app.core.models import User, Item
+from app.core.models import User, Item, Role, RoleScope, UserRole
 from app.core.security import get_password_hash, create_access_token
-from apps.api.app.domains.item.dependencies import get_current_user, get_current_active_superuser
+from app.core.dependencies import get_current_user, get_current_active_superuser
+from app.core.scopes import DEFAULT_ROLE_SCOPES
 
 
 # ======================== pytest-asyncio 配置 ========================
@@ -86,7 +88,17 @@ async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
     # 创建所有表
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
-    
+
+    # 初始化默认角色（viewer / editor / admin）及其 scopes
+    async with async_session() as session:
+        for role_name, scopes in DEFAULT_ROLE_SCOPES.items():
+            role = Role(name=role_name)
+            session.add(role)
+            await session.flush()
+            for scope_value in scopes:
+                session.add(RoleScope(role_id=role.id, scope=scope_value))
+        await session.commit()
+
     # 创建会话
     async with async_session() as session:
         yield session
@@ -101,22 +113,22 @@ async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
 # ======================== FastAPI App Fixture ========================
 
 @pytest_asyncio.fixture(scope="function")
-async def app(db_session: AsyncSession) -> FastAPI:
+async def app(db_session: AsyncSession) -> AsyncGenerator[FastAPI, None]:
     """
     创建配置好的 FastAPI 应用实例，用于测试。
-    
+
     覆盖的依赖：
     - get_db: 返回内存数据库会话
     """
     # 覆盖数据库依赖
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
         yield db_session
-    
+
     # 覆盖依赖
     fastapi_app.dependency_overrides[get_db] = override_get_db
-    
+
     yield fastapi_app
-    
+
     # 清理依赖覆盖
     fastapi_app.dependency_overrides.clear()
 
@@ -138,7 +150,9 @@ async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
 @pytest_asyncio.fixture(scope="function")
 async def test_user(db_session: AsyncSession) -> User:
     """
-    创建一个普通测试用户。
+    创建一个普通测试用户（默认分配 editor 角色，拥有 item 读/写权限）。
+
+    editor scopes: item:read, item:create, item:update, item:delete
     """
     user = User(
         email="test@example.com",
@@ -148,6 +162,14 @@ async def test_user(db_session: AsyncSession) -> User:
         is_superuser=False,
     )
     db_session.add(user)
+    await db_session.flush()
+
+    # 默认分配 editor 角色
+    role_result = await db_session.execute(select(Role).where(Role.name == "editor"))  # type: ignore[arg-type]
+    role = role_result.scalar_one_or_none()
+    if role:
+        db_session.add(UserRole(user_id=user.id, role_id=role.id))
+
     await db_session.commit()
     await db_session.refresh(user)
     return user
