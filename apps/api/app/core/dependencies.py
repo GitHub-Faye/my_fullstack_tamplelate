@@ -14,10 +14,9 @@
 
 import uuid
 from typing import Annotated
-from typing import AsyncGenerator
 
 import jwt
-from fastapi import Depends, status
+from fastapi import Depends
 
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
@@ -28,7 +27,7 @@ from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.models import User, Role, RoleScope, UserRole
 from app.core.security import reusable_oauth2
-from app.core.scopes import ItemScope
+from app.core.scopes import ALL_SCOPES, ItemScope
 from app.core.errors import (
     BusinessException,
     ErrorCode,
@@ -179,7 +178,7 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
     """
     # 超管拥有所有权限
     if user.is_superuser:
-        return {scope.value for scope in ItemScope}
+        return {scope.value for scope in ALL_SCOPES}
     
     # 加载用户的 roles 和 scopes
     scopes = set()

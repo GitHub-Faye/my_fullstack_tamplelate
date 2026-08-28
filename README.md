@@ -61,7 +61,7 @@ cd apps/api
 uv run alembic upgrade head
 ```
 
-迁移配置在 [`migrations/env.py`](apps/api/migrations/env.py)，模型定义在 [`app/core/models.py`](apps/api/app/core/database.py)。
+迁移配置在 [`migrations/env.py`](apps/api/migrations/env.py)，模型定义在 [`app/core/models.py`](apps/api/app/core/models.py)。
 
 ### 4. 启动后端
 
@@ -103,7 +103,7 @@ pnpm dev     # next dev --port 3000
 
 #### 1.1 创建数据库模型
 
-在 [`apps/api/app/core/models.py`](apps/api/app/core/database.py) 添加模型：
+在 [`apps/api/app/core/models.py`](apps/api/app/core/models.py) 添加模型：
 
 ```python
 class Category(SQLModel, table=True):

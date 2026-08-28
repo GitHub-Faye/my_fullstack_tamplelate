@@ -30,8 +30,13 @@ class UserRegister(SQLModel):
 
 
 # 更新用户时可选属性
-class UserUpdate(UserBase):
-    email: EmailStr | None = Field(default=None, max_length=255)  # type: ignore
+# 不继承 UserBase：父类字段为必填，此处需要全部可选（部分更新），
+# 独立声明避免用 type: ignore 覆盖父类字段的反模式。
+class UserUpdate(SQLModel):
+    email: EmailStr | None = Field(default=None, max_length=255)
+    is_active: bool | None = None
+    is_superuser: bool | None = None
+    full_name: str | None = Field(default=None, max_length=255)
     password: str | None = Field(default=None, min_length=8, max_length=128)
 
 
@@ -52,6 +57,8 @@ class UpdatePassword(SQLModel):
 class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
+    # 用户当前拥有的权限 scope 列表（由 read_user_me 等端点填充，用于前端 scope 级权限控制）
+    scopes: list[str] = []
 
 
 # 使用统一分页协议
