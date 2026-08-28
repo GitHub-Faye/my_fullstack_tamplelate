@@ -1,13 +1,13 @@
 from typing import Any, Tuple
 import uuid
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 
 from app.core.security import get_password_hash, verify_password
 from app.domains.user.schemas import UserCreate, UserUpdate, UserUpdateMe, UpdatePassword
-from app.core.models import User, Item, Role, UserRole
+from app.core.models import User, Role, UserRole
 
 # ============================== 用户 CRUD 操作 ==============================
 async def get_user(*, session: AsyncSession, user_id: uuid.UUID) -> User | None:
@@ -65,7 +65,7 @@ async def create_user(*, session: AsyncSession, user_create: UserCreate) -> User
     创建新用户。
     - 调用 get_password_hash 对明文密码进行哈希
     - 使用 model_validate 转换请求 DTO 为数据库模型
-    - 默认分配 viewer 角色（item:read），保证新用户具备基础读取权限
+    - 默认分配 viewer 角色（user:read），保证新用户具备基础读取权限
     - 插入数据库并返回完整的用户对象
     """
     db_obj = User.model_validate(
@@ -155,25 +155,12 @@ async def update_password_me(
 async def delete_user(*, session: AsyncSession, db_user: User) -> None:
     """
     删除指定用户。
-    
+
     Args:
         session: 数据库会话
         db_user: 要删除的用户对象
     """
     await session.delete(db_user)
-    await session.commit()
-
-
-async def delete_user_items(*, session: AsyncSession, user_id: uuid.UUID) -> None:
-    """
-    删除指定用户的所有关联项目。
-    
-    Args:
-        session: 数据库会话
-        user_id: 用户ID
-    """
-    statement = delete(Item).where(Item.owner_id == user_id)
-    await session.execute(statement)
     await session.commit()
 
 

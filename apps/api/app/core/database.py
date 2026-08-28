@@ -63,11 +63,11 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 async def init_roles_and_scopes(session: AsyncSession) -> None:
     """
     初始化默认角色和权限范围。
-    
+
     创建以下默认角色：
-    - viewer: 只读权限 (item:read)
-    - editor: 完全权限 (item:read, item:create, item:update, item:delete)
-    - admin: 管理权限 (所有 item 权限)
+    - viewer: 只读权限 (user:read)
+    - editor: 读/写权限 (user:read, user:create, user:update, user:delete)
+    - admin: 管理权限 (所有 user 权限 + system:read)
     """
     for role_name, scopes in DEFAULT_ROLE_SCOPES.items():
         # 检查角色是否已存在
@@ -102,7 +102,7 @@ async def init_default_admin(session: AsyncSession) -> None:
     默认管理员账号：
     - 邮箱: admin@admin.com
     - 密码: admin
-    - 角色: admin（拥有所有 item 权限）+ superuser
+    - 角色: admin（拥有所有 user 权限）+ superuser
     """
     # 检查是否已有用户
     result = await session.execute(select(func.count()).select_from(User))

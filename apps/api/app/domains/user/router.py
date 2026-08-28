@@ -21,7 +21,9 @@ from app.core.dependencies import (
     SessionDep,
     get_current_active_superuser,
     get_user_scopes,
+    require_any_scope,
 )
+from app.core.scopes import UserScope
 from app.core.config import get_settings
 from app.core.security import create_access_token, verify_password
 from app.core.schemas import Message, PaginationParams
@@ -321,7 +323,7 @@ async def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     业务逻辑：
     1. 检查当前用户是否为超管，超管不允许自删除（防止误操作导致系统无超管）
     2. 使用仓库函数删除用户记录
-    3. 级联删除会由数据库约束自动处理（User.items 有 cascade_delete=True）
+    3. 级联删除会由数据库约束自动处理（User.roles 关联表 userrole 外键为 CASCADE）
 
     异常：
     - 403：超管不允许删除自己
@@ -429,23 +431,25 @@ async def update_user(
     return user
 
 
-# ======================== 删除用户（超管操作） ========================
+# ======================== 删除用户（user:admin 判定） ========================
 
 @router.delete("/users/{user_id}")
 async def delete_user(
     session: SessionDep,
     current_user: CurrentUser,
     user_id: uuid.UUID,
-    _: Annotated[None, Depends(get_current_active_superuser)],
+    _: Annotated[None, Depends(require_any_scope(UserScope.ADMIN, UserScope.DELETE))],
 ) -> Message:
     """
-    删除指定用户（超管操作）。
+    删除指定用户（scope 判定，而非超管判定）。
 
-    权限：超管-only
+    权限：拥有 user:admin 或 user:delete scope（与用户管理删除按钮一致）。
+    - 超管本身拥有全部 scope，天然满足此权限。
+    - 普通拥有 user:delete scope 的角色（如 editor）也可删除用户。
 
     参数：
     - session：数据库会话
-    - current_user：当前超管用户（用于权限检查）
+    - current_user：当前用户（用于禁止删除自己）
     - user_id：目标用户 UUID
 
     返回值：
@@ -453,17 +457,18 @@ async def delete_user(
 
     业务流程：
     1. 查询目标用户是否存在
-    2. 防止超管删除自己（防止系统无超管）
-    3. 使用仓库函数删除该用户的所有 Item（确保数据一致性）
-    4. 使用仓库函数删除用户记录
+    2. 防止删除自己（防止系统无管理员）
+    3. 使用仓库函数删除用户记录（UserRole 关联由外键 CASCADE 自动清理）
+    4. 返回成功消息
 
     异常：
     - 404：用户不存在
     - 403：不允许删除自己
+    - 403：无 user:admin / user:delete scope
 
     注意：
-    - 虽然 User.items 有 cascade_delete=True，但此处显式删除 Item
-    - 这是为了确保数据库一致性和日志记录，避免某些场景下级联失败
+    - User.roles 多对多关联的表 userrole 外键为 ondelete="CASCADE"，
+      删除用户时数据库会自动清理其与角色的关联。
     """
     # 查询目标用户
     user = await repository.get_user(session=session, user_id=user_id)
@@ -476,9 +481,6 @@ async def delete_user(
             code=ErrorCode.USER_CANNOT_DELETE_SELF,
             detail="Super users are not allowed to delete themselves"
         )
-
-    # 使用仓库函数删除该用户的所有 Item（确保数据一致性）
-    await repository.delete_user_items(session=session, user_id=user_id)
 
     # 使用仓库函数删除用户
     await repository.delete_user(session=session, db_user=user)

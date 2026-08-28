@@ -8,16 +8,6 @@
 from enum import Enum
 
 
-class ItemScope(str, Enum):
-    """Item 资源的权限范围"""
-
-    READ = "item:read"       # 读取 item 列表/详情
-    CREATE = "item:create"  # 创建 item
-    UPDATE = "item:update"  # 更新 item
-    DELETE = "item:delete"  # 删除 item
-    ADMIN = "item:admin"    # 管理所有 item（包括他人的）
-
-
 class UserScope(str, Enum):
     """User 资源的权限范围"""
 
@@ -36,14 +26,6 @@ class SystemScope(str, Enum):
 
 
 # 所有 scope 的集合（用于初始化或验证）
-ALL_ITEM_SCOPES = [
-    ItemScope.READ,
-    ItemScope.CREATE,
-    ItemScope.UPDATE,
-    ItemScope.DELETE,
-    ItemScope.ADMIN,
-]
-
 ALL_USER_SCOPES = [
     UserScope.READ,
     UserScope.CREATE,
@@ -57,29 +39,24 @@ ALL_SYSTEM_SCOPES = [
     SystemScope.ADMIN,
 ]
 
-ALL_SCOPES = ALL_ITEM_SCOPES + ALL_USER_SCOPES + ALL_SYSTEM_SCOPES
+ALL_SCOPES = ALL_USER_SCOPES + ALL_SYSTEM_SCOPES
 
 
 # 预定义角色对应的 scopes
 # 注意：与 packages/contracts/src/scopes.ts 的 DEFAULT_ROLE_SCOPES 保持同步
+# 系统预置角色（viewer/editor/admin）不可修改/删除，
+# 由 app.core.database.init_roles_and_scopes 在启动时初始化。
 DEFAULT_ROLE_SCOPES = {
     "viewer": [
-        ItemScope.READ,
         UserScope.READ,
     ],
     "editor": [
-        ItemScope.READ,
-        ItemScope.CREATE,
-        ItemScope.UPDATE,
-        ItemScope.DELETE,
         UserScope.READ,
+        UserScope.CREATE,
+        UserScope.UPDATE,
+        UserScope.DELETE,
     ],
     "admin": [
-        ItemScope.READ,
-        ItemScope.CREATE,
-        ItemScope.UPDATE,
-        ItemScope.DELETE,
-        ItemScope.ADMIN,
         UserScope.READ,
         UserScope.CREATE,
         UserScope.UPDATE,

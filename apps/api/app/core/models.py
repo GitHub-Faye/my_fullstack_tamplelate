@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import List, Optional   # 保留 typing.List
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -59,7 +59,7 @@ class Role(RoleBase, table=True):
 # ==================================== RoleScope ====================================
 
 class RoleScopeBase(SQLModel):
-    scope: str = Field(max_length=100)  # 如 "item:read", "item:create"
+    scope: str = Field(max_length=100)  # 如 "user:read", "system:read"
 
 
 class RoleScope(RoleScopeBase, table=True):
@@ -92,33 +92,8 @@ class User(UserBase, table=True):
         sa_type=DateTime(timezone=True),
     )
 
-    # 与 Item 的一对多关系
-    items: List["Item"] = Relationship(
-        back_populates="owner",
-        cascade_delete=True,          # 推荐，替代 cascade="all, delete-orphan"
-    )
     # 与 Role 的多对多关系（通过 UserRole 关联表）
     roles: List["Role"] = Relationship(
         back_populates="users",
         link_model=UserRole,
     )
-
-
-# ==================================== Item ====================================
-class ItemBase(SQLModel):
-    title: str = Field(min_length=1, max_length=255)
-    description: Optional[str] = Field(default=None, max_length=255)
-
-
-class Item(ItemBase, table=True):
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    created_at: Optional[datetime] = Field(
-        default_factory=get_datetime_utc,
-        sa_type=DateTime(timezone=True),
-    )
-    owner_id: uuid.UUID = Field(
-        foreign_key="user.id", nullable=False, ondelete="CASCADE"
-    )
-
-    # 关键修改在这里
-    owner: Optional["User"] = Relationship(back_populates="items")

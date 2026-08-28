@@ -16,7 +16,7 @@ class ErrorCode(str, Enum):
     业务错误码枚举
     
     格式规范: DOMAIN_ACTION_DETAIL
-    - DOMAIN: 领域/模块 (AUTH, USER, ITEM, SYSTEM)
+    - DOMAIN: 领域/模块 (AUTH, USER, ROLE, SYSTEM)
     - ACTION: 操作 (INVALID, NOT_FOUND, ALREADY_EXISTS, FORBIDDEN, etc.)
     - DETAIL: 具体细节 (可选)
     """
@@ -38,10 +38,9 @@ class ErrorCode(str, Enum):
     USER_CANNOT_DELETE_SELF = "USER_CANNOT_DELETE_SELF"
     USER_CANNOT_DELETE_SUPERUSER = "USER_CANNOT_DELETE_SUPERUSER"
     
-    # ==================== 物品相关错误 (ITEM) ====================
-    ITEM_NOT_FOUND = "ITEM_NOT_FOUND"
-    ITEM_NOT_OWNER = "ITEM_NOT_OWNER"
-    
+    # ==================== 角色相关错误 (ROLE) ====================
+    ROLE_NOT_FOUND = "ROLE_NOT_FOUND"
+
     # ==================== 系统错误 (SYSTEM) ====================
     SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR"
     SYSTEM_VALIDATION_ERROR = "SYSTEM_VALIDATION_ERROR"
@@ -66,11 +65,10 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     ErrorCode.AUTH_MISSING_SCOPE: status.HTTP_403_FORBIDDEN,
     ErrorCode.USER_CANNOT_DELETE_SELF: status.HTTP_403_FORBIDDEN,
     ErrorCode.USER_CANNOT_DELETE_SUPERUSER: status.HTTP_403_FORBIDDEN,
-    ErrorCode.ITEM_NOT_OWNER: status.HTTP_403_FORBIDDEN,
-    
+
     # 404 Not Found
     ErrorCode.USER_NOT_FOUND: status.HTTP_404_NOT_FOUND,
-    ErrorCode.ITEM_NOT_FOUND: status.HTTP_404_NOT_FOUND,
+    ErrorCode.ROLE_NOT_FOUND: status.HTTP_404_NOT_FOUND,
     
     # 409 Conflict
     ErrorCode.USER_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
@@ -100,10 +98,9 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.USER_PASSWORD_SAME_AS_OLD: "New password cannot be the same as the current one",
     ErrorCode.USER_CANNOT_DELETE_SELF: "Super users are not allowed to delete themselves",
     ErrorCode.USER_CANNOT_DELETE_SUPERUSER: "Cannot delete superuser",
-    
-    ErrorCode.ITEM_NOT_FOUND: "Item not found",
-    ErrorCode.ITEM_NOT_OWNER: "Not enough permissions to access this item",
-    
+
+    ErrorCode.ROLE_NOT_FOUND: "Role not found",
+
     ErrorCode.SYSTEM_INTERNAL_ERROR: "Internal server error",
     ErrorCode.SYSTEM_VALIDATION_ERROR: "Validation error",
     ErrorCode.SYSTEM_RATE_LIMIT: "Too many requests",
@@ -174,9 +171,17 @@ def raise_user_already_exists(detail: str | None = None) -> NoReturn:
     )
 
 
-def raise_item_not_found(detail: str | None = None) -> NoReturn:
-    """抛出物品不存在错误"""
-    raise BusinessException(code=ErrorCode.ITEM_NOT_FOUND, detail=detail)
+def raise_role_not_found(detail: str | None = None) -> NoReturn:
+    """抛出角色不存在错误"""
+    raise BusinessException(code=ErrorCode.ROLE_NOT_FOUND, detail=detail)
+
+
+def raise_bad_request(detail: str | None = None) -> NoReturn:
+    """抛出通用请求错误（400）"""
+    raise BusinessException(
+        code=ErrorCode.SYSTEM_VALIDATION_ERROR,
+        detail=detail,
+    )
 
 
 def raise_permission_denied(detail: str | None = None) -> NoReturn:

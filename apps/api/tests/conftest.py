@@ -25,7 +25,7 @@ from sqlmodel import SQLModel
 from main import app as fastapi_app
 from app.core.config import get_settings, Settings
 from app.core.database import get_db
-from app.core.models import User, Item, Role, RoleScope, UserRole
+from app.core.models import User, Role, RoleScope, UserRole
 from app.core.security import get_password_hash, create_access_token
 from app.core.dependencies import get_current_user, get_current_active_superuser
 from app.core.scopes import DEFAULT_ROLE_SCOPES
@@ -150,9 +150,9 @@ async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
 @pytest_asyncio.fixture(scope="function")
 async def test_user(db_session: AsyncSession) -> User:
     """
-    创建一个普通测试用户（默认分配 editor 角色，拥有 item 读/写权限）。
+    创建一个普通测试用户（默认分配 editor 角色，拥有 user 读/写权限）。
 
-    editor scopes: item:read, item:create, item:update, item:delete
+    editor scopes: user:read, user:create, user:update, user:delete
     """
     user = User(
         email="test@example.com",
@@ -194,19 +194,17 @@ async def test_superuser(db_session: AsyncSession) -> User:
 
 
 @pytest_asyncio.fixture(scope="function")
-async def test_item(db_session: AsyncSession, test_user: User) -> Item:
+async def test_role(db_session: AsyncSession, test_user: User) -> Role:
     """
-    创建一个测试物品，属于 test_user。
+    创建一个测试角色，属于 test_role（自定义角色，可用于 CRUD 测试）。
     """
-    item = Item(
-        title="Test Item",
-        description="This is a test item",
-        owner_id=test_user.id,
-    )
-    db_session.add(item)
+    role = Role(name="test_role")
+    db_session.add(role)
+    await db_session.flush()
+    db_session.add(RoleScope(role_id=role.id, scope="user:read"))
     await db_session.commit()
-    await db_session.refresh(item)
-    return item
+    await db_session.refresh(role)
+    return role
 
 
 @pytest_asyncio.fixture(scope="function")

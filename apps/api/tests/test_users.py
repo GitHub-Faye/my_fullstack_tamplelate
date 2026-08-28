@@ -438,6 +438,80 @@ async def test_update_user_not_found_superuser(superuser_client: AsyncClient):
 
 
 @pytest.mark.asyncio
+async def test_delete_user_scope_permission(
+    authorized_client: AsyncClient,
+    test_user: User,
+    db_session: AsyncSession
+):
+    """
+    测试拥有 user:delete scope 的用户（editor）可以删除其他用户（scope 判定，非超管判定）。
+    """
+    # 创建要删除的用户
+    user_to_delete = User(
+        email="delete_scope@example.com",
+        hashed_password=get_password_hash("password123"),
+        full_name="User To Delete By Editor",
+        is_active=True,
+        is_superuser=False,
+    )
+    db_session.add(user_to_delete)
+    await db_session.commit()
+
+    # test_user 默认 editor 角色，拥有 user:delete scope
+    response = await authorized_client.delete(f"/v1/users/{user_to_delete.id}")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "deleted successfully" in data["message"]
+
+
+@pytest.mark.asyncio
+async def test_delete_user_without_scope_forbidden(
+    client: AsyncClient,
+    db_session: AsyncSession,
+):
+    """
+    测试没有 user:admin / user:delete scope 的用户（viewer）删除用户返回 403。
+    """
+    from sqlalchemy import select
+    from app.core.models import Role, UserRole
+    from app.core.security import create_access_token
+    from datetime import timedelta
+
+    # 创建只有 user:read scope 的 viewer 用户
+    viewer_role = (await db_session.execute(
+        select(Role).where(Role.name == "viewer")
+    )).scalar_one()
+    limited_user = User(
+        email="limited_delete@example.com",
+        hashed_password=get_password_hash("password123"),
+        is_active=True,
+        is_superuser=False,
+    )
+    db_session.add(limited_user)
+    await db_session.flush()
+    db_session.add(UserRole(user_id=limited_user.id, role_id=viewer_role.id))
+    await db_session.commit()
+
+    # 创建要被删除的目标用户
+    target_user = User(
+        email="target_delete@example.com",
+        hashed_password=get_password_hash("password123"),
+        is_active=True,
+        is_superuser=False,
+    )
+    db_session.add(target_user)
+    await db_session.commit()
+
+    token = create_access_token(subject=str(limited_user.id), expires_delta=timedelta(minutes=30))
+    client.headers["Authorization"] = f"Bearer {token}"
+
+    response = await client.delete(f"/v1/users/{target_user.id}")
+
+    assert response.status_code == 403
+
+
+@pytest.mark.asyncio
 async def test_delete_user_superuser(
     superuser_client: AsyncClient,
     db_session: AsyncSession
