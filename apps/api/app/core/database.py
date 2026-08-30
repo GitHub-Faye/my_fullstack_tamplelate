@@ -67,7 +67,7 @@ async def init_roles_and_scopes(session: AsyncSession) -> None:
     创建以下默认角色：
     - viewer: 只读权限 (user:read)
     - editor: 读/写权限 (user:read, user:create, user:update, user:delete)
-    - admin: 管理权限 (所有 user 权限 + system:read)
+    - admin: 管理权限 (所有 user 权限 + 所有 role 权限)
     """
     for role_name, scopes in DEFAULT_ROLE_SCOPES.items():
         # 检查角色是否已存在

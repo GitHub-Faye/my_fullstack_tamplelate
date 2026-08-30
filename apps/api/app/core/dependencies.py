@@ -25,9 +25,9 @@ from sqlalchemy import select
 
 from app.core.config import get_settings
 from app.core.database import get_db
-from app.core.models import User, Role, RoleScope, UserRole
+from app.core.models import User, Role, RoleScope as RoleScopeModel, UserRole
 from app.core.security import reusable_oauth2
-from app.core.scopes import ALL_SCOPES, UserScope, SystemScope
+from app.core.scopes import ALL_SCOPES, RoleScope, UserScope
 from app.core.errors import (
     BusinessException,
     ErrorCode,
@@ -185,8 +185,8 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
     
     # 查询用户的所有角色及其 scopes
     stmt = (
-        select(RoleScope.scope)  # type: ignore[call-overload,arg-type]
-        .join(Role, RoleScope.role_id == Role.id)
+        select(RoleScopeModel.scope)  # type: ignore[call-overload,arg-type]
+        .join(Role, RoleScopeModel.role_id == Role.id)
         .join(UserRole, Role.id == UserRole.role_id)
         .where(UserRole.user_id == user.id)
         .distinct()
@@ -197,12 +197,12 @@ async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
     return scopes
 
 
-def require_scope(required_scope: UserScope | SystemScope):
+def require_scope(required_scope: UserScope | RoleScope):
     """
     创建依赖项，检查用户是否拥有指定的 scope 权限。
 
     参数：
-    - required_scope：需要的权限范围（UserScope 或 SystemScope）
+    - required_scope：需要的权限范围（UserScope 或 RoleScope）
 
     返回值：
     - 依赖函数，可在路由的 dependencies 中使用
@@ -224,7 +224,7 @@ def require_scope(required_scope: UserScope | SystemScope):
     return scope_checker
 
 
-def require_any_scope(*required_scopes: UserScope | SystemScope):
+def require_any_scope(*required_scopes: UserScope | RoleScope):
     """
     创建依赖项，检查用户是否拥有任意一个指定的 scope 权限。
 
@@ -235,7 +235,7 @@ def require_any_scope(*required_scopes: UserScope | SystemScope):
     - 依赖函数，可在路由的 dependencies 中使用
 
     使用示例：
-    @router.get("/", dependencies=[Depends(require_any_scope(UserScope.READ, SystemScope.READ))])
+    @router.get("/", dependencies=[Depends(require_any_scope(UserScope.READ, RoleScope.READ))])
     async def read_roles(...):
         ...
     """
@@ -254,7 +254,7 @@ def require_any_scope(*required_scopes: UserScope | SystemScope):
     return scope_checker
 
 
-def require_all_scopes(*required_scopes: UserScope | SystemScope):
+def require_all_scopes(*required_scopes: UserScope | RoleScope):
     """
     创建依赖项，检查用户是否拥有所有指定的 scope 权限。
 
@@ -265,7 +265,7 @@ def require_all_scopes(*required_scopes: UserScope | SystemScope):
     - 依赖函数，可在路由的 dependencies 中使用
 
     使用示例：
-    @router.post("/admin", dependencies=[Depends(require_all_scopes(UserScope.UPDATE, SystemScope.READ))])
+    @router.post("/admin", dependencies=[Depends(require_all_scopes(UserScope.UPDATE, RoleScope.READ))])
     async def admin_create(...):
         ...
     """

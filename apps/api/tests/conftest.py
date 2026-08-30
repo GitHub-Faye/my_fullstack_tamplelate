@@ -28,7 +28,7 @@ from app.core.database import get_db
 from app.core.models import User, Role, RoleScope, UserRole
 from app.core.security import get_password_hash, create_access_token
 from app.core.dependencies import get_current_user, get_current_active_superuser
-from app.core.scopes import DEFAULT_ROLE_SCOPES
+from app.core.scopes import DEFAULT_ROLE_SCOPES, ALL_ROLE_SCOPES
 
 
 # ======================== pytest-asyncio 配置 ========================
@@ -218,6 +218,60 @@ async def user_token(test_user: User) -> str:
         expires_delta=timedelta(minutes=30),
     )
     return token
+
+
+@pytest_asyncio.fixture(scope="function")
+async def role_admin_user(db_session: AsyncSession) -> User:
+    """
+    创建一个拥有全部 role:* scope 的管理用户（role_manager 自定义角色）。
+
+    role_manager scopes: role:read, role:create, role:update, role:delete
+    用于角色管理 CRUD 测试（editor 用户不再持有 role:* scope）。
+    """
+    role = Role(name="role_manager")
+    db_session.add(role)
+    await db_session.flush()
+    for scope_value in ALL_ROLE_SCOPES:
+        db_session.add(RoleScope(role_id=role.id, scope=scope_value.value))
+    await db_session.commit()
+
+    user = User(
+        email="roleadmin@example.com",
+        hashed_password=get_password_hash("roleadmin123"),
+        full_name="Role Admin",
+        is_active=True,
+        is_superuser=False,
+    )
+    db_session.add(user)
+    await db_session.flush()
+    db_session.add(UserRole(user_id=user.id, role_id=role.id))
+    await db_session.commit()
+    await db_session.refresh(user)
+    return user
+
+
+@pytest_asyncio.fixture(scope="function")
+async def role_admin_token(role_admin_user: User) -> str:
+    """
+    为角色管理用户生成 JWT 访问令牌。
+    """
+    from datetime import timedelta
+    token = create_access_token(
+        subject=str(role_admin_user.id),
+        expires_delta=timedelta(minutes=30),
+    )
+    return token
+
+
+@pytest_asyncio.fixture(scope="function")
+async def role_admin_client(app: FastAPI, role_admin_token: str) -> AsyncGenerator[AsyncClient, None]:
+    """
+    已授权的角色管理客户端（拥有全部 role:* scope）。
+    """
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        ac.headers["Authorization"] = f"Bearer {role_admin_token}"
+        yield ac
 
 
 @pytest_asyncio.fixture(scope="function")

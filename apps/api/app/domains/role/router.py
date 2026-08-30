@@ -8,10 +8,10 @@ Role 领域 API 路由模块
 - 删除角色
 
 权限控制（严格走 scope 而非角色/超管判断）：
-- 读取: system:read（或 fallback user:read，通过 require_any_scope）
-- 创建: user:create
-- 更新: user:update
-- 删除: user:delete
+- 读取: role:read
+- 创建: role:create
+- 更新: role:update
+- 删除: role:delete
 
 说明：
 - 路由前缀 /roles 在下方 api.py include_router 时统一附加。
@@ -26,10 +26,9 @@ from fastapi import APIRouter, Depends, Query
 
 from app.core.dependencies import (
     SessionDep,
-    require_any_scope,
     require_scope,
 )
-from app.core.scopes import SystemScope, UserScope
+from app.core.scopes import RoleScope
 from app.core.schemas import Message, PaginationParams
 from app.core.errors import (
     raise_bad_request,
@@ -54,12 +53,12 @@ router = APIRouter()
 async def read_roles(
     session: SessionDep,
     pagination: Annotated[PaginationParams, Query()],
-    _: Annotated[None, Depends(require_any_scope(UserScope.READ, SystemScope.READ))],
+    _: Annotated[None, Depends(require_scope(RoleScope.READ))],
 ) -> Any:
     """
     获取角色列表（分页）。
 
-    权限：拥有 user:read 或 system:read scope。
+    权限：拥有 role:read scope。
 
     返回：
     - RolesPublic：data（角色列表，含 scopes）、count、page、page_size、total_pages
@@ -91,12 +90,12 @@ async def read_roles(
 async def read_role(
     session: SessionDep,
     role_id: uuid.UUID,
-    _: Annotated[None, Depends(require_any_scope(UserScope.READ, SystemScope.READ))],
+    _: Annotated[None, Depends(require_scope(RoleScope.READ))],
 ) -> Any:
     """
     获取单个角色详情（含 scopes 列表）。
 
-    权限：拥有 user:read 或 system:read scope。
+    权限：拥有 role:read scope。
     """
     role = await repository.get_role(session=session, role_id=role_id)
     if not role:
@@ -114,12 +113,12 @@ async def create_role(
     *,
     session: SessionDep,
     role_in: RoleCreate,
-    _: Annotated[None, Depends(require_scope(UserScope.CREATE))],
+    _: Annotated[None, Depends(require_scope(RoleScope.CREATE))],
 ) -> Any:
     """
     创建新角色。
 
-    权限：拥有 user:create scope。
+    权限：拥有 role:create scope。
 
     参数：
     - role_in：RoleCreate（name 必填，scopes 可选）
@@ -148,12 +147,12 @@ async def update_role(
     session: SessionDep,
     role_id: uuid.UUID,
     role_in: RoleUpdate,
-    _: Annotated[None, Depends(require_scope(UserScope.UPDATE))],
+    _: Annotated[None, Depends(require_scope(RoleScope.UPDATE))],
 ) -> Any:
     """
     更新角色（修改名字和/或它的 scope 集合）。
 
-    权限：拥有 user:update scope。
+    权限：拥有 role:update scope。
 
     参数：
     - role_id：目标角色 UUID
@@ -193,12 +192,12 @@ async def update_role(
 async def delete_role(
     session: SessionDep,
     role_id: uuid.UUID,
-    _: Annotated[None, Depends(require_scope(UserScope.DELETE))],
+    _: Annotated[None, Depends(require_scope(RoleScope.DELETE))],
 ) -> Message:
     """
     删除角色。
 
-    权限：拥有 user:delete scope。
+    权限：拥有 role:delete scope。
 
     注意：
     - 系统预置角色（viewer / editor / admin）不允许删除。

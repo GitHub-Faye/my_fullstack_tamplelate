@@ -59,7 +59,7 @@ class Role(RoleBase, table=True):
 # ==================================== RoleScope ====================================
 
 class RoleScopeBase(SQLModel):
-    scope: str = Field(max_length=100)  # 如 "user:read", "system:read"
+    scope: str = Field(max_length=100)  # 如 "user:read", "role:read"
 
 
 class RoleScope(RoleScopeBase, table=True):
