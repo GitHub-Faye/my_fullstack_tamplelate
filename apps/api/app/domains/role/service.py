@@ -2,7 +2,12 @@
 
 import uuid
 
-from app.core.errors import raise_bad_request, raise_role_already_exists, raise_role_not_found
+from app.core.errors import (
+    BusinessException,
+    ErrorCode,
+    raise_role_already_exists,
+    raise_role_not_found,
+)
 from app.core.models import Role
 from app.domains.role import repository
 from app.domains.role.schemas import RoleCreate, RoleUpdate
@@ -61,4 +66,7 @@ async def delete_role(*, session: AsyncSession, role_id: uuid.UUID) -> None:
         await session.commit()
     except IntegrityError:
         await session.rollback()
-        raise_bad_request("Unable to delete role")
+        raise BusinessException(
+            code=ErrorCode.SYSTEM_INTERNAL_ERROR,
+            detail="Unable to delete role",
+        )

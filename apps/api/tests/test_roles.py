@@ -298,7 +298,7 @@ async def test_update_builtin_role_forbidden(role_admin_client: AsyncClient):
         json={"name": "hacked_admin"},
     )
 
-    assert response.status_code == 400
+    assert response.status_code == 403
     assert "cannot be modified" in response.json()["detail"]
 
 
@@ -355,7 +355,7 @@ async def test_delete_builtin_role_forbidden(role_admin_client: AsyncClient):
 
     response = await role_admin_client.delete(f"/v1/roles/{viewer_role['id']}")
 
-    assert response.status_code == 400
+    assert response.status_code == 403
     assert "cannot be deleted" in response.json()["detail"]
 
 

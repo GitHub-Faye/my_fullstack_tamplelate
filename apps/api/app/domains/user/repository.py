@@ -22,18 +22,11 @@ async def get_user(*, session: AsyncSession, user_id: uuid.UUID) -> User | None:
     return user
 
 async def get_users(
-    *, session: AsyncSession, skip: int, limit: int, sort_field: str = "created_at", sort_order: str = "desc"
+    *, session: AsyncSession, skip: int, limit: int
 ) -> tuple[list[User], int]:
     """
-    分页获取用户列表
-    
-    Args:
-        session: 数据库会话
-        skip: 跳过的记录数
-        limit: 返回的记录数
-        sort_field: 排序字段
-        sort_order: 排序方式 ("asc" 或 "desc")
-    
+    分页获取用户列表（按创建时间倒序）。
+
     Returns:
         tuple: (用户列表, 总记录数)
     """
@@ -42,19 +35,8 @@ async def get_users(
     result = await session.execute(count_statement)
     count = result.scalar_one()
 
-    # 获取分页的用户列表
-    statement = select(User)
-    
-    # 添加排序
-    if hasattr(User, sort_field):
-        if sort_order.lower() == "desc":
-            statement = statement.order_by(getattr(User, sort_field).desc())
-        else:
-            statement = statement.order_by(getattr(User, sort_field).asc())
-    else:
-        # 默认按创建时间倒序排列
-        statement = statement.order_by(User.created_at.desc())
-    
+    # 获取分页的用户列表（默认按创建时间倒序）
+    statement = select(User).order_by(User.created_at.desc())
     statement = statement.offset(skip).limit(limit)
     result = await session.execute(statement)
     users = result.scalars().all()

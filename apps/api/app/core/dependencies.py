@@ -125,42 +125,6 @@ async def get_current_user(session: SessionDep, token: TokenDep) -> User:
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-# ======================== 权限检查 ========================
-
-async def get_current_active_superuser(current_user: CurrentUser) -> User:
-    """
-    检查当前用户是否有超管权限。
-    
-    此函数通常在路由的 dependencies 参数中使用，用于强制权限检查。
-    
-    参数：
-    - current_user：已认证的当前用户（依赖注入，通过 get_current_user 获取）
-    
-    返回值：
-    - User：超管用户对象
-    
-    异常：
-    - 403 Forbidden：用户不是超管
-    
-    典型使用场景：
-    @router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
-    def delete_user(...):
-        # 只有超管可以执行此操作
-        pass
-    
-    或者：
-    @router.delete("/{user_id}")
-    def delete_user(current_user: CurrentUser):
-        # 手动检查
-        get_current_active_superuser(current_user)
-    
-    两种方式等效，第一种更清晰（直接拒绝权限不足的请求）。
-    """
-    if not current_user.is_superuser:
-        raise_permission_denied("The user doesn't have enough privileges")
-    return current_user
-
-CurrentActiveSuperuser = Annotated[User, Depends(get_current_active_superuser)]
 # ======================== Scope 权限检查 ========================
 
 async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:

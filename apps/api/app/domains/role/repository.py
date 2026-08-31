@@ -18,7 +18,7 @@ Role 领域仓库层（Repository）
 
 import uuid
 
-from app.core.errors import raise_bad_request
+from app.core.errors import raise_bad_request, raise_role_builtin_protected
 from app.core.models import Role, RoleScopeModel
 from app.core.scopes import ALL_SCOPES, BUILTIN_ROLES
 from app.domains.role.schemas import RoleCreate, RoleUpdate
@@ -161,9 +161,9 @@ async def update_role(
     - 不允许删除系统预置角色（viewer / editor / admin）——
       init_roles_and_scopes 依赖它们，且它们被新用户默认引用。
     """
-    # 防止删除系统预置角色（其 scopes 由代码初始化时定义，删除会导致初始化逻辑失效）
+    # 防止修改系统预置角色（其 scopes 由代码初始化时定义，删除会导致初始化逻辑失效）
     if db_role.name in BUILTIN_ROLES:
-        raise_bad_request(
+        raise_role_builtin_protected(
             f"Built-in role '{db_role.name}' cannot be modified"
         )
 
@@ -203,7 +203,7 @@ async def delete_role(*, session: AsyncSession, db_role: Role) -> None:
     """
     # 防止删除系统预置角色
     if db_role.name in BUILTIN_ROLES:
-        raise_bad_request(
+        raise_role_builtin_protected(
             f"Built-in role '{db_role.name}' cannot be deleted"
         )
 

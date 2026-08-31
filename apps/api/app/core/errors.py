@@ -31,7 +31,6 @@ class ErrorCode(str, Enum):
     
     # ==================== 用户相关错误 (USER) ====================
     USER_NOT_FOUND = "USER_NOT_FOUND"
-    USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS"
     USER_EMAIL_ALREADY_EXISTS = "USER_EMAIL_ALREADY_EXISTS"
     USER_INVALID_PASSWORD = "USER_INVALID_PASSWORD"
     USER_PASSWORD_SAME_AS_OLD = "USER_PASSWORD_SAME_AS_OLD"
@@ -40,6 +39,7 @@ class ErrorCode(str, Enum):
     # ==================== 角色相关错误 (ROLE) ====================
     ROLE_NOT_FOUND = "ROLE_NOT_FOUND"
     ROLE_ALREADY_EXISTS = "ROLE_ALREADY_EXISTS"
+    ROLE_BUILTIN_PROTECTED = "ROLE_BUILTIN_PROTECTED"
 
     # ==================== 系统错误 (SYSTEM) ====================
     SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR"
@@ -64,6 +64,7 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS: status.HTTP_403_FORBIDDEN,
     ErrorCode.AUTH_MISSING_SCOPE: status.HTTP_403_FORBIDDEN,
     ErrorCode.USER_CANNOT_DELETE_SELF: status.HTTP_403_FORBIDDEN,
+    ErrorCode.ROLE_BUILTIN_PROTECTED: status.HTTP_403_FORBIDDEN,
 
     # 404 Not Found
     ErrorCode.USER_NOT_FOUND: status.HTTP_404_NOT_FOUND,
@@ -71,7 +72,6 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
 
     # 409 Conflict
     ErrorCode.ROLE_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
-    ErrorCode.USER_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     ErrorCode.USER_EMAIL_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     
     # 429 Too Many Requests
@@ -92,7 +92,6 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.AUTH_MISSING_SCOPE: "Missing required scope",
     
     ErrorCode.USER_NOT_FOUND: "User not found",
-    ErrorCode.USER_ALREADY_EXISTS: "User already exists",
     ErrorCode.USER_EMAIL_ALREADY_EXISTS: "User with this email already exists",
     ErrorCode.USER_INVALID_PASSWORD: "Incorrect password",
     ErrorCode.USER_PASSWORD_SAME_AS_OLD: "New password cannot be the same as the current one",
@@ -100,6 +99,7 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
 
     ErrorCode.ROLE_NOT_FOUND: "Role not found",
     ErrorCode.ROLE_ALREADY_EXISTS: "Role already exists",
+    ErrorCode.ROLE_BUILTIN_PROTECTED: "Built-in role cannot be modified or deleted",
 
     ErrorCode.SYSTEM_INTERNAL_ERROR: "Internal server error",
     ErrorCode.SYSTEM_VALIDATION_ERROR: "Validation error",
@@ -173,6 +173,14 @@ def raise_role_already_exists(detail: str | None = None) -> NoReturn:
     """抛出角色已存在错误"""
     raise BusinessException(
         code=ErrorCode.ROLE_ALREADY_EXISTS,
+        detail=detail,
+    )
+
+
+def raise_role_builtin_protected(detail: str | None = None) -> NoReturn:
+    """抛出预置角色保护错误（不可修改/删除）"""
+    raise BusinessException(
+        code=ErrorCode.ROLE_BUILTIN_PROTECTED,
         detail=detail,
     )
 
