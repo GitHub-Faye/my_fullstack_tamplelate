@@ -9,6 +9,7 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
+  Users,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -72,20 +74,19 @@ export function UserTable() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>邮箱</TableHead>
-              <TableHead>姓名</TableHead>
+              <TableHead>用户</TableHead>
               <TableHead>角色</TableHead>
               <TableHead>状态</TableHead>
               <TableHead>创建时间</TableHead>
@@ -95,26 +96,54 @@ export function UserTable() {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center h-32">
-                  暂无用户数据
+                <TableCell colSpan={5} className="h-40 text-center">
+                  <div className="flex flex-col items-center justify-center text-muted-foreground">
+                    <Users className="mb-2 h-8 w-8" />
+                    <p>暂无用户数据</p>
+                    <p className="text-sm">点击右上角按钮创建新用户</p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.email}</TableCell>
-                  <TableCell>{user.full_name || "-"}</TableCell>
+                <TableRow key={user.id} className="hover:bg-muted/50">
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="text-xs">
+                          {(user.full_name || user.email).slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex min-w-0 flex-col">
+                        <span className="truncate font-medium">{user.email}</span>
+                        {user.full_name && (
+                          <span className="truncate text-xs text-muted-foreground">
+                            {user.full_name}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Badge variant={user.is_superuser ? "default" : "secondary"}>
                       {formatUserRole(user.is_superuser)}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.is_active ? "default" : "destructive"}>
+                    <Badge
+                      variant={user.is_active ? "default" : "destructive"}
+                      className={
+                        user.is_active
+                          ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400"
+                          : undefined
+                      }
+                    >
                       {formatUserStatus(user.is_active)}
                     </Badge>
                   </TableCell>
-                  <TableCell>{formatDate(user.created_at)}</TableCell>
+                  <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                    {formatDate(user.created_at)}
+                  </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -152,7 +181,7 @@ export function UserTable() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-muted-foreground">
             共 {totalCount} 条记录，第 {page} / {totalPages} 页
           </div>

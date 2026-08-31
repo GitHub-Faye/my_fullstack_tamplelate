@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Loader2, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,16 +17,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 import { loginSchema, type LoginFormData } from "../schemas";
 import { useLogin } from "../api/client/queries";
+import { AuthCardShell } from "./AuthCardShell";
 
 export function LoginForm() {
   const router = useRouter();
@@ -55,127 +49,131 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold">登录</CardTitle>
-        <CardDescription>
-          输入您的邮箱和密码登录账户
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>邮箱</FormLabel>
-                  <FormControl>
+    <AuthCardShell
+      icon={<KeyRound className="h-5 w-5" />}
+      title="登录账户"
+      description="输入您的邮箱和密码，继续访问管理后台"
+    >
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>邮箱</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
                       type="email"
+                      className="pl-9"
                       placeholder="name@example.com"
+                      autoComplete="email"
                       {...field}
                       disabled={loginMutation.isPending}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>密码</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      className="pr-9"
+                      placeholder="请输入密码"
+                      autoComplete="current-password"
+                      {...field}
+                      disabled={loginMutation.isPending}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={loginMutation.isPending}
+                      aria-label={showPassword ? "隐藏密码" : "显示密码"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex items-center justify-between">
             <FormField
               control={form.control}
-              name="password"
+              name="rememberMe"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>密码</FormLabel>
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                   <FormControl>
-                    <div className="relative">
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="请输入密码"
-                        {...field}
-                        disabled={loginMutation.isPending}
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={loginMutation.isPending}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-muted-foreground" />
-                        )}
-                      </Button>
-                    </div>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={loginMutation.isPending}
+                    />
                   </FormControl>
-                  <FormMessage />
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="font-normal">记住我</FormLabel>
+                  </div>
                 </FormItem>
               )}
             />
-
-            <div className="flex items-center justify-between">
-              <FormField
-                control={form.control}
-                name="rememberMe"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        disabled={loginMutation.isPending}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel className="font-normal">记住我</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-              <Button
-                variant="link"
-                className="px-0 font-normal"
-                type="button"
-                onClick={() => router.push("/recover-password")}
-              >
-                忘记密码？
-              </Button>
-            </div>
-
             <Button
-              type="submit"
-              className="w-full"
-              disabled={loginMutation.isPending}
+              variant="link"
+              className="px-0 font-normal"
+              type="button"
+              onClick={() => router.push("/recover-password")}
             >
-              {loginMutation.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  登录中...
-                </>
-              ) : (
-                "登录"
-              )}
+              忘记密码？
             </Button>
-          </form>
-        </Form>
+          </div>
 
-        <div className="mt-4 text-center text-sm">
-          还没有账户？{" "}
           <Button
-            variant="link"
-            className="px-0 font-normal"
-            onClick={() => router.push("/signup")}
+            type="submit"
+            className="w-full"
+            disabled={loginMutation.isPending}
           >
-            立即注册
+            {loginMutation.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                登录中...
+              </>
+            ) : (
+              "登录"
+            )}
           </Button>
-        </div>
-      </CardContent>
-    </Card>
+        </form>
+      </Form>
+
+      <div className="mt-4 text-center text-sm text-muted-foreground">
+        还没有账户？{" "}
+        <Button
+          variant="link"
+          className="px-0 font-normal"
+          onClick={() => router.push("/signup")}
+        >
+          立即注册
+        </Button>
+      </div>
+    </AuthCardShell>
   );
 }

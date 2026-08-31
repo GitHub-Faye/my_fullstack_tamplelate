@@ -107,11 +107,9 @@ export function UserForm({ user, mode }: UserFormProps) {
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle>{isEdit ? "编辑用户" : "创建用户"}</CardTitle>
+        <CardTitle className="text-lg">{isEdit ? "编辑用户" : "创建用户"}</CardTitle>
         <CardDescription>
-          {isEdit
-            ? "修改用户信息和权限"
-            : "创建一个新用户账户"}
+          {isEdit ? "修改用户信息和权限" : "创建一个新用户账户"}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -127,6 +125,7 @@ export function UserForm({ user, mode }: UserFormProps) {
                     <Input
                       type="email"
                       placeholder="name@example.com"
+                      autoComplete="off"
                       {...field}
                       disabled={isPending}
                     />
@@ -145,6 +144,7 @@ export function UserForm({ user, mode }: UserFormProps) {
                   <FormControl>
                     <Input
                       placeholder="请输入用户姓名"
+                      autoComplete="off"
                       {...field}
                       value={field.value || ""}
                       disabled={isPending}
@@ -167,7 +167,9 @@ export function UserForm({ user, mode }: UserFormProps) {
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
+                        className="pr-9"
                         placeholder={isEdit ? "可选" : "至少8个字符"}
+                        autoComplete="new-password"
                         {...field}
                         disabled={isPending}
                       />
@@ -175,9 +177,10 @@ export function UserForm({ user, mode }: UserFormProps) {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
                         disabled={isPending}
+                        aria-label={showPassword ? "隐藏密码" : "显示密码"}
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -232,7 +235,7 @@ export function UserForm({ user, mode }: UserFormProps) {
               />
             </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex gap-4 pt-2">
               <Button type="submit" disabled={isPending}>
                 {isPending ? (
                   <>

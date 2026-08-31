@@ -56,7 +56,7 @@ export function PasswordChangeForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>修改密码</CardTitle>
+        <CardTitle className="text-lg">修改密码</CardTitle>
         <CardDescription>更改您的账户密码</CardDescription>
       </CardHeader>
       <CardContent>

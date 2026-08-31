@@ -4,6 +4,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // React Query 开发者工具 - 用于调试和监控查询状态
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { ThemeProvider } from "next-themes";
 import { useState, type ReactNode } from "react";
 
 // 提供者组件属性接口
@@ -31,11 +32,19 @@ export function Providers({ children }: ProvidersProps) {
   );
 
   return (
-    // QueryClientProvider 为子组件提供 queryClient 上下文
-    <QueryClientProvider client={queryClient}>
-      {children}
-      {/* React Query 开发者工具，仅在开发环境显示 */}
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    // ThemeProvider 提供 next-themes 上下文（明暗主题切换）
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      {/* QueryClientProvider 为子组件提供 queryClient 上下文 */}
+      <QueryClientProvider client={queryClient}>
+        {children}
+        {/* React Query 开发者工具，仅在开发环境显示 */}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

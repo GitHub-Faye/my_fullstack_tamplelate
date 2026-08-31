@@ -24,6 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 import {
   roleCreateSchema,
@@ -91,7 +92,7 @@ export function RoleForm({ role, mode }: RoleFormProps) {
   return (
     <Card className="max-w-2xl">
       <CardHeader>
-        <CardTitle>{isEdit ? "编辑角色" : "创建角色"}</CardTitle>
+        <CardTitle className="text-lg">{isEdit ? "编辑角色" : "创建角色"}</CardTitle>
         <CardDescription>
           {isEdit
             ? "修改角色名称和权限范围"
@@ -110,6 +111,7 @@ export function RoleForm({ role, mode }: RoleFormProps) {
                   <FormControl>
                     <Input
                       placeholder="如：order_manager"
+                      autoComplete="off"
                       {...field}
                       disabled={isPending || isBuiltin}
                     />
@@ -135,22 +137,30 @@ export function RoleForm({ role, mode }: RoleFormProps) {
                       ? "保存时会整体替换角色的权限集合"
                       : "勾选该角色可拥有的权限范围"}
                   </FormDescription>
-                  <div className="grid grid-cols-1 gap-2 pt-2">
-                    {AVAILABLE_SCOPES.map((scope) => (
-                      <label
-                        key={scope}
-                        className="flex items-center space-x-3 rounded-md border p-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                      >
-                        <Checkbox
-                          checked={selectedScopes.includes(scope)}
-                          onCheckedChange={() => toggleScope(scope)}
-                          disabled={isPending || isBuiltin}
-                        />
-                        <div className="space-y-1">
-                          <p className="text-sm font-mono leading-none">{scope}</p>
-                        </div>
-                      </label>
-                    ))}
+                  <div className="grid grid-cols-1 gap-2 pt-2 sm:grid-cols-2">
+                    {AVAILABLE_SCOPES.map((scope) => {
+                      const checked = selectedScopes.includes(scope);
+                      return (
+                        <label
+                          key={scope}
+                          className={cn(
+                            "flex items-center space-x-3 rounded-lg border p-3 transition-colors cursor-pointer",
+                            checked
+                              ? "border-primary/40 bg-primary/5"
+                              : "hover:bg-muted/50"
+                          )}
+                        >
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={() => toggleScope(scope)}
+                            disabled={isPending || isBuiltin}
+                          />
+                          <div className="space-y-1">
+                            <p className="text-sm font-mono leading-none">{scope}</p>
+                          </div>
+                        </label>
+                      );
+                    })}
                   </div>
                   <FormMessage />
                 </FormItem>

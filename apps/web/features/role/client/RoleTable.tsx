@@ -81,15 +81,15 @@ export function RoleTable() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -102,9 +102,9 @@ export function RoleTable() {
           <TableBody>
             {roles.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center h-32">
+                <TableCell colSpan={4} className="h-40 text-center">
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
-                    <Shield className="h-8 w-8 mb-2" />
+                    <Shield className="mb-2 h-8 w-8" />
                     <p>暂无角色数据</p>
                     <p className="text-sm">点击上方按钮创建新角色</p>
                   </div>
@@ -113,10 +113,14 @@ export function RoleTable() {
             ) : (
               roles.map((role) => {
                 const builtin = isBuiltin(role.name);
+                const scopes = role.scopes ?? [];
                 return (
-                  <TableRow key={role.id}>
+                  <TableRow key={role.id} className="hover:bg-muted/50">
                     <TableCell className="font-medium">
                       <span className="flex items-center gap-2">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                          <Shield className="h-4 w-4" />
+                        </span>
                         {role.name}
                         {builtin && (
                           <Badge variant="secondary" className="gap-1">
@@ -128,10 +132,10 @@ export function RoleTable() {
                     </TableCell>
                     <TableCell className="max-w-xs">
                       <div className="flex flex-wrap gap-1">
-                        {(role.scopes ?? []).length === 0 ? (
-                          <span className="text-muted-foreground text-sm">-</span>
+                        {scopes.length === 0 ? (
+                          <span className="text-sm text-muted-foreground">-</span>
                         ) : (
-                          (role.scopes ?? []).map((scope) => (
+                          scopes.map((scope) => (
                             <Badge key={scope} variant="outline" className="font-mono text-xs">
                               {scope}
                             </Badge>
@@ -139,7 +143,9 @@ export function RoleTable() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{formatDate(role.created_at)}</TableCell>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                      {formatDate(role.created_at)}
+                    </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -178,7 +184,7 @@ export function RoleTable() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-muted-foreground">
             共 {totalCount} 条记录，第 {page} / {totalPages} 页
           </div>

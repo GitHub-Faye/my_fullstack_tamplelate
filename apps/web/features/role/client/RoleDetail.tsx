@@ -28,8 +28,8 @@ export function RoleDetail({ roleId }: RoleDetailProps) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -37,15 +37,8 @@ export function RoleDetail({ roleId }: RoleDetailProps) {
   if (error || !role) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/roles">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              返回列表
-            </Link>
-          </Button>
-        </div>
-        <div className="text-center py-12">
+        <BackToList />
+        <div className="py-12 text-center">
           <h2 className="text-xl font-semibold">角色不存在</h2>
           <p className="text-muted-foreground">该角色可能已被删除或您没有访问权限</p>
         </div>
@@ -58,21 +51,16 @@ export function RoleDetail({ roleId }: RoleDetailProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/dashboard/roles">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            返回列表
-          </Link>
-        </Button>
-      </div>
+      <BackToList />
 
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Shield className="h-6 w-6 text-muted-foreground" />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Shield className="h-5 w-5" />
+            </span>
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 {role.name}
                 {isBuiltin && <Badge variant="secondary">预置</Badge>}
               </CardTitle>
@@ -116,5 +104,16 @@ export function RoleDetail({ roleId }: RoleDetailProps) {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function BackToList() {
+  return (
+    <Button variant="outline" size="sm" asChild>
+      <Link href="/dashboard/roles">
+        <ArrowLeft className="h-4 w-4" />
+        返回列表
+      </Link>
+    </Button>
   );
 }

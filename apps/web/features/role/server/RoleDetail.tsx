@@ -37,7 +37,7 @@ export async function RoleDetail({ roleId }: RoleDetailProps) {
       <div className="flex items-center gap-4">
         <Button variant="outline" size="sm" asChild>
           <Link href="/dashboard/roles">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
             返回列表
           </Link>
         </Button>
@@ -46,9 +46,11 @@ export async function RoleDetail({ roleId }: RoleDetailProps) {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
-            <Shield className="h-6 w-6 text-muted-foreground" />
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Shield className="h-5 w-5" />
+            </span>
             <div>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 {role.name}
                 {isBuiltin && <Badge variant="secondary">预置</Badge>}
               </CardTitle>

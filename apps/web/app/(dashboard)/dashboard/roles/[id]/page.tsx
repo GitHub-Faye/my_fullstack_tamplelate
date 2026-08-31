@@ -1,8 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
 import { useParams } from "next/navigation";
 import { RoleDetail } from "@/features/role/client";
-import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function RolePage() {

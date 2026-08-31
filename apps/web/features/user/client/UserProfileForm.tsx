@@ -65,7 +65,7 @@ export function UserProfileForm({ user }: UserProfileFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>个人资料</CardTitle>
+        <CardTitle className="text-lg">个人资料</CardTitle>
         <CardDescription>更新您的个人信息</CardDescription>
       </CardHeader>
       <CardContent>
