@@ -3,7 +3,6 @@ import warnings
 from typing import Annotated, Any, Literal
 
 from pydantic import (
-    AnyUrl,
     BeforeValidator,
     EmailStr,
     HttpUrl,
@@ -76,8 +75,9 @@ class Settings(BaseSettings):
     # ======================== CORS 跨域配置 ========================
     # CORS_ALLOW_ORIGINS：后端允许的跨域源列表
     # 使用 BeforeValidator 将字符串自动转换为列表
+    # 本地开发可用 ["*"] 允许所有来源（注意：AnyUrl 无法表示 "*"，故使用 str）
     CORS_ALLOW_ORIGINS: Annotated[
-        list[AnyUrl] | str, BeforeValidator(parse_cors)
+        list[str] | str, BeforeValidator(parse_cors)
     ] = []
 
     @computed_field  # type: ignore[prop-decorator]
@@ -85,13 +85,17 @@ class Settings(BaseSettings):
     def all_cors_origins(self) -> list[str]:
         """
         Pydantic v2 计算属性：返回所有 CORS 源（包含前端 URL）。
-        
+
         组合：
         1. CORS_ALLOW_ORIGINS 中的所有源
         2. FRONTEND_HOST（自动追加）
-        
+
         返回值为规范化的字符串列表（移除末尾 /）。
         """
+        # 允许所有来源时直接透传 "*"
+        # （不要追加 FRONTEND_HOST，避免破坏通配符语义，也不要去尾斜杠）
+        if self.CORS_ALLOW_ORIGINS == ["*"]:
+            return ["*"]
         return [str(origin).rstrip("/") for origin in self.CORS_ALLOW_ORIGINS] + [
             self.FRONTEND_HOST
         ]
