@@ -2,7 +2,8 @@
 
 import uuid
 from datetime import datetime, timezone
-from typing import List, Optional   # 保留 typing.List
+
+from typing import Optional
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime
@@ -39,18 +40,18 @@ class RoleBase(SQLModel):
 
 class Role(RoleBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
-    created_at: Optional[datetime] = Field(
+    created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),
     )
 
     # 与 User 的多对多关系（通过 UserRole 关联表）
-    users: List["User"] = Relationship(
+    users: list["User"] = Relationship(
         back_populates="roles",
         link_model=UserRole,
     )
     # 与 RoleScope 的一对多关系
-    scopes: List["RoleScopeModel"] = Relationship(
+    scopes: list["RoleScopeModel"] = Relationship(
         back_populates="role",
         cascade_delete=True,
     )
@@ -68,7 +69,7 @@ class RoleScopeModel(RoleScopeBase, table=True):
     role_id: uuid.UUID = Field(
         foreign_key="role.id", nullable=False, ondelete="CASCADE"
     )
-    created_at: Optional[datetime] = Field(
+    created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),
     )
@@ -82,19 +83,19 @@ class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
     is_active: bool = True
     is_superuser: bool = False
-    full_name: Optional[str] = Field(default=None, max_length=255)
+    full_name: str | None = Field(default=None, max_length=255)
 
 
 class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
-    created_at: Optional[datetime] = Field(
+    created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
         sa_type=DateTime(timezone=True),
     )
 
     # 与 Role 的多对多关系（通过 UserRole 关联表）
-    roles: List["Role"] = Relationship(
+    roles: list["Role"] = Relationship(
         back_populates="users",
         link_model=UserRole,
     )

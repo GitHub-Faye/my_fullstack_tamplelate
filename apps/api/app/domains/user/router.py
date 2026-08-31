@@ -6,7 +6,7 @@
 - 获取/创建/更新/删除用户
 - 密码修改
 - 用户自助注册/个人信息更新
-- 权限控制（超管-only 端点）
+- 权限控制（基于 scope 判定）
 """
 
 import uuid
@@ -37,10 +37,7 @@ from app.domains.user.schemas import (
 from fastapi import APIRouter, Depends, Query
 from fastapi.security import OAuth2PasswordRequestForm
 
-# 注：已移除 Celery 异步任务（app.tasks 已删除），注册后不再派发后台任务
-
 settings = get_settings()
-# ======================== APIRouter 创建 ========================
 router = APIRouter()
 
 
@@ -377,12 +374,6 @@ async def delete_user(
     返回值：
     - Message：删除成功消息
 
-    业务流程：
-    1. 查询目标用户是否存在
-    2. 防止删除自己（防止系统无管理员）
-    3. 使用仓库函数删除用户记录（UserRole 关联由外键 CASCADE 自动清理）
-    4. 返回成功消息
-
     异常：
     - 404：用户不存在
     - 403：不允许删除自己
@@ -392,9 +383,8 @@ async def delete_user(
     - User.roles 多对多关联的表 userrole 外键为 ondelete="CASCADE"，
       删除用户时数据库会自动清理其与角色的关联。
     """
-    user = await service.get_user(session=session, user_id=user_id)
     await service.delete_user(
-        session=session, user=user, current_user=current_user
+        session=session, user_id=user_id, current_user=current_user
     )
     return Message(message="User deleted successfully")
 

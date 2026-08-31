@@ -26,9 +26,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 async def authenticate(*, session: AsyncSession, email: str, password: str) -> User:
     user, upgraded = await repository.authenticate(session=session, email=email, password=password)
-    # Persist legacy password-hash upgrade only when it actually occurred.
-    if upgraded:
-        await session.commit()
     if not user:
         raise BusinessException(
             code=ErrorCode.AUTH_INVALID_CREDENTIALS,
@@ -36,6 +33,9 @@ async def authenticate(*, session: AsyncSession, email: str, password: str) -> U
         )
     if not user.is_active:
         raise BusinessException(code=ErrorCode.AUTH_INACTIVE_USER, detail="Inactive user")
+    # 密码哈希升级在认证通过后才 commit，避免无效用户的升级落盘
+    if upgraded:
+        await session.commit()
     return user
 
 
@@ -50,19 +50,19 @@ async def login(*, session: AsyncSession, email: str, password: str, expires_min
 
 async def create_user(*, session: AsyncSession, user_in: UserCreate) -> User:
     if await repository.get_user_by_email(session=session, email=user_in.email):
-        raise_user_already_exists("The user with this email already exists in the system.")
+        raise_user_already_exists("User with this email already exists")
     try:
         user = await repository.create_user(session=session, user_create=user_in)
         await session.commit()
         return user
     except IntegrityError:
         await session.rollback()
-        raise_user_already_exists("The user with this email already exists in the system.")
+        raise_user_already_exists("User with this email already exists")
 
 
 async def register_user(*, session: AsyncSession, user_in: UserRegister) -> User:
     if await repository.get_user_by_email(session=session, email=user_in.email):
-        raise_user_already_exists("The user with this email already exists in the system")
+        raise_user_already_exists("User with this email already exists")
     try:
         user = await repository.create_user(
             session=session, user_create=UserCreate.model_validate(user_in)
@@ -71,7 +71,7 @@ async def register_user(*, session: AsyncSession, user_in: UserRegister) -> User
         return user
     except IntegrityError:
         await session.rollback()
-        raise_user_already_exists("The user with this email already exists in the system")
+        raise_user_already_exists("User with this email already exists")
 
 
 async def list_users(
@@ -91,7 +91,10 @@ async def update_me(*, session: AsyncSession, user: User, user_in: UserUpdateMe)
         return user
     except IntegrityError:
         await session.rollback()
-        raise_user_already_exists("User with this email already exists")
+        raise BusinessException(
+            code=ErrorCode.SYSTEM_INTERNAL_ERROR,
+            detail="Unable to update user",
+        )
 
 
 async def update_password(
@@ -137,12 +140,16 @@ async def update_user(
         raise_user_already_exists("User with this email already exists")
 
 
-async def delete_user(*, session: AsyncSession, user: User, current_user: User | None = None) -> None:
-    if (
-        current_user is not None
-        and user.id == current_user.id
-        and current_user.is_superuser
-    ):
+async def delete_user(
+    *, session: AsyncSession, user: User | None = None, user_id: uuid.UUID | None = None, current_user: User | None = None
+) -> None:
+    """删除用户。支持传入 user 对象或 user_id（任一即可）。"""
+    if user is None and user_id is None:
+        raise ValueError("Either user or user_id must be provided")
+    if user is None:
+        user = await get_user(session=session, user_id=user_id)  # type: ignore[arg-type]
+    # 防止超管自删（普通用户允许自删，不影响系统可用性）
+    if current_user is not None and user.id == current_user.id and current_user.is_superuser:
         raise BusinessException(
             code=ErrorCode.USER_CANNOT_DELETE_SELF,
             detail="Super users are not allowed to delete themselves",

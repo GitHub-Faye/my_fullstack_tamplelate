@@ -175,6 +175,9 @@ async def test_user(db_session: AsyncSession) -> User:
 async def test_superuser(db_session: AsyncSession) -> User:
     """
     创建一个超级管理员测试用户。
+
+    注意：此用户未分配任何角色，仅通过 is_superuser=True 获得全部 scope。
+    与 role_admin_user（通过角色获得 scope）形成对比，用于测试不同授权路径。
     """
     user = User(
         email="admin@example.com",
