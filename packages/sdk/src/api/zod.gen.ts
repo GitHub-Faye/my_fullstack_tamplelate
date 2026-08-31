@@ -15,50 +15,60 @@ export const zBodyLoginAccessTokenV1LoginAccessTokenPost = z.object({
 });
 
 /**
- * ItemCreate
- */
-export const zItemCreate = z.object({
-    title: z.string().min(1).max(255),
-    description: z.string().max(255).nullish()
-});
-
-/**
- * ItemPublic
- */
-export const zItemPublic = z.object({
-    title: z.string().min(1).max(255),
-    description: z.string().max(255).nullish(),
-    id: z.uuid(),
-    owner_id: z.uuid(),
-    created_at: z.iso.datetime().nullish()
-});
-
-/**
- * ItemUpdate
- */
-export const zItemUpdate = z.object({
-    title: z.string().min(1).max(255).nullish(),
-    description: z.string().max(255).nullish()
-});
-
-/**
- * ItemsPublic
- */
-export const zItemsPublic = z.object({
-    data: z.array(z.unknown()),
-    count: z.int(),
-    page: z.int().nullish(),
-    page_size: z.int().nullish(),
-    total_pages: z.int().nullish()
-});
-
-/**
  * Message
  *
  * 通用消息响应
  */
 export const zMessage = z.object({
     message: z.string()
+});
+
+/**
+ * RoleCreate
+ *
+ * 创建角色的请求体：name 必填，scopes 可选（默认空集合）
+ */
+export const zRoleCreate = z.object({
+    name: z.string().min(1).max(50),
+    scopes: z.array(z.string()).max(100).optional()
+});
+
+/**
+ * RolePublic
+ *
+ * 单条角色的响应体：基础字段 + 当前持有的 scope 列表
+ */
+export const zRolePublic = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    created_at: z.iso.datetime().nullish(),
+    scopes: z.array(z.string()).optional()
+});
+
+/**
+ * RoleUpdate
+ *
+ * 更新角色的请求体：所有字段可选，未设置的字段保持不变（部分更新）
+ *
+ * - name：角色名（更新后会影响引用此角色的用户）
+ * - scopes：完整的 scope 集合（整体替换，非增量合并）
+ */
+export const zRoleUpdate = z.object({
+    name: z.string().min(1).max(50).nullish(),
+    scopes: z.array(z.string()).max(100).nullish()
+});
+
+/**
+ * RolesPublic
+ *
+ * 角色分页列表的响应体：data / count / page / page_size / total_pages
+ */
+export const zRolesPublic = z.object({
+    data: z.array(z.unknown()),
+    count: z.int(),
+    page: z.int().nullish(),
+    page_size: z.int().nullish(),
+    total_pages: z.int().nullish()
 });
 
 /**
@@ -97,7 +107,8 @@ export const zUserPublic = z.object({
     is_superuser: z.boolean().optional().default(false),
     full_name: z.string().max(255).nullish(),
     id: z.uuid(),
-    created_at: z.iso.datetime().nullish()
+    created_at: z.iso.datetime().nullish(),
+    scopes: z.array(z.string()).optional()
 });
 
 /**
@@ -114,8 +125,8 @@ export const zUserRegister = z.object({
  */
 export const zUserUpdate = z.object({
     email: z.email().max(255).nullish(),
-    is_active: z.boolean().optional().default(true),
-    is_superuser: z.boolean().optional().default(false),
+    is_active: z.boolean().nullish(),
+    is_superuser: z.boolean().nullish(),
     full_name: z.string().max(255).nullish(),
     password: z.string().min(8).max(128).nullish()
 });
@@ -145,7 +156,9 @@ export const zUsersPublic = z.object({
 export const zValidationError = z.object({
     loc: z.array(z.union([z.string(), z.int()])),
     msg: z.string(),
-    type: z.string()
+    type: z.string(),
+    input: z.unknown().optional(),
+    ctx: z.record(z.string(), z.unknown()).optional()
 });
 
 /**
@@ -154,6 +167,13 @@ export const zValidationError = z.object({
 export const zHttpValidationError = z.object({
     detail: z.array(zValidationError).optional()
 });
+
+/**
+ * Response Health Check V1 Health Check Get
+ *
+ * Successful Response
+ */
+export const zHealthCheckV1HealthCheckGetResponse = z.boolean();
 
 export const zLoginAccessTokenV1LoginAccessTokenPostBody = zBodyLoginAccessTokenV1LoginAccessTokenPost;
 
@@ -183,42 +203,6 @@ export const zCreateUserV1UsersPostBody = zUserCreate;
  * Successful Response
  */
 export const zCreateUserV1UsersPostResponse = zUserPublic;
-
-export const zDeleteUserV1UsersUserIdDeletePath = z.object({
-    user_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zDeleteUserV1UsersUserIdDeleteResponse = zMessage;
-
-export const zReadUserByIdV1UsersUserIdGetPath = z.object({
-    user_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zReadUserByIdV1UsersUserIdGetResponse = zUserPublic;
-
-export const zUpdateUserV1UsersUserIdPatchBody = zUserUpdate;
-
-export const zUpdateUserV1UsersUserIdPatchPath = z.object({
-    user_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zUpdateUserV1UsersUserIdPatchResponse = zUserPublic;
-
-/**
- * Response Health Check V1 Users Health Check  Get
- *
- * Successful Response
- */
-export const zHealthCheckV1UsersHealthCheckGetResponse = z.boolean();
 
 /**
  * Successful Response
@@ -251,7 +235,36 @@ export const zRegisterUserV1UsersSignupPostBody = zUserRegister;
  */
 export const zRegisterUserV1UsersSignupPostResponse = zUserPublic;
 
-export const zReadItemsV1ItemsGetQuery = z.object({
+export const zDeleteUserV1UsersUserIdDeletePath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteUserV1UsersUserIdDeleteResponse = zMessage;
+
+export const zReadUserByIdV1UsersUserIdGetPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zReadUserByIdV1UsersUserIdGetResponse = zUserPublic;
+
+export const zUpdateUserV1UsersUserIdPatchBody = zUserUpdate;
+
+export const zUpdateUserV1UsersUserIdPatchPath = z.object({
+    user_id: z.uuid()
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateUserV1UsersUserIdPatchResponse = zUserPublic;
+
+export const zReadRolesV1RolesGetQuery = z.object({
     page: z.int().optional().default(1),
     page_size: z.int().optional().default(20)
 });
@@ -259,40 +272,40 @@ export const zReadItemsV1ItemsGetQuery = z.object({
 /**
  * Successful Response
  */
-export const zReadItemsV1ItemsGetResponse = zItemsPublic;
+export const zReadRolesV1RolesGetResponse = zRolesPublic;
 
-export const zCreateItemV1ItemsPostBody = zItemCreate;
+export const zCreateRoleV1RolesPostBody = zRoleCreate;
 
 /**
  * Successful Response
  */
-export const zCreateItemV1ItemsPostResponse = zItemPublic;
+export const zCreateRoleV1RolesPostResponse = zRolePublic;
 
-export const zDeleteItemV1ItemsItemIdDeletePath = z.object({
-    item_id: z.uuid()
+export const zDeleteRoleV1RolesRoleIdDeletePath = z.object({
+    role_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zDeleteItemV1ItemsItemIdDeleteResponse = zMessage;
+export const zDeleteRoleV1RolesRoleIdDeleteResponse = zMessage;
 
-export const zReadItemV1ItemsItemIdGetPath = z.object({
-    item_id: z.uuid()
+export const zReadRoleV1RolesRoleIdGetPath = z.object({
+    role_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zReadItemV1ItemsItemIdGetResponse = zItemPublic;
+export const zReadRoleV1RolesRoleIdGetResponse = zRolePublic;
 
-export const zUpdateItemV1ItemsItemIdPutBody = zItemUpdate;
+export const zUpdateRoleV1RolesRoleIdPatchBody = zRoleUpdate;
 
-export const zUpdateItemV1ItemsItemIdPutPath = z.object({
-    item_id: z.uuid()
+export const zUpdateRoleV1RolesRoleIdPatchPath = z.object({
+    role_id: z.uuid()
 });
 
 /**
  * Successful Response
  */
-export const zUpdateItemV1ItemsItemIdPutResponse = zItemPublic;
+export const zUpdateRoleV1RolesRoleIdPatchResponse = zRolePublic;

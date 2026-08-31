@@ -89,7 +89,7 @@ export function UserForm({ user, mode }: UserFormProps) {
         router.push("/dashboard/admin");
       } else {
         await createMutation.mutateAsync({
-          email: data.email,
+          email: data.email ?? "",
           password: (data as UserCreateFormData).password,
           full_name: data.fullName || undefined,
           is_active: data.isActive,

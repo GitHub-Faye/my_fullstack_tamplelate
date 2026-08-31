@@ -13,7 +13,9 @@ export const loginSchema = z.object({
     .string()
     .min(1, "请输入密码")
     .min(8, "密码至少需要8个字符"),
-  rememberMe: z.boolean().default(false),
+  // 不使用 .default()：避免输入/输出类型分歧（zodResolver + RHF 类型不兼容），
+  // 默认值由 useForm defaultValues 提供
+  rememberMe: z.boolean(),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;

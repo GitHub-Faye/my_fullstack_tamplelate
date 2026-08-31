@@ -1,7 +1,7 @@
 /**
  * 业务错误码定义
- * 
- * 与后端 apps/api/app/core/errors.py 保持同步
+ *
+ * 与后端 apps/api/app/core/errors.py 保持同步（单一事实源的两个镜像）
  * 格式: DOMAIN_ACTION_DETAIL
  */
 
@@ -16,16 +16,15 @@ export enum ErrorCode {
 
   // ==================== 用户相关错误 (USER) ====================
   USER_NOT_FOUND = "USER_NOT_FOUND",
-  USER_ALREADY_EXISTS = "USER_ALREADY_EXISTS",
   USER_EMAIL_ALREADY_EXISTS = "USER_EMAIL_ALREADY_EXISTS",
   USER_INVALID_PASSWORD = "USER_INVALID_PASSWORD",
   USER_PASSWORD_SAME_AS_OLD = "USER_PASSWORD_SAME_AS_OLD",
   USER_CANNOT_DELETE_SELF = "USER_CANNOT_DELETE_SELF",
-  USER_CANNOT_DELETE_SUPERUSER = "USER_CANNOT_DELETE_SUPERUSER",
 
-  // ==================== 物品相关错误 (ITEM) ====================
-  ITEM_NOT_FOUND = "ITEM_NOT_FOUND",
-  ITEM_NOT_OWNER = "ITEM_NOT_OWNER",
+  // ==================== 角色相关错误 (ROLE) ====================
+  ROLE_NOT_FOUND = "ROLE_NOT_FOUND",
+  ROLE_ALREADY_EXISTS = "ROLE_ALREADY_EXISTS",
+  ROLE_BUILTIN_PROTECTED = "ROLE_BUILTIN_PROTECTED",
 
   // ==================== 系统错误 (SYSTEM) ====================
   SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR",
@@ -39,28 +38,27 @@ export enum ErrorCode {
 export const ERROR_STATUS_MAP: Record<ErrorCode, number> = {
   // 400 Bad Request
   [ErrorCode.AUTH_INVALID_CREDENTIALS]: 400,
-  [ErrorCode.AUTH_INVALID_TOKEN]: 400,
   [ErrorCode.AUTH_INACTIVE_USER]: 400,
   [ErrorCode.USER_INVALID_PASSWORD]: 400,
   [ErrorCode.USER_PASSWORD_SAME_AS_OLD]: 400,
   [ErrorCode.SYSTEM_VALIDATION_ERROR]: 400,
 
   // 401 Unauthorized
+  [ErrorCode.AUTH_INVALID_TOKEN]: 401,
   [ErrorCode.AUTH_EXPIRED_TOKEN]: 401,
 
   // 403 Forbidden
   [ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS]: 403,
   [ErrorCode.AUTH_MISSING_SCOPE]: 403,
   [ErrorCode.USER_CANNOT_DELETE_SELF]: 403,
-  [ErrorCode.USER_CANNOT_DELETE_SUPERUSER]: 403,
-  [ErrorCode.ITEM_NOT_OWNER]: 403,
+  [ErrorCode.ROLE_BUILTIN_PROTECTED]: 403,
 
   // 404 Not Found
   [ErrorCode.USER_NOT_FOUND]: 404,
-  [ErrorCode.ITEM_NOT_FOUND]: 404,
+  [ErrorCode.ROLE_NOT_FOUND]: 404,
 
   // 409 Conflict
-  [ErrorCode.USER_ALREADY_EXISTS]: 409,
+  [ErrorCode.ROLE_ALREADY_EXISTS]: 409,
   [ErrorCode.USER_EMAIL_ALREADY_EXISTS]: 409,
 
   // 429 Too Many Requests
@@ -82,15 +80,14 @@ export const DEFAULT_ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.AUTH_MISSING_SCOPE]: "Missing required scope",
 
   [ErrorCode.USER_NOT_FOUND]: "User not found",
-  [ErrorCode.USER_ALREADY_EXISTS]: "User already exists",
   [ErrorCode.USER_EMAIL_ALREADY_EXISTS]: "User with this email already exists",
   [ErrorCode.USER_INVALID_PASSWORD]: "Incorrect password",
   [ErrorCode.USER_PASSWORD_SAME_AS_OLD]: "New password cannot be the same as the current one",
   [ErrorCode.USER_CANNOT_DELETE_SELF]: "Super users are not allowed to delete themselves",
-  [ErrorCode.USER_CANNOT_DELETE_SUPERUSER]: "Cannot delete superuser",
 
-  [ErrorCode.ITEM_NOT_FOUND]: "Item not found",
-  [ErrorCode.ITEM_NOT_OWNER]: "Not enough permissions to access this item",
+  [ErrorCode.ROLE_NOT_FOUND]: "Role not found",
+  [ErrorCode.ROLE_ALREADY_EXISTS]: "Role already exists",
+  [ErrorCode.ROLE_BUILTIN_PROTECTED]: "Built-in role cannot be modified or deleted",
 
   [ErrorCode.SYSTEM_INTERNAL_ERROR]: "Internal server error",
   [ErrorCode.SYSTEM_VALIDATION_ERROR]: "Validation error",
@@ -130,11 +127,11 @@ export class BusinessError extends Error {
   ) {
     const defaultMessage = DEFAULT_ERROR_MESSAGES[code];
     super(message || defaultMessage);
-    
+
     this.code = code;
     this.statusCode = ERROR_STATUS_MAP[code] || 500;
     this.data = data;
-    
+
     // 确保 instanceof 正常工作
     Object.setPrototypeOf(this, BusinessError.prototype);
   }
@@ -169,10 +166,10 @@ export function isUserError(code: ErrorCode): boolean {
 }
 
 /**
- * 判断是否为物品错误
+ * 判断是否为角色错误
  */
-export function isItemError(code: ErrorCode): boolean {
-  return code.startsWith("ITEM_");
+export function isRoleError(code: ErrorCode): boolean {
+  return code.startsWith("ROLE_");
 }
 
 /**

@@ -2,6 +2,8 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/* eslint-disable react/prop-types -- shadcn/ui 生成的组件，className 经透传且类型已由泛型约束 */
+
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>

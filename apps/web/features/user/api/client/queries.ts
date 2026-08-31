@@ -5,7 +5,6 @@ import {
   useMutation,
   useQueryClient,
   type UseQueryOptions,
-  type UseMutationOptions,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -26,24 +25,8 @@ import {
   type ReadUsersV1UsersGetResponse,
   type ReadUsersV1UsersGetError,
   type ReadUserMeV1UsersMeGetResponse,
-  type ReadUserByIdV1UsersUserIdGetData,
   type ReadUserByIdV1UsersUserIdGetResponse,
   type ReadUserByIdV1UsersUserIdGetError,
-  type LoginAccessTokenV1LoginAccessTokenPostResponse,
-  type LoginAccessTokenV1LoginAccessTokenPostError,
-  type RegisterUserV1UsersSignupPostResponse,
-  type RegisterUserV1UsersSignupPostError,
-  type CreateUserV1UsersPostResponse,
-  type CreateUserV1UsersPostError,
-  type UpdateUserMeV1UsersMePatchResponse,
-  type UpdateUserMeV1UsersMePatchError,
-  type UpdatePasswordMeV1UsersMePasswordPatchResponse,
-  type UpdatePasswordMeV1UsersMePasswordPatchError,
-  type UpdateUserV1UsersUserIdPatchResponse,
-  type UpdateUserV1UsersUserIdPatchError,
-  type DeleteUserMeV1UsersMeDeleteResponse,
-  type DeleteUserV1UsersUserIdDeleteResponse,
-  type DeleteUserV1UsersUserIdDeleteError,
   type BodyLoginAccessTokenV1LoginAccessTokenPost,
   type UserRegister,
   type UserCreate,
@@ -150,7 +133,6 @@ export function useUser(
  * Login mutation
  */
 export function useLogin() {
-  const queryClient = useQueryClient();
   const { setAuth } = useAuthStore();
 
   return useMutation({

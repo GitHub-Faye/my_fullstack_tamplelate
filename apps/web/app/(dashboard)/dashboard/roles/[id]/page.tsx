@@ -1,22 +1,22 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { ItemDetail } from "@/features/item/client";
+import { RoleDetail } from "@/features/role/client";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function ItemPage() {
+export default function RolePage() {
   const params = useParams();
-  const itemId = params.id as string;
+  const roleId = params.id as string;
 
   return (
-    <Suspense fallback={<ItemDetailSkeleton />}>
-      <ItemDetail itemId={itemId} />
+    <Suspense fallback={<RoleDetailSkeleton />}>
+      <RoleDetail roleId={roleId} />
     </Suspense>
   );
 }
 
-function ItemDetailSkeleton() {
+function RoleDetailSkeleton() {
   return (
     <div className="space-y-6">
       <Skeleton className="h-10 w-32" />

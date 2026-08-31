@@ -48,9 +48,7 @@ export async function getUserById(
  * Get current user (server-side)
  * Use this in Server Components when you have the token
  */
-export async function getCurrentUser(
-  token?: string
-): Promise<ReadUserMeV1UsersMeGetResponse | null> {
+export async function getCurrentUser(): Promise<ReadUserMeV1UsersMeGetResponse | null> {
   try {
     // Note: For server-side calls, you may need to configure the client
     // with the token if your SDK supports it

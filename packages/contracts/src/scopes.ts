@@ -1,44 +1,12 @@
 /**
  * 权限 Scope 定义
- * 
- * 与后端 apps/api/app/core/scopes.py 保持同步
+ *
+ * 与后端 apps/api/app/core/scopes.py 保持同步（单一事实源的两个镜像，字符串必须逐字一致）
  * 格式: "资源:操作"
  */
 
 /**
- * Item 资源的权限 Scope
- */
-export const ItemScope = {
-  /** 读取 item 列表/详情 */
-  READ: "item:read",
-  /** 创建 item */
-  CREATE: "item:create",
-  /** 更新 item */
-  UPDATE: "item:update",
-  /** 删除 item */
-  DELETE: "item:delete",
-  /** 管理所有 item（包括他人的） */
-  ADMIN: "item:admin",
-} as const;
-
-/**
- * Item Scope 类型
- */
-export type ItemScopeType = typeof ItemScope[keyof typeof ItemScope];
-
-/**
- * 所有 Item Scope 列表
- */
-export const ALL_ITEM_SCOPES: ItemScopeType[] = [
-  ItemScope.READ,
-  ItemScope.CREATE,
-  ItemScope.UPDATE,
-  ItemScope.DELETE,
-  ItemScope.ADMIN,
-];
-
-/**
- * 用户相关 Scope
+ * User 资源的权限 Scope
  */
 export const UserScope = {
   /** 读取用户信息 */
@@ -70,67 +38,70 @@ export const ALL_USER_SCOPES: UserScopeType[] = [
 ];
 
 /**
- * 系统管理 Scope
+ * Role（角色）资源的专属权限 Scope
  */
-export const SystemScope = {
-  /** 系统只读访问 */
-  READ: "system:read",
-  /** 系统管理 */
-  ADMIN: "system:admin",
+export const RoleScope = {
+  /** 读取角色列表/详情 */
+  READ: "role:read",
+  /** 创建角色 */
+  CREATE: "role:create",
+  /** 更新角色（名称 + scope 集合） */
+  UPDATE: "role:update",
+  /** 删除角色 */
+  DELETE: "role:delete",
 } as const;
 
 /**
- * System Scope 类型
+ * Role Scope 类型
  */
-export type SystemScopeType = typeof SystemScope[keyof typeof SystemScope];
+export type RoleScopeType = typeof RoleScope[keyof typeof RoleScope];
+
+/**
+ * 所有 Role Scope 列表
+ */
+export const ALL_ROLE_SCOPES: RoleScopeType[] = [
+  RoleScope.READ,
+  RoleScope.CREATE,
+  RoleScope.UPDATE,
+  RoleScope.DELETE,
+];
 
 /**
  * 所有 Scope 的联合类型
  */
-export type ScopeType = ItemScopeType | UserScopeType | SystemScopeType;
+export type ScopeType = UserScopeType | RoleScopeType;
 
 /**
  * 所有 Scope 列表
  */
 export const ALL_SCOPES: ScopeType[] = [
-  ...ALL_ITEM_SCOPES,
   ...ALL_USER_SCOPES,
-  ...Object.values(SystemScope),
+  ...ALL_ROLE_SCOPES,
 ];
 
 /**
+ * 系统预置角色（不可修改/删除）
+ */
+export const BUILTIN_ROLES = ["viewer", "editor", "admin"] as const;
+
+/**
  * 预定义角色对应的 Scopes
+ * 与后端 app.core.database.init_roles_and_scopes 保持一致
  */
 export const DEFAULT_ROLE_SCOPES: Record<string, ScopeType[]> = {
   /** 只读用户 */
-  viewer: [ItemScope.READ, UserScope.READ],
-  
-  /** 编辑者 */
+  viewer: [UserScope.READ],
+
+  /** 编辑者：用户读写 */
   editor: [
-    ItemScope.READ,
-    ItemScope.CREATE,
-    ItemScope.UPDATE,
-    ItemScope.DELETE,
-    UserScope.READ,
-  ],
-  
-  /** 管理员 */
-  admin: [
-    ItemScope.READ,
-    ItemScope.CREATE,
-    ItemScope.UPDATE,
-    ItemScope.DELETE,
-    ItemScope.ADMIN,
     UserScope.READ,
     UserScope.CREATE,
     UserScope.UPDATE,
     UserScope.DELETE,
-    UserScope.ADMIN,
-    SystemScope.READ,
   ],
-  
-  /** 超级管理员 */
-  superuser: [...ALL_SCOPES],
+
+  /** 管理员：所有用户权限 + 所有角色权限 */
+  admin: [...ALL_USER_SCOPES, ...ALL_ROLE_SCOPES],
 };
 
 /**

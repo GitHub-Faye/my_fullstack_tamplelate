@@ -64,7 +64,7 @@ function setCookie(name: string, value: string | null, days: number = 7) {
  */
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // ==================== 初始状态 ====================
       user: null,
       token: null,

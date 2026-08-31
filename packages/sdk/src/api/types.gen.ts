@@ -45,63 +45,82 @@ export type HttpValidationError = {
 };
 
 /**
- * ItemCreate
+ * Message
+ *
+ * 通用消息响应
  */
-export type ItemCreate = {
+export type Message = {
     /**
-     * Title
+     * Message
      */
-    title: string;
-    /**
-     * Description
-     */
-    description?: string | null;
+    message: string;
 };
 
 /**
- * ItemPublic
+ * RoleCreate
+ *
+ * 创建角色的请求体：name 必填，scopes 可选（默认空集合）
  */
-export type ItemPublic = {
+export type RoleCreate = {
     /**
-     * Title
+     * Name
      */
-    title: string;
+    name: string;
     /**
-     * Description
+     * Scopes
      */
-    description?: string | null;
+    scopes?: Array<string>;
+};
+
+/**
+ * RolePublic
+ *
+ * 单条角色的响应体：基础字段 + 当前持有的 scope 列表
+ */
+export type RolePublic = {
     /**
      * Id
      */
     id: string;
     /**
-     * Owner Id
+     * Name
      */
-    owner_id: string;
+    name: string;
     /**
      * Created At
      */
     created_at?: string | null;
+    /**
+     * Scopes
+     */
+    scopes?: Array<string>;
 };
 
 /**
- * ItemUpdate
+ * RoleUpdate
+ *
+ * 更新角色的请求体：所有字段可选，未设置的字段保持不变（部分更新）
+ *
+ * - name：角色名（更新后会影响引用此角色的用户）
+ * - scopes：完整的 scope 集合（整体替换，非增量合并）
  */
-export type ItemUpdate = {
+export type RoleUpdate = {
     /**
-     * Title
+     * Name
      */
-    title?: string | null;
+    name?: string | null;
     /**
-     * Description
+     * Scopes
      */
-    description?: string | null;
+    scopes?: Array<string> | null;
 };
 
 /**
- * ItemsPublic
+ * RolesPublic
+ *
+ * 角色分页列表的响应体：data / count / page / page_size / total_pages
  */
-export type ItemsPublic = {
+export type RolesPublic = {
     /**
      * Data
      */
@@ -122,18 +141,6 @@ export type ItemsPublic = {
      * Total Pages
      */
     total_pages?: number | null;
-};
-
-/**
- * Message
- *
- * 通用消息响应
- */
-export type Message = {
-    /**
-     * Message
-     */
-    message: string;
 };
 
 /**
@@ -218,6 +225,10 @@ export type UserPublic = {
      * Created At
      */
     created_at?: string | null;
+    /**
+     * Scopes
+     */
+    scopes?: Array<string>;
 };
 
 /**
@@ -249,11 +260,11 @@ export type UserUpdate = {
     /**
      * Is Active
      */
-    is_active?: boolean;
+    is_active?: boolean | null;
     /**
      * Is Superuser
      */
-    is_superuser?: boolean;
+    is_superuser?: boolean | null;
     /**
      * Full Name
      */
@@ -320,7 +331,35 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
+    /**
+     * Input
+     */
+    input?: unknown;
+    /**
+     * Context
+     */
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
+
+export type HealthCheckV1HealthCheckGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/health-check';
+};
+
+export type HealthCheckV1HealthCheckGetResponses = {
+    /**
+     * Response Health Check V1 Health Check Get
+     *
+     * Successful Response
+     */
+    200: boolean;
+};
+
+export type HealthCheckV1HealthCheckGetResponse = HealthCheckV1HealthCheckGetResponses[keyof HealthCheckV1HealthCheckGetResponses];
 
 export type LoginAccessTokenV1LoginAccessTokenPostData = {
     body: BodyLoginAccessTokenV1LoginAccessTokenPost;
@@ -421,114 +460,6 @@ export type CreateUserV1UsersPostResponses = {
 };
 
 export type CreateUserV1UsersPostResponse = CreateUserV1UsersPostResponses[keyof CreateUserV1UsersPostResponses];
-
-export type DeleteUserV1UsersUserIdDeleteData = {
-    body?: never;
-    path: {
-        /**
-         * User Id
-         */
-        user_id: string;
-    };
-    query?: never;
-    url: '/v1/users/{user_id}';
-};
-
-export type DeleteUserV1UsersUserIdDeleteErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteUserV1UsersUserIdDeleteError = DeleteUserV1UsersUserIdDeleteErrors[keyof DeleteUserV1UsersUserIdDeleteErrors];
-
-export type DeleteUserV1UsersUserIdDeleteResponses = {
-    /**
-     * Successful Response
-     */
-    200: Message;
-};
-
-export type DeleteUserV1UsersUserIdDeleteResponse = DeleteUserV1UsersUserIdDeleteResponses[keyof DeleteUserV1UsersUserIdDeleteResponses];
-
-export type ReadUserByIdV1UsersUserIdGetData = {
-    body?: never;
-    path: {
-        /**
-         * User Id
-         */
-        user_id: string;
-    };
-    query?: never;
-    url: '/v1/users/{user_id}';
-};
-
-export type ReadUserByIdV1UsersUserIdGetErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadUserByIdV1UsersUserIdGetError = ReadUserByIdV1UsersUserIdGetErrors[keyof ReadUserByIdV1UsersUserIdGetErrors];
-
-export type ReadUserByIdV1UsersUserIdGetResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserPublic;
-};
-
-export type ReadUserByIdV1UsersUserIdGetResponse = ReadUserByIdV1UsersUserIdGetResponses[keyof ReadUserByIdV1UsersUserIdGetResponses];
-
-export type UpdateUserV1UsersUserIdPatchData = {
-    body: UserUpdate;
-    path: {
-        /**
-         * User Id
-         */
-        user_id: string;
-    };
-    query?: never;
-    url: '/v1/users/{user_id}';
-};
-
-export type UpdateUserV1UsersUserIdPatchErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateUserV1UsersUserIdPatchError = UpdateUserV1UsersUserIdPatchErrors[keyof UpdateUserV1UsersUserIdPatchErrors];
-
-export type UpdateUserV1UsersUserIdPatchResponses = {
-    /**
-     * Successful Response
-     */
-    200: UserPublic;
-};
-
-export type UpdateUserV1UsersUserIdPatchResponse = UpdateUserV1UsersUserIdPatchResponses[keyof UpdateUserV1UsersUserIdPatchResponses];
-
-export type HealthCheckV1UsersHealthCheckGetData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/v1/users/health-check/';
-};
-
-export type HealthCheckV1UsersHealthCheckGetResponses = {
-    /**
-     * Response Health Check V1 Users Health Check  Get
-     *
-     * Successful Response
-     */
-    200: boolean;
-};
-
-export type HealthCheckV1UsersHealthCheckGetResponse = HealthCheckV1UsersHealthCheckGetResponses[keyof HealthCheckV1UsersHealthCheckGetResponses];
 
 export type DeleteUserMeV1UsersMeDeleteData = {
     body?: never;
@@ -637,7 +568,97 @@ export type RegisterUserV1UsersSignupPostResponses = {
 
 export type RegisterUserV1UsersSignupPostResponse = RegisterUserV1UsersSignupPostResponses[keyof RegisterUserV1UsersSignupPostResponses];
 
-export type ReadItemsV1ItemsGetData = {
+export type DeleteUserV1UsersUserIdDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/v1/users/{user_id}';
+};
+
+export type DeleteUserV1UsersUserIdDeleteErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteUserV1UsersUserIdDeleteError = DeleteUserV1UsersUserIdDeleteErrors[keyof DeleteUserV1UsersUserIdDeleteErrors];
+
+export type DeleteUserV1UsersUserIdDeleteResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeleteUserV1UsersUserIdDeleteResponse = DeleteUserV1UsersUserIdDeleteResponses[keyof DeleteUserV1UsersUserIdDeleteResponses];
+
+export type ReadUserByIdV1UsersUserIdGetData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/v1/users/{user_id}';
+};
+
+export type ReadUserByIdV1UsersUserIdGetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadUserByIdV1UsersUserIdGetError = ReadUserByIdV1UsersUserIdGetErrors[keyof ReadUserByIdV1UsersUserIdGetErrors];
+
+export type ReadUserByIdV1UsersUserIdGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserPublic;
+};
+
+export type ReadUserByIdV1UsersUserIdGetResponse = ReadUserByIdV1UsersUserIdGetResponses[keyof ReadUserByIdV1UsersUserIdGetResponses];
+
+export type UpdateUserV1UsersUserIdPatchData = {
+    body: UserUpdate;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/v1/users/{user_id}';
+};
+
+export type UpdateUserV1UsersUserIdPatchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateUserV1UsersUserIdPatchError = UpdateUserV1UsersUserIdPatchErrors[keyof UpdateUserV1UsersUserIdPatchErrors];
+
+export type UpdateUserV1UsersUserIdPatchResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserPublic;
+};
+
+export type UpdateUserV1UsersUserIdPatchResponse = UpdateUserV1UsersUserIdPatchResponses[keyof UpdateUserV1UsersUserIdPatchResponses];
+
+export type ReadRolesV1RolesGetData = {
     body?: never;
     path?: never;
     query?: {
@@ -650,138 +671,138 @@ export type ReadItemsV1ItemsGetData = {
          */
         page_size?: number;
     };
-    url: '/v1/items/';
+    url: '/v1/roles/';
 };
 
-export type ReadItemsV1ItemsGetErrors = {
+export type ReadRolesV1RolesGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadItemsV1ItemsGetError = ReadItemsV1ItemsGetErrors[keyof ReadItemsV1ItemsGetErrors];
+export type ReadRolesV1RolesGetError = ReadRolesV1RolesGetErrors[keyof ReadRolesV1RolesGetErrors];
 
-export type ReadItemsV1ItemsGetResponses = {
+export type ReadRolesV1RolesGetResponses = {
     /**
      * Successful Response
      */
-    200: ItemsPublic;
+    200: RolesPublic;
 };
 
-export type ReadItemsV1ItemsGetResponse = ReadItemsV1ItemsGetResponses[keyof ReadItemsV1ItemsGetResponses];
+export type ReadRolesV1RolesGetResponse = ReadRolesV1RolesGetResponses[keyof ReadRolesV1RolesGetResponses];
 
-export type CreateItemV1ItemsPostData = {
-    body: ItemCreate;
+export type CreateRoleV1RolesPostData = {
+    body: RoleCreate;
     path?: never;
     query?: never;
-    url: '/v1/items/';
+    url: '/v1/roles/';
 };
 
-export type CreateItemV1ItemsPostErrors = {
+export type CreateRoleV1RolesPostErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type CreateItemV1ItemsPostError = CreateItemV1ItemsPostErrors[keyof CreateItemV1ItemsPostErrors];
+export type CreateRoleV1RolesPostError = CreateRoleV1RolesPostErrors[keyof CreateRoleV1RolesPostErrors];
 
-export type CreateItemV1ItemsPostResponses = {
+export type CreateRoleV1RolesPostResponses = {
     /**
      * Successful Response
      */
-    200: ItemPublic;
+    200: RolePublic;
 };
 
-export type CreateItemV1ItemsPostResponse = CreateItemV1ItemsPostResponses[keyof CreateItemV1ItemsPostResponses];
+export type CreateRoleV1RolesPostResponse = CreateRoleV1RolesPostResponses[keyof CreateRoleV1RolesPostResponses];
 
-export type DeleteItemV1ItemsItemIdDeleteData = {
+export type DeleteRoleV1RolesRoleIdDeleteData = {
     body?: never;
     path: {
         /**
-         * Item Id
+         * Role Id
          */
-        item_id: string;
+        role_id: string;
     };
     query?: never;
-    url: '/v1/items/{item_id}';
+    url: '/v1/roles/{role_id}';
 };
 
-export type DeleteItemV1ItemsItemIdDeleteErrors = {
+export type DeleteRoleV1RolesRoleIdDeleteErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type DeleteItemV1ItemsItemIdDeleteError = DeleteItemV1ItemsItemIdDeleteErrors[keyof DeleteItemV1ItemsItemIdDeleteErrors];
+export type DeleteRoleV1RolesRoleIdDeleteError = DeleteRoleV1RolesRoleIdDeleteErrors[keyof DeleteRoleV1RolesRoleIdDeleteErrors];
 
-export type DeleteItemV1ItemsItemIdDeleteResponses = {
+export type DeleteRoleV1RolesRoleIdDeleteResponses = {
     /**
      * Successful Response
      */
     200: Message;
 };
 
-export type DeleteItemV1ItemsItemIdDeleteResponse = DeleteItemV1ItemsItemIdDeleteResponses[keyof DeleteItemV1ItemsItemIdDeleteResponses];
+export type DeleteRoleV1RolesRoleIdDeleteResponse = DeleteRoleV1RolesRoleIdDeleteResponses[keyof DeleteRoleV1RolesRoleIdDeleteResponses];
 
-export type ReadItemV1ItemsItemIdGetData = {
+export type ReadRoleV1RolesRoleIdGetData = {
     body?: never;
     path: {
         /**
-         * Item Id
+         * Role Id
          */
-        item_id: string;
+        role_id: string;
     };
     query?: never;
-    url: '/v1/items/{item_id}';
+    url: '/v1/roles/{role_id}';
 };
 
-export type ReadItemV1ItemsItemIdGetErrors = {
+export type ReadRoleV1RolesRoleIdGetErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadItemV1ItemsItemIdGetError = ReadItemV1ItemsItemIdGetErrors[keyof ReadItemV1ItemsItemIdGetErrors];
+export type ReadRoleV1RolesRoleIdGetError = ReadRoleV1RolesRoleIdGetErrors[keyof ReadRoleV1RolesRoleIdGetErrors];
 
-export type ReadItemV1ItemsItemIdGetResponses = {
+export type ReadRoleV1RolesRoleIdGetResponses = {
     /**
      * Successful Response
      */
-    200: ItemPublic;
+    200: RolePublic;
 };
 
-export type ReadItemV1ItemsItemIdGetResponse = ReadItemV1ItemsItemIdGetResponses[keyof ReadItemV1ItemsItemIdGetResponses];
+export type ReadRoleV1RolesRoleIdGetResponse = ReadRoleV1RolesRoleIdGetResponses[keyof ReadRoleV1RolesRoleIdGetResponses];
 
-export type UpdateItemV1ItemsItemIdPutData = {
-    body: ItemUpdate;
+export type UpdateRoleV1RolesRoleIdPatchData = {
+    body: RoleUpdate;
     path: {
         /**
-         * Item Id
+         * Role Id
          */
-        item_id: string;
+        role_id: string;
     };
     query?: never;
-    url: '/v1/items/{item_id}';
+    url: '/v1/roles/{role_id}';
 };
 
-export type UpdateItemV1ItemsItemIdPutErrors = {
+export type UpdateRoleV1RolesRoleIdPatchErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type UpdateItemV1ItemsItemIdPutError = UpdateItemV1ItemsItemIdPutErrors[keyof UpdateItemV1ItemsItemIdPutErrors];
+export type UpdateRoleV1RolesRoleIdPatchError = UpdateRoleV1RolesRoleIdPatchErrors[keyof UpdateRoleV1RolesRoleIdPatchErrors];
 
-export type UpdateItemV1ItemsItemIdPutResponses = {
+export type UpdateRoleV1RolesRoleIdPatchResponses = {
     /**
      * Successful Response
      */
-    200: ItemPublic;
+    200: RolePublic;
 };
 
-export type UpdateItemV1ItemsItemIdPutResponse = UpdateItemV1ItemsItemIdPutResponses[keyof UpdateItemV1ItemsItemIdPutResponses];
+export type UpdateRoleV1RolesRoleIdPatchResponse = UpdateRoleV1RolesRoleIdPatchResponses[keyof UpdateRoleV1RolesRoleIdPatchResponses];
