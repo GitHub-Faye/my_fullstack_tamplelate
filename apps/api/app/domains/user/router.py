@@ -19,7 +19,8 @@ from app.core.dependencies import (
     require_any_scope,
     require_scope,
 )
-from app.core.responses import paginated_fields, user_public, users_public
+from app.core.responses import paginated_fields
+from app.domains.user.responses import user_public, users_public
 from app.core.schemas import Message, PaginationParams
 from app.core.scopes import UserScope
 from app.domains.user import service
@@ -157,11 +158,6 @@ async def read_users(
             page_size=pagination.page_size,
         ),
     )
-
-
-@router.get("/users/health-check/")
-async def health_check() -> bool:
-    return True
 
 
 # ======================== 当前用户自助操作 ========================
@@ -407,8 +403,8 @@ async def delete_user(
 
 @router.get("/users/{user_id}", response_model=UserPublic)
 async def read_user_by_id(
-    user_id: uuid.UUID,
     session: SessionDep,
+    user_id: uuid.UUID,
     current_user: CurrentUser,
     _: Annotated[None, Depends(require_scope(UserScope.READ))],
 ) -> Any:

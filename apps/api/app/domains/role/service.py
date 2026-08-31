@@ -2,7 +2,7 @@
 
 import uuid
 
-from app.core.errors import raise_bad_request, raise_role_not_found
+from app.core.errors import raise_bad_request, raise_role_already_exists, raise_role_not_found
 from app.core.models import Role
 from app.domains.role import repository
 from app.domains.role.schemas import RoleCreate, RoleUpdate
@@ -25,14 +25,14 @@ async def get_role(*, session: AsyncSession, role_id: uuid.UUID) -> Role:
 
 async def create_role(*, session: AsyncSession, role_in: RoleCreate) -> Role:
     if await repository.get_role_by_name(session=session, name=role_in.name):
-        raise_bad_request(f"Role with name '{role_in.name}' already exists")
+        raise_role_already_exists(f"Role with name '{role_in.name}' already exists")
     try:
         role = await repository.create_role(session=session, role_in=role_in)
         await session.commit()
         return role
     except IntegrityError:
         await session.rollback()
-        raise_bad_request(f"Role with name '{role_in.name}' already exists")
+        raise_role_already_exists(f"Role with name '{role_in.name}' already exists")
 
 
 async def update_role(
@@ -42,7 +42,7 @@ async def update_role(
     if role_in.name and role_in.name != role.name:
         existing = await repository.get_role_by_name(session=session, name=role_in.name)
         if existing and existing.id != role_id:
-            raise_bad_request(f"Role with name '{role_in.name}' already exists")
+            raise_role_already_exists(f"Role with name '{role_in.name}' already exists")
     try:
         updated = await repository.update_role(
             session=session, db_role=role, role_in=role_in
@@ -51,7 +51,7 @@ async def update_role(
         return updated
     except IntegrityError:
         await session.rollback()
-        raise_bad_request(f"Role with name '{role_in.name}' already exists")
+        raise_role_already_exists(f"Role with name '{role_in.name}' already exists")
 
 
 async def delete_role(*, session: AsyncSession, role_id: uuid.UUID) -> None:

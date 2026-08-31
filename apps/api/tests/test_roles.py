@@ -140,7 +140,7 @@ async def test_create_role_success(
 @pytest.mark.asyncio
 async def test_create_role_duplicate_name(role_admin_client: AsyncClient):
     """
-    测试创建重名角色返回 400。
+    测试创建重名角色返回 409。
     """
     response = await role_admin_client.post(
         "/v1/roles/",
@@ -150,7 +150,7 @@ async def test_create_role_duplicate_name(role_admin_client: AsyncClient):
         },
     )
 
-    assert response.status_code == 400
+    assert response.status_code == 409
 
 
 @pytest.mark.asyncio

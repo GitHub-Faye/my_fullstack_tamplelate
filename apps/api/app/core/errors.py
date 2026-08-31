@@ -36,10 +36,10 @@ class ErrorCode(str, Enum):
     USER_INVALID_PASSWORD = "USER_INVALID_PASSWORD"
     USER_PASSWORD_SAME_AS_OLD = "USER_PASSWORD_SAME_AS_OLD"
     USER_CANNOT_DELETE_SELF = "USER_CANNOT_DELETE_SELF"
-    USER_CANNOT_DELETE_SUPERUSER = "USER_CANNOT_DELETE_SUPERUSER"
-    
+
     # ==================== 角色相关错误 (ROLE) ====================
     ROLE_NOT_FOUND = "ROLE_NOT_FOUND"
+    ROLE_ALREADY_EXISTS = "ROLE_ALREADY_EXISTS"
 
     # ==================== 系统错误 (SYSTEM) ====================
     SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR"
@@ -64,13 +64,13 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     ErrorCode.AUTH_INSUFFICIENT_PERMISSIONS: status.HTTP_403_FORBIDDEN,
     ErrorCode.AUTH_MISSING_SCOPE: status.HTTP_403_FORBIDDEN,
     ErrorCode.USER_CANNOT_DELETE_SELF: status.HTTP_403_FORBIDDEN,
-    ErrorCode.USER_CANNOT_DELETE_SUPERUSER: status.HTTP_403_FORBIDDEN,
 
     # 404 Not Found
     ErrorCode.USER_NOT_FOUND: status.HTTP_404_NOT_FOUND,
     ErrorCode.ROLE_NOT_FOUND: status.HTTP_404_NOT_FOUND,
-    
+
     # 409 Conflict
+    ErrorCode.ROLE_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     ErrorCode.USER_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     ErrorCode.USER_EMAIL_ALREADY_EXISTS: status.HTTP_409_CONFLICT,
     
@@ -97,9 +97,9 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
     ErrorCode.USER_INVALID_PASSWORD: "Incorrect password",
     ErrorCode.USER_PASSWORD_SAME_AS_OLD: "New password cannot be the same as the current one",
     ErrorCode.USER_CANNOT_DELETE_SELF: "Super users are not allowed to delete themselves",
-    ErrorCode.USER_CANNOT_DELETE_SUPERUSER: "Cannot delete superuser",
 
     ErrorCode.ROLE_NOT_FOUND: "Role not found",
+    ErrorCode.ROLE_ALREADY_EXISTS: "Role already exists",
 
     ErrorCode.SYSTEM_INTERNAL_ERROR: "Internal server error",
     ErrorCode.SYSTEM_VALIDATION_ERROR: "Validation error",
@@ -150,13 +150,6 @@ class BusinessException(HTTPException):
 
 # ==================== 便捷工厂函数 ====================
 
-def raise_auth_error(
-    code: ErrorCode = ErrorCode.AUTH_INVALID_CREDENTIALS,
-    detail: str | None = None,
-) -> None:
-    """抛出认证错误"""
-    raise BusinessException(code=code, detail=detail)
-
 
 def raise_user_not_found(detail: str | None = None) -> NoReturn:
     """抛出用户不存在错误"""
@@ -174,6 +167,14 @@ def raise_user_already_exists(detail: str | None = None) -> NoReturn:
 def raise_role_not_found(detail: str | None = None) -> NoReturn:
     """抛出角色不存在错误"""
     raise BusinessException(code=ErrorCode.ROLE_NOT_FOUND, detail=detail)
+
+
+def raise_role_already_exists(detail: str | None = None) -> NoReturn:
+    """抛出角色已存在错误"""
+    raise BusinessException(
+        code=ErrorCode.ROLE_ALREADY_EXISTS,
+        detail=detail,
+    )
 
 
 def raise_bad_request(detail: str | None = None) -> NoReturn:

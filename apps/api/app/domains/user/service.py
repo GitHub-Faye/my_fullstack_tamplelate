@@ -105,10 +105,17 @@ async def update_password(
             code=ErrorCode.USER_PASSWORD_SAME_AS_OLD,
             detail="New password cannot be the same as the current one",
         )
-    await repository.update_password_me(
-        session=session, db_user=user, new_password=body.new_password
-    )
-    await session.commit()
+    try:
+        await repository.update_password_me(
+            session=session, db_user=user, new_password=body.new_password
+        )
+        await session.commit()
+    except IntegrityError:
+        await session.rollback()
+        raise BusinessException(
+            code=ErrorCode.SYSTEM_INTERNAL_ERROR,
+            detail="Unable to update password",
+        )
 
 
 async def update_user(

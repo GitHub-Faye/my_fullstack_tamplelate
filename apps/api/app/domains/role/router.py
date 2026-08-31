@@ -26,7 +26,8 @@ from app.core.dependencies import (
     SessionDep,
     require_scope,
 )
-from app.core.responses import paginated_fields, role_public, roles_public
+from app.core.responses import paginated_fields
+from app.domains.role.responses import role_public, roles_public
 from app.core.schemas import Message, PaginationParams
 from app.core.scopes import RoleScope
 from app.domains.role import service
