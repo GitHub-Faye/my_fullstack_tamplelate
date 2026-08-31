@@ -169,11 +169,14 @@ export const useIsAuthenticated = () =>
 export const useIsSuperuser = () =>
   useAuthStore((state) => state.user?.is_superuser ?? false);
 
+/** 空权限列表缓存：避免每次调用生成新数组引用，触发 useSyncExternalStore 的 getServerSnapshot 无限循环警告 */
+const EMPTY_SCOPES: ScopeType[] = [];
+
 /** 获取当前用户拥有的权限 Scope 列表（后端实时计算）
  *  类型断言：后端保证返回合法 scope 字符串，消费方可直接配合 @repo/contracts/scopes 的 hasScope 使用
  */
 export const useUserScopes = () =>
-  useAuthStore((state) => (state.user?.scopes ?? []) as ScopeType[]);
+  useAuthStore((state) => (state.user?.scopes ?? EMPTY_SCOPES) as ScopeType[]);
 
 /** 获取状态是否已恢复完成 */
 export const useIsHydrated = () => useAuthStore((state) => state.isHydrated);
