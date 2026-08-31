@@ -5,13 +5,11 @@
 - JSON 格式输出（生产环境）
 - 彩色控制台输出（开发环境）
 - 与标准库 logging 的桥接
-- FastAPI 和 Celery 集成
 """
 
 import logging
 import logging.config
 import sys
-from typing import Any
 
 import structlog
 from structlog.types import EventDict, WrappedLogger

@@ -65,10 +65,10 @@ async def test_login_access_token_nonexistent_user(client: AsyncClient):
             "password": "somepassword",
         },
     )
-    
+
     assert response.status_code == 400
     data = response.json()
-    assert "detail" in data
+    assert "Incorrect email or password" in data["detail"]
 
 
 @pytest.mark.asyncio
@@ -109,20 +109,13 @@ async def test_login_access_token_inactive_user(
 async def test_test_token_valid(authorized_client: AsyncClient, test_user: User):
     """
     测试使用有效的 token 获取当前用户信息。
-    
-    Note: SQLite has issues with UUID type handling, so this test may fail
-    due to database type mismatch. In production with PostgreSQL this works correctly.
     """
     response = await authorized_client.post("/v1/login/test-token")
-    
-    # SQLite may have UUID handling issues, accept both success and 500 error
-    if response.status_code == 200:
-        data = response.json()
-        assert data["email"] == test_user.email
-        assert data["full_name"] == test_user.full_name
-    else:
-        # SQLite UUID type mismatch - this is a known limitation
-        pytest.skip("SQLite UUID handling limitation")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["email"] == test_user.email
+    assert data["full_name"] == test_user.full_name
 
 
 @pytest.mark.asyncio

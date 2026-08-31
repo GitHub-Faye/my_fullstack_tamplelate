@@ -101,43 +101,43 @@ async def init_roles_and_scopes(session: AsyncSession) -> None:
 async def init_default_admin(session: AsyncSession) -> None:
     """
     如果系统中没有任何用户，创建一个默认 admin 用户。
-    
+
     默认管理员账号：
-    - 邮箱: admin@admin.com
-    - 密码: admin
+    - 邮箱: 来自 settings.FIRST_SUPERUSER
+    - 密码: 来自 settings.FIRST_SUPERUSER_PASSWORD
     - 角色: admin（拥有所有 user 权限）+ superuser
     """
     # 检查是否已有用户
     result = await session.execute(select(func.count()).select_from(User))
     user_count = result.scalar_one()
-    
+
     if user_count > 0:
         logger.info("default_admin_exists", message="Users already exist, skipping default admin creation.")
         return
-    
+
     # 查找 admin 角色
     result = await session.execute(select(Role).where(Role.name == BUILTIN_ROLES[-1]))
     admin_role = result.scalar_one_or_none()
-    
+
     if not admin_role:
         logger.warning("admin_role_missing", message="Admin role not found, skipping default admin creation.")
         return
-    
+
     # 创建默认 admin 用户
     admin_user = User(
-        email="1@qq.com",
-        hashed_password=get_password_hash("11111111"),
+        email=settings.FIRST_SUPERUSER,
+        hashed_password=get_password_hash(settings.FIRST_SUPERUSER_PASSWORD),
         full_name="Default Admin",
         is_superuser=True,
         is_active=True,
     )
     session.add(admin_user)
     await session.flush()
-    
+
     # 分配 admin 角色
     user_role = UserRole(user_id=admin_user.id, role_id=admin_role.id)
     session.add(user_role)
-    
+
     await session.commit()
     logger.info("default_admin_created", email=str(admin_user.email))
 
