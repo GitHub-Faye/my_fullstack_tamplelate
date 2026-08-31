@@ -5,6 +5,7 @@ export {
   useToken,
   useIsAuthenticated,
   useIsSuperuser,
+  useUserScopes,
   useIsHydrated,
 } from "./stores/auth";
 

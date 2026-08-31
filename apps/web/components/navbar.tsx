@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCurrentUser, useIsSuperuser, useAuthStore } from "@/features/user";
+import { useCurrentUser, useUserScopes, useAuthStore } from "@/features/user";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LayoutDashboard, Users, Settings, LogOut, User, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { hasScope, UserScope, RoleScope } from "@repo/contracts/scopes";
 
 const navigation = [
   { name: "仪表盘", href: "/dashboard", icon: LayoutDashboard },
@@ -30,7 +31,7 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const user = useCurrentUser();
-  const isSuperuser = useIsSuperuser();
+  const userScopes = useUserScopes();
   const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = () => {
@@ -43,9 +44,21 @@ export function Navbar() {
     return name.slice(0, 2).toUpperCase();
   };
 
-  const allNavigation = isSuperuser
-    ? [...navigation, ...adminNavigation]
-    : navigation;
+  // 管理入口按 scope 判定可见性（与后端 require_scope 一致）：
+  // - 用户管理: user:read
+  // - 角色管理: role:read
+  // 无对应 scope 时（如仅 viewer）不显示管理入口
+  const visibleAdminNavigation = adminNavigation.filter((item) => {
+    if (item.href === "/dashboard/admin") {
+      return hasScope(userScopes, UserScope.READ);
+    }
+    if (item.href === "/dashboard/roles") {
+      return hasScope(userScopes, RoleScope.READ);
+    }
+    return true;
+  });
+
+  const allNavigation = [...navigation, ...visibleAdminNavigation];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

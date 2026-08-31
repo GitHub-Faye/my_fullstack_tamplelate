@@ -1,17 +1,11 @@
 import { UserTable } from "../client/UserTable";
 
-interface UserListProps {
-  currentUserId?: string;
-}
-
 /**
  * UserList Server Component
- * Fetches initial user data on the server and renders the client UserTable
+ * Renders the client UserTable
+ * Note: UserTable 内部通过 auth store 获取当前用户 id 以禁用"删除自己"，
+ * 无需再从服务端透传 currentUserId。
  */
-export async function UserList({ currentUserId }: UserListProps) {
-  // Pass initial data to the client component
-  // Note: The UserTable component uses React Query, so it will handle
-  // client-side data fetching. For a fully server-rendered table,
-  // you would need to create a separate Server Component version.
-  return <UserTable currentUserId={currentUserId} />;
+export async function UserList() {
+  return <UserTable />;
 }

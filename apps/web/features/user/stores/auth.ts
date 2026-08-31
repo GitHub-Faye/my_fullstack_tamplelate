@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { UserPublic } from "@repo/sdk";
+import type { ScopeType } from "@repo/contracts/scopes";
 import { configureApiClient } from "@/lib/api-sdk";
 
 /**
@@ -167,6 +168,12 @@ export const useIsAuthenticated = () =>
 /** 获取是否为超级管理员 */
 export const useIsSuperuser = () =>
   useAuthStore((state) => state.user?.is_superuser ?? false);
+
+/** 获取当前用户拥有的权限 Scope 列表（后端实时计算）
+ *  类型断言：后端保证返回合法 scope 字符串，消费方可直接配合 @repo/contracts/scopes 的 hasScope 使用
+ */
+export const useUserScopes = () =>
+  useAuthStore((state) => (state.user?.scopes ?? []) as ScopeType[]);
 
 /** 获取状态是否已恢复完成 */
 export const useIsHydrated = () => useAuthStore((state) => state.isHydrated);

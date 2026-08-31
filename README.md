@@ -3,7 +3,7 @@
 全栈开发模板，基于 **FastAPI + Next.js + SQLite + TanStack Query** 的现代化 Monorepo 架构。
 
 > **定位**：这是一个「起始项目模板」，任何新业务域接入时都遵循同一套开发规范。
-> 后端以 `user` / `role` 两个业务域为参考范例，前端以 `item` 为参考范例，模板已内置：
+> 后端以 `user` / `role` 两个业务域为参考范例，前端以 `features/user` / `features/role` 为参考范例，模板已内置：
 > 统一的三层架构、RBAC 权限体系（Scope）、错误体系、分页协议、前后端契约同步链路。
 
 ---
@@ -143,13 +143,14 @@ async def create_xxx(*, session, xxx_in) -> Xxx:
 
 ```python
 class ErrorCode(str, Enum):
-    ORDER_NOT_FOUND = "ORDER_NOT_FOUND"          # 新增
-    ORDER_ALREADY_EXISTS = "ORDER_ALREADY_EXISTS"
+    ROLE_NOT_FOUND = "ROLE_NOT_FOUND"            # 新增
+    ROLE_ALREADY_EXISTS = "ROLE_ALREADY_EXISTS"
+    ROLE_BUILTIN_PROTECTED = "ROLE_BUILTIN_PROTECTED"
 
-ERROR_STATUS_MAP[ErrorCode.ORDER_NOT_FOUND] = status.HTTP_404_NOT_FOUND
+ERROR_STATUS_MAP[ErrorCode.ROLE_NOT_FOUND] = status.HTTP_404_NOT_FOUND
 
-def raise_order_not_found(detail=None) -> NoReturn:
-    raise BusinessException(code=ErrorCode.ORDER_NOT_FOUND, detail=detail)
+def raise_role_not_found(detail=None) -> NoReturn:
+    raise BusinessException(code=ErrorCode.ROLE_NOT_FOUND, detail=detail)
 ```
 
 ### Scope 权限体系
@@ -157,15 +158,14 @@ def raise_order_not_found(detail=None) -> NoReturn:
 统一在 [`app/core/scopes.py`](apps/api/app/core/scopes.py) 中扩展：
 
 ```python
-class OrderScope(str, Enum):
-    READ = "order:read"
-    CREATE = "order:create"
-    UPDATE = "order:update"
-    DELETE = "order:delete"
-    ADMIN = "order:admin"
+class RoleScope(str, Enum):
+    READ = "role:read"
+    CREATE = "role:create"
+    UPDATE = "role:update"
+    DELETE = "role:delete"
 
-ALL_ORDER_SCOPES = [OrderScope.READ, OrderScope.CREATE, OrderScope.UPDATE, OrderScope.DELETE, OrderScope.ADMIN]
-ALL_SCOPES = ALL_USER_SCOPES + ALL_ROLE_SCOPES + ALL_ORDER_SCOPES   # 记得加入总集合！
+ALL_ROLE_SCOPES = [RoleScope.READ, RoleScope.CREATE, RoleScope.UPDATE, RoleScope.DELETE]
+ALL_SCOPES = ALL_USER_SCOPES + ALL_ROLE_SCOPES   # 记得加入总集合！
 ```
 
 路由中使用三个依赖函数（定义在 [`app/core/dependencies.py`](apps/api/app/core/dependencies.py)）：
@@ -173,18 +173,18 @@ ALL_SCOPES = ALL_USER_SCOPES + ALL_ROLE_SCOPES + ALL_ORDER_SCOPES   # 记得加�
 ```python
 from app.core.dependencies import require_scope, require_any_scope, require_all_scopes
 
-@router.get("/", response_model=OrdersPublic)
-async def read_orders(
+@router.get("/", response_model=RolesPublic)
+async def read_roles(
     session: SessionDep,
     pagination: Annotated[PaginationParams, Query()],
-    _: Annotated[None, Depends(require_scope(OrderScope.READ))],
+    _: Annotated[None, Depends(require_scope(RoleScope.READ))],
 ) -> Any: ...
 
-@router.delete("/{order_id}")
-async def delete_order(
+@router.delete("/{role_id}")
+async def delete_role(
     session: SessionDep,
-    order_id: uuid.UUID,
-    _: Annotated[None, Depends(require_any_scope(OrderScope.ADMIN, OrderScope.DELETE))],
+    role_id: uuid.UUID,
+    _: Annotated[None, Depends(require_any_scope(RoleScope.ADMIN, RoleScope.DELETE))],
 ) -> Message: ...
 ```
 
@@ -194,17 +194,16 @@ async def delete_order(
 
 ## ➕ 新增一个业务域的完整流程
 
-> 以新增 **订单（Order）** 域为例。按顺序执行以下步骤。
+> 以下按步骤接入新业务域。示例用 `<name>` 占位（如 `order` / `post` / `product`），对应类名用 `Xxx` / `<Name>Scope`（如 `Order` / `OrderScope`）。可对照已落地的 `user` / `role` 两个域（[`domains/user/`](apps/api/app/domains/user/) 与 [`domains/role/`](apps/api/app/domains/role/)）。
 
 ### 第 1 步：定义数据库模型
 
 在 [`apps/api/app/core/models.py`](apps/api/app/core/models.py) 添加模型：
 
 ```python
-class Order(SQLModel, table=True):
+class Xxx(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     name: str = Field(unique=True, index=True, max_length=50)
-    owner_id: uuid.UUID = Field(foreign_key="user.id")
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc, sa_type=DateTime(timezone=True)
     )
@@ -214,7 +213,7 @@ class Order(SQLModel, table=True):
 
 ```bash
 cd apps/api
-uv run alembic revision --autogenerate -m "add order table"
+uv run alembic revision --autogenerate -m "add <name> table"
 uv run alembic upgrade head
 ```
 
@@ -224,19 +223,19 @@ uv run alembic upgrade head
 
 | 文件 | 核心内容 |
 |------|----------|
-| `schemas.py` | `OrderCreate` / `OrderUpdate` / `OrderPublic`（含 `scopes` 或业务字段）/ `OrdersPublic(PaginatedResponse[OrderPublic])` |
-| `repository.py` | `get_order` / `get_orders`（分页+count）/ `create_order`（flush）/ `update_order` / `delete_order` |
+| `schemas.py` | `XxxCreate` / `XxxUpdate` / `XxxPublic` / `XxxsPublic(PaginatedResponse[XxxPublic])` |
+| `repository.py` | `get_xxx` / `get_xxx_list`（分页+count）/ `create_xxx`（flush）/ `update_xxx` / `delete_xxx` |
 | `service.py` | 唯一性预检 → repository → `commit`；`IntegrityError` 兜底 |
-| `responses.py` | `order_public` / `orders_public`（批量 scope 查询） |
-| `router.py` | RESTful 路由 + `require_scope(OrderScope.X)` |
+| `responses.py` | `xxx_public` / `xxxs_public`（批量 scope 查询） |
+| `router.py` | RESTful 路由 + `require_scope(<Name>Scope.X)` |
 | `__init__.py` | 空文件 |
 
 > ⚠️ SQLModel `Relationship` 字段类型必须用 `Optional["Xxx"]` 写法，**不能用 `"Xxx | None"`**（SQLAlchemy 无法解析 union 语法字符串注解）。
 
 ### 第 4 步：注册 Scope（两个文件）
 
-- [`app/core/scopes.py`](apps/api/app/core/scopes.py)：新增 `OrderScope` 枚举 + `ALL_ORDER_SCOPES` + 加入 `ALL_SCOPES`
-- [`packages/contracts/src/scopes.ts`](packages/contracts/src/scopes.ts)：同步新增 `OrderScope` 常量 + `ALL_ORDER_SCOPES` + 更新 `ScopeType` 联合类型 + `ALL_SCOPES` + `DEFAULT_ROLE_SCOPES`
+- [`app/core/scopes.py`](apps/api/app/core/scopes.py)：新增 `<Name>Scope` 枚举 + `ALL_<NAME>_SCOPES` + 加入 `ALL_SCOPES`
+- [`packages/contracts/src/scopes.ts`](packages/contracts/src/scopes.ts)：同步新增 `<Name>Scope` 常量 + `ALL_<NAME>_SCOPES` + 更新 `ScopeType` 联合类型 + `ALL_SCOPES` + `DEFAULT_ROLE_SCOPES`
 
 > ⚠️ **前后端必须保持 scope 字符串一致**，这是契约同步的硬约束。
 
@@ -245,9 +244,9 @@ uv run alembic upgrade head
 在 [`apps/api/app/api/v1/api.py`](apps/api/app/api/v1/api.py) 添加：
 
 ```python
-from app.domains.order.router import router as order_router
+from app.domains.xxx.router import router as xxx_router
 
-router.include_router(order_router, prefix="/orders", tags=["orders"])
+router.include_router(xxx_router, prefix="/<name>s", tags=["<name>s"])
 ```
 
 ### 第 6 步：生成 SDK
@@ -259,16 +258,16 @@ pnpm generate     # 从 OpenAPI 自动生成客户端 + React Query Hooks
 
 ### 第 7 步：编写测试
 
-在 [`apps/api/tests/`](apps/api/tests/) 新建 `test_orders.py`，复用现有测试夹具（`db_session` / `client` / `authorized_client` / `superuser_client`）：
+在 [`apps/api/tests/`](apps/api/tests/) 新建 `test_<name>s.py`，复用现有测试夹具（`db_session` / `client` / `authorized_client` / `superuser_client`）：
 
 ```python
 @pytest.mark.asyncio
-async def test_create_order_success(superuser_client: AsyncClient):
+async def test_create_xxx_success(superuser_client: AsyncClient):
     response = await superuser_client.post(
-        "/v1/orders/", json={"name": "ORD-1"},
+        "/v1/<name>s/", json={"name": "XXX-1"},
     )
     assert response.status_code == 200
-    assert response.json()["name"] == "ORD-1"
+    assert response.json()["name"] == "XXX-1"
 ```
 
 运行测试：
@@ -279,10 +278,10 @@ cd apps/api && pnpm test    # 或 pytest
 
 ### 第 8 步：前端开发（可选）
 
-按 [`apps/web/features/item/`](apps/web/features/item/) 模板创建 `features/order/`：
+按 [`apps/web/features/user/`](apps/web/features/user/)（或 `features/role/`）模板创建 `features/<name>/`：
 
 ```
-features/order/
+features/<name>/
 ├── index.ts
 ├── api/
 │   ├── index.ts
@@ -297,13 +296,13 @@ features/order/
 └── server/                 # 服务端组件（List / Detail）
 ```
 
-在 [`apps/web/components/navbar.tsx`](apps/web/components/navbar.tsx) 添加导航项，并按 scope 控制页面可见性：
+在 [`apps/web/components/navbar.tsx`](apps/web/components/navbar.tsx) 添加导航项，并按 scope 控制页面可见性（本模板实际做法见 `navbar.tsx` 的 `visibleAdminNavigation`）：
 
 ```tsx
-import { OrderScope, hasScope } from '@repo/contracts/scopes';
+import { <Name>Scope, hasScope } from '@repo/contracts/scopes';
 
 const userScopes = user?.scopes ?? [];
-if (!hasScope(userScopes, OrderScope.READ)) return null; // 无权限不显示
+if (!hasScope(userScopes, <Name>Scope.READ)) return null; // 无权限不显示
 ```
 
 ---
@@ -325,7 +324,7 @@ User ────(多对多)──── Role ────(一对多)───�
 
 ### 权限判定
 
-- **scope 命名**：统一 `资源:操作` 格式（`order:read`、`order:admin`）
+- **scope 命名**：统一 `资源:操作` 格式（`user:read`、`role:admin`）
 - **超管**：`is_superuser=True` 自动拥有全部 scope（`get_user_scopes()` 实现，见 [`dependencies.py`](apps/api/app/core/dependencies.py)）
 - **角色**：用户经角色获得 scope；预置角色在 `init_roles_and_scopes()` 启动时初始化（[`database.py`](apps/api/app/core/database.py)）
 - **预置角色不可修改/删除**：`BUILTIN_ROLES = ("viewer", "editor", "admin")`
@@ -334,9 +333,9 @@ User ────(多对多)──── Role ────(一对多)───�
 
 | 函数 | 语义 | 示例 |
 |------|------|------|
-| `require_scope` | 必须拥有该 scope | `require_scope(OrderScope.READ)` |
-| `require_any_scope` | 满足任意一个即可 | `require_any_scope(OrderScope.ADMIN, OrderScope.DELETE)` |
-| `require_all_scopes` | 必须全部拥有 | `require_all_scopes(OrderScope.READ, SystemScope.READ)` |
+| `require_scope` | 必须拥有该 scope | `require_scope(UserScope.READ)` |
+| `require_any_scope` | 满足任意一个即可 | `require_any_scope(UserScope.ADMIN, UserScope.DELETE)`（用户删除的真实用法） |
+| `require_all_scopes` | 必须全部拥有 | `require_all_scopes(UserScope.READ, RoleScope.READ)` |
 
 ---
 

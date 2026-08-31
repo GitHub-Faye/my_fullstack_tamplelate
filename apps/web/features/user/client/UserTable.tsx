@@ -42,14 +42,12 @@ import { useUsers, useDeleteUser, userKeys } from "../api/client/queries";
 import { formatDate, formatUserRole, formatUserStatus } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import type { UserPublic } from "@repo/sdk";
+import { useAuthStore } from "../stores/auth";
 
-interface UserTableProps {
-  currentUserId?: string;
-}
-
-export function UserTable({ currentUserId }: UserTableProps) {
+export function UserTable() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const currentUserId = useAuthStore((state) => state.user?.id);
   const [page, setPage] = useState(1);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const pageSize = 10;

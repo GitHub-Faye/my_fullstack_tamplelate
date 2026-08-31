@@ -34,22 +34,28 @@ import { ErrorCode, BusinessError, ERROR_STATUS_MAP } from '@repo/contracts/erro
 try {
   await api.createUser(data);
 } catch (error) {
-  if (error.code === ErrorCode.USER_ALREADY_EXISTS) {
-    // 处理用户已存在
+  if (error.code === ErrorCode.USER_EMAIL_ALREADY_EXISTS) {
+    // 处理邮箱已存在
   }
 }
 ```
 
 ### scopes.ts - 权限 Scope
 
-与后端 `apps/api/app/core/scopes.py` 保持同步的权限定义。
+与后端 `apps/api/app/core/scopes.py` 保持逐字同步的权限定义
+（`UserScope` / `RoleScope` 分别对应后端 user / role 两个业务域）。
 
 ```typescript
-import { ItemScope, hasScope, DEFAULT_ROLE_SCOPES } from '@repo/contracts/scopes';
+import { UserScope, hasScope, DEFAULT_ROLE_SCOPES } from '@repo/contracts/scopes';
 
 // 检查权限
-if (hasScope(userScopes, ItemScope.CREATE)) {
-  // 允许创建
+if (hasScope(userScopes, UserScope.READ)) {
+  // 允许读取用户
+}
+
+// 检查角色权限
+if (hasScope(userScopes, RoleScope.READ)) {
+  // 允许读取角色
 }
 
 // 获取角色权限
@@ -96,10 +102,10 @@ localStorage.setItem(StorageKeys.ACCESS_TOKEN, token);
 ```typescript
 import {
   ErrorCode,
-  ItemScope,
+  UserScope,
+  RoleScope,
   PaginatedResponse,
-  UserRole,
-  StorageKeys
+  buildPaginatedResponse
 } from '@repo/contracts';
 
 // 错误处理
