@@ -9,13 +9,12 @@ Tests cover:
 """
 
 import uuid
-import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 
+import pytest
 from app.core.models import Role, RoleScopeModel, User, UserRole
 from app.core.security import get_password_hash
-
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # ======================== 用户注册测试 ========================
 
@@ -308,10 +307,9 @@ async def test_read_users_no_scope_forbidden(
     """
     测试没有 user:read scope 的用户（viewer）读取用户列表返回 403。
     """
-    from sqlalchemy import select
-    from app.core.models import Role, UserRole
-    from app.core.security import create_access_token
     from datetime import timedelta
+
+    from app.core.security import create_access_token
 
     # 创建只有 user:read 之外 scope 的用户（自定义无 user:read 角色）
     limited_role = Role(name="limited_reader")
@@ -516,10 +514,10 @@ async def test_delete_user_without_scope_forbidden(
     """
     测试没有 user:admin / user:delete scope 的用户（viewer）删除用户返回 403。
     """
-    from sqlalchemy import select
-    from app.core.models import Role, UserRole
-    from app.core.security import create_access_token
     from datetime import timedelta
+
+    from app.core.security import create_access_token
+    from sqlalchemy import select
 
     # 创建只有 user:read scope 的 viewer 用户
     viewer_role = (await db_session.execute(

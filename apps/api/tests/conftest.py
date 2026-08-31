@@ -9,27 +9,23 @@ This module provides:
 """
 
 import asyncio
-import uuid
-from datetime import datetime, timezone, timedelta
-from typing import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator
+from datetime import timedelta
 
 import pytest
 import pytest_asyncio
+from app.core.database import get_db
+from app.core.models import Role, RoleScopeModel, User, UserRole
+from app.core.scopes import ALL_ROLE_SCOPES, DEFAULT_ROLE_SCOPES
+from app.core.security import create_access_token, get_password_hash
 from fastapi import FastAPI
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlmodel import SQLModel
+from httpx import ASGITransport, AsyncClient
 
 # Import app and dependencies to override
 from main import app as fastapi_app
-from app.core.config import get_settings, Settings
-from app.core.database import get_db
-from app.core.models import User, Role, RoleScopeModel, UserRole
-from app.core.security import get_password_hash, create_access_token
-from app.core.dependencies import get_current_user, get_current_active_superuser
-from app.core.scopes import DEFAULT_ROLE_SCOPES, ALL_ROLE_SCOPES
-
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlmodel import SQLModel
 
 # ======================== pytest-asyncio 配置 ========================
 
@@ -212,7 +208,6 @@ async def user_token(test_user: User) -> str:
     """
     为普通测试用户生成 JWT 访问令牌。
     """
-    from datetime import timedelta
     token = create_access_token(
         subject=str(test_user.id),
         expires_delta=timedelta(minutes=30),
@@ -255,7 +250,6 @@ async def role_admin_token(role_admin_user: User) -> str:
     """
     为角色管理用户生成 JWT 访问令牌。
     """
-    from datetime import timedelta
     token = create_access_token(
         subject=str(role_admin_user.id),
         expires_delta=timedelta(minutes=30),
@@ -279,7 +273,6 @@ async def superuser_token(test_superuser: User) -> str:
     """
     为超级管理员测试用户生成 JWT 访问令牌。
     """
-    from datetime import timedelta
     token = create_access_token(
         subject=str(test_superuser.id),
         expires_delta=timedelta(minutes=30),

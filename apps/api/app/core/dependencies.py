@@ -13,31 +13,29 @@
 """
 
 import uuid
+from collections.abc import Sequence
 from typing import Annotated
 
 import jwt
 from fastapi import Depends
-
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.core.database import get_db
-from app.core.models import User, Role, RoleScopeModel, UserRole
-from app.core.security import reusable_oauth2
-from app.core.scopes import ALL_SCOPES, RoleScope, UserScope
 from app.core.errors import (
     BusinessException,
     ErrorCode,
-    raise_user_not_found,
     raise_permission_denied,
     raise_scope_missing,
+    raise_user_not_found,
 )
-
+from app.core.models import Role, RoleScopeModel, User, UserRole
+from app.core.scopes import ALL_SCOPES, RoleScope, UserScope
+from app.core.security import reusable_oauth2
 from app.domains.user.schemas import TokenPayload
-
 
 settings = get_settings()
 
@@ -166,35 +164,45 @@ CurrentActiveSuperuser = Annotated[User, Depends(get_current_active_superuser)]
 # ======================== Scope 权限检查 ========================
 
 async def get_user_scopes(session: AsyncSession, user: User) -> set[str]:
-    """
-    获取用户的所有 scope 权限。
-    
-    参数：
-    - session：数据库会话
-    - user：用户对象
-    
-    返回值：
-    - set[str]：用户拥有的所有 scope 集合
-    """
-    # 超管拥有所有权限
-    if user.is_superuser:
-        return {scope.value for scope in ALL_SCOPES}
-    
-    # 加载用户的 roles 和 scopes
-    scopes = set()
-    
-    # 查询用户的所有角色及其 scopes
+    """获取单个用户的全部 scope 权限。"""
+    scopes_by_user = await get_users_scopes(session, [user.id], users=[user])
+    return scopes_by_user.get(user.id, set())
+
+
+async def get_users_scopes(
+    session: AsyncSession,
+    user_ids: Sequence[uuid.UUID],
+    *,
+    users: Sequence[User] | None = None,
+) -> dict[uuid.UUID, set[str]]:
+    """批量获取用户 scope，结果包含无角色用户的空集合。"""
+    result_map = {user_id: set() for user_id in user_ids}
+    if not user_ids:
+        return result_map
+
+    all_scopes = {scope.value for scope in ALL_SCOPES}
+    superuser_ids = {
+        user.id for user in (users or ()) if user.is_superuser and user.id in result_map
+    }
+    for user_id in superuser_ids:
+        result_map[user_id] = set(all_scopes)
+
+    regular_ids = set(result_map) - superuser_ids
+    if not regular_ids:
+        return result_map
+
     stmt = (
-        select(RoleScopeModel.scope)  # type: ignore[call-overload,arg-type]
+        select(UserRole.user_id, RoleScopeModel.scope)
         .join(Role, RoleScopeModel.role_id == Role.id)
         .join(UserRole, Role.id == UserRole.role_id)
-        .where(UserRole.user_id == user.id)
+        .where(UserRole.user_id.in_(regular_ids))
         .distinct()
     )
     result = await session.execute(stmt)
-    scopes = {row[0] for row in result.all()}
-    
-    return scopes
+    for user_id, scope in result.all():
+        result_map[user_id].add(scope)
+
+    return result_map
 
 
 def require_scope(required_scope: UserScope | RoleScope):

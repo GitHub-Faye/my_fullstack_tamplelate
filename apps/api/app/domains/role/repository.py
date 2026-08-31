@@ -17,17 +17,14 @@ Role 领域仓库层（Repository）
 """
 
 import uuid
-from typing import Tuple
 
-from sqlalchemy import delete, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.core.errors import (
-    raise_bad_request,
-)
+from app.core.errors import raise_bad_request
 from app.core.models import Role, RoleScopeModel
 from app.core.scopes import ALL_SCOPES, BUILTIN_ROLES
-from app.domains.role.schemas import RoleCreate, RolePublic, RoleUpdate
+from app.domains.role.schemas import RoleCreate, RoleUpdate
+from sqlalchemy import delete, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 # ============================== Role CRUD Operations ==============================
 
@@ -52,17 +49,24 @@ async def _validate_scopes(session: AsyncSession, scopes: list[str]) -> list[str
     return list(dict.fromkeys(scopes))
 
 
-async def _get_role_scopes(session: AsyncSession, role_id: uuid.UUID) -> list[str]:
-    """查询角色当前持有的 scope 值列表"""
-    statement = select(RoleScopeModel).where(RoleScopeModel.role_id == role_id)  # type: ignore[arg-type]
+async def get_role_scopes_by_ids(
+    session: AsyncSession,
+    role_ids: list[uuid.UUID],
+) -> dict[uuid.UUID, list[str]]:
+    """批量查询角色 scope，结果包含无 scope 角色的空列表。"""
+    scopes_by_role = {role_id: [] for role_id in role_ids}
+    if not role_ids:
+        return scopes_by_role
+
+    statement = (
+        select(RoleScopeModel.role_id, RoleScopeModel.scope)
+        .where(RoleScopeModel.role_id.in_(role_ids))
+        .order_by(RoleScopeModel.role_id, RoleScopeModel.scope)
+    )
     result = await session.execute(statement)
-    return sorted(rs.scope for rs in result.scalars().all())
-
-
-async def get_role_public(*, session: AsyncSession, role: Role) -> RolePublic:
-    """将角色模型与其 scope 集合组装为统一 API 响应。"""
-    scopes = await _get_role_scopes(session, role.id)
-    return RolePublic.model_validate(role, update={"scopes": scopes})
+    for role_id, scope in result.all():
+        scopes_by_role[role_id].append(scope)
+    return scopes_by_role
 
 
 async def get_role(*, session: AsyncSession, role_id: uuid.UUID) -> Role | None:
@@ -70,7 +74,7 @@ async def get_role(*, session: AsyncSession, role_id: uuid.UUID) -> Role | None:
     按 ID 查询角色。
 
     返回：
-    - Role 数据库对象（不含 scopes，scopes 由调用方通过 _get_role_scopes 补全）
+    - Role 数据库对象（不含 scopes，scopes 由调用方通过 get_role_scopes_by_ids 补全）
     - 不存在时返回 None
     """
     return await session.get(Role, role_id)
@@ -81,7 +85,7 @@ async def get_roles(
     session: AsyncSession,
     skip: int = 0,
     limit: int = 100,
-) -> Tuple[list[Role], int]:
+) -> tuple[list[Role], int]:
     """
     分页查询角色列表。
 
@@ -131,8 +135,6 @@ async def create_role(
     for scope_value in valid_scopes:
         session.add(RoleScopeModel(role_id=db_role.id, scope=scope_value))
 
-    await session.commit()
-    await session.refresh(db_role)
     return db_role
 
 
@@ -168,7 +170,7 @@ async def update_role(
     update_data = role_in.model_dump(exclude_unset=True)
 
     # 处理名称更新
-    if "name" in update_data and update_data["name"]:
+    if update_data.get("name"):
         db_role.name = update_data["name"]
 
     # 处理 scopes 整体替换（先删后插，保证与传入集合一致）
@@ -185,8 +187,7 @@ async def update_role(
             session.add(RoleScopeModel(role_id=db_role.id, scope=scope_value))
 
     session.add(db_role)
-    await session.commit()
-    await session.refresh(db_role)
+    await session.flush()
     return db_role
 
 
@@ -207,7 +208,6 @@ async def delete_role(*, session: AsyncSession, db_role: Role) -> None:
         )
 
     await session.delete(db_role)
-    await session.commit()
 
 
 async def get_role_by_name(*, session: AsyncSession, name: str) -> Role | None:

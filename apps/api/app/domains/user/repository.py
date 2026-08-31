@@ -1,13 +1,15 @@
-from typing import Any, Tuple
 import uuid
 
+from app.core.models import Role, User, UserRole
+from app.core.security import get_password_hash, verify_password
+from app.domains.user.schemas import (
+    UserCreate,
+    UserUpdate,
+    UserUpdateMe,
+)
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
 
-from app.core.security import get_password_hash, verify_password
-from app.domains.user.schemas import UserCreate, UserUpdate, UserUpdateMe, UpdatePassword
-from app.core.models import User, Role, UserRole
 
 # ============================== 用户 CRUD 操作 ==============================
 async def get_user(*, session: AsyncSession, user_id: uuid.UUID) -> User | None:
@@ -21,7 +23,7 @@ async def get_user(*, session: AsyncSession, user_id: uuid.UUID) -> User | None:
 
 async def get_users(
     *, session: AsyncSession, skip: int, limit: int, sort_field: str = "created_at", sort_order: str = "desc"
-) -> Tuple[list[User], int]:
+) -> tuple[list[User], int]:
     """
     分页获取用户列表
     
@@ -80,12 +82,12 @@ async def create_user(*, session: AsyncSession, user_create: UserCreate) -> User
     if viewer_role:
         session.add(UserRole(user_id=db_obj.id, role_id=viewer_role.id))
 
-    await session.commit()
-    await session.refresh(db_obj)
     return db_obj
 
 
-async def update_user(*, session: AsyncSession, db_user: User, user_in: UserUpdate) -> Any:
+async def update_user(
+    *, session: AsyncSession, db_user: User, user_in: UserUpdate
+) -> User:
     """
     更新已有用户信息。
     - model_dump(exclude_unset=True)：仅取用户明确设置的字段（跳过未设置的可选字段）
@@ -100,8 +102,7 @@ async def update_user(*, session: AsyncSession, db_user: User, user_in: UserUpda
         extra_data["hashed_password"] = hashed_password
     db_user.sqlmodel_update(user_data, update=extra_data)
     session.add(db_user)
-    await session.commit()
-    await session.refresh(db_user)
+    await session.flush()
     return db_user
 
 
@@ -124,8 +125,7 @@ async def update_user_me(
     # 使用 sqlmodel_update() 合并数据
     db_user.sqlmodel_update(user_data)
     session.add(db_user)
-    await session.commit()
-    await session.refresh(db_user)
+    await session.flush()
     return db_user
 
 
@@ -147,8 +147,7 @@ async def update_password_me(
     hashed_password = get_password_hash(new_password)
     db_user.hashed_password = hashed_password
     session.add(db_user)
-    await session.commit()
-    await session.refresh(db_user)
+    await session.flush()
     return db_user
 
 
@@ -161,7 +160,6 @@ async def delete_user(*, session: AsyncSession, db_user: User) -> None:
         db_user: 要删除的用户对象
     """
     await session.delete(db_user)
-    await session.commit()
 
 
 async def get_user_by_email(*, session: AsyncSession, email: str) -> User | None:
@@ -181,26 +179,27 @@ async def get_user_by_email(*, session: AsyncSession, email: str) -> User | None
 DUMMY_HASH = "$argon2id$v=19$m=65536,t=3,p=4$MjQyZWE1MzBjYjJlZTI0Yw$YTU4NGM5ZTZmYjE2NzZlZjY0ZWY3ZGRkY2U2OWFjNjk"
 
 
-async def authenticate(*, session: AsyncSession, email: str, password: str) -> User | None:
+async def authenticate(
+    *, session: AsyncSession, email: str, password: str
+) -> tuple[User | None, bool]:
     """
     认证用户（登录验证）。
     - 首先按邮箱查询用户
     - 若用户不存在，仍执行虚拟密码验证（防止时序攻击）
     - 若用户存在，验证密码；密码正确则返回用户对象
     - verify_password 可能返回更新后的哈希值（密钥拉伸升级），如有则更新到数据库
-    """
+    返回 (user, upgraded)：upgraded 表示是否升级了旧密码哈希。"""
     db_user = await get_user_by_email(session=session, email=email)
     if not db_user:
         # 用户不存在时，也运行密码验证以保持恒定的响应时间（防时序攻击）
         verify_password(password, DUMMY_HASH)
-        return None
+        return None, False
     verified, updated_password_hash = verify_password(password, db_user.hashed_password)
     if not verified:
-        return None
+        return None, False
     if updated_password_hash:
         # Argon2 参数升级时更新哈希值
         db_user.hashed_password = updated_password_hash
         session.add(db_user)
-        await session.commit()
-        await session.refresh(db_user)
-    return db_user
+        await session.flush()
+    return db_user, bool(updated_password_hash)

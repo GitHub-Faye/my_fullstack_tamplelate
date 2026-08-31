@@ -1,10 +1,9 @@
 import uuid
 from datetime import datetime
 
+from app.core.schemas import PaginatedResponse
 from pydantic import EmailStr
 from sqlmodel import Field, SQLModel
-
-from app.core.schemas import  PaginatedResponse
 
 
 # ------------------------------- 用户模型 -------------------------------------------------
@@ -58,7 +57,7 @@ class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
     # 用户当前拥有的权限 scope 列表（由 read_user_me 等端点填充，用于前端 scope 级权限控制）
-    scopes: list[str] = []
+    scopes: list[str] = Field(default_factory=list)
 
 
 # 使用统一分页协议

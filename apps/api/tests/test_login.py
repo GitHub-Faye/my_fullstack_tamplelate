@@ -8,12 +8,10 @@ Tests cover:
 """
 
 import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.models import User
 from app.core.security import get_password_hash
-
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # ======================== 登录测试 ========================
 

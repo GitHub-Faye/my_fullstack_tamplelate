@@ -10,30 +10,19 @@
 """
 
 import uuid
-from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query
-from fastapi.security import OAuth2PasswordRequestForm
-
+from app.core.config import get_settings
 from app.core.dependencies import (
     CurrentUser,
     SessionDep,
-    get_user_scopes,
     require_any_scope,
     require_scope,
 )
-from app.core.scopes import UserScope
-from app.core.config import get_settings
-from app.core.security import create_access_token, verify_password
+from app.core.responses import paginated_fields, user_public, users_public
 from app.core.schemas import Message, PaginationParams
-from app.core.errors import (
-    BusinessException,
-    ErrorCode,
-    raise_user_already_exists,
-    raise_user_not_found,
-)
-from app.domains.user import repository
+from app.core.scopes import UserScope
+from app.domains.user import service
 from app.domains.user.schemas import (
     Token,
     UpdatePassword,
@@ -44,6 +33,8 @@ from app.domains.user.schemas import (
     UserUpdate,
     UserUpdateMe,
 )
+from fastapi import APIRouter, Depends, Query
+from fastapi.security import OAuth2PasswordRequestForm
 
 # 注：已移除 Celery 异步任务（app.tasks 已删除），注册后不再派发后台任务
 
@@ -71,24 +62,11 @@ async def login_access_token(
     异常：
     - 400：邮箱或密码错误 / 用户未激活
     """
-    user = await repository.authenticate(
-        session=session, email=form_data.username, password=form_data.password
-    )
-    if not user:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INVALID_CREDENTIALS,
-            detail="Incorrect email or password"
-        )
-    elif not user.is_active:
-        raise BusinessException(
-            code=ErrorCode.AUTH_INACTIVE_USER,
-            detail="Inactive user"
-        )
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    return Token(
-        access_token=create_access_token(
-            user.id, expires_delta=access_token_expires
-        )
+    return await service.login(
+        session=session,
+        email=form_data.username,
+        password=form_data.password,
+        expires_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES,
     )
 
 
@@ -104,8 +82,7 @@ async def test_token(session: SessionDep, current_user: CurrentUser) -> Any:
     返回值：
     - UserPublic：当前用户信息（含 scopes）
     """
-    user_scopes = await get_user_scopes(session, current_user)
-    return UserPublic.model_validate(current_user, update={"scopes": user_scopes})
+    return await user_public(session=session, user=current_user)
 
 
 # ======================== 用户管理路由（scope 判定） ========================
@@ -140,15 +117,9 @@ async def create_user(
     1. 检查邮箱是否已存在，存在则返回 409 错误
     2. 调用 repository create_user() 创建用户（密码自动哈希，默认分配 viewer 角色）
     """
-    # 检查邮箱唯一性
-    user = await repository.get_user_by_email(session=session, email=user_in.email)
-    if user:
-        raise_user_already_exists("The user with this email already exists in the system.")
+    user = await service.create_user(session=session, user_in=user_in)
 
-    # 创建用户（密码自动哈希）
-    user = await repository.create_user(session=session, user_create=user_in)
-
-    return user
+    return await user_public(session=session, user=user)
 
 
 @router.get(
@@ -172,19 +143,19 @@ async def read_users(
     返回值：
     - UsersPublic：包含 data（用户列表）、count（总数）、page（当前页）、page_size（每页大小）、total_pages（总页数）
     """
-    # 使用仓库函数获取分页用户列表
-    users, count = await repository.get_users(
+    users, count = await service.list_users(
         session=session,
         skip=pagination.offset,
-        limit=pagination.limit
+        limit=pagination.limit,
     )
 
     return UsersPublic(
-        data=[UserPublic.model_validate(u) for u in users],
-        count=count,
-        page=pagination.page,
-        page_size=pagination.page_size,
-        total_pages=(count + pagination.page_size - 1) // pagination.page_size if count > 0 else 0,
+        data=await users_public(session=session, users=users),
+        **paginated_fields(
+            count=count,
+            page=pagination.page,
+            page_size=pagination.page_size,
+        ),
     )
 
 
@@ -222,19 +193,11 @@ async def update_user_me(
     - 允许用户更新为自己的原邮箱
     - 若邮箱被其他用户占用，返回 409 冲突错误
     """
-    # 若修改邮箱，检查新邮箱是否被其他用户占用
-    if user_in.email:
-        existing_user = await repository.get_user_by_email(session=session, email=user_in.email)
-        if existing_user and existing_user.id != current_user.id:
-            raise_user_already_exists("User with this email already exists")
-
-    # 使用仓库函数更新用户信息
-    current_user = await repository.update_user_me(
-        session=session, db_user=current_user, user_in=user_in
+    current_user = await service.update_me(
+        session=session, user=current_user, user_in=user_in
     )
     # 重新计算并附加权限 scope（角色可能未变化，但保证响应始终携带 scopes）
-    user_scopes = await get_user_scopes(session, current_user)
-    return UserPublic.model_validate(current_user, update={"scopes": user_scopes})
+    return await user_public(session=session, user=current_user)
 
 
 @router.patch("/users/me/password", response_model=Message)
@@ -264,25 +227,7 @@ async def update_password_me(
     - 400：密码错误
     - 400：新密码与旧密码相同
     """
-    # 验证现有密码
-    verified, _ = verify_password(body.current_password, current_user.hashed_password)
-    if not verified:
-        raise BusinessException(
-            code=ErrorCode.USER_INVALID_PASSWORD,
-            detail="Incorrect password"
-        )
-
-    # 检查新密码是否与旧密码相同
-    if body.current_password == body.new_password:
-        raise BusinessException(
-            code=ErrorCode.USER_PASSWORD_SAME_AS_OLD,
-            detail="New password cannot be the same as the current one"
-        )
-
-    # 使用仓库函数更新密码
-    await repository.update_password_me(
-        session=session, db_user=current_user, new_password=body.new_password
-    )
+    await service.update_password(session=session, user=current_user, body=body)
     return Message(message="Password updated successfully")
 
 
@@ -305,8 +250,7 @@ async def read_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     - 用于前端按 scope 控制导航和页面可见性
     """
     # 实时计算并附加当前用户的权限 scope 列表
-    user_scopes = await get_user_scopes(session, current_user)
-    return UserPublic.model_validate(current_user, update={"scopes": user_scopes})
+    return await user_public(session=session, user=current_user)
 
 
 @router.delete("/users/me", response_model=Message)
@@ -331,14 +275,9 @@ async def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     异常：
     - 403：超管不允许删除自己
     """
-    # 防止超管意外删除自己
-    if current_user.is_superuser:
-        raise BusinessException(
-            code=ErrorCode.USER_CANNOT_DELETE_SELF,
-            detail="Super users are not allowed to delete themselves"
-        )
-    # 使用仓库函数删除用户
-    await repository.delete_user(session=session, db_user=current_user)
+    await service.delete_user(
+        session=session, user=current_user, current_user=current_user
+    )
     return Message(message="User deleted successfully")
 
 
@@ -370,16 +309,9 @@ async def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     - 此路由无需超管权限，任何人可注册
     - 此路由不发送邮件通知
     """
-    # 检查邮箱唯一性
-    user = await repository.get_user_by_email(session=session, email=user_in.email)
-    if user:
-        raise_user_already_exists("The user with this email already exists in the system")
+    user = await service.register_user(session=session, user_in=user_in)
 
-    # 将 UserRegister 转换为 UserCreate（Pydantic v2 用法）
-    user_create = UserCreate.model_validate(user_in)
-    user = await repository.create_user(session=session, user_create=user_create)
-
-    return user
+    return await user_public(session=session, user=user)
 
 
 # ======================== 更新用户（user:update 判定） ========================
@@ -419,20 +351,10 @@ async def update_user(
     - 409：新邮箱被其他用户占用
     - 403：无 user:update scope
     """
-    # 查询目标用户
-    user = await repository.get_user(session=session, user_id=user_id)
-    if not user:
-        raise_user_not_found("The user with this id does not exist in the system")
-
-    # 若修改邮箱，检查新邮箱唯一性
-    if user_in.email:
-        existing_user = await repository.get_user_by_email(session=session, email=user_in.email)
-        if existing_user and existing_user.id != user_id:
-            raise_user_already_exists("User with this email already exists")
-
-    # 调用 CRUD 更新用户
-    user = await repository.update_user(session=session, db_user=user, user_in=user_in)
-    return user
+    user = await service.update_user(
+        session=session, user_id=user_id, user_in=user_in
+    )
+    return await user_public(session=session, user=user)
 
 
 # ======================== 删除用户（user:admin 判定） ========================
@@ -474,20 +396,10 @@ async def delete_user(
     - User.roles 多对多关联的表 userrole 外键为 ondelete="CASCADE"，
       删除用户时数据库会自动清理其与角色的关联。
     """
-    # 查询目标用户
-    user = await repository.get_user(session=session, user_id=user_id)
-    if not user:
-        raise_user_not_found()
-
-    # 防止超管删除自己
-    if user == current_user:
-        raise BusinessException(
-            code=ErrorCode.USER_CANNOT_DELETE_SELF,
-            detail="Super users are not allowed to delete themselves"
-        )
-
-    # 使用仓库函数删除用户
-    await repository.delete_user(session=session, db_user=user)
+    user = await service.get_user(session=session, user_id=user_id)
+    await service.delete_user(
+        session=session, user=user, current_user=current_user
+    )
     return Message(message="User deleted successfully")
 
 
@@ -521,9 +433,5 @@ async def read_user_by_id(
     - 403：无 user:read scope
     - 404：用户不存在
     """
-    user = await repository.get_user(session=session, user_id=user_id)
-
-    # 允许查看任何用户（user:read 权限已由依赖强制）
-    if user is None:
-        raise_user_not_found()
-    return user
+    user = await service.get_user(session=session, user_id=user_id)
+    return await user_public(session=session, user=user)

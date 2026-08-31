@@ -5,13 +5,11 @@ Utility functions for testing.
 """
 
 import uuid
-from datetime import datetime, timezone, timedelta
-from typing import Optional
-
-from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import timedelta
 
 from app.core.models import User
-from app.core.security import get_password_hash, create_access_token
+from app.core.security import create_access_token, get_password_hash
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def create_test_user(

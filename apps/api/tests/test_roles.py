@@ -10,13 +10,12 @@ Tests cover:
 """
 
 import uuid
-import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from app.core.models import User, Role, RoleScopeModel, UserRole
-from app.core.scopes import DEFAULT_ROLE_SCOPES, ALL_SCOPES
+import pytest
+from app.core.models import Role, User, UserRole
+from httpx import AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def _admin_headers(user_token: str) -> dict[str, str]:
@@ -390,8 +389,9 @@ async def test_user_without_role_scope_cannot_delete(
     db_session.add(UserRole(user_id=limited_user.id, role_id=editor_role.id))
     await db_session.commit()
 
-    from app.core.security import create_access_token
     from datetime import timedelta
+
+    from app.core.security import create_access_token
     token = create_access_token(subject=str(limited_user.id), expires_delta=timedelta(minutes=30))
     headers = _admin_headers(token)
 

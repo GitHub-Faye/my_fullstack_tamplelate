@@ -17,9 +17,8 @@ Role 领域 Schema / DTO 定义模块
 import uuid
 from datetime import datetime
 
-from sqlmodel import SQLModel, Field
-
 from app.core.schemas import PaginatedResponse
+from sqlmodel import Field, SQLModel
 
 
 # --------------------------- API 请求模型（Request DTO） ------------------------------------
@@ -45,9 +44,8 @@ class RolePublic(SQLModel):
     id: uuid.UUID
     name: str
     created_at: datetime | None = None
-    scopes: list[str] = []
+    scopes: list[str] = Field(default_factory=list)
 
 
 class RolesPublic(PaginatedResponse[RolePublic]):
     """角色分页列表的响应体：data / count / page / page_size / total_pages"""
-    pass
