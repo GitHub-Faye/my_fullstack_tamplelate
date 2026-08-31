@@ -1,10 +1,13 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api import router as api_router
 
+from app.core.errors import BusinessException
 from app.core.middleware import ProcessTimeMiddleware
 from app.core.config import get_settings
 from app.core.database import init_db
@@ -51,10 +54,37 @@ app = FastAPI(
     version="1.0.0",
 )
 
+
+@app.exception_handler(BusinessException)
+async def business_exception_handler(
+    request: Request, exc: BusinessException
+) -> JSONResponse:
+    """将业务异常统一序列化为标准错误响应。"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=exc.to_dict(),
+        headers=exc.headers,
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+) -> JSONResponse:
+    """将请求校验异常统一序列化为标准错误响应。"""
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": exc.errors(),
+            "code": "SYSTEM_VALIDATION_ERROR",
+        },
+    )
+
+
 app.add_middleware(ProcessTimeMiddleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.all_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

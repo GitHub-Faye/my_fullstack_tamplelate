@@ -19,9 +19,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.core.dependencies import (
     CurrentUser,
     SessionDep,
-    get_current_active_superuser,
     get_user_scopes,
     require_any_scope,
+    require_scope,
 )
 from app.core.scopes import UserScope
 from app.core.config import get_settings
@@ -32,9 +32,7 @@ from app.core.errors import (
     ErrorCode,
     raise_user_already_exists,
     raise_user_not_found,
-    raise_permission_denied,
 )
-
 from app.domains.user import repository
 from app.domains.user.schemas import (
     Token,
@@ -110,7 +108,12 @@ async def test_token(session: SessionDep, current_user: CurrentUser) -> Any:
     return UserPublic.model_validate(current_user, update={"scopes": user_scopes})
 
 
-# ======================== 超管-only 路由：创建用户 ========================
+# ======================== 用户管理路由（scope 判定） ========================
+# 用户管理端点统一走 user:* scope 判定（超管天然拥有全部 scope，无需特判）。
+# - 创建: user:create
+# - 读取: user:read
+# - 更新: user:update
+# - 删除: user:admin 或 user:delete
 
 @router.post(
     "/users/", response_model=UserPublic
@@ -119,12 +122,12 @@ async def create_user(
     *,
     session: SessionDep,
     user_in: UserCreate,
-    _: Annotated[None, Depends(get_current_active_superuser)],
+    _: Annotated[None, Depends(require_scope(UserScope.CREATE))],
 ) -> Any:
     """
-    创建新用户（超管操作）。
+    创建新用户。
 
-    权限：超管-only
+    权限：拥有 user:create scope。
 
     参数：
     - session：数据库会话
@@ -155,12 +158,12 @@ async def create_user(
 async def read_users(
     session: SessionDep,
     pagination: Annotated[PaginationParams, Query()],
-    _: Annotated[None, Depends(get_current_active_superuser)],
+    _: Annotated[None, Depends(require_scope(UserScope.READ))],
 ) -> Any:
     """
     获取所有用户列表（分页）。
 
-    权限：超管-only（通过 dependencies 依赖注入强制）
+    权限：拥有 user:read scope（通过 dependencies 依赖注入强制）。
 
     参数：
     - session：数据库会话（依赖注入）
@@ -379,7 +382,7 @@ async def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     return user
 
 
-# ======================== 更新用户（超管操作） ========================
+# ======================== 更新用户（user:update 判定） ========================
 
 @router.patch(
     "/users/{user_id}",
@@ -390,12 +393,12 @@ async def update_user(
     session: SessionDep,
     user_id: uuid.UUID,
     user_in: UserUpdate,
-    _: Annotated[None, Depends(get_current_active_superuser)],
+    _: Annotated[None, Depends(require_scope(UserScope.UPDATE))],
 ) -> Any:
     """
-    更新指定用户信息（超管操作）。
+    更新指定用户信息（scope 判定）。
 
-    权限：超管-only
+    权限：拥有 user:update scope。
 
     参数：
     - session：数据库会话
@@ -414,6 +417,7 @@ async def update_user(
     异常：
     - 404：用户不存在
     - 409：新邮箱被其他用户占用
+    - 403：无 user:update scope
     """
     # 查询目标用户
     user = await repository.get_user(session=session, user_id=user_id)
@@ -491,14 +495,15 @@ async def delete_user(
 
 @router.get("/users/{user_id}", response_model=UserPublic)
 async def read_user_by_id(
-    user_id: uuid.UUID, session: SessionDep, current_user: CurrentUser
+    user_id: uuid.UUID,
+    session: SessionDep,
+    current_user: CurrentUser,
+    _: Annotated[None, Depends(require_scope(UserScope.READ))],
 ) -> Any:
     """
     获取指定用户信息。
 
-    权限：
-    - 用户可查看自己的信息
-    - 超管可查看任何用户信息
+    权限：拥有 user:read scope。
 
     参数：
     - user_id：目标用户 UUID
@@ -510,25 +515,15 @@ async def read_user_by_id(
 
     业务流程：
     1. 查询指定用户
-    2. 若为自己，直接返回
-    3. 若不是自己且当前用户非超管，返回 403 禁止访问
-    4. 若用户不存在，返回 404
+    2. 若不存在，返回 404
 
     异常：
-    - 403：权限不足
+    - 403：无 user:read scope
     - 404：用户不存在
     """
     user = await repository.get_user(session=session, user_id=user_id)
 
-    # 允许查看自己的信息
-    if user == current_user:
-        return user
-
-    # 非超管不允许查看他人信息
-    if not current_user.is_superuser:
-        raise_permission_denied("The user doesn't have enough privileges")
-
-    # 检查目标用户是否存在
+    # 允许查看任何用户（user:read 权限已由依赖强制）
     if user is None:
         raise_user_not_found()
     return user

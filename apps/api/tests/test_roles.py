@@ -15,7 +15,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.core.models import User, Role, RoleScope, UserRole
+from app.core.models import User, Role, RoleScopeModel, UserRole
 from app.core.scopes import DEFAULT_ROLE_SCOPES, ALL_SCOPES
 
 

@@ -69,10 +69,10 @@ async def read_roles(
         limit=pagination.limit,
     )
 
-    data = []
-    for role in roles:
-        scopes = await repository._get_role_scopes(session, role.id)
-        data.append(RolePublic.model_validate(role, update={"scopes": scopes}))
+    data = [
+        await repository.get_role_public(session=session, role=role)
+        for role in roles
+    ]
 
     return RolesPublic(
         data=data,
@@ -101,8 +101,7 @@ async def read_role(
     if not role:
         raise_role_not_found()
 
-    scopes = await repository._get_role_scopes(session, role.id)
-    return RolePublic.model_validate(role, update={"scopes": scopes})
+    return await repository.get_role_public(session=session, role=role)
 
 
 @router.post(
@@ -134,8 +133,7 @@ async def create_role(
 
     role = await repository.create_role(session=session, role_in=role_in)
 
-    scopes = await repository._get_role_scopes(session, role.id)
-    return RolePublic.model_validate(role, update={"scopes": scopes})
+    return await repository.get_role_public(session=session, role=role)
 
 
 @router.patch(
@@ -184,8 +182,7 @@ async def update_role(
         role_in=role_in,
     )
 
-    scopes = await repository._get_role_scopes(session, role.id)
-    return RolePublic.model_validate(role, update={"scopes": scopes})
+    return await repository.get_role_public(session=session, role=role)
 
 
 @router.delete("/{role_id}")

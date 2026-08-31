@@ -74,30 +74,6 @@ class PaginationParams(SQLModel):
         return self.page_size
 
 
-# ==================== 通用错误响应 ====================
-
-class ErrorDetail(SQLModel):
-    """错误详情"""
-    loc: list[str] | None = None  # 错误位置，如 ["body", "email"]
-    msg: str  # 错误消息
-    type: str | None = None  # 错误类型
-
-
-class ErrorResponse(SQLModel):
-    """
-    统一错误响应格式
-    
-    {
-        "detail": "错误消息" | [{"loc": [...], "msg": "...", "type": "..."}],
-        "code": "ERROR_CODE",
-        "data": {}  // 额外数据
-    }
-    """
-    detail: str | list[ErrorDetail]
-    code: str | None = None
-    data: dict[str, Any] | None = None
-
-
 # ==================== 通用 ID 参数 ====================
 
 class IDParam(SQLModel):

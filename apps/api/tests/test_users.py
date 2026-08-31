@@ -13,7 +13,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.models import User
+from app.core.models import Role, RoleScopeModel, User, UserRole
 from app.core.security import get_password_hash
 
 
@@ -290,10 +290,52 @@ async def test_read_users_superuser(
 @pytest.mark.asyncio
 async def test_read_users_normal_user(authorized_client: AsyncClient):
     """
-    测试普通用户无法获取所有用户列表。
+    测试拥有 user:read scope 的用户（editor）可以获取用户列表（scope 判定，非超管判定）。
     """
     response = await authorized_client.get("/v1/users/")
-    
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "data" in data
+    assert "count" in data
+
+
+@pytest.mark.asyncio
+async def test_read_users_no_scope_forbidden(
+    client: AsyncClient,
+    db_session: AsyncSession,
+):
+    """
+    测试没有 user:read scope 的用户（viewer）读取用户列表返回 403。
+    """
+    from sqlalchemy import select
+    from app.core.models import Role, UserRole
+    from app.core.security import create_access_token
+    from datetime import timedelta
+
+    # 创建只有 user:read 之外 scope 的用户（自定义无 user:read 角色）
+    limited_role = Role(name="limited_reader")
+    db_session.add(limited_role)
+    await db_session.flush()
+    db_session.add(RoleScopeModel(role_id=limited_role.id, scope="role:read"))
+    await db_session.commit()
+
+    limited_user = User(
+        email="limited_reader@example.com",
+        hashed_password=get_password_hash("password123"),
+        is_active=True,
+        is_superuser=False,
+    )
+    db_session.add(limited_user)
+    await db_session.flush()
+    db_session.add(UserRole(user_id=limited_user.id, role_id=limited_role.id))
+    await db_session.commit()
+
+    token = create_access_token(subject=str(limited_user.id), expires_delta=timedelta(minutes=30))
+    client.headers["Authorization"] = f"Bearer {token}"
+
+    response = await client.get("/v1/users/")
+
     assert response.status_code == 403
 
 
@@ -364,7 +406,7 @@ async def test_read_user_by_id_other_normal_user(
     db_session: AsyncSession
 ):
     """
-    测试普通用户无法获取其他用户的信息。
+    测试拥有 user:read scope 的用户（editor）可以查看其他用户的信息（scope 判定，非超管判定）。
     """
     # 创建另一个用户
     other_user = User(
@@ -376,12 +418,13 @@ async def test_read_user_by_id_other_normal_user(
     )
     db_session.add(other_user)
     await db_session.commit()
-    
+
     response = await authorized_client.get(f"/v1/users/{other_user.id}")
-    
-    assert response.status_code == 403
+
+    assert response.status_code == 200
     data = response.json()
-    assert "privileges" in data["detail"]
+    assert data["id"] == str(other_user.id)
+    assert data["email"] == other_user.email
 
 
 @pytest.mark.asyncio

@@ -52,6 +52,9 @@ ALL_ROLE_SCOPES = [
 
 ALL_SCOPES = ALL_USER_SCOPES + ALL_ROLE_SCOPES
 
+# 系统预置角色不可修改或删除。
+BUILTIN_ROLES = ("viewer", "editor", "admin")
+
 
 # 预定义角色对应的 scopes
 # 注意：与 packages/contracts/src/scopes.ts 的 DEFAULT_ROLE_SCOPES 保持同步

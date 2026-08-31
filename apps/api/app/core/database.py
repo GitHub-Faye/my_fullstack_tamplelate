@@ -13,9 +13,12 @@ from sqlalchemy import event
 from typing import AsyncGenerator
 
 from app.core.config import get_settings
-from app.core.models import Role, RoleScope, User, UserRole
-from app.core.scopes import DEFAULT_ROLE_SCOPES
+from app.core.logging import get_logger
+from app.core.models import Role, RoleScopeModel, User, UserRole
+from app.core.scopes import BUILTIN_ROLES, DEFAULT_ROLE_SCOPES
 from app.core.security import get_password_hash
+
+logger = get_logger(__name__)
 
 settings = get_settings()
 
@@ -87,10 +90,10 @@ async def init_roles_and_scopes(session: AsyncSession) -> None:
         
         # 创建角色的 scopes
         for scope_value in scopes:
-            role_scope = RoleScope(role_id=role.id, scope=scope_value)
+            role_scope = RoleScopeModel(role_id=role.id, scope=scope_value)
             session.add(role_scope)
         
-        print(f"Created role: {role_name} with scopes: {[s.value for s in scopes]}")
+        logger.info("role_created", role_name=role_name, scopes=[s.value for s in scopes])
     
     await session.commit()
 
@@ -109,15 +112,15 @@ async def init_default_admin(session: AsyncSession) -> None:
     user_count = result.scalar_one()
     
     if user_count > 0:
-        print("Users already exist, skipping default admin creation.")
+        logger.info("default_admin_exists", message="Users already exist, skipping default admin creation.")
         return
     
     # 查找 admin 角色
-    result = await session.execute(select(Role).where(Role.name == "admin"))
+    result = await session.execute(select(Role).where(Role.name == BUILTIN_ROLES[-1]))
     admin_role = result.scalar_one_or_none()
     
     if not admin_role:
-        print("Admin role not found, skipping default admin creation.")
+        logger.warning("admin_role_missing", message="Admin role not found, skipping default admin creation.")
         return
     
     # 创建默认 admin 用户
@@ -136,7 +139,7 @@ async def init_default_admin(session: AsyncSession) -> None:
     session.add(user_role)
     
     await session.commit()
-    print("Created default admin user (email: admin@admin.com, password: admin)")
+    logger.info("default_admin_created", email=str(admin_user.email))
 
 
 async def init_db():

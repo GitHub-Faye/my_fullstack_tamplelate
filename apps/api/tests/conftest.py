@@ -25,7 +25,7 @@ from sqlmodel import SQLModel
 from main import app as fastapi_app
 from app.core.config import get_settings, Settings
 from app.core.database import get_db
-from app.core.models import User, Role, RoleScope, UserRole
+from app.core.models import User, Role, RoleScopeModel, UserRole
 from app.core.security import get_password_hash, create_access_token
 from app.core.dependencies import get_current_user, get_current_active_superuser
 from app.core.scopes import DEFAULT_ROLE_SCOPES, ALL_ROLE_SCOPES
@@ -96,7 +96,7 @@ async def db_session(engine) -> AsyncGenerator[AsyncSession, None]:
             session.add(role)
             await session.flush()
             for scope_value in scopes:
-                session.add(RoleScope(role_id=role.id, scope=scope_value))
+                session.add(RoleScopeModel(role_id=role.id, scope=scope_value))
         await session.commit()
 
     # 创建会话
@@ -201,7 +201,7 @@ async def test_role(db_session: AsyncSession, test_user: User) -> Role:
     role = Role(name="test_role")
     db_session.add(role)
     await db_session.flush()
-    db_session.add(RoleScope(role_id=role.id, scope="user:read"))
+    db_session.add(RoleScopeModel(role_id=role.id, scope="user:read"))
     await db_session.commit()
     await db_session.refresh(role)
     return role
@@ -232,7 +232,7 @@ async def role_admin_user(db_session: AsyncSession) -> User:
     db_session.add(role)
     await db_session.flush()
     for scope_value in ALL_ROLE_SCOPES:
-        db_session.add(RoleScope(role_id=role.id, scope=scope_value.value))
+        db_session.add(RoleScopeModel(role_id=role.id, scope=scope_value.value))
     await db_session.commit()
 
     user = User(

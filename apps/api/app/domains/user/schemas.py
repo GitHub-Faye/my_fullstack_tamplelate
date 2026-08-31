@@ -78,9 +78,3 @@ class Token(SQLModel):
 # JWT 载荷
 class TokenPayload(SQLModel):
     sub: str | None = None
-
-
-# 重置密码时的 payload
-class NewPassword(SQLModel):
-    token: str
-    new_password: str = Field(min_length=8, max_length=128)

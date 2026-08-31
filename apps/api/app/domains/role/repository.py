@@ -6,11 +6,11 @@ Role 领域仓库层（Repository）
 - get_roles: 分页查询角色列表（含各角色的 scopes）
 - create_role: 创建角色（name + scopes，两处写入同一事务）
 - update_role: 更新角色（name 和/或 scopes，scopes 整体替换）
-- delete_role: 删除角色（RoleScope 级联删除）
+- delete_role: 删除角色（RoleScopeModel 级联删除）
 
 说明：
-- Role 与 RoleScope 是一对多关系，角色名唯一（Role.name 带唯一索引）。
-- 更新 scopes 使用「先删后插」策略：删除旧的 RoleScope 记录后，
+- Role 与 RoleScopeModel 是一对多关系，角色名唯一（Role.name 带唯一索引）。
+- 更新 scopes 使用「先删后插」策略：删除旧的 RoleScopeModel 记录后，
   用传入的完整 scope 集合重建，实现整体替换而非增量合并。
 - scope 合法性校验统一走 app.core.scopes.ALL_SCOPES，
   与系统 scope 定义（user:read 等）保持一致。
@@ -25,9 +25,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.errors import (
     raise_bad_request,
 )
-from app.core.models import Role, RoleScope
-from app.core.scopes import ALL_SCOPES
-from app.domains.role.schemas import RoleCreate, RoleUpdate
+from app.core.models import Role, RoleScopeModel
+from app.core.scopes import ALL_SCOPES, BUILTIN_ROLES
+from app.domains.role.schemas import RoleCreate, RolePublic, RoleUpdate
 
 # ============================== Role CRUD Operations ==============================
 
@@ -54,9 +54,15 @@ async def _validate_scopes(session: AsyncSession, scopes: list[str]) -> list[str
 
 async def _get_role_scopes(session: AsyncSession, role_id: uuid.UUID) -> list[str]:
     """查询角色当前持有的 scope 值列表"""
-    statement = select(RoleScope).where(RoleScope.role_id == role_id)  # type: ignore[arg-type]
+    statement = select(RoleScopeModel).where(RoleScopeModel.role_id == role_id)  # type: ignore[arg-type]
     result = await session.execute(statement)
     return sorted(rs.scope for rs in result.scalars().all())
+
+
+async def get_role_public(*, session: AsyncSession, role: Role) -> RolePublic:
+    """将角色模型与其 scope 集合组装为统一 API 响应。"""
+    scopes = await _get_role_scopes(session, role.id)
+    return RolePublic.model_validate(role, update={"scopes": scopes})
 
 
 async def get_role(*, session: AsyncSession, role_id: uuid.UUID) -> Role | None:
@@ -121,9 +127,9 @@ async def create_role(
     session.add(db_role)
     await session.flush()  # 获取 role.id
 
-    # 写入 scopes（RoleScope 关联表）
+    # 写入 scopes（RoleScopeModel 关联表）
     for scope_value in valid_scopes:
-        session.add(RoleScope(role_id=db_role.id, scope=scope_value))
+        session.add(RoleScopeModel(role_id=db_role.id, scope=scope_value))
 
     await session.commit()
     await session.refresh(db_role)
@@ -148,13 +154,13 @@ async def update_role(
 
     业务规则：
     - 未设置的字段保持不变（部分更新）。
-    - 一旦传入 scopes，则「整体替换」：删除全部旧 RoleScope 后重建，
+    - 一旦传入 scopes，则「整体替换」：删除全部旧 RoleScopeModel 后重建，
       实现增减 scope 的效果（满足"修改角色的同时修改其持有的 scope"）。
     - 不允许删除系统预置角色（viewer / editor / admin）——
       init_roles_and_scopes 依赖它们，且它们被新用户默认引用。
     """
     # 防止删除系统预置角色（其 scopes 由代码初始化时定义，删除会导致初始化逻辑失效）
-    if db_role.name in ("viewer", "editor", "admin"):
+    if db_role.name in BUILTIN_ROLES:
         raise_bad_request(
             f"Built-in role '{db_role.name}' cannot be modified"
         )
@@ -170,13 +176,13 @@ async def update_role(
     if scope_values is not None:
         valid_scopes = await _validate_scopes(session, scope_values)
 
-        # 删除旧的 RoleScope 记录
-        statement = delete(RoleScope).where(RoleScope.role_id == db_role.id)  # type: ignore[arg-type]
+        # 删除旧的 RoleScopeModel 记录
+        statement = delete(RoleScopeModel).where(RoleScopeModel.role_id == db_role.id)  # type: ignore[arg-type]
         await session.execute(statement)
 
         # 重建 scopes（整体替换）
         for scope_value in valid_scopes:
-            session.add(RoleScope(role_id=db_role.id, scope=scope_value))
+            session.add(RoleScopeModel(role_id=db_role.id, scope=scope_value))
 
     session.add(db_role)
     await session.commit()
@@ -189,13 +195,13 @@ async def delete_role(*, session: AsyncSession, db_role: Role) -> None:
     删除角色。
 
     注意：
-    - RoleScope 通过外键 ondelete="CASCADE" 级联删除。
+    - RoleScopeModel 通过外键 ondelete="CASCADE" 级联删除。
     - 删除前需确保没有用户引用此角色（UserRole 外键为 CASCADE，
       删除角色会自动解除用户与角色的关联）。
     - 系统预置角色（viewer / editor / admin）不允许删除。
     """
     # 防止删除系统预置角色
-    if db_role.name in ("viewer", "editor", "admin"):
+    if db_role.name in BUILTIN_ROLES:
         raise_bad_request(
             f"Built-in role '{db_role.name}' cannot be deleted"
         )

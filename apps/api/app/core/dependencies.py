@@ -25,7 +25,7 @@ from sqlalchemy import select
 
 from app.core.config import get_settings
 from app.core.database import get_db
-from app.core.models import User, Role, RoleScope as RoleScopeModel, UserRole
+from app.core.models import User, Role, RoleScopeModel, UserRole
 from app.core.security import reusable_oauth2
 from app.core.scopes import ALL_SCOPES, RoleScope, UserScope
 from app.core.errors import (

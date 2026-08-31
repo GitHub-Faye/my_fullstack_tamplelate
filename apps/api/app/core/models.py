@@ -50,19 +50,20 @@ class Role(RoleBase, table=True):
         link_model=UserRole,
     )
     # 与 RoleScope 的一对多关系
-    scopes: List["RoleScope"] = Relationship(
+    scopes: List["RoleScopeModel"] = Relationship(
         back_populates="role",
         cascade_delete=True,
     )
 
 
-# ==================================== RoleScope ====================================
+# ==================================== RoleScopeModel ====================================
 
 class RoleScopeBase(SQLModel):
     scope: str = Field(max_length=100)  # 如 "user:read", "role:read"
 
 
-class RoleScope(RoleScopeBase, table=True):
+class RoleScopeModel(RoleScopeBase, table=True):
+    __tablename__ = "role_scope"
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     role_id: uuid.UUID = Field(
         foreign_key="role.id", nullable=False, ondelete="CASCADE"
