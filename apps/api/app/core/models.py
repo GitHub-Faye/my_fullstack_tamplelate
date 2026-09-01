@@ -19,13 +19,15 @@ def get_datetime_utc() -> datetime:
 
 class UserRole(SQLModel, table=True):
     """用户与角色的多对多关联表"""
+
+    __tablename__ = "tpl_user_role"  # type: ignore[assignment]
     user_id: uuid.UUID = Field(
-        foreign_key="user.id",
+        foreign_key="tpl_user.id",
         primary_key=True,
         ondelete="CASCADE",
     )
     role_id: uuid.UUID = Field(
-        foreign_key="role.id",
+        foreign_key="tpl_role.id",
         primary_key=True,
         ondelete="CASCADE",
     )
@@ -38,6 +40,7 @@ class RoleBase(SQLModel):
 
 
 class Role(RoleBase, table=True):
+    __tablename__ = "tpl_role"  # type: ignore[assignment]
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
@@ -63,10 +66,10 @@ class RoleScopeBase(SQLModel):
 
 
 class RoleScopeModel(RoleScopeBase, table=True):
-    __tablename__ = "role_scope"
+    __tablename__ = "tpl_role_scope"  # type: ignore[assignment]
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     role_id: uuid.UUID = Field(
-        foreign_key="role.id", nullable=False, ondelete="CASCADE"
+        foreign_key="tpl_role.id", nullable=False, ondelete="CASCADE"
     )
     created_at: datetime | None = Field(
         default_factory=get_datetime_utc,
@@ -86,6 +89,7 @@ class UserBase(SQLModel):
 
 
 class User(UserBase, table=True):
+    __tablename__ = "tpl_user"  # type: ignore[assignment]
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     created_at: datetime | None = Field(
