@@ -1,16 +1,15 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
-from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-
 from app.api import router as api_router
 from app.core.config import get_settings
 from app.core.database import init_db
 from app.core.errors import BusinessException, ErrorCode
 from app.core.logging import configure_logging, get_logger
 from app.core.middleware import ProcessTimeMiddleware
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 # 首先配置日志系统（在应用启动前）
 configure_logging()

@@ -3,9 +3,6 @@
 import uuid
 from datetime import timedelta
 
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.errors import (
     BusinessException,
     ErrorCode,
@@ -23,6 +20,8 @@ from app.domains.user.schemas import (
     UserUpdate,
     UserUpdateMe,
 )
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def authenticate(*, session: AsyncSession, email: str, password: str) -> User:

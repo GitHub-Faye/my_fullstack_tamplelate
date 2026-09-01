@@ -18,14 +18,13 @@ Role 领域仓库层（Repository）
 
 import uuid
 
-from sqlalchemy import delete, func
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
-
 from app.core.errors import raise_bad_request, raise_role_builtin_protected
 from app.core.models import Role, RoleScopeModel
 from app.core.scopes import ALL_SCOPES, BUILTIN_ROLES
 from app.domains.role.schemas import RoleCreate, RoleUpdate
+from sqlalchemy import delete, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import select
 
 # ============================== Role CRUD Operations ==============================
 

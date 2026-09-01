@@ -2,11 +2,10 @@
 
 from collections.abc import Sequence
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.models import Role
 from app.domains.role.repository import get_role_scopes_by_ids
 from app.domains.role.schemas import RolePublic
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def role_public(

@@ -22,8 +22,6 @@ Role 领域 API 路由模块
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query
-
 from app.core.dependencies import (
     SessionDep,
     require_scope,
@@ -39,6 +37,7 @@ from app.domains.role.schemas import (
     RolesPublic,
     RoleUpdate,
 )
+from fastapi import APIRouter, Depends, Query
 
 router = APIRouter()
 

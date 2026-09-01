@@ -12,9 +12,6 @@
 import uuid
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query
-from fastapi.security import OAuth2PasswordRequestForm
-
 from app.core.config import get_settings
 from app.core.dependencies import (
     CurrentUser,
@@ -37,6 +34,8 @@ from app.domains.user.schemas import (
     UserUpdate,
     UserUpdateMe,
 )
+from fastapi import APIRouter, Depends, Query
+from fastapi.security import OAuth2PasswordRequestForm
 
 settings = get_settings()
 router = APIRouter()

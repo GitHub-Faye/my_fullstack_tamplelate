@@ -1,8 +1,5 @@
 import uuid
 
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.models import Role, User, UserRole
 from app.core.security import get_password_hash, verify_password
 from app.domains.user.schemas import (
@@ -10,6 +7,8 @@ from app.domains.user.schemas import (
     UserUpdate,
     UserUpdateMe,
 )
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 # ============================== 用户 CRUD 操作 ==============================

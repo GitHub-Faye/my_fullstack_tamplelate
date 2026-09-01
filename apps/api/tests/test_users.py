@@ -11,11 +11,10 @@ Tests cover:
 import uuid
 
 import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.models import Role, RoleScopeModel, User, UserRole
 from app.core.security import get_password_hash
+from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # ======================== 响应字段安全断言（P0-1） ========================
 # 所有返回 User 数据的端点都不得泄露 hashed_password。
@@ -622,9 +621,8 @@ async def test_delete_user_without_scope_forbidden(
     """
     from datetime import timedelta
 
-    from sqlalchemy import select
-
     from app.core.security import create_access_token
+    from sqlalchemy import select
 
     # 创建只有 user:read scope 的 viewer 用户
     viewer_role = (await db_session.execute(

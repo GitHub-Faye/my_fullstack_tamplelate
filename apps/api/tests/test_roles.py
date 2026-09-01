@@ -12,11 +12,10 @@ Tests cover:
 import uuid
 
 import pytest
+from app.core.models import Role, User, UserRole
 from httpx import AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.core.models import Role, User, UserRole
 
 
 def _admin_headers(user_token: str) -> dict[str, str]:

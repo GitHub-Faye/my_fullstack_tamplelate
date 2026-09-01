@@ -2,11 +2,10 @@
 
 from collections.abc import Sequence
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.dependencies import get_user_scopes, get_users_scopes
 from app.core.models import User
 from app.domains.user.schemas import UserPublic
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def user_public(

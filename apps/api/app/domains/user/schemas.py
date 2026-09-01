@@ -1,10 +1,9 @@
 import uuid
 from datetime import datetime
 
+from app.core.schemas import PaginatedResponse
 from pydantic import ConfigDict, EmailStr
 from sqlmodel import Field, SQLModel
-
-from app.core.schemas import PaginatedResponse
 
 
 # ------------------------------- 用户模型 -------------------------------------------------
