@@ -97,6 +97,35 @@ localStorage.setItem(StorageKeys.ACCESS_TOKEN, token);
 | `apps/api/app/core/scopes.py` | `src/scopes.ts` | 权限 Scope |
 | `apps/api/app/core/schemas.py` | `src/pagination.ts` | 分页协议 |
 
+> 同步由 `packages/contracts/test/consistency.test.ts` 自动校验：枚举字符串集合、状态码映射、错误消息 key、BUILTIN_ROLES 与 DEFAULT_ROLE_SCOPES 均逐字比对。任一不一致该测试立即失败。
+
+## 错误协议统一约定
+
+- 错误响应：`{ detail: string, code: ErrorCode, data?: Record<string, unknown> }`
+- HTTP 状态码由 `ERROR_STATUS_MAP` 给出：
+  - 400：业务请求错误（`SYSTEM_BAD_REQUEST` / 鉴权失败等）
+  - 401：令牌无效 / 过期
+  - 403：权限 / scope 不足 / 预置角色保护 / 超管自删
+  - 404：资源不存在
+  - 409：资源冲突（邮箱已存在 / 角色名冲突）
+  - **422**：Pydantic 校验错误（`SYSTEM_VALIDATION_ERROR`）
+  - 429：限流
+  - 500：内部错误
+- 前端展示层（toast 等）允许使用本地化文案（中文）；后端 `detail` 与 contracts 文本保持英文作为协议常量。
+
+## 分页约定
+
+- 请求参数：`page`（≥1）+ `page_size`（1..100）
+- 默认值来自 `DEFAULT_PAGINATION = { page: 1, page_size: 20 }`
+- 前端列表/查询默认值必须消费 `DEFAULT_PAGINATION`，禁止硬编码 `page_size: 10` 等。
+
+## responses.py 双入口约定
+
+- `apps/api/app/core/responses.py`：分页工具函数（`paginated_fields` / `total_pages`），与 `core/schemas.py:PaginatedResponse` 配套
+- `apps/api/app/domains/*/responses.py`：DTO 组装函数（`user_public` / `roles_public`），把 DB 模型 + 权限 scope 拼成响应 DTO
+
+两者职责不同、命名相同；新增领域时按此约定落位。
+
 ## 使用示例
 
 ```typescript

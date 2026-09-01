@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCurrentUser, useUserScopes } from "@/features/user";
+import { useAuthUser, useUserScopes } from "@/features/user";
 import {
   Card,
   CardContent,
@@ -17,7 +17,7 @@ import { formatDate, formatUserRole, formatUserStatus } from "@/lib/utils";
 import { hasScope, UserScope, RoleScope } from "@repo/contracts/scopes";
 
 export default function DashboardPage() {
-  const user = useCurrentUser();
+  const user = useAuthUser();
   const scopes = useUserScopes();
 
   const quickActions = [

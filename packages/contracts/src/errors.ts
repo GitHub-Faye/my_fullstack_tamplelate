@@ -29,6 +29,7 @@ export enum ErrorCode {
   // ==================== 系统错误 (SYSTEM) ====================
   SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR",
   SYSTEM_VALIDATION_ERROR = "SYSTEM_VALIDATION_ERROR",
+  SYSTEM_BAD_REQUEST = "SYSTEM_BAD_REQUEST",
   SYSTEM_RATE_LIMIT = "SYSTEM_RATE_LIMIT",
 }
 
@@ -41,7 +42,7 @@ export const ERROR_STATUS_MAP: Record<ErrorCode, number> = {
   [ErrorCode.AUTH_INACTIVE_USER]: 400,
   [ErrorCode.USER_INVALID_PASSWORD]: 400,
   [ErrorCode.USER_PASSWORD_SAME_AS_OLD]: 400,
-  [ErrorCode.SYSTEM_VALIDATION_ERROR]: 400,
+  [ErrorCode.SYSTEM_BAD_REQUEST]: 400,
 
   // 401 Unauthorized
   [ErrorCode.AUTH_INVALID_TOKEN]: 401,
@@ -63,6 +64,9 @@ export const ERROR_STATUS_MAP: Record<ErrorCode, number> = {
 
   // 429 Too Many Requests
   [ErrorCode.SYSTEM_RATE_LIMIT]: 429,
+
+  // 422 Unprocessable Entity（与后端 RequestValidationError handler 一致）
+  [ErrorCode.SYSTEM_VALIDATION_ERROR]: 422,
 
   // 500 Internal Server Error
   [ErrorCode.SYSTEM_INTERNAL_ERROR]: 500,
@@ -91,6 +95,7 @@ export const DEFAULT_ERROR_MESSAGES: Record<ErrorCode, string> = {
 
   [ErrorCode.SYSTEM_INTERNAL_ERROR]: "Internal server error",
   [ErrorCode.SYSTEM_VALIDATION_ERROR]: "Validation error",
+  [ErrorCode.SYSTEM_BAD_REQUEST]: "Bad request",
   [ErrorCode.SYSTEM_RATE_LIMIT]: "Too many requests",
 };
 

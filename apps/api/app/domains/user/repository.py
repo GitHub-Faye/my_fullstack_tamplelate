@@ -1,5 +1,8 @@
 import uuid
 
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.models import Role, User, UserRole
 from app.core.security import get_password_hash, verify_password
 from app.domains.user.schemas import (
@@ -7,8 +10,6 @@ from app.domains.user.schemas import (
     UserUpdate,
     UserUpdateMe,
 )
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 # ============================== 用户 CRUD 操作 ==============================
@@ -142,6 +143,14 @@ async def delete_user(*, session: AsyncSession, db_user: User) -> None:
         db_user: 要删除的用户对象
     """
     await session.delete(db_user)
+
+
+async def count_superusers(*, session: AsyncSession) -> int:
+    """统计系统中超管总人数（用于最后超管保护）。"""
+    result = await session.execute(
+        select(func.count()).select_from(User).where(User.is_superuser.is_(True))
+    )
+    return int(result.scalar_one())
 
 
 async def get_user_by_email(*, session: AsyncSession, email: str) -> User | None:

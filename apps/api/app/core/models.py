@@ -1,8 +1,7 @@
 # app/core/models.py   （或你当前的文件）
 
 import uuid
-from datetime import datetime, timezone
-
+from datetime import UTC, datetime
 from typing import Optional
 
 from pydantic import EmailStr
@@ -12,7 +11,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 def get_datetime_utc() -> datetime:
     """返回 UTC 时间，用于默认 created_at 字段。"""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # ==================================== UserRole (Association Table) ====================================

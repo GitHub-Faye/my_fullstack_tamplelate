@@ -10,12 +10,17 @@ import {
 
 // ==================== Server-Side Data Fetching ====================
 
+import { DEFAULT_PAGINATION } from "@repo/contracts/pagination";
+
 /**
  * Get roles list (server-side)
  * Use this in Server Components for initial data fetching
  */
 export async function getRoles(
-  filters: ReadRolesV1RolesGetData["query"] = { page: 1, page_size: 10 }
+  filters: ReadRolesV1RolesGetData["query"] = {
+    page: DEFAULT_PAGINATION.page,
+    page_size: DEFAULT_PAGINATION.page_size,
+  }
 ): Promise<ReadRolesV1RolesGetResponse> {
   const response = await readRolesV1RolesGet({
     query: filters,

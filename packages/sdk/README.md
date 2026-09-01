@@ -290,9 +290,17 @@ if (!validation.success) {
 ## 重新生成代码
 
 ```bash
-# 本地开发（使用本地 API）
-npx @hey-api/openapi-ts -c openapi-ts.config.local.ts
+# 本地开发（使用本地 API，默认）
+pnpm generate            # 等价于 openapi-ts -f openapi-ts.config.ts
 
-# 或使用配置文件中的默认配置
-npm run generate
+# 或显式使用本地覆盖配置
+pnpm generate:local      # openapi-ts -f openapi-ts.config.local.ts
 ```
+
+### 配置约定
+
+- `openapi-ts.config.ts`：**基线配置**，input 默认指向 `http://localhost:8000/openapi.json`；任何环境都应基于该文件派生。
+- `openapi-ts.config.local.ts`：本地开发覆盖配置（如端口、路径差异）。仓库内不存环境特定密钥。
+- `src/api/**`：**生成产物，禁止手改**。改协议必须回到 OpenAPI/Python 端，PR 需附带 `pnpm generate` 的 diff。
+
+> ⚠️ 旧文档曾指向空 `openapi-ts.config.ts`。自 v0.1 起该文件已恢复基线（参见 P0-3 提交）。

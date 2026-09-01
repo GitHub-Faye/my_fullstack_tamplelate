@@ -6,14 +6,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api import router as api_router
-
-from app.core.errors import BusinessException
-from app.core.middleware import ProcessTimeMiddleware
 from app.core.config import get_settings
 from app.core.database import init_db
+from app.core.errors import BusinessException, ErrorCode
 from app.core.logging import configure_logging, get_logger
-
-import sentry_sdk
+from app.core.middleware import ProcessTimeMiddleware
 
 # 首先配置日志系统（在应用启动前）
 configure_logging()
@@ -71,12 +68,18 @@ async def business_exception_handler(
 async def validation_exception_handler(
     request: Request, exc: RequestValidationError
 ) -> JSONResponse:
-    """将请求校验异常统一序列化为标准错误响应。"""
+    """将请求校验异常统一序列化为标准错误响应。
+
+    与 BusinessException 保持同构：{detail, code, data?}。
+    状态码固定为 422，对应 contracts 的 SYSTEM_VALIDATION_ERROR 映射。
+    """
+    errors = exc.errors()
     return JSONResponse(
         status_code=422,
         content={
-            "detail": exc.errors(),
-            "code": "SYSTEM_VALIDATION_ERROR",
+            "detail": "Request validation failed",
+            "code": ErrorCode.SYSTEM_VALIDATION_ERROR.value,
+            "data": {"errors": errors},
         },
     )
 

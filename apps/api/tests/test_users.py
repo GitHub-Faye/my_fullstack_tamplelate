@@ -11,10 +11,92 @@ Tests cover:
 import uuid
 
 import pytest
-from app.core.models import Role, RoleScopeModel, User, UserRole
-from app.core.security import get_password_hash
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.models import Role, RoleScopeModel, User, UserRole
+from app.core.security import get_password_hash
+
+# ======================== 响应字段安全断言（P0-1） ========================
+# 所有返回 User 数据的端点都不得泄露 hashed_password。
+# 该断言是输出加固的守护：任何新增/改造端点若破坏 UserPublic 过滤，
+# 此处会立即失败。
+
+SCHEMA_FIELDS_TO_REDACT = {"hashed_password", "password"}
+
+
+def assert_no_password_fields(data: dict) -> None:
+    """断言响应对象不包含任何敏感字段。"""
+    assert "hashed_password" not in data, "响应泄露 hashed_password"
+    # password 仅用于请求模型，响应中出现即异常
+    assert "password" not in data, "响应泄露 password"
+
+
+@pytest.mark.asyncio
+async def test_user_responses_never_leak_password(
+    superuser_client: AsyncClient,
+    test_user: User,
+    test_superuser: User,
+    db_session: AsyncSession,
+):
+    """
+    覆盖所有返回用户数据的端点，断言均不泄露 hashed_password/password。
+
+    防回归用例：若某端点误将 DB 模型（User）直接返回，此测试失败。
+    """
+    # 1. 当前用户
+    resp = await superuser_client.get("/v1/users/me")
+    assert resp.status_code == 200
+    assert_no_password_fields(resp.json())
+
+    # 2. 用户列表（逐项检查）
+    resp = await superuser_client.get("/v1/users/")
+    assert resp.status_code == 200
+    for item in resp.json()["data"]:
+        assert_no_password_fields(item)
+
+    # 3. 单个用户（他人）
+    resp = await superuser_client.get(f"/v1/users/{test_user.id}")
+    assert resp.status_code == 200
+    assert_no_password_fields(resp.json())
+
+    # 4. 创建用户
+    resp = await superuser_client.post(
+        "/v1/users/",
+        json={
+            "email": "guard@example.com",
+            "password": "guardpass123",
+            "full_name": "Guard User",
+        },
+    )
+    assert resp.status_code == 200
+    assert_no_password_fields(resp.json())
+
+    # 5. 更新用户
+    resp = await superuser_client.patch(
+        f"/v1/users/{test_user.id}",
+        json={"full_name": "Guarded"},
+    )
+    assert resp.status_code == 200
+    assert_no_password_fields(resp.json())
+
+    # 6. 更新当前用户
+    resp = await superuser_client.patch("/v1/users/me", json={"full_name": "Guard Me"})
+    assert resp.status_code == 200
+    assert_no_password_fields(resp.json())
+
+    # 7. 登录令牌（不含用户对象，仍应无敏感字段）
+    resp = await superuser_client.post(
+        "/v1/login/access-token",
+        data={
+            "username": test_superuser.email,
+            "password": "adminpassword123",
+            "grant_type": "password",
+        },
+    )
+    assert resp.status_code == 200
+    assert_no_password_fields(resp.json())
+
 
 # ======================== 用户注册测试 ========================
 
@@ -73,8 +155,32 @@ async def test_register_user_invalid_email(client: AsyncClient):
             "full_name": "Test User",
         },
     )
-    
+
     assert response.status_code == 422  # Validation error
+
+
+@pytest.mark.asyncio
+async def test_validation_error_protocol_shape(client: AsyncClient):
+    """
+    测试 422 校验错误与 BusinessException 同构：{detail, code, data.errors}。
+
+    守护 P0-2 约定：SDK/前端可按统一 ErrorResponse 消费所有错误。
+    """
+    response = await client.post(
+        "/v1/users/signup",
+        json={
+            "email": "invalid-email",
+            "password": "password123",
+        },
+    )
+
+    assert response.status_code == 422
+    body = response.json()
+    # 统一错误协议：detail（字符串）+ code（错误码）+ data（结构化明细）
+    assert body["code"] == "SYSTEM_VALIDATION_ERROR"
+    assert isinstance(body["detail"], str)
+    assert "errors" in body["data"]
+    assert isinstance(body["data"]["errors"], list)
 
 
 @pytest.mark.asyncio
@@ -516,8 +622,9 @@ async def test_delete_user_without_scope_forbidden(
     """
     from datetime import timedelta
 
-    from app.core.security import create_access_token
     from sqlalchemy import select
+
+    from app.core.security import create_access_token
 
     # 创建只有 user:read scope 的 viewer 用户
     viewer_role = (await db_session.execute(
@@ -587,10 +694,73 @@ async def test_delete_user_self_superuser(
     测试超级管理员不能删除自己。
     """
     response = await superuser_client.delete(f"/v1/users/{test_superuser.id}")
-    
+
     assert response.status_code == 403
     data = response.json()
     assert "not allowed to delete themselves" in data["detail"]
+
+
+@pytest.mark.asyncio
+async def test_delete_last_superuser_forbidden(
+    authorized_client: AsyncClient,
+    db_session: AsyncSession,
+):
+    """
+    测试删除系统中最后一个超管被拒（最后超管保护）。
+
+    构造：db_session 默认无任何超管，本用例创建唯一的超管 sup2。
+    使用拥有 user:delete scope 的 editor（authorized_client）删除 sup2：
+    - editor 拥有 user:delete scope，依赖层通过（scope 判定非超管判定）；
+    - 但 service 层检测删除目标是超管且删除后系统中超管数为 0 → 拒绝 400。
+    """
+    # 创建唯一的超管（将要删除的目标）
+    sup2 = User(
+        email="sup2@example.com",
+        hashed_password=get_password_hash("sup2password123"),
+        full_name="Super 2",
+        is_active=True,
+        is_superuser=True,
+    )
+    db_session.add(sup2)
+    await db_session.commit()
+
+    response = await authorized_client.delete(f"/v1/users/{sup2.id}")
+
+    assert response.status_code == 400
+    data = response.json()
+    assert "last superuser" in data["detail"]
+
+    # 超管用户确实未被删除
+    still_exists = await db_session.get(User, sup2.id)
+    assert still_exists is not None
+
+
+@pytest.mark.asyncio
+async def test_delete_superuser_when_another_exists(
+    superuser_client: AsyncClient,
+    test_superuser: User,
+    db_session: AsyncSession,
+):
+    """
+    测试系统中存在多个超管时，删除其中一个超管成功（非最后超管不受保护）。
+    """
+    # 创建第二个超管
+    sup2 = User(
+        email="sup2b@example.com",
+        hashed_password=get_password_hash("sup2password123"),
+        full_name="Super 2b",
+        is_active=True,
+        is_superuser=True,
+    )
+    db_session.add(sup2)
+    await db_session.commit()
+
+    # test_superuser 删除 sup2：删除后仍有 test_superuser 一个超管 → 允许
+    response = await superuser_client.delete(f"/v1/users/{sup2.id}")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "deleted successfully" in data["message"]
 
 
 @pytest.mark.asyncio

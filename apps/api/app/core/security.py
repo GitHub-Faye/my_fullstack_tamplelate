@@ -1,16 +1,14 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
+from fastapi.security import OAuth2PasswordBearer
 from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 from pwdlib.hashers.bcrypt import BcryptHasher
 
 from app.core.config import get_settings
 from app.core.scopes import ALL_SCOPES
-
-
-from fastapi.security import OAuth2PasswordBearer
 
 password_hash = PasswordHash(
     (
@@ -51,7 +49,7 @@ def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
     - exp：过期时间戳
     - sub：用户标识
     """
-    expire = datetime.now(timezone.utc) + expires_delta
+    expire = datetime.now(UTC) + expires_delta
     to_encode = {"exp": expire, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt

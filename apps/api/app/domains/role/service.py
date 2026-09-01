@@ -2,6 +2,9 @@
 
 import uuid
 
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.errors import (
     BusinessException,
     ErrorCode,
@@ -11,8 +14,6 @@ from app.core.errors import (
 from app.core.models import Role
 from app.domains.role import repository
 from app.domains.role.schemas import RoleCreate, RoleUpdate
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def list_roles(

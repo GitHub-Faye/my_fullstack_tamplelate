@@ -44,6 +44,7 @@ class ErrorCode(str, Enum):
     # ==================== 系统错误 (SYSTEM) ====================
     SYSTEM_INTERNAL_ERROR = "SYSTEM_INTERNAL_ERROR"
     SYSTEM_VALIDATION_ERROR = "SYSTEM_VALIDATION_ERROR"
+    SYSTEM_BAD_REQUEST = "SYSTEM_BAD_REQUEST"
     SYSTEM_RATE_LIMIT = "SYSTEM_RATE_LIMIT"
 
 
@@ -54,7 +55,7 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     ErrorCode.AUTH_INACTIVE_USER: status.HTTP_400_BAD_REQUEST,
     ErrorCode.USER_INVALID_PASSWORD: status.HTTP_400_BAD_REQUEST,
     ErrorCode.USER_PASSWORD_SAME_AS_OLD: status.HTTP_400_BAD_REQUEST,
-    ErrorCode.SYSTEM_VALIDATION_ERROR: status.HTTP_400_BAD_REQUEST,
+    ErrorCode.SYSTEM_BAD_REQUEST: status.HTTP_400_BAD_REQUEST,
 
     # 401 Unauthorized
     ErrorCode.AUTH_INVALID_TOKEN: status.HTTP_401_UNAUTHORIZED,
@@ -76,7 +77,10 @@ ERROR_STATUS_MAP: dict[ErrorCode, int] = {
     
     # 429 Too Many Requests
     ErrorCode.SYSTEM_RATE_LIMIT: status.HTTP_429_TOO_MANY_REQUESTS,
-    
+
+    # 422 Unprocessable Content
+    ErrorCode.SYSTEM_VALIDATION_ERROR: status.HTTP_422_UNPROCESSABLE_CONTENT,
+
     # 500 Internal Server Error
     ErrorCode.SYSTEM_INTERNAL_ERROR: status.HTTP_500_INTERNAL_SERVER_ERROR,
 }
@@ -103,6 +107,7 @@ DEFAULT_ERROR_MESSAGES: dict[ErrorCode, str] = {
 
     ErrorCode.SYSTEM_INTERNAL_ERROR: "Internal server error",
     ErrorCode.SYSTEM_VALIDATION_ERROR: "Validation error",
+    ErrorCode.SYSTEM_BAD_REQUEST: "Bad request",
     ErrorCode.SYSTEM_RATE_LIMIT: "Too many requests",
 }
 
@@ -186,9 +191,9 @@ def raise_role_builtin_protected(detail: str | None = None) -> NoReturn:
 
 
 def raise_bad_request(detail: str | None = None) -> NoReturn:
-    """抛出通用请求错误（400）"""
+    """抛出通用业务请求错误（400，与 Pydantic 校验 422 严格区分）。"""
     raise BusinessException(
-        code=ErrorCode.SYSTEM_VALIDATION_ERROR,
+        code=ErrorCode.SYSTEM_BAD_REQUEST,
         detail=detail,
     )
 

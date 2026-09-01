@@ -22,22 +22,23 @@ Role 领域 API 路由模块
 import uuid
 from typing import Annotated, Any
 
+from fastapi import APIRouter, Depends, Query
+
 from app.core.dependencies import (
     SessionDep,
     require_scope,
 )
 from app.core.responses import paginated_fields
-from app.domains.role.responses import role_public, roles_public
 from app.core.schemas import Message, PaginationParams
 from app.core.scopes import RoleScope
 from app.domains.role import service
+from app.domains.role.responses import role_public, roles_public
 from app.domains.role.schemas import (
     RoleCreate,
     RolePublic,
     RolesPublic,
     RoleUpdate,
 )
-from fastapi import APIRouter, Depends, Query
 
 router = APIRouter()
 
@@ -156,7 +157,7 @@ async def update_role(
     return await role_public(session=session, role=role)
 
 
-@router.delete("/{role_id}")
+@router.delete("/{role_id}", response_model=Message)
 async def delete_role(
     session: SessionDep,
     role_id: uuid.UUID,

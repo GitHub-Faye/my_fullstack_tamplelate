@@ -34,10 +34,13 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "typescript": "5.9.2"
+    "typescript": "5.9.2",
+    "vitest": "^2.1.9"
   }
 }

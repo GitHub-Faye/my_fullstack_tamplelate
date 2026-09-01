@@ -9,7 +9,6 @@ from typing import Generic, TypeVar
 from pydantic import field_validator
 from sqlmodel import SQLModel
 
-
 # ==================== 通用消息响应 ====================
 
 class Message(SQLModel):

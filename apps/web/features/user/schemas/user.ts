@@ -93,13 +93,6 @@ export const userUpdateMeSchema = z.object({
 
 export type UserUpdateMeFormData = z.infer<typeof userUpdateMeSchema>;
 
-/**
- * User filter/pagination schema
- */
-export const userListFilterSchema = z.object({
-  skip: z.number().min(0).default(0),
-  limit: z.number().min(1).max(100).default(10),
-  search: z.string().optional(),
-});
-
-export type UserListFilter = z.infer<typeof userListFilterSchema>;
+/* 注：原 userListFilterSchema（skip/limit/search）与后端 PaginationParams(page/page_size)
+ * 协议不一致且无任何调用方，已删除。如需再引入搜索/筛选，须以 contracts/pagination
+ * 为基础扩展，避免前后端参数错位。 */

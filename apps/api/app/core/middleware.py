@@ -1,6 +1,6 @@
 import time
 import uuid
-from typing import Callable
+from collections.abc import Callable
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -69,7 +69,7 @@ class ProcessTimeMiddleware(BaseHTTPMiddleware):
             process_time = time.perf_counter() - start_time
             
             # 记录请求错误
-            logger.error(
+            logger.exception(
                 "request_failed",
                 request_id=request_id,
                 method=method,
@@ -77,6 +77,5 @@ class ProcessTimeMiddleware(BaseHTTPMiddleware):
                 error_type=type(exc).__name__,
                 error_message=str(exc),
                 process_time_ms=round(process_time * 1000, 2),
-                exc_info=True,
             )
             raise

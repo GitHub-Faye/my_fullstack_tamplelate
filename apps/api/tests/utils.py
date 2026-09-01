@@ -7,9 +7,10 @@ Utility functions for testing.
 import uuid
 from datetime import timedelta
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.models import User
 from app.core.security import create_access_token, get_password_hash
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def create_test_user(

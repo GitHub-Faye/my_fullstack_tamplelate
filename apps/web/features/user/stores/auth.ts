@@ -155,8 +155,11 @@ export const useAuthStore = create<AuthState>()(
 // ==================== 选择器 Hooks (Selectors) ====================
 // 使用细粒度的选择器优化性能，避免不必要的重渲染
 
-/** 获取当前用户信息 */
-export const useUser = () => useAuthStore((state) => state.user);
+/** 获取当前用户信息（认证 store 快照） */
+export const useAuthUser = () => useAuthStore((state) => state.user);
+
+/** 兼容旧调用方；业务代码优先使用 useAuthUser，避免与 query hook 同名 */
+export const useUser = useAuthUser;
 
 /** 获取访问令牌 */
 export const useToken = () => useAuthStore((state) => state.token);

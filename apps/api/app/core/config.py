@@ -1,6 +1,7 @@
 import secrets
 import warnings
-from typing import Annotated, Any, Literal
+from pathlib import Path
+from typing import Annotated, Any, Literal, Self
 
 from pydantic import (
     BeforeValidator,
@@ -10,9 +11,6 @@ from pydantic import (
     model_validator,
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing_extensions import Self
-
-from pathlib import Path
 
 # 获取当前文件所在目录（app/core/）
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -228,6 +226,7 @@ class Settings(BaseSettings):
 # 创建单例（推荐用 lru_cache 缓存）
 from functools import lru_cache
 
-@lru_cache()
+
+@lru_cache
 def get_settings() -> Settings:
     return Settings()

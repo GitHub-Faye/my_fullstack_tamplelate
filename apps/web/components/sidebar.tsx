@@ -10,7 +10,7 @@ import {
   LogOut,
   User,
 } from "lucide-react";
-import { useCurrentUser, useUserScopes, useAuthStore } from "@/features/user";
+import { useAuthUser, useUserScopes, useAuthStore } from "@/features/user";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -115,7 +115,7 @@ export function Sidebar({ onNavigate }: SidebarProps) {
 /** 侧边栏底部用户菜单 */
 function SidebarUserMenu() {
   const router = useRouter();
-  const user = useCurrentUser();
+  const user = useAuthUser();
   const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = () => {

@@ -1,3 +1,3 @@
 export { RoleList } from "./RoleList";
 
-// Note: RoleDetail is exported from client/index.ts as a Client Component
+// RoleDetail 由 client/index.ts 提供（页面 (dashboard)/dashboard/roles/[id]/page.tsx 仅引用 client 版）

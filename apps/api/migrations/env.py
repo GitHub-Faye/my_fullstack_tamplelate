@@ -1,13 +1,10 @@
 import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import pool
+from alembic import context
+from sqlalchemy import event, pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-from sqlalchemy import event
-
-from alembic import context
-
 from sqlmodel import SQLModel
 
 # this is the Alembic Config object, which provides
@@ -23,7 +20,7 @@ if config.config_file_name is not None:
 # 导入所有模型，确保 SQLModel.metadata 包含所有 table 定义
 # -----------------------------------------------------------
 # 必须先导入模型，再赋值 target_metadata
-from app.core.models import Role, RoleScopeModel, User, UserRole  # noqa: F401, E402
+from app.core.models import Role, RoleScopeModel, User, UserRole  # noqa: F401
 
 # SQLModel.metadata 是所有模型的公共元数据容器
 target_metadata = SQLModel.metadata
@@ -32,7 +29,7 @@ target_metadata = SQLModel.metadata
 # 从应用配置中读取数据库连接 URL
 # -----------------------------------------------------------
 # 覆盖 alembic.ini 中的 sqlalchemy.url，改为从 .env 读取
-from app.core.config import get_settings  # noqa: E402
+from app.core.config import get_settings
 
 settings = get_settings()
 config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI)
@@ -85,7 +82,7 @@ async def run_async_migrations() -> None:
     if settings.SQLALCHEMY_DATABASE_URI.startswith("sqlite"):
 
         @event.listens_for(connectable.sync_engine, "connect")
-        def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:  # noqa: ANN001
+        def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:
             cursor = dbapi_connection.cursor()
             cursor.execute("PRAGMA foreign_keys=ON")
             cursor.close()

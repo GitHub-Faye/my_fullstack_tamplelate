@@ -1,5 +1,4 @@
 # gunicorn.conf.py
-import multiprocessing
 
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger

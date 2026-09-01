@@ -1,3 +1,4 @@
+import { DEFAULT_PAGINATION } from "@repo/contracts/pagination";
 import { getRoles } from "../api/server/queries";
 import { RoleTable } from "../client/RoleTable";
 
@@ -7,7 +8,10 @@ import { RoleTable } from "../client/RoleTable";
  */
 export async function RoleList() {
   // Fetch roles on the server
-  await getRoles({ page: 1, page_size: 10 });
+  await getRoles({
+    page: DEFAULT_PAGINATION.page,
+    page_size: DEFAULT_PAGINATION.page_size,
+  });
 
   // Pass initial data to the client component
   // Note: The RoleTable component uses React Query, so it will handle

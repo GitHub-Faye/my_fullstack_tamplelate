@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "generate": "openapi-ts -f openapi-ts.config.local.ts",
+    "generate": "openapi-ts -f openapi-ts.config.ts",
     "generate:local": "openapi-ts -f openapi-ts.config.local.ts",
     "clean": "rm -rf dist src/api"
   },

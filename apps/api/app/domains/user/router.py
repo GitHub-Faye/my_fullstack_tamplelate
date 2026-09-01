@@ -12,6 +12,9 @@
 import uuid
 from typing import Annotated, Any
 
+from fastapi import APIRouter, Depends, Query
+from fastapi.security import OAuth2PasswordRequestForm
+
 from app.core.config import get_settings
 from app.core.dependencies import (
     CurrentUser,
@@ -20,10 +23,10 @@ from app.core.dependencies import (
     require_scope,
 )
 from app.core.responses import paginated_fields
-from app.domains.user.responses import user_public, users_public
 from app.core.schemas import Message, PaginationParams
 from app.core.scopes import UserScope
 from app.domains.user import service
+from app.domains.user.responses import user_public, users_public
 from app.domains.user.schemas import (
     Token,
     UpdatePassword,
@@ -34,8 +37,6 @@ from app.domains.user.schemas import (
     UserUpdate,
     UserUpdateMe,
 )
-from fastapi import APIRouter, Depends, Query
-from fastapi.security import OAuth2PasswordRequestForm
 
 settings = get_settings()
 router = APIRouter()
@@ -352,7 +353,7 @@ async def update_user(
 
 # ======================== 删除用户（user:admin 判定） ========================
 
-@router.delete("/users/{user_id}")
+@router.delete("/users/{user_id}", response_model=Message)
 async def delete_user(
     session: SessionDep,
     current_user: CurrentUser,
@@ -368,7 +369,7 @@ async def delete_user(
 
     参数：
     - session：数据库会话
-    - current_user：当前用户（用于禁止删除自己）
+    - current_user：当前用户（用于禁止删除自己 + 最后超管保护）
     - user_id：目标用户 UUID
 
     返回值：
@@ -376,7 +377,8 @@ async def delete_user(
 
     异常：
     - 404：用户不存在
-    - 403：不允许删除自己
+    - 403：超管不允许删除自己
+    - 400：系统中最后一个超管不可删除
     - 403：无 user:admin / user:delete scope
 
     注意：

@@ -4,13 +4,12 @@
 # Session Factory（会话工厂）
 # Dependency / Context Provider（依赖注入或请求作用域的会话获取器）
 
-from sqlmodel import SQLModel
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.pool import NullPool
-from sqlalchemy import select, func
-from sqlalchemy import event
+from collections.abc import AsyncGenerator
 
-from typing import AsyncGenerator
+from sqlalchemy import event, func, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
+from sqlmodel import SQLModel
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
@@ -39,7 +38,7 @@ def _is_sqlite() -> bool:
 if _is_sqlite():
 
     @event.listens_for(engine.sync_engine, "connect")
-    def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:  # noqa: ANN001
+    def _set_sqlite_pragma(dbapi_connection, connection_record) -> None:
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.close()

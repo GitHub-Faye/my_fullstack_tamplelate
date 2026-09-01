@@ -1,9 +1,10 @@
 import uuid
 from datetime import datetime
 
-from app.core.schemas import PaginatedResponse
-from pydantic import EmailStr
+from pydantic import ConfigDict, EmailStr
 from sqlmodel import Field, SQLModel
+
+from app.core.schemas import PaginatedResponse
 
 
 # ------------------------------- 用户模型 -------------------------------------------------
@@ -54,6 +55,19 @@ class UpdatePassword(SQLModel):
 # ---------------------------- API 响应模型（Response DTO） --------------------------------
 # 返回给客户端的 User 信息
 class UserPublic(UserBase):
+    """
+    用户公开响应模型。
+
+    安全约定（不可违反）：
+    - 本模型刻意不声明任何敏感字段（如 hashed_password），依赖
+      `from_attributes` + `user_public()/users_public()` 组装，配合
+      FastAPI 的 response_model 过滤输出。
+    - 新增任何返回用户数据的端点必须使用本模型作为 response_model，
+      禁止直接返回 DB 模型（User），否则可能泄露 hashed_password。
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     created_at: datetime | None = None
     # 用户当前拥有的权限 scope 列表（由 read_user_me 等端点填充，用于前端 scope 级权限控制）

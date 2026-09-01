@@ -14,18 +14,19 @@ from datetime import timedelta
 
 import pytest
 import pytest_asyncio
+from fastapi import FastAPI
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlmodel import SQLModel
+
 from app.core.database import get_db
 from app.core.models import Role, RoleScopeModel, User, UserRole
 from app.core.scopes import ALL_ROLE_SCOPES, DEFAULT_ROLE_SCOPES
 from app.core.security import create_access_token, get_password_hash
-from fastapi import FastAPI
-from httpx import ASGITransport, AsyncClient
 
 # Import app and dependencies to override
 from main import app as fastapi_app
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlmodel import SQLModel
 
 # ======================== pytest-asyncio 配置 ========================
 

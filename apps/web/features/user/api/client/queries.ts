@@ -34,6 +34,7 @@ import {
   type UpdatePassword,
   type UserUpdate,
 } from "@repo/sdk";
+import { DEFAULT_PAGINATION } from "@repo/contracts/pagination";
 import { useAuthStore } from "../../stores/auth";
 
 // Query Keys
@@ -76,7 +77,10 @@ export function useCurrentUser(
  * Get users list query (admin only)
  */
 export function useUsers(
-  filters: ReadUsersV1UsersGetData["query"] = { page: 1, page_size: 10 },
+  filters: ReadUsersV1UsersGetData["query"] = {
+    page: DEFAULT_PAGINATION.page,
+    page_size: DEFAULT_PAGINATION.page_size,
+  },
   options?: Omit<
     UseQueryOptions<
       ReadUsersV1UsersGetResponse,

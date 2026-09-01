@@ -17,8 +17,9 @@ Role 领域 Schema / DTO 定义模块
 import uuid
 from datetime import datetime
 
-from app.core.schemas import PaginatedResponse
 from sqlmodel import Field, SQLModel
+
+from app.core.schemas import PaginatedResponse
 
 
 # --------------------------- API 请求模型（Request DTO） ------------------------------------

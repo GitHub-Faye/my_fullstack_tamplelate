@@ -1,7 +1,8 @@
 // Store exports (auth-related state)
 export {
   useAuthStore,
-  useUser as useCurrentUser,
+  useAuthUser,
+  useUser,
   useToken,
   useIsAuthenticated,
   useIsSuperuser,
