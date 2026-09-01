@@ -18,7 +18,6 @@ my_fullstack_tamplelate/
 ├── packages/
 │   ├── contracts/    # 共享业务契约 (错误码/Scope/分页)
 │   ├── sdk/          # OpenAPI 自动生成 SDK + React Query
-│   ├── ui/           # 共享 UI 组件 (Button/Card/Code)
 │   ├── eslint-config/ # 共享 ESLint 配置
 │   └── typescript-config/ # 共享 TS 配置
 └── pnpm-workspace.yaml  # Monorepo 工作区定义
@@ -30,7 +29,6 @@ my_fullstack_tamplelate/
 | **前端** | Next.js + React + TanStack Query + shadcn/ui | [`apps/web/`](apps/web/) |
 | **SDK** | OpenAPI 自动生成客户端 + React Query Hooks | [`packages/sdk/`](packages/sdk/sdk.md) |
 | **契约** | 共享错误码/Scope/分页协议 | [`packages/contracts/`](packages/contracts/contracts.md) |
-| **UI** | 共享 React 组件 | [`packages/ui/`](packages/ui/) |
 
 **数据流：** `前端 (Next.js)` → `SDK (@repo/sdk)` → `API (FastAPI)` → `SQLite`
 
@@ -71,7 +69,8 @@ uv run alembic upgrade head
 
 ```bash
 cd apps/api
-pnpm dev     # fastapi dev 热重载
+uv run fastapi dev     # 方式一：通过 uv 运行（推荐，无需激活 venv）
+# 或 pnpm dev           # 方式二：需 venv 已在 PATH 中（uv sync 后激活）
 ```
 
 后端默认运行在 `http://localhost:8000`，API 文档：`http://localhost:8000/docs`
@@ -414,8 +413,8 @@ pnpm check-types      # TypeScript 类型检查
 
 # ── 后端 ──
 cd apps/api
-pnpm dev              # fastapi dev（热重载）
-pnpm test             # pytest
+uv run fastapi dev    # 启动后端（热重载，推荐）；或 pnpm dev
+uv run pytest         # 或 pnpm test
 uv run alembic upgrade head  # 数据库迁移
 uv run alembic revision --autogenerate -m "描述"  # 生成迁移
 
@@ -460,5 +459,4 @@ pnpm generate:live    # 启动后端后：拉取最新 OpenAPI 覆盖快照并�
 | [`packages/contracts/src/`](packages/contracts/src/) | 共享契约（错误码、Scope、分页、常量） |
 | [`packages/sdk/src/`](packages/sdk/src/) | OpenAPI 自动生成 SDK（生成物，禁止手改） |
 | [`packages/sdk/openapi.json`](packages/sdk/openapi.json) | 后端 OpenAPI 快照（`pnpm generate` 的输入，接口变更后跑 `generate:live` 刷新） |
-| [`packages/ui/src/`](packages/ui/src/) | 共享 UI 组件 |
 | [`.github/workflows/`](.github/workflows/) | CI（push / PR 自动跑 backend + frontend 全部检查） |

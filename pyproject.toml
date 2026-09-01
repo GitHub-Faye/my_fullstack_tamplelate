@@ -19,13 +19,9 @@ dependencies = [
     "pwdlib[argon2,bcrypt]>=0.3.0",
     # === Logging ===
     "structlog>=25.0.0",
-    # === File & Office ===
-    "aiofiles>=25.1.0",
-    "openpyxl>=3.1.5",
     # === Validation & Config ===
     "pydantic[email]>=2.13.4",
     "pydantic-settings>=2.14.2",
-    "typer>=0.20.0",
 ]
 
 environment = ".venv"
