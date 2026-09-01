@@ -14,8 +14,7 @@
 my_fullstack_tamplelate/
 ├── apps/
 │   ├── api/          # FastAPI 后端 (Python)
-│   ├── web/          # Next.js 前端 (TypeScript/React)
-│   └── docs/         # 文档站点
+│   └── web/          # Next.js 前端 (TypeScript/React)
 ├── packages/
 │   ├── contracts/    # 共享业务契约 (错误码/Scope/分页)
 │   ├── sdk/          # OpenAPI 自动生成 SDK + React Query
@@ -32,7 +31,6 @@ my_fullstack_tamplelate/
 | **SDK** | OpenAPI 自动生成客户端 + React Query Hooks | [`packages/sdk/`](packages/sdk/sdk.md) |
 | **契约** | 共享错误码/Scope/分页协议 | [`packages/contracts/`](packages/contracts/contracts.md) |
 | **UI** | 共享 React 组件 | [`packages/ui/`](packages/ui/) |
-| **文档** | 文档站 | [`apps/docs/`](apps/docs/) |
 
 **数据流：** `前端 (Next.js)` → `SDK (@repo/sdk)` → `API (FastAPI)` → `SQLite`
 

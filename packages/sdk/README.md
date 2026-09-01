@@ -2,31 +2,16 @@
 
 本 SDK 包使用 [`@hey-api/openapi-ts`](https://heyapi.dev/) 从 OpenAPI 规范自动生成 TypeScript 客户端代码。
 
-## 配置文件
+## 生成流程
 
-配置文件位于 [`openapi-ts.config.local.ts`](./openapi-ts.config.local.ts):
-
-```typescript
-import { defineConfig } from '@hey-api/openapi-ts';
-
-export default defineConfig({
-  input: 'http://localhost:8000/openapi.json',
-  output: {
-    path: './src/api',
-    module: {
-        extension: '.js',
-      },
-  },
-  
-  plugins: [
-      '@hey-api/client-fetch',
-      '@hey-api/typescript',
-      'zod',
-      '@hey-api/sdk',
-      '@tanstack/react-query',   
-    ],
-});
+```bash
+pnpm generate         # 从仓库内 openapi.json 快照离线生成（CI / 新接入方无需后端）
+pnpm generate:live    # 启动后端后：拉取 /openapi.json 覆盖快照并重新生成
 ```
+
+- **快照**：`openapi.json` 是后端 OpenAPI 的提交到仓库的副本，保证离线可构建。
+- **配置**：见 [`openapi-ts.config.ts`](./openapi-ts.config.ts)，`input` 指向快照。
+- **后端接口变更后**：启动后端 → `pnpm generate:live` 刷新快照 → 提交 `openapi.json` 与 `src/api/**` 生成物。
 
 ## 插件详解
 
@@ -290,17 +275,15 @@ if (!validation.success) {
 ## 重新生成代码
 
 ```bash
-# 本地开发（使用本地 API，默认）
-pnpm generate            # 等价于 openapi-ts -f openapi-ts.config.ts
+# 离线生成（默认）：从仓库内 openapi.json 快照生成，无需后端运行
+pnpm generate            # openapi-ts -f openapi-ts.config.ts
 
-# 或显式使用本地覆盖配置
-pnpm generate:local      # openapi-ts -f openapi-ts.config.local.ts
+# 刷新快照 + 重新生成：需先启动后端（http://localhost:8000）
+pnpm generate:live       # curl /openapi.json -o openapi.json && 重新生成
 ```
 
 ### 配置约定
 
-- `openapi-ts.config.ts`：**基线配置**，input 默认指向 `http://localhost:8000/openapi.json`；任何环境都应基于该文件派生。
-- `openapi-ts.config.local.ts`：本地开发覆盖配置（如端口、路径差异）。仓库内不存环境特定密钥。
+- `openapi-ts.config.ts`：**唯一配置**，`input` 指向仓库内 `openapi.json` 快照（离线可生成）。
+- `openapi.json`：**OpenAPI 快照**，接口变更后跑 `pnpm generate:live` 刷新并提交。
 - `src/api/**`：**生成产物，禁止手改**。改协议必须回到 OpenAPI/Python 端，PR 需附带 `pnpm generate` 的 diff。
-
-> ⚠️ 旧文档曾指向空 `openapi-ts.config.ts`。自 v0.1 起该文件已恢复基线（参见 P0-3 提交）。

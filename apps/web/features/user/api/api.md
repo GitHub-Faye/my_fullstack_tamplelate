@@ -29,10 +29,10 @@
 |------|------|
 | [@hey-api/openapi-ts](packages/sdk/package.json:27) | 从 OpenAPI 规范生成 TypeScript SDK |
 | [@hey-api/client-fetch](packages/sdk/package.json:22) | HTTP 客户端底层 |
-| [@hey-api/sdk](packages/sdk/openapi-ts.config.local.ts:16) | SDK 生成插件 |
-| [@hey-api/typescript](packages/sdk/openapi-ts.config.local.ts:14) | TypeScript 类型生成 |
-| [zod](packages/sdk/openapi-ts.config.local.ts:15) | Schema 验证生成 |
-| [@tanstack/react-query](packages/sdk/openapi-ts.config.local.ts:17) | React Query hooks 生成 |
+| [@hey-api/sdk](packages/sdk/openapi-ts.config.ts:28) | SDK 生成插件 |
+| [@hey-api/typescript](packages/sdk/openapi-ts.config.ts:26) | TypeScript 类型生成 |
+| [zod](packages/sdk/openapi-ts.config.ts:27) | Schema 验证生成 |
+| [@tanstack/react-query](packages/sdk/openapi-ts.config.ts:29) | React Query hooks 生成 |
 
 ---
 
@@ -102,11 +102,11 @@ apps/web/features/user/api/
 后端 OpenAPI Schema → @hey-api/openapi-ts → TypeScript SDK
 ```
 
-**配置位置：** [`packages/sdk/openapi-ts.config.local.ts`](packages/sdk/openapi-ts.config.local.ts:1)
+**配置位置：** [`packages/sdk/openapi-ts.config.ts`](packages/sdk/openapi-ts.config.ts:1)
 
 ```typescript
 export default defineConfig({
-  input: 'http://localhost:8000/openapi.json',  // 后端 API 文档地址
+  input: './openapi.json',              // 仓库内 OpenAPI 快照（离线可生成）
   output: {
     path: './src/api',
     module: { extension: '.js' },
@@ -126,7 +126,8 @@ export default defineConfig({
 ```bash
 # 在 packages/sdk 目录下执行
 cd packages/sdk
-pnpm generate:local    # 从本地后端生成 SDK
+pnpm generate         # 从仓库内 openapi.json 快照离线生成 SDK
+pnpm generate:live    # 启动后端后：拉取最新 OpenAPI 覆盖快照并重新生成
 ```
 
 ### 3. SDK 使用方式
@@ -331,13 +332,14 @@ Provider 在根布局 [`apps/web/app/layout.tsx`](apps/web/app/layout.tsx:41) �
 
 **步骤：**
 
-1. **确保后端服务运行**并暴露 OpenAPI 文档（通常是 `/openapi.json`）
+1. **启动后端**并确保 `/openapi.json` 可访问
 
-2. **重新生成 SDK**：
+2. **刷新快照并重新生成 SDK**：
    ```bash
    cd packages/sdk
-   pnpm generate:local
+   pnpm generate:live   # 拉取最新 OpenAPI 覆盖快照 + 重新生成
    ```
+   提交时包含更新后的 `openapi.json` 与 `src/api/**` 生成物。
 
 3. **检查生成的代码**：
    - 类型定义：`packages/sdk/src/api/types.gen.ts`
