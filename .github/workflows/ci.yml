@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  push:
+    branches: [main, simple]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (pytest + ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Lint (ruff)
+        run: uv run ruff check apps/api
+
+      - name: Test (pytest)
+        run: uv run pytest apps/api/tests -q
+        env:
+          ENVIRONMENT: local
+          PROJECT_NAME: CI
+          FIRST_SUPERUSER: admin@example.com
+          FIRST_SUPERUSER_PASSWORD: ci-test-password
+
+  frontend:
+    name: Frontend (typecheck + lint + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 使用仓库内 openapi.json 快照离线生成 SDK（无需启动后端）
+      - name: Generate SDK (offline snapshot)
+        run: pnpm --filter @repo/sdk generate
+
+      - name: Type check
+        run: pnpm check-types
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test (vitest: web + contracts)
+        run: pnpm test
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:8000

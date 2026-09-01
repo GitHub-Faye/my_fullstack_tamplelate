@@ -253,8 +253,15 @@ router.include_router(xxx_router, prefix="/<name>s", tags=["<name>s"])
 
 ```bash
 cd packages/sdk
-pnpm generate     # 从 OpenAPI 自动生成客户端 + React Query Hooks
+pnpm generate     # 从仓库内 openapi.json 快照离线生成客户端 + React Query Hooks
 ```
+
+> **SDK 生成策略**：`packages/sdk/openapi.json` 是后端 OpenAPI 的**提交到仓库的快照**，`generate` 从该文件离线生成——因此 CI / 新接入方无需启动后端即可构建。
+> 后端接口变更后刷新快照：
+> ```bash
+> # 启动后端后：
+> cd packages/sdk && pnpm generate:live   # 拉取 http://localhost:8000/openapi.json 覆盖快照 + 重新生成
+> ```
 
 ### 第 7 步：编写测试
 
@@ -273,7 +280,7 @@ async def test_create_xxx_success(superuser_client: AsyncClient):
 运行测试：
 
 ```bash
-cd apps/api && pnpm test    # 或 pytest
+cd apps/api && pytest    # 或 pnpm test
 ```
 
 ### 第 8 步：前端开发（可选）
@@ -293,16 +300,27 @@ features/<name>/
 │       └── queries.ts
 ├── client/                 # 客户端组件（Table / Form / Detail）
 ├── schemas/                # 前端业务类型
-└── server/                 # 服务端组件（List / Detail）
+├── server/                 # 服务端组件（List / Detail）
+└── stores/                 # （可选）全局状态（如 auth store，纯 CRUD 域可省略）
 ```
 
-在 [`apps/web/components/navbar.tsx`](apps/web/components/navbar.tsx) 添加导航项，并按 scope 控制页面可见性（本模板实际做法见 `navbar.tsx` 的 `visibleAdminNavigation`）：
+在 [`apps/web/components/sidebar.tsx`](apps/web/components/sidebar.tsx) 添加导航项到 `navigation` 或 `adminNavigation` 数组，并按 scope 过滤可见性（本模板实际做法见 `sidebar.tsx` 的 `visibleAdmin` 过滤逻辑）：
 
 ```tsx
 import { <Name>Scope, hasScope } from '@repo/contracts/scopes';
+import { YourIcon } from "lucide-react";
 
-const userScopes = user?.scopes ?? [];
-if (!hasScope(userScopes, <Name>Scope.READ)) return null; // 无权限不显示
+const adminNavigation = [
+  // ...现有项
+  { name: "<Name>管理", href: "/dashboard/<name>s", icon: YourIcon },
+];
+
+// 在 Sidebar 组件中按 scope 过滤：
+const visibleAdmin = adminNavigation.filter((item) => {
+  if (item.href === "/dashboard/<name>s") return hasScope(userScopes, <Name>Scope.READ);
+  // ...
+  return true;
+});
 ```
 
 ---
@@ -350,7 +368,9 @@ User ────(多对多)──── Role ────(一对多)───�
 | [`apps/api/app/core/schemas.py`](apps/api/app/core/schemas.py)（分页协议） | [`packages/contracts/src/pagination.ts`](packages/contracts/src/pagination.ts) |
 
 > ⚠️ 后端 `scopes.py` 与前端 `scopes.ts` 是**单一事实源的两个镜像**，字符串必须逐字一致。
-> 验证方法：运行 `cd apps/api && pnpm test` 确认后端行为，运行 `cd packages/contracts && pnpm lint && pnpm test` 确认前端契约。
+> 验证方法：
+> - 后端行为：`cd apps/api && pnpm test`
+> - 契约一致性（自动比对 Python↔TS 镜像）：`cd packages/contracts && pnpm test`（`consistency.test.ts` 守护 8 项断言，任一侧改漏即红）
 
 ---
 
@@ -409,8 +429,20 @@ pnpm test:coverage    # 测试覆盖率
 
 # ── SDK ──
 cd packages/sdk
-pnpm generate         # 从 OpenAPI 重新生成 SDK
+pnpm generate         # 从仓库内 openapi.json 快照重新生成 SDK（离线可用）
+pnpm generate:live    # 启动后端后：拉取最新 OpenAPI 覆盖快照并重新生成
 ```
+
+### CI（GitHub Actions）
+
+`.github/workflows/ci.yml` 提供模板级 CI，push / PR 自动运行：
+
+| Job | 内容 |
+|-----|------|
+| **Backend** | `uv sync` → `ruff check` → `pytest`（59+ 用例） |
+| **Frontend** | `pnpm install` → 离线生成 SDK → `check-types` → `lint` → `test`（web + contracts vitest） |
+
+无需启动后端：SDK 从仓库内 `openapi.json` 快照离线生成，契约一致性由 `consistency.test.ts` 守护。
 
 ---
 
@@ -424,9 +456,11 @@ pnpm generate         # 从 OpenAPI 重新生成 SDK
 | [`apps/api/migrations/`](apps/api/migrations/) | Alembic 数据库迁移 |
 | [`apps/api/tests/`](apps/api/tests/) | 后端测试（pytest + pytest-asyncio） |
 | [`apps/web/app/`](apps/web/app/) | Next.js 页面路由 |
-| [`apps/web/components/`](apps/web/components/) | 全局 UI 组件（navbar、providers、shadcn/ui） |
+| [`apps/web/components/`](apps/web/components/) | 全局 UI 组件（sidebar、brand、theme-toggle、providers、shadcn/ui） |
 | [`apps/web/features/`](apps/web/features/) | 前端业务模块——**新前端业务参考范例** |
 | [`apps/web/lib/`](apps/web/lib/) | 工具函数（API SDK 客户端、utils） |
 | [`packages/contracts/src/`](packages/contracts/src/) | 共享契约（错误码、Scope、分页、常量） |
-| [`packages/sdk/src/`](packages/sdk/src/) | OpenAPI 自动生成 SDK |
+| [`packages/sdk/src/`](packages/sdk/src/) | OpenAPI 自动生成 SDK（生成物，禁止手改） |
+| [`packages/sdk/openapi.json`](packages/sdk/openapi.json) | 后端 OpenAPI 快照（`pnpm generate` 的输入，接口变更后跑 `generate:live` 刷新） |
 | [`packages/ui/src/`](packages/ui/src/) | 共享 UI 组件 |
+| [`.github/workflows/`](.github/workflows/) | CI（push / PR 自动跑 backend + frontend 全部检查） |

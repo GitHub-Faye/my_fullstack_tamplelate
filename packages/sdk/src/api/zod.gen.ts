@@ -100,6 +100,15 @@ export const zUserCreate = z.object({
 
 /**
  * UserPublic
+ *
+ * 用户公开响应模型。
+ *
+ * 安全约定（不可违反）：
+ * - 本模型刻意不声明任何敏感字段（如 hashed_password），依赖
+ * `from_attributes` + `user_public()/users_public()` 组装，配合
+ * FastAPI 的 response_model 过滤输出。
+ * - 新增任何返回用户数据的端点必须使用本模型作为 response_model，
+ * 禁止直接返回 DB 模型（User），否则可能泄露 hashed_password。
  */
 export const zUserPublic = z.object({
     email: z.email().max(255),

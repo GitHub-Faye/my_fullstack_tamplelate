@@ -284,7 +284,7 @@ export const registerUserV1UsersSignupPost = <ThrowOnError extends boolean = fal
  *
  * 参数：
  * - session：数据库会话
- * - current_user：当前用户（用于禁止删除自己）
+ * - current_user：当前用户（用于禁止删除自己 + 最后超管保护）
  * - user_id：目标用户 UUID
  *
  * 返回值：
@@ -292,7 +292,8 @@ export const registerUserV1UsersSignupPost = <ThrowOnError extends boolean = fal
  *
  * 异常：
  * - 404：用户不存在
- * - 403：不允许删除自己
+ * - 403：超管不允许删除自己
+ * - 400：系统中最后一个超管不可删除
  * - 403：无 user:admin / user:delete scope
  *
  * 注意：

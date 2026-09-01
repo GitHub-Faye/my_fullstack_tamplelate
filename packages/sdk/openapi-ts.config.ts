@@ -6,11 +6,15 @@ import { defineConfig } from "@hey-api/openapi-ts";
  * 用途：作为 generate 的默认基线配置。当 openapi-ts.config.local.ts
  * 不存在或未通过 -f 显式指定时，pnpm generate 会使用本文件。
  *
- * 注意：input 写死 http://localhost:8000/openapi.json 仅为开发默认值；
- * CI/其他环境请复制本文件为 openapi-ts.config.<env>.ts 并修改 input。
+ * input 指向仓库内的 openapi.json 快照，保证 CI / 新接入方
+ * 在【未启动后端】时也能离线生成 SDK。
+ *
+ * 后端接口变更后，需刷新快照再重新生成：
+ *   pnpm generate:live   # 启动后端后：拉取 /openapi.json 覆盖快照 + 重新生成
+ *   pnpm generate        # 用仓库内快照重新生成（离线可用）
  */
 export default defineConfig({
-  input: "http://localhost:8000/openapi.json",
+  input: "./openapi.json",
   output: {
     path: "./src/api",
     module: {
